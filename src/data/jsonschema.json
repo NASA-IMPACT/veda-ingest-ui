@@ -1,0 +1,76 @@
+{
+  "title": "Validate Dataset",
+  "type": "object",
+  "required": ["collection", "title", "description", "license", "discovery_items"],
+  "properties": {
+    "collection": { "type": "string", "title": "Collection" },
+    "title": { "type": "string", "title": "Title"},
+    "description": { "type": "string", "title": "Description"},
+    "license": { "type": "string", "title": "License"},
+    "spatial_extent": {
+      "title": "Spatial Extent",
+      "type": "object",
+      "properties": {
+        "xmin": {
+          "type": "number",
+          "title": "xmin"
+        },
+        "ymin": {
+          "type": "number",
+          "title": "ymin"
+        },
+        "xmax": {
+          "type": "number",
+          "title": "xmax"
+        },
+        "ymax": {
+          "type": "number",
+          "title": "ymax"
+        }
+        
+      }
+    },
+    "temporal_extent": {
+      "title": "Temporal Extent",
+      "type": "object",
+      "properties": {
+        "startdate": {
+          "type": "string",
+          "format": "date",
+          "title": "Start Date"
+        },
+        "enddate": {
+          "type": "string",
+          "format": "date",
+          "title": "End Date"
+        }
+      }
+    },
+    "discovery_items": {
+      "type": "array", 
+      "title": "Discovery Items",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "prefix": {
+            "type": "string",
+            "title": "Prefix"
+          },
+          "bucket": {
+            "type": "string",
+            "title": "Bucket"
+          }
+        }
+      }
+    },
+    "sample_files": {
+      "title": "Sample Files",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
