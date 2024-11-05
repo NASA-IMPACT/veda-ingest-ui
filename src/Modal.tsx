@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Modal, ModalProps } from 'antd';
 
-export default function StyledModal( { title, cancelButtonProps, children }: ModalProps) {
+export default function StyledModal( { title, cancelButtonProps, okText="Try Again", children }: ModalProps) {
 
   const [isModalOpen, setIsModalOpen] = useState(true);
 
@@ -19,7 +19,7 @@ export default function StyledModal( { title, cancelButtonProps, children }: Mod
         open={isModalOpen}
         onOk={handleOk}
         onCancel={handleCancel}
-        okText="Try Again"
+        okText={okText}
         cancelButtonProps={cancelButtonProps}
         >
         {children}

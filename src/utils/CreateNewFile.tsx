@@ -1,18 +1,14 @@
 import { Octokit } from "@octokit/rest";
-import { RequestError } from "@octokit/request-error";
 
-const authToken = ''
-const owner= ''
-const repo= ''
+
 const targetBranch = 'master';
 
   const octokit = new Octokit({
     auth: authToken,
   });
 
-
 /**
- * Create a new file on a new branch and open a pull request
+ * Create a new file on a new branch named after the collection and open a pull request
  *
  * @param {formData} formData
  * @returns {Promise<Object>}
@@ -21,11 +17,9 @@ export default async function createNewFile (formData: FormData) {
   const collectionName = formData['collection'];
   // prettify stringify to preserve json formatting
   const content = JSON.stringify(formData, null, 2);
-  const targetPath = 'ingestion-data/production/discovery-config';
+  const targetPath = 'ingestion-data/staging/dataset-config';
   const path = `${targetPath}/${collectionName}.json`;
-
   const branchName = `feat/${collectionName}`;
-
 
     // Get the current target branch reference to get the sha
     const sha = await octokit.rest.git.getRef({
@@ -71,22 +65,12 @@ export default async function createNewFile (formData: FormData) {
       parents: [sha.data.object.sha],
     });
   
-    try {
       await octokit.rest.git.createRef({
         owner,
         repo,
         ref: `refs/heads/${branchName}`,
         sha: newCommit.data.sha,
       });
-    } catch (error) {
-      if(error instanceof RequestError) {
-        error.message = 'Branch with this collection name has already been created';
-        console.error(error.message);
-        throw error
-      } else {
-        throw error
-      }
-    }
 
   
     // open PR with new file added to targetBranch
