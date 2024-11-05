@@ -12,6 +12,8 @@
   "dependencies": {
     "@ant-design/cssinjs": "^1.21.1",
     "@ant-design/icons": "^5.5.1",
+    "@octokit/request-error": "^6.1.5",
+    "@octokit/rest": "^21.0.2",
     "@rjsf/antd": "^5.22.2",
     "@rjsf/core": "^5.22.2",
     "@rjsf/utils": "^5.22.2",

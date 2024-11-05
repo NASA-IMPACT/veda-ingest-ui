@@ -1,7 +1,7 @@
 {
   "ui:grid": [
-          { "collection": 12, "title":12 },
-          { "description": 6, "license": 18 },
+          { "collection": 8, "title": 8, "license": 8 },
+          { "description": 24 },
           {"spatial_extent": 12, "temporal_extent": 12},
           {"discovery_items": 12,"sample_files": 12}
 
@@ -16,7 +16,26 @@
 
   "ui:globalOptions": {
       "style": {
-        "background-color": "#457B9D"
+        "backgroundColor": "#C3C1B7"
       }
+  },
+
+  "ui:submitButtonOptions": {
+    "props": {
+      "color": "default",
+      "variant": "solid",
+      "size": "large"
+    }
+  },
+  "ui:ui_row": {
+    "props": {
+      "gutter": "{[16, 16]}"
+    }
+  },
+  "ui:ui_item_label": {
+    "props": {
+      "size": "large"
+    }
+
   }
 }

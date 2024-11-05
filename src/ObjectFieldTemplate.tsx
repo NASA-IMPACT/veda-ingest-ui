@@ -64,7 +64,7 @@ export default function ObjectFieldTemplate<
     const {
         ButtonTemplates: { AddButton },
     } = registry.templates;
-    const { colSpan = 24, labelAlign = 'right', rowGutter = 24 } = formContext as GenericObjectType;
+    const { colSpan = 24, labelAlign = 'right', rowGutter = 12 } = formContext as GenericObjectType;
 
     const findSchema = (element: ObjectFieldTemplatePropertyType): S => element.content.props.schema;
 
@@ -119,7 +119,6 @@ export default function ObjectFieldTemplate<
                 const labelColClassName = classNames(
                     labelClsBasic,
                     labelAlign === 'left' && `${labelClsBasic}-left`
-                    // labelCol.className,
                 );
 
                 return (
