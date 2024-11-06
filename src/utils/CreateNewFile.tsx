@@ -1,7 +1,9 @@
 import { Octokit } from "@octokit/rest";
 
-
 const targetBranch = 'master';
+const authToken = import.meta.env.VITE_AUTH_TOKEN
+const owner = import.meta.env.VITE_OWNER
+const repo = import.meta.env.VITE_REPO
 
   const octokit = new Octokit({
     auth: authToken,
@@ -72,7 +74,6 @@ export default async function createNewFile (formData: FormData) {
         sha: newCommit.data.sha,
       });
 
-  
     // open PR with new file added to targetBranch
     const pr = await octokit.rest.pulls.create({
       owner,
@@ -81,9 +82,9 @@ export default async function createNewFile (formData: FormData) {
       base: targetBranch,
       title: `Create ${path}`,
     });
-  
+
     console.log(pr);
-  
+
     return pr
 }
 
