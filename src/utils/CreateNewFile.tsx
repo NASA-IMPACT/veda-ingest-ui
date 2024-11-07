@@ -1,4 +1,5 @@
 import { Octokit } from "@octokit/rest";
+import { formatFilename } from "./utils";
 
 const targetBranch = 'master';
 const authToken = import.meta.env.VITE_AUTH_TOKEN
@@ -20,8 +21,9 @@ export default async function createNewFile (formData: FormData) {
   // prettify stringify to preserve json formatting
   const content = JSON.stringify(formData, null, 2);
   const targetPath = 'ingestion-data/staging/dataset-config';
-  const path = `${targetPath}/${collectionName}.json`;
-  const branchName = `feat/${collectionName}`;
+  const fileName = formatFilename(collectionName);
+  const path = `${targetPath}/${fileName}.json`;
+  const branchName = `feat/${fileName}`;
 
     // Get the current target branch reference to get the sha
     const sha = await octokit.rest.git.getRef({
