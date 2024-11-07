@@ -64,7 +64,7 @@ export default function ObjectFieldTemplate<
     const {
         ButtonTemplates: { AddButton },
     } = registry.templates;
-    const { colSpan = 24, labelAlign = 'right', rowGutter = 12 } = formContext as GenericObjectType;
+    const { colSpan = 24, labelAlign = 'left', rowGutter = 12, } = formContext as GenericObjectType;
 
     const findSchema = (element: ObjectFieldTemplatePropertyType): S => element.content.props.schema;
 
@@ -152,7 +152,7 @@ export default function ObjectFieldTemplate<
                                     return Object.keys(ui_row).map((row_item) => {
                                             const element = properties.find((p => p.name == row_item))
                                             if (element) {
-                                                return <Col key={element.name} span={ui_row[row_item]}>
+                                                return <Col key={element.name} span={ui_row[row_item]} >
                                                     {element.content}
                                                 </Col>
                                             } else {

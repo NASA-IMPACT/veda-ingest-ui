@@ -5,7 +5,6 @@ import { Theme as AntDTheme } from '@rjsf/antd';
 
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from "json-schema";
-import { StyleProvider } from '@ant-design/cssinjs';
 import { RequestError } from '@octokit/request-error';
 
 import createNewFile from './utils/CreateNewFile';
@@ -62,7 +61,6 @@ const onFormDataSubmit = async ({ formData }) => {
   }
 
   return (
-      <StyleProvider >
         <Form
           schema={jsonSchema as JSONSchema7}
           uiSchema={uiSchema}
@@ -72,9 +70,8 @@ const onFormDataSubmit = async ({ formData }) => {
           }}
           formData={formData}
           onChange={onFormDataChanged}
-          onSubmit={onFormDataSubmit} 
+          onSubmit={onFormDataSubmit}
         />
-    </StyleProvider>
   )
 }
 

@@ -1,41 +1,42 @@
 {
   "ui:grid": [
-          { "collection": 8, "title": 8, "license": 8 },
-          { "description": 24 },
-          {"spatial_extent": 12, "temporal_extent": 12},
-          {"discovery_items": 12,"sample_files": 12}
+    {
+      "collection": 8,
+      "title": 8,
+      "license": 8
+    },
+    {
+      "description": 24
+    },
+    {
+      "spatial_extent": 12,
+      "temporal_extent": 12
 
-        ],
-  
+    },
+    {
+      "discovery_items": 12,
+      "sample_files": 12
+    }
+  ],
   "spatial_extent": {
     "ui:grid": [
-      {"xmin": 12, "ymin": 12},
-      {"xmax": 12, "ymax": 12}
-    ]
-  },
-
-  "ui:globalOptions": {
-      "style": {
-        "backgroundColor": "#C3C1B7"
+      {
+        "xmin": 12,
+        "ymin": 12
+      },
+      {
+        "xmax": 12,
+        "ymax": 12
       }
+    ]
   },
 
   "ui:submitButtonOptions": {
     "props": {
-      "color": "default",
+      "color": "primary",
       "variant": "solid",
       "size": "large"
     }
   },
-  "ui:ui_row": {
-    "props": {
-      "gutter": "{[16, 16]}"
-    }
-  },
-  "ui:ui_item_label": {
-    "props": {
-      "size": "large"
-    }
-
-  }
+  "ui:options": {"label": false}
 }
