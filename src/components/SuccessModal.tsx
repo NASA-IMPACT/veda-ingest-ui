@@ -1,4 +1,4 @@
-import { Status } from './App';
+import { Status } from './Dashboard';
 import StyledModal from './Modal';
 
 export default function SuccessModal({
@@ -19,7 +19,6 @@ export default function SuccessModal({
         title="Collection Submitted"
         cancelButtonProps={{ style: { display: 'none' } }}
         okText='OK'
-        okButtonProps={{ style: { backgroundColor: 'purple' } }}
         onOk={onOk}
         >
           <p>The <strong>{collectionName}</strong> collection has been submitted.</p>

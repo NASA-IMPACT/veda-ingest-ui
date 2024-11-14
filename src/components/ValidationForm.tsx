@@ -7,11 +7,11 @@ import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from "json-schema";
 import { RequestError } from '@octokit/request-error';
 
-import createNewFile from './utils/CreateNewFile';
-import ObjectFieldTemplate from "./ObjectFieldTemplate";
-import jsonSchema from "./data/jsonschema.json";
-import uiSchema from "./data/uischema.json";
-import { Status } from './App';
+import createNewFile from '../utils/CreateNewFile';
+import ObjectFieldTemplate from "../ObjectFieldTemplate";
+import jsonSchema from "../data/jsonschema.json";
+import uiSchema from "../data/uischema.json";
+import { Status } from './Dashboard';
 
 
 const Form = withTheme(AntDTheme);

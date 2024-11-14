@@ -1,16 +1,10 @@
 :root {
 
-  --color-base: #C3C1B7;
-  --color-primary: #016996;
-  --color-danger: #C53229;
 
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: var(--color-primary);
-  background-color: var(--color-base);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -18,17 +12,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
 
 .visually-hidden:not(:focus):not(:active) {
   position: absolute;
@@ -39,3 +22,8 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* .ant-btn {
+  background-color: #2276AC;
+  color: #FFFFFF;
+} */
