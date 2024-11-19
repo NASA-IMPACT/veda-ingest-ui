@@ -1,21 +1,27 @@
 {
   "ui:grid": [
     {
-      "collection": 8,
-      "title": 8,
-      "license": 8
+      "collection": 4,
+      "title": 4,
+      "license": 4,
+      "description": 12
     },
     {
-      "description": 24
-    },
-    {
-      "spatial_extent": 12,
-      "temporal_extent": 12
+      "dashboard:is_periodic": 4,
+      "dashboard:time_density": 4,
+      "data_type": 4,
+      "spatial_extent": 6,
+      "temporal_extent": 6
 
     },
+    { 
+      "sample_files": 8,  
+      "discovery_items": 8,
+      "stac_extensions": 8
+    },
     {
-      "discovery_items": 12,
-      "sample_files": 12
+      "links": 24
+
     }
   ],
   "spatial_extent": {
@@ -30,13 +36,47 @@
       }
     ]
   },
+  "discovery_items": {
+      "items": {
+        "ui-grid": [
+          {
+            "prefix": 12,
+            "bucket": 12
+          }
+        ]
+      }
+  },
+  "links": {
+    "items": {
+      "ui:grid": [
+      {
+        "href": 12,
+        "rel": 12
+      },
+      {
+        "type": 12,
+        "title": 12
+      },
+      {
+        "label:assets": 12
+      }
+    ]
+    }
+  },
+  "description": {
+
+      "ui:widget": "textarea",
+      "ui:options": {
+        "rows": 2
+      }
+  },
 
   "ui:submitButtonOptions": {
     "props": {
       "color": "primary",
       "variant": "solid",
-      "size": "large"
+      "size": "large",
+      "block": "true"
     }
-  },
-  "ui:options": {"label": false}
+  }
 }

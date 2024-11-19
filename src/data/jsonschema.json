@@ -1,12 +1,43 @@
 {
   "title": "Validate Dataset",
   "type": "object",
-  "required": ["collection", "title", "description", "license", "discovery_items", "sample_files"],
+  "required": ["collection", "title", "description", "license", "discovery_items", "spatial_extent", "temporal_extent", "sample_files", "data_type"],
   "properties": {
     "collection": { "type": "string", "title": "Collection" },
     "title": { "type": "string", "title": "Title"},
     "description": { "type": "string", "title": "Description"},
     "license": { "type": "string", "title": "License"},
+    "dashboard:is_periodic": {"type": "boolean", "title": "Is Periodic?"},
+    "dashboard:time_density": {"type": "string", "title": "Time Density"},
+    "links": {
+      "title": "Links",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "href": {
+            "type": "string",
+            "title": "href"
+          },
+          "rel": {
+            "type": "string",
+            "title": "rel"
+          },
+          "type": {
+            "type": "string",
+            "title": "type"
+          },
+          "title": {
+            "type": "string",
+            "title": "title"
+          },
+          "label:assets": {
+            "type": "string",
+            "title": "label:assets"
+          }
+        }
+      }
+    },
     "spatial_extent": {
       "title": "Spatial Extent",
       "type": "object",
@@ -49,7 +80,6 @@
     "discovery_items": {
       "type": "array", 
       "title": "Discovery Items",
-      "minItems": 1,
       "items": {
           "type": "object",
           "properties": {
@@ -68,7 +98,17 @@
     "sample_files": {
       "title": "Sample Files",
       "type": "array",
-      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "data_type": {
+      "title": "Data Type",
+      "const": "cog"
+    },
+    "stac_extensions": {
+      "title": "STAC Extensions",
+      "type": "array",
       "items": {
         "type": "string"
       }

@@ -62,3 +62,35 @@ yarn dev
 ```
 
 This will start the app and make it available at <http://localhost:5173/>.
+
+## Configuring the Validation Form
+
+The fields in the Validation Form are configured by a combination of the json schema in the [jsonschema.json file](src/data/jsonschema.json) and the UI Schema in the [uischema.json file](src/data/uischema.json). To modify fields in the form, a developer must update the json schema to include the proper JSON schema data fields and then modify the ui Schema to have any new or renamed fields in the desired location.
+
+The Form uses a 24 column grid format and the layout of each row is dictated by the "ui:grid" array in that json. Each row is defined as an object with each field allowed up to 24 columns wide.  For example: 
+```json
+  "ui:grid": [
+    {
+      "collection": 4,
+      "title": 4,
+      "license": 4,
+      "description": 12
+    },
+    ...
+  ]
+```
+ the new first row has 4 fields with a combined width of 24. Nested objects in the field can be defined with their own grid.  For example,
+```json
+  "spatial_extent": {
+    "ui:grid": [
+      {
+        "xmin": 12,
+        "ymin": 12
+      },
+      {
+        "xmax": 12,
+        "ymax": 12
+      }
+    ]
+  },
+```
