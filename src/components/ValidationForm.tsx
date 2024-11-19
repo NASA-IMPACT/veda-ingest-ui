@@ -28,13 +28,13 @@ function ValidationForm({
   setApiErrorMessage: (apiErrorMessage: string) => void,
   setPullRequestUrl: (PullRequestUrl: string) => void
 }) {
-  const [formData, setFormData] = useState<object>({});
+  const [formData, setFormData] = useState<unknown>({});
 
   const onFormDataChanged = (formState: { formData: SetStateAction<object | undefined>; }) => {
     setFormData(formState.formData)
 }
 
-
+// @ts-expect-error RJSF form data typing
 const onFormDataSubmit = async ({ formData }) => {
   setStatus('loading')
   setCollectionName(formData.collection)
@@ -69,7 +69,9 @@ const onFormDataSubmit = async ({ formData }) => {
             ObjectFieldTemplate: ObjectFieldTemplate,
           }}
           formData={formData}
+          // @ts-expect-error RJSF onChange typing
           onChange={onFormDataChanged}
+          // @ts-expect-error RJSF onSubmit typing
           onSubmit={onFormDataSubmit}
         />
   )
