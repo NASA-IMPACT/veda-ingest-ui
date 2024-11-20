@@ -5,9 +5,7 @@ import { Theme as AntDTheme } from '@rjsf/antd';
 
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from "json-schema";
-import { RequestError } from '@octokit/request-error';
 
-import createNewFile from '../utils/CreateNewFile';
 import ObjectFieldTemplate from "../ObjectFieldTemplate";
 import jsonSchema from "../data/jsonschema.json";
 import uiSchema from "../data/uischema.json";
@@ -39,24 +37,29 @@ const onFormDataSubmit = async ({ formData }) => {
   setStatus('loading')
   setCollectionName(formData.collection)
   console.log(formData)
+  const url = 'http://localhost:3000/ingest';
+  const requestOptions = {
+    method: 'POST',
+    body: JSON.stringify(formData),
+    headers: { 'Content-Type': 'application/json' },
+  };
   try {
-    const pr = await createNewFile(formData)
-      console.log(`success, PR is available at ${pr.url}` )
-      setPullRequestUrl(pr.data.html_url);
-      setFormData({});
-      setStatus('success')
+    const response = await fetch(url, requestOptions); 
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      setApiErrorMessage(errorMessage);
+      setStatus('error')
+      throw new Error(`There was an error: ${errorMessage}`);
+    }
+
+    const data = await response.json()
+    setPullRequestUrl(data['data']);
+    setFormData({});
+    setStatus('success')
   } catch (error) {
-    if (error instanceof RequestError) {
-      // Handle network errors or other exceptions
-      console.error(`Request error message: ${error.message}`);
-      console.error(`Status: ${error.status}`);
-      console.error(`Request: ${JSON.stringify(error.request)}`);
-      setApiErrorMessage(error.message)
+      console.error(error)
       setStatus('error');
-    } else {
-      console.error(error);
-      setStatus('error');
-      }
     }
   }
 

@@ -4,7 +4,8 @@
  * @param {input} string
  * @returns {string}
  */
-export const formatFilename = (input: string) => {
+export const formatFilename = (input) => {
   return input.replace(/[^0-9a-zA-Z_-]/g, '')
 }
 
+// module.exports = {formatFilename};
