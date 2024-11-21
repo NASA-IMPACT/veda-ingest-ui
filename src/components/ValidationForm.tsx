@@ -6,10 +6,10 @@ import { Theme as AntDTheme } from '@rjsf/antd';
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from "json-schema";
 
-import ObjectFieldTemplate from "../ObjectFieldTemplate";
-import jsonSchema from "../data/jsonschema.json";
-import uiSchema from "../data/uischema.json";
-import { Status } from './Dashboard';
+import ObjectFieldTemplate from "@/ObjectFieldTemplate";
+import jsonSchema from "@/formSchemas/jsonschema.json";
+import uiSchema from "@/formSchemas/uischema.json";
+import { Status } from '@/typings/vite-env';
 
 
 const Form = withTheme(AntDTheme);

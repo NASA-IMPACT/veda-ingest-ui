@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { Button, Input, Form } from 'antd';
 import type { FormProps } from 'antd';
-import { authenticate } from '../services/authenticate';
-import StyledHeader from './Header';
+import { authenticate } from '@/services/authenticate';
+import StyledHeader from '@/components/Header';
 
 
 type FieldType = {

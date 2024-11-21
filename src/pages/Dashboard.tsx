@@ -1,17 +1,16 @@
 
 import { useState } from 'react';
 
-import { Spin, Layout, ConfigProvider} from 'antd'
+import { Spin, Layout } from 'antd'
 import {useEffect} from 'react'
 import { useNavigate } from 'react-router-dom';
 import userpool from '../UserPool'
 
-import ValidationForm from './ValidationForm'
-import ErrorModal from './ErrorModal';
-import SuccessModal from './SuccessModal';
-import StyledHeader from './Header';
-
-export type Status = 'idle'| 'loading' | 'success' | 'error';
+import ValidationForm from '@/components/ValidationForm'
+import ErrorModal from '@/components/ErrorModal';
+import SuccessModal from '@/components/SuccessModal';
+import StyledHeader from '@/components/Header';
+import { Status } from '@/typings/vite-env';
 
 const { Content } = Layout;
 
@@ -34,15 +33,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <ConfigProvider
-      theme={{
-        token: {
-          // Seed Token
-          colorPrimary: '#2276AC',
-        },
-      
-      }}
-      >
+
         <Layout>
           <StyledHeader loggedIn={true} />
           <Content>
@@ -67,7 +58,6 @@ const Dashboard = () => {
             }
           </Content>
         </Layout>
-      </ConfigProvider>
     </>
   )
 }

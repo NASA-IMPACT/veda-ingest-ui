@@ -1,7 +1,7 @@
 import { Button } from 'antd';
 
 import { useNavigate } from 'react-router-dom'
-import StyledHeader from './Header';
+import StyledHeader from '@/components/Header';
 
 const Home = () => {
     const Navigate=useNavigate();

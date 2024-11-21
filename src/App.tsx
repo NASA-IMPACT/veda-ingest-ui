@@ -1,8 +1,10 @@
-import  { useEffect } from 'react'
+import  { useEffect, Suspense, lazy } from 'react'
 import { BrowserRouter,Routes, Route,Navigate  } from 'react-router-dom'
-import Home from './components/Home';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
+import { Spin, ConfigProvider } from 'antd'
+const Home = lazy(() => import ('./pages/Home'));
+const Login = lazy(() => import ('./pages/Login'));
+const Dashboard = lazy(() => import ('./pages/Dashboard'));
+
 
 import userpool from './UserPool';
 
@@ -16,13 +18,26 @@ function App() {
   },[]);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path='/' element={<Home />}/>
-        <Route path='/login' element={<Login />}/>
-        <Route path="/dashboard" element={<Dashboard/>}/>
-      </Routes>
-    </BrowserRouter>
+    <ConfigProvider
+    theme={{
+      token: {
+        // Seed Token
+        colorPrimary: '#2276AC',
+      },
+    
+    }}
+    >
+      <Suspense fallback={<Spin />}>
+        <BrowserRouter>
+          <Routes>
+            <Route path='/' element={<Home />}/>
+            <Route path='/login' element={<Login />}/>
+            <Route path="/dashboard" element={<Dashboard/>}/>
+          </Routes>
+        </BrowserRouter>
+      </Suspense>
+    </ConfigProvider>
+
   );
 }
 
