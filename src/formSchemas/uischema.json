@@ -12,16 +12,14 @@
       "data_type": 4,
       "spatial_extent": 6,
       "temporal_extent": 6
-
     },
-    { 
-      "sample_files": 8,  
+    {
+      "sample_files": 8,
       "discovery_items": 8,
       "stac_extensions": 8
     },
     {
       "links": 24
-
     }
   ],
   "spatial_extent": {
@@ -37,38 +35,37 @@
     ]
   },
   "discovery_items": {
-      "items": {
-        "ui-grid": [
-          {
-            "prefix": 12,
-            "bucket": 12
-          }
-        ]
-      }
+    "items": {
+      "ui-grid": [
+        {
+          "prefix": 12,
+          "bucket": 12
+        }
+      ]
+    }
   },
   "links": {
     "items": {
       "ui:grid": [
-      {
-        "href": 12,
-        "rel": 12
-      },
-      {
-        "type": 12,
-        "title": 12
-      },
-      {
-        "label:assets": 12
-      }
-    ]
+        {
+          "href": 12,
+          "rel": 12
+        },
+        {
+          "type": 12,
+          "title": 12
+        },
+        {
+          "label:assets": 12
+        }
+      ]
     }
   },
   "description": {
-
-      "ui:widget": "textarea",
-      "ui:options": {
-        "rows": 2
-      }
+    "ui:widget": "textarea",
+    "ui:options": {
+      "rows": 2
+    }
   },
 
   "ui:submitButtonOptions": {

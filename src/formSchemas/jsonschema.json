@@ -1,14 +1,24 @@
 {
   "title": "Validate Dataset",
   "type": "object",
-  "required": ["collection", "title", "description", "license", "discovery_items", "spatial_extent", "temporal_extent", "sample_files", "data_type"],
+  "required": [
+    "collection",
+    "title",
+    "description",
+    "license",
+    "discovery_items",
+    "spatial_extent",
+    "temporal_extent",
+    "sample_files",
+    "data_type"
+  ],
   "properties": {
     "collection": { "type": "string", "title": "Collection" },
-    "title": { "type": "string", "title": "Title"},
-    "description": { "type": "string", "title": "Description"},
-    "license": { "type": "string", "title": "License"},
-    "dashboard:is_periodic": {"type": "boolean", "title": "Is Periodic?"},
-    "dashboard:time_density": {"type": "string", "title": "Time Density"},
+    "title": { "type": "string", "title": "Title" },
+    "description": { "type": "string", "title": "Description" },
+    "license": { "type": "string", "title": "License" },
+    "dashboard:is_periodic": { "type": "boolean", "title": "Is Periodic?" },
+    "dashboard:time_density": { "type": "string", "title": "Time Density" },
     "links": {
       "title": "Links",
       "type": "array",
@@ -58,7 +68,6 @@
           "type": "number",
           "title": "ymax"
         }
-        
       }
     },
     "temporal_extent": {
@@ -78,21 +87,21 @@
       }
     },
     "discovery_items": {
-      "type": "array", 
+      "type": "array",
       "title": "Discovery Items",
       "items": {
-          "type": "object",
-          "properties": {
-            "prefix": {
-              "type": "string",
-              "title": "Prefix"
-            },
-            "bucket": {
-              "type": "string",
-              "title": "Bucket"
-            }
+        "type": "object",
+        "properties": {
+          "prefix": {
+            "type": "string",
+            "title": "Prefix"
           },
-          "required": ["prefix", "bucket"]
+          "bucket": {
+            "type": "string",
+            "title": "Bucket"
+          }
+        },
+        "required": ["prefix", "bucket"]
       }
     },
     "sample_files": {

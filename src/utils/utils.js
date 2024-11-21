@@ -5,7 +5,7 @@
  * @returns {string}
  */
 export const formatFilename = (input) => {
-  return input.replace(/[^0-9a-zA-Z_-]/g, '')
-}
+  return input.replace(/[^0-9a-zA-Z_-]/g, '');
+};
 
 // module.exports = {formatFilename};

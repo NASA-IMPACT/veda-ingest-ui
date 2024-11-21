@@ -1,11 +1,11 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config();
-import { createServer } from "http";
-import app from "./restApi.ts";
+import { createServer } from 'http';
+import app from './restApi.ts';
 
 const server = createServer();
 
-server.on("request", app);
+server.on('request', app);
 // createWebSocketServer(server);
 
 // hard-coded port for simplicity until more flexibility needed

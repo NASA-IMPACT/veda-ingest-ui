@@ -1,8 +1,10 @@
-import react from "eslint-plugin-react";
 import typescriptEslint from "@typescript-eslint/eslint-plugin";
-import prettier from "eslint-plugin-prettier";
 import globals from "globals";
+import react from "eslint-plugin-react";
 import tsParser from "@typescript-eslint/parser";
+import hooksPlugin from 'eslint-plugin-react-hooks';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import reactRefresh from "eslint-plugin-react-refresh";
 
 export default [
   {
@@ -12,7 +14,9 @@ export default [
     plugins: {
       react,
       "@typescript-eslint": typescriptEslint,
-      prettier,
+      'react-hooks': hooksPlugin,
+      "react-refresh": reactRefresh,
+      eslintPluginPrettierRecommended,
     },
 
     languageOptions: {

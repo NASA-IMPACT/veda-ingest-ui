@@ -1,16 +1,16 @@
-import fs from "fs";
+import fs from 'fs';
 import dotenv from 'dotenv';
-import express from "express";
-import ViteExpress from "vite-express";
-import { Octokit } from "@octokit/rest";
-import { createAppAuth } from "@octokit/auth-app";
-import { formatFilename } from './utils/utils.js'
+import express from 'express';
+import ViteExpress from 'vite-express';
+import { Octokit } from '@octokit/rest';
+import { createAppAuth } from '@octokit/auth-app';
+import { formatFilename } from './utils/utils.js';
 const key = fs.readFileSync('./private-key.pem', 'utf-8');
 
 dotenv.config();
 
 const targetBranch = 'master';
-const owner = process.env.OWNER
+const owner = process.env.OWNER;
 const repo = process.env.REPO;
 const appId = parseInt(process.env.APP_ID);
 const installationId = parseInt(process.env.INSTALLATION_ID);
@@ -38,9 +38,9 @@ app.post('/ingest', async (req, res) => {
         installationId,
       },
     });
-  
+
     const { token } = await appOctokit.auth({
-      type: "installation",
+      type: 'installation',
     });
 
     const octokit = new Octokit({
@@ -53,15 +53,15 @@ app.post('/ingest', async (req, res) => {
       repo,
       ref: `heads/${targetBranch}`,
     });
-  
+
     // Get the tree associated with master, and the content
     // of the template file to open the PR with.
     const tree = await octokit.rest.git.getTree({
       owner,
       repo,
-      tree_sha: sha.data.object.sha
+      tree_sha: sha.data.object.sha,
     });
-  
+
     // Create a new blob with the content in formData
     const blob = await octokit.rest.git.createBlob({
       owner,
@@ -69,19 +69,21 @@ app.post('/ingest', async (req, res) => {
       content,
       encoding: 'utf8',
     });
-  
+
     const newTree = await octokit.rest.git.createTree({
       owner,
       repo,
-      tree: [{
-        path,
-        sha: blob.data.sha,
-        mode: '100644',
-        type: 'blob'
-      }],
-      base_tree: tree.data.sha
+      tree: [
+        {
+          path,
+          sha: blob.data.sha,
+          mode: '100644',
+          type: 'blob',
+        },
+      ],
+      base_tree: tree.data.sha,
     });
-  
+
     // Create a commit and a reference using the new tree
     const newCommit = await octokit.rest.git.createCommit({
       owner,
@@ -90,7 +92,7 @@ app.post('/ingest', async (req, res) => {
       tree: newTree.data.sha,
       parents: [sha.data.object.sha],
     });
-  
+
     await octokit.rest.git.createRef({
       owner,
       repo,
@@ -108,20 +110,18 @@ app.post('/ingest', async (req, res) => {
     });
 
     res.status(201).send({
-        message: 'Data received successfully',
-        data: pr.data.html_url
-
+      message: 'Data received successfully',
+      data: pr.data.html_url,
     });
   } catch (error) {
-    console.error(error)
+    console.error(error);
     // branch with branchName already exists
-    if (error['status'] === 422 && error.response.data.message) { 
+    if (error['status'] === 422 && error.response.data.message) {
       return res.status(400).json({ error: error.response.data.message });
     }
     // other errors leave as general server error
     res.status(500).json({ error: 'Internal Server Error' });
   }
-  
 });
 
-ViteExpress.listen(app, 3000, () => console.log("Server is listening..."));
+ViteExpress.listen(app, 3000, () => console.log('Server is listening...'));
