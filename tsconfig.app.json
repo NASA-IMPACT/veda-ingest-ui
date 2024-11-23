@@ -1,31 +1,36 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "ES2020",
+    /* Basic Options */
+    "allowJs": true,
+    "composite": true,
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
+    "outDir": "dist/client",
+    "target": "ESNext",
+    // allow alias importing of src directory
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },
 
-    /* Bundler mode */
-    "moduleResolution": "Bundler",
+    /* Module Resolution */
     "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
     "isolatedModules": true,
-    "moduleDetection": "force",
     "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "moduleDetection": "force",
     "jsx": "react-jsx",
+    "types": ["node", "react", "react-dom", "vite/client"],
 
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "src/utils"],
-  "typeRoots": ["./src/typings/*.d.ts", "./node_modules/@types"],
+  "include": ["src", "vite.config.ts", "tailwind.config.ts"],
+  "exclude": ["node_modules", "dist", "server.ts", "api", ".amplify-hosting"]
 }

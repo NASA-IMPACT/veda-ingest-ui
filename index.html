@@ -1,17 +1,14 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <script>
-      if (global === undefined) {
-        var global = window;
-      }
-    </script>
     <meta charset="UTF-8" />
+    <meta name="description" content="About Vite template with SSR + Express APIs + Amplify Hosting" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VEDA Ingestion</title>
+    <title>vite-amplify</title>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/index.tsx"></script>
+    <div id="root"><!--ssr-outlet--></div>
+    <script type="module" src="/src/entry-client.tsx"></script>
   </body>
 </html>

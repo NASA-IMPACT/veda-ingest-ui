@@ -1,40 +1,41 @@
-import { useEffect, Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Spin, ConfigProvider } from 'antd';
-const Home = lazy(() => import('./pages/Home'));
-const Login = lazy(() => import('./pages/Login'));
+import { Suspense, lazy } from 'react';
+import { Spin } from 'antd';
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+import { Amplify } from 'aws-amplify';
+import { withAuthenticator, ThemeProvider } from '@aws-amplify/ui-react';
+import "./styles/styles.css";
 
-import userpool from './UserPool';
+import { SignInHeader } from './components/SignInHeader';
+
+// import '@aws-amplify/ui/dist/style.css';
+
+Amplify.configure({
+  Auth: {
+    Cognito: {
+      //  Amazon Cognito User Pool ID
+      userPoolId: 'us-west-2_0G3VRilt1',
+      userPoolClientId: '2qaubmk2u5lcjsi8lhmoe4nr7m',
+    }
+  }
+});
 
 function App() {
-  useEffect(() => {
-    const user = userpool.getCurrentUser();
-    if (user) {
-      <Navigate to="/dashboard" replace />;
-    }
-  }, []);
 
   return (
-    <ConfigProvider
-      theme={{
-        token: {
-          // Seed Token
-          colorPrimary: '#2276AC',
-        },
-      }}
-    >
-      <Suspense fallback={<Spin />}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-          </Routes>
-        </BrowserRouter>
+    <ThemeProvider>
+      <Suspense fallback={<Spin fullscreen/>}>
+        <Dashboard />
       </Suspense>
-    </ConfigProvider>
+    </ThemeProvider>
+
   );
 }
 
-export default App;
+export default withAuthenticator(App, {
+  hideSignUp: true,
+  components: {
+    SignIn: {
+      Header: SignInHeader,
+    }
+  }
+});

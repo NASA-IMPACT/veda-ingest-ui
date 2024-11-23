@@ -1,6 +1,4 @@
 import { Layout } from 'antd';
-import React from 'react';
-
 const { Header } = Layout;
 
 const headerStyle: React.CSSProperties = {
@@ -19,11 +17,11 @@ const headerStyle: React.CSSProperties = {
   flexDirection: 'column',
 };
 
+export function SignInHeader() {
 
-const StyledHeader = () => {
-    return (
-      <Header style={headerStyle}>Welcome to the VEDA Data Ingest UI</Header>
-    );
-};
-
-export default StyledHeader;
+  return (
+    <Header style={headerStyle}>
+      Sign in to your Account
+    </Header>
+  );
+}

@@ -9,7 +9,7 @@ import { JSONSchema7 } from 'json-schema';
 import ObjectFieldTemplate from '@/ObjectFieldTemplate';
 import jsonSchema from '@/formSchemas/jsonschema.json';
 import uiSchema from '@/formSchemas/uischema.json';
-import { Status } from '@/typings/vite-env';
+import { Status } from '@/vite-env';
 
 const Form = withTheme(AntDTheme);
 
@@ -37,7 +37,7 @@ function ValidationForm({
     setStatus('loading');
     setCollectionName(formData.collection);
     console.log(formData);
-    const url = 'http://localhost:3000/ingest';
+    const url = 'api/ingest';
     const requestOptions = {
       method: 'POST',
       body: JSON.stringify(formData),
