@@ -13,8 +13,8 @@ Amplify.configure({
   Auth: {
     Cognito: {
       //  Amazon Cognito User Pool ID
-      userPoolId: 'us-west-2_0G3VRilt1',
-      userPoolClientId: '2qaubmk2u5lcjsi8lhmoe4nr7m',
+      userPoolId: import.meta.env.VITE_USER_POOL_ID || '',
+      userPoolClientId: import.meta.env.VITE_USER_POOL_CLIENT_ID || '',
     }
   }
 });
