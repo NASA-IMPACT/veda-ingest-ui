@@ -1,5 +1,6 @@
-import { Layout } from 'antd';
+import { Layout, Button } from 'antd';
 import React from 'react';
+import { signOut } from "aws-amplify/auth"
 
 const { Header } = Layout;
 
@@ -15,14 +16,27 @@ const headerStyle: React.CSSProperties = {
   marginBottom: '24px',
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center',
-  flexDirection: 'column',
+  justifyContent: 'space-between',
+  flexDirection: 'row',
 };
+
+    
 
 
 const StyledHeader = () => {
+  async function handleSignOut() {
+    await signOut()
+  }
     return (
-      <Header style={headerStyle}>Welcome to the VEDA Data Ingest UI</Header>
+      <Header style={headerStyle}>
+        <div>
+          {/* empty div to move logout button right */}
+        </div>
+        Welcome to the VEDA Data Ingest UI
+          <Button onClick={handleSignOut}>
+            Sign out
+          </Button>
+        </Header>
     );
 };
 
