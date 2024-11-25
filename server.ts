@@ -34,7 +34,7 @@ export const createServer = async (root = process.cwd(), env = process.env.NODE_
     app.use(vite.middlewares);
   } else {
     // add static file serving for production builds
-    app.use((await import('compression')).default());
+    app.use((await import('compression')).default() as unknown as express.RequestHandler);
     app.use(
       (await import('serve-static')).default(path.resolve(__dirname, '../client'), {
         index: false,

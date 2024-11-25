@@ -2,9 +2,10 @@ import express, { Router, Request, Response } from 'express'
 
 import dotenv from 'dotenv';
 import { Octokit } from '@octokit/rest';
+import { RequestError } from '@octokit/request-error';
 import { createAppAuth } from '@octokit/auth-app';
 
-const key = process.env.GITHUB_PRIVATE_KEY ||'';
+const privateKey = process.env.GITHUB_PRIVATE_KEY ||'';
 
 dotenv.config();
 
@@ -44,21 +45,18 @@ class Api {
       const path = `${targetPath}/${fileName}.json`;
       const branchName = `feat/${fileName}`;
   
-      const appOctokit = new Octokit({
-        authStrategy: createAppAuth,
-        auth: {
-          appId,
-          privateKey: key,
-          installationId,
-        },
-      });
-  
-      const { token } = await appOctokit.auth({
-        type: 'installation',
-      });
+      const auth = createAppAuth({
+        appId,
+        privateKey
+      })
+      const authentication = await auth({
+        type: "installation",
+        installationId
+      })
+
   
       const octokit = new Octokit({
-        auth: token,
+        auth: authentication,
       });
   
       // Get the current target branch reference to get the sha
@@ -129,10 +127,14 @@ class Api {
       });
     } catch (error) {
       console.error(error);
+      if (error instanceof RequestError) {
       // branch with branchName already exists
-      if (error['status'] === 422 && error.response.data.message) {
-        return res.status(400).json({ error: error.response.data.message });
+      if (error['status'] === 422 && error.response) {
+          const errorMessage = error.response.data as any;
+          return res.status(400).json({ error: errorMessage['message'] });        
       }
+      }
+
       // other errors leave as general server error
       res.status(500).json({ error: 'Internal Server Error' });
     }
