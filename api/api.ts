@@ -1,11 +1,10 @@
 import express, { Router, Request, Response } from 'express'
 
-import fs from 'fs';
 import dotenv from 'dotenv';
 import { Octokit } from '@octokit/rest';
 import { createAppAuth } from '@octokit/auth-app';
 
-const key = fs.readFileSync('./private-key.pem', 'utf-8');
+const key = process.env.GITHUB_PRIVATE_KEY ||'';
 
 dotenv.config();
 

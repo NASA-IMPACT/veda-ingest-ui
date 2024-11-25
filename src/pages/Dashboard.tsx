@@ -6,7 +6,7 @@ import StyledHeader from '@/components/Header';
 import ValidationForm from '@/components/ValidationForm';
 import ErrorModal from '@/components/ErrorModal';
 import SuccessModal from '@/components/SuccessModal';
-import { Status } from '@/typings/vite-env';
+import { Status } from '@/vite-env';
 
 const { Content } = Layout;
 
