@@ -6,7 +6,7 @@ frontend:
         - nvm use 20
         - corepack enable
         - yarn cache clean
-        - yarn install --immutable
+        - yarn install
     build:
       commands:
         - yarn build
