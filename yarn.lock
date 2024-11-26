@@ -3981,7 +3981,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"aws-amplify@npm:^6.9.0":
+"aws-amplify@npm:^6.10.0":
   version: 6.10.0
   resolution: "aws-amplify@npm:6.10.0"
   dependencies:
@@ -8004,9 +8004,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-amplify@workspace:.":
+"veda ingest ui@workspace:.":
   version: 0.0.0-use.local
-  resolution: "vite-amplify@workspace:."
+  resolution: "veda ingest ui@workspace:."
   dependencies:
     "@aws-amplify/ui-react": "npm:^6.7.0"
     "@eslint/js": "npm:^9.10.0"
@@ -8027,7 +8027,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^4.3.1"
     antd: "npm:^5.22.2"
     autoprefixer: "npm:^10.4.20"
-    aws-amplify: "npm:^6.9.0"
+    aws-amplify: "npm:^6.10.0"
     compression: "npm:^1.7.4"
     dotenv: "npm:^16.4.5"
     eslint: "npm:9.10.0"

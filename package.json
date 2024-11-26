@@ -1,5 +1,5 @@
 {
-  "name": "vite-amplify",
+  "name": "veda ingest ui",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -24,7 +24,6 @@
     "@rjsf/utils": "^5.23.0",
     "@rjsf/validator-ajv8": "^5.23.0",
     "antd": "^5.22.2",
-    "aws-amplify": "^6.9.0",
     "express": "^4.21.0",
     "lodash": "^4.17.21",
     "octokit": "^4.0.2",
@@ -45,6 +44,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
+    "aws-amplify": "^6.10.0",
     "compression": "^1.7.4",
     "dotenv": "^16.4.5",
     "eslint": "9.10.0",
