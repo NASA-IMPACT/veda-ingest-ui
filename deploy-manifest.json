@@ -21,7 +21,7 @@
       }
     },
     {
-      "path": "/api/*",
+      "path": "/server/*",
       "target": {
         "kind": "Compute",
         "src": "default"
@@ -39,7 +39,7 @@
     {
       "name": "default",
       "runtime": "nodejs20.x",
-      "entrypoint": "server/server.js"
+      "entrypoint": "server/entry.mjs"
     }
   ]
 }
