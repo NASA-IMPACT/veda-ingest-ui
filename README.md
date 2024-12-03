@@ -1,96 +1,72 @@
-# VEDA Data Ingest
+<!--bati:start section="document"-->
 
-This application is to allow users to create PRs in [veda-data](https://github.com/NASA-IMPACT/veda-data) to ingest data.
+<!--bati:start section="intro"-->
 
-It leverages the [Vite](https://vite.dev/) javascript build tool and the [react-jsonschema-form](https://github.com/rjsf-team/react-jsonschema-form) to create a React form component based on the JSON Schema for the data ingestion.
-
-The styling of the form uses the [ant design](https://ant.design/) React Framework for components.
-
-Accessing the Github API is done through the [@octokit/rest](https://github.com/octokit/rest.js) GitHub REST API client for JavaScript.
-
-
-# Requirements
-
-To set up the development environment for this website, you'll need to install the following on your system:
-
-- [Node](http://nodejs.org/) (see version in [.nvmrc](../.nvmrc)) (To manage multiple node versions we recommend [nvm](https://github.com/creationix/nvm))
-- [Yarn](https://yarnpkg.com/) Package manager
-
-If you use [`nvm`](https://github.com/creationix/nvm), activate the desired Node version:
-
-## Installation
-
-Install Node + package manager this repo depends on.
-
-```
-nvm install
-npm -g install yarn
-```
-
-Then install project dependencies by running the yarn install.
-
-```
-yarn install
-```
-
-## Usage
-
-### Config files
-
-Configuration is done using [`.env.` files through Vite](https://vite.dev/guide/env-and-mode)
-
-Copy the `.env` to `.env.local` to add your configuration variables.
+Generated with [Bati](https://batijs.dev) ([version 312](https://www.npmjs.com/package/create-bati/v/0.0.312)) using this command:
 
 ```sh
-cp .env .env.local
+yarn dlx @batijs/cli --react --express --eslint --prettier
 ```
 
-### Github Token
+<!--bati:start section="TOC"-->
 
-A Github fine grained access Token is needed to have access to the repo.  [Create that token](https://github.com/settings/tokens) on your github profile with the permissions:
-- Read access to metadata
-- Read and Write access to code and pull requests
+## Contents
 
-Put the key in `.env.local` file.
+* [React](#react)
 
-## Running the app
+  * [`/pages/+config.ts`](#pagesconfigts)
+  * [Routing](#routing)
+  * [`/pages/_error/+Page.jsx`](#pages_errorpagejsx)
+  * [`/pages/+onPageTransitionStart.ts` and `/pages/+onPageTransitionEnd.ts`](#pagesonpagetransitionstartts-and-pagesonpagetransitionendts)
+  * [SSR](#ssr)
+  * [HTML Streaming](#html-streaming)
 
-To preview the app use:
+<!--bati:end section="TOC"-->
 
-```
-yarn dev
-```
+<!--bati:end section="intro"-->
 
-This will start the app and make it available at <http://localhost:5173/>.
+<!--bati:start section="features"-->
 
-## Configuring the Validation Form
+<!--bati:start category="UI Framework" flag="react"-->
 
-The fields in the Validation Form are configured by a combination of the json schema in the [jsonschema.json file](src/data/jsonschema.json) and the UI Schema in the [uischema.json file](src/data/uischema.json). To modify fields in the form, a developer must update the json schema to include the proper JSON schema data fields and then modify the ui Schema to have any new or renamed fields in the desired location.
+## React
 
-The Form uses a 24 column grid format and the layout of each row is dictated by the "ui:grid" array in that json. Each row is defined as an object with each field allowed up to 24 columns wide.  For example: 
-```json
-  "ui:grid": [
-    {
-      "collection": 4,
-      "title": 4,
-      "license": 4,
-      "description": 12
-    },
-    ...
-  ]
-```
- the new first row has 4 fields with a combined width of 24. Nested objects in the field can be defined with their own grid.  For example,
-```json
-  "spatial_extent": {
-    "ui:grid": [
-      {
-        "xmin": 12,
-        "ymin": 12
-      },
-      {
-        "xmax": 12,
-        "ymax": 12
-      }
-    ]
-  },
-```
+This app is ready to start. It's powered by [Vike](https://vike.dev) and [React](https://react.dev/learn).
+
+### `/pages/+config.ts`
+
+Such `+` files are [the interface](https://vike.dev/config) between Vike and your code. It defines:
+
+* A default [`<Layout>` component](https://vike.dev/Layout) (that wraps your [`<Page>` components](https://vike.dev/Page)).
+* A default [`title`](https://vike.dev/title).
+* Global [`<head>` tags](https://vike.dev/head-tags).
+
+### Routing
+
+[Vike's built-in router](https://vike.dev/routing) lets you choose between:
+
+* [Filesystem Routing](https://vike.dev/filesystem-routing) (the URL of a page is determined based on where its `+Page.jsx` file is located on the filesystem)
+* [Route Strings](https://vike.dev/route-string)
+* [Route Functions](https://vike.dev/route-function)
+
+### `/pages/_error/+Page.jsx`
+
+The [error page](https://vike.dev/error-page) which is rendered when errors occur.
+
+### `/pages/+onPageTransitionStart.ts` and `/pages/+onPageTransitionEnd.ts`
+
+The [`onPageTransitionStart()` hook](https://vike.dev/onPageTransitionStart), together with [`onPageTransitionEnd()`](https://vike.dev/onPageTransitionEnd), enables you to implement page transition animations.
+
+### SSR
+
+SSR is enabled by default. You can [disable it](https://vike.dev/ssr) for all your pages or only for some pages.
+
+### HTML Streaming
+
+You can enable/disable [HTML streaming](https://vike.dev/stream) for all your pages, or only for some pages while still using it for others.
+
+<!--bati:end category="UI Framework" flag="react"-->
+
+<!--bati:end section="features"-->
+
+<!--bati:end section="document"-->
