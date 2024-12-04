@@ -13,6 +13,8 @@ export default tseslint.config(
       // Temporary compiled files
       "**/*.ts.build-*.mjs",
 
+      "cdk.out/*",
+
       // JS files at the root of the project
       "*.js",
       "*.cjs",

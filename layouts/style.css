@@ -37,6 +37,11 @@
   --amplify-border-widths-small: 2px;
   --amplify-border-widths-medium: 4px;
   --amplify-border-widths-large: 8px;
+
+}
+
+.amplify-button--primary {
+  background-color: #2276AC;
 }
 
 /* Links */

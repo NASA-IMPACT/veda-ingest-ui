@@ -19,12 +19,16 @@
     ],
     "types": [
       "vite/client",
-      "vike-react"
+      "vike-react",
+      "@types/node",
+      "vitest/globals",
+      "@types/which"
     ],
     "jsx": "preserve",
     "jsxImportSource": "react"
   },
   "exclude": [
-    "dist"
+    "dist",
+    "cdk.out"
   ]
 }
