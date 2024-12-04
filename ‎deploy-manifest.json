@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "framework": { "name": "hono", "version": "4.6.12" },
+  "routes": [
+    {
+      "path": "/../client/static/*",
+      "target": {
+        "kind": "Static",
+        "cacheControl": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "path": "/*.*",
+      "target": {
+        "kind": "Static",
+        "cacheControl": "public, max-age=0, must-revalidate"
+      },
+      "fallback": {
+        "kind": "Compute",
+        "src": "default"
+      }
+    },
+    {
+      "path": "/api/*",
+      "target": {
+        "kind": "Compute",
+        "src": "default"
+      }
+    },
+    {
+      "path": "/*",
+      "target": {
+        "kind": "Compute",
+        "src": "default"
+      }
+    }
+  ],
+  "computeResources": [
+    {
+      "name": "default",
+      "runtime": "nodejs20.x",
+      "entrypoint": "hono-entry.ts"
+    }
+  ]
+}
