@@ -1,8 +1,7 @@
-import { Layout, Typography } from 'antd';
+import { Layout } from 'antd';
 import Sidebar from './MenuBar';
 
 const { Header, Content, Sider } = Layout;
-const { Title } = Typography;
 
 
 const AppLayout = ({ children }) => {
