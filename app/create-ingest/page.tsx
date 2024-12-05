@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import AppLayout from '../../components/Layout';
 
-import {  Spin } from 'antd';
+import { Spin } from 'antd';
 
 import ValidationForm from '../../components/ValidationForm';
 import ErrorModal from '../../components/ErrorModal';

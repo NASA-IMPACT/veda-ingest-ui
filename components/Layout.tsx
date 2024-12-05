@@ -1,10 +1,12 @@
+import React, { ReactNode } from "react";
+
 import { Layout } from 'antd';
 import Sidebar from './MenuBar';
 
 const { Header, Content, Sider } = Layout;
 
 
-const AppLayout = ({ children }) => {
+const AppLayout = ({ children }: {children: ReactNode}) => {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider collapsible>
