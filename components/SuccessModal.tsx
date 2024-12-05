@@ -1,5 +1,6 @@
 import React from 'react';
 import StyledModal from './Modal';
+import { Status } from '@/types/global';
 
 export default function SuccessModal({ collectionName, pullRequestUrl, setStatus }: { collectionName: string; pullRequestUrl: string; setStatus: (status: Status) => void }) {
   const onOk = () => {
