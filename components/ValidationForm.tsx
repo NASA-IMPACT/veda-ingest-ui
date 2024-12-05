@@ -11,6 +11,7 @@ import { JSONSchema7 } from 'json-schema';
 import ObjectFieldTemplate from '../ObjectFieldTemplate';
 import jsonSchema from '../FormSchemas/jsonschema.json';
 import uiSchema from '../FormSchemas/uischema.json';
+import { Status } from '@/types/global';
 
 const Form = withTheme(AntDTheme);
 
