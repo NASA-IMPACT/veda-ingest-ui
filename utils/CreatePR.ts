@@ -30,6 +30,7 @@ const CreatePR = async (data: { [x: string]: unknown }) => {
       },
     });
 
+    // @ts-expect-error due to token type not defined on octokit
     const { token } = await appOctokit.auth({
       type: 'installation',
       installationId,
