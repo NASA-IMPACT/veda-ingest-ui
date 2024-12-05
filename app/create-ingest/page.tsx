@@ -1,18 +1,15 @@
-// export default function Page() {
-//   return <h1>Hello, Dashboard Page!</h1>
-// }
+
 "use client"
 import { useState } from 'react';
 import AppLayout from '../../components/Layout';
 
 import {  Spin } from 'antd';
-import withTheme from '../../theme';
 
 import ValidationForm from '../../components/ValidationForm';
 import ErrorModal from '../../components/ErrorModal';
 import SuccessModal from '../../components/SuccessModal';
 
-const Home = function Home() {
+const CreateIngest = function CreateIngest() {
   const [status, setStatus] = useState('idle');
   const [collectionName, setCollectionName] = useState('');
   const [apiErrorMessage, setApiErrorMessage] = useState('');
@@ -28,8 +25,4 @@ const Home = function Home() {
   );
 };
 
-const HomePage = () => {
-  return withTheme(<Home />);
-}
-
-export default HomePage;
+export default CreateIngest
