@@ -67,7 +67,6 @@
       "rows": 2
     }
   },
-
   "ui:submitButtonOptions": {
     "props": {
       "color": "primary",

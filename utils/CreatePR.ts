@@ -1,9 +1,6 @@
-import dotenv from 'dotenv';
 import { Octokit } from '@octokit/rest';
 import { RequestError } from '@octokit/request-error';
 import { createAppAuth } from '@octokit/auth-app';
-
-dotenv.config();
 
 const targetBranch = 'master';
 const owner = process.env.OWNER || '';

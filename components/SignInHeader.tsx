@@ -19,5 +19,5 @@ const headerStyle: React.CSSProperties = {
 };
 
 export function SignInHeader() {
-  return <Header style={headerStyle}>Sign in to your Account</Header>;
+  return <Header style={headerStyle}>Sign In To Begin VEDA Data Ingest</Header>;
 }

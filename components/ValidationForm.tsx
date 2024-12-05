@@ -11,7 +11,6 @@ import { JSONSchema7 } from 'json-schema';
 import ObjectFieldTemplate from '../ObjectFieldTemplate';
 import jsonSchema from '../FormSchemas/jsonschema.json';
 import uiSchema from '../FormSchemas/uischema.json';
-import { Status } from '../vite-env';
 
 const Form = withTheme(AntDTheme);
 
@@ -37,7 +36,7 @@ function ValidationForm({
     setStatus('loading');
     setCollectionName(formData.collection);
     console.log(formData);
-    const url = 'api/ingest/create';
+    const url = 'api/create-ingest';
     const requestOptions = {
       method: 'POST',
       body: JSON.stringify(formData),
@@ -53,8 +52,8 @@ function ValidationForm({
         throw new Error(`There was an error: ${errorMessage}`);
       }
 
-      const data = await response.json();
-      setPullRequestUrl(data['data']);
+      const githubUrl = await response.json();
+      setPullRequestUrl(githubUrl);
       setFormData({});
       setStatus('success');
     } catch (error) {

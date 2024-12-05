@@ -1,6 +1,5 @@
 import { Layout } from 'antd';
 import React from 'react';
-import logoUrl from '../assets/logo.svg';
 
 const { Header } = Layout;
 
@@ -38,9 +37,6 @@ function Logo() {
         marginBottom: 10,
       }}
     >
-      <a href='/'>
-        <img src={logoUrl} height={64} width={64} alt='logo' />
-      </a>
     </div>
   );
 }

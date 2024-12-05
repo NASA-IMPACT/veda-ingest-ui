@@ -1,5 +1,4 @@
 import React from 'react';
-import { Status } from '../vite-env';
 import StyledModal from './Modal';
 
 export default function SuccessModal({ collectionName, pullRequestUrl, setStatus }: { collectionName: string; pullRequestUrl: string; setStatus: (status: Status) => void }) {

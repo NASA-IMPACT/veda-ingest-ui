@@ -11,7 +11,7 @@ frontend:
       commands:
         - yarn build
   artifacts:
-      baseDirectory: dist
+      baseDirectory: .next
       files:
           - '**/*'
   cache:
