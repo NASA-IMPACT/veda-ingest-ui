@@ -29,7 +29,7 @@ const CreatePR = async (data: { [x: string]: unknown; }) => {
     
     console.log('collectionName', collectionName)
     // prettify stringify to preserve json formatting
-    const content = JSON.stringify(data, null, 2);
+    const content = JSON.stringify(data);
     console.log('content', content)
     const targetPath = 'ingestion-data/staging/dataset-config';
     const fileName = collectionName;
