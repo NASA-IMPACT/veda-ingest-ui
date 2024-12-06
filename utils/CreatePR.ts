@@ -1,13 +1,13 @@
-// import { Octokit } from '@octokit/rest';
+import { Octokit } from '@octokit/rest';
 import { RequestError } from '@octokit/request-error';
-// import { createAppAuth } from '@octokit/auth-app';
+import { createAppAuth } from '@octokit/auth-app';
 
-// const targetBranch = 'master';
-// const owner = process.env.OWNER || '';
-// const repo = process.env.REPO || '';
-// const appId = parseInt(process.env.APP_ID || '');
-// const installationId = parseInt(process.env.INSTALLATION_ID || '');
-// const privateKey = process.env.GITHUB_PRIVATE_KEY || '';
+const targetBranch = 'master';
+const owner = process.env.OWNER || '';
+const repo = process.env.REPO || '';
+const appId = parseInt(process.env.APP_ID || '');
+const installationId = parseInt(process.env.INSTALLATION_ID || '');
+const privateKey = process.env.GITHUB_PRIVATE_KEY || '';
 
 const CreatePR = async (data: unknown ) => {
   try {
@@ -27,31 +27,33 @@ const CreatePR = async (data: unknown ) => {
       const branchName = `feat/${fileName}`;
 
       console.log('created: ', path, branchName);
-    // const appOctokit = new Octokit({
-    //   authStrategy: createAppAuth,
-    //   auth: {
-    //     appId,
-    //     privateKey,
-    //     installationId,
-    //   },
-    // });
+    const appOctokit = new Octokit({
+      authStrategy: createAppAuth,
+      auth: {
+        appId,
+        privateKey,
+        installationId,
+      },
+    });
 
-    // // @ts-expect-error dunno
-    // const { token } = await appOctokit.auth({
-    //   type: 'installation',
-    //   installationId,
-    // });
+    //  @ts-expect-error dunno
+    const { token } = await appOctokit.auth({
+      type: 'installation',
+      installationId,
+    });
 
-    // const octokit = new Octokit({
-    //   auth: token,
-    // });
+    const octokit = new Octokit({
+      auth: token,
+    });
 
     // // Get the current target branch reference to get the sha
-    // const sha = await octokit.rest.git.getRef({
-    //   owner,
-    //   repo,
-    //   ref: `heads/${targetBranch}`,
-    // });
+    const sha = await octokit.rest.git.getRef({
+      owner,
+      repo,
+      ref: `heads/${targetBranch}`,
+    });
+
+    console.log('sha', sha)
 
     // // Get the tree associated with master, and the content
     // // of the template file to open the PR with.
