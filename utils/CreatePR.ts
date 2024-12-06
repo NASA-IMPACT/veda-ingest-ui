@@ -23,8 +23,7 @@ const CreatePR = async (data: unknown ) => {
       const path = `${targetPath}/${fileName}.json`;
       const branchName = `feat/${fileName}`;
 
-      console.log('created: ', path, branchName);
-      console.log('owner', owner, repo, appId, installationId, privateKey)
+    console.log(`created: ${path} on ${branchName} in ${repo}` );
     const appOctokit = new Octokit({
       authStrategy: createAppAuth,
       auth: {
