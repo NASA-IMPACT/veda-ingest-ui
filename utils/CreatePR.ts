@@ -9,118 +9,108 @@ const appId = parseInt(process.env.APP_ID || '');
 const installationId = parseInt(process.env.INSTALLATION_ID || '');
 const privateKey = process.env.GITHUB_PRIVATE_KEY || '';
 
-function isJson(str: string) {
-  try {
-      JSON.parse(str);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (e) {
-      return false;
-  }
-  return true;
-}
-
 const CreatePR = async (data: unknown ) => {
   try {
 
     //@ts-expect-error testing
     const collectionName = data['collection'];
-    console.log('in createPR is json?', isJson(data as unknown as string))
     console.log('data in CreatePR')
     console.log(data)
     
     console.log('collectionName', collectionName)
     // prettify stringify to preserve json formatting
     // const content = JSON.stringify(data);
-    // console.log('content', content)
-    // const targetPath = 'ingestion-data/staging/dataset-config';
-    // const fileName = collectionName;
-    // const path = `${targetPath}/${fileName}.json`;
-    // const branchName = `feat/${fileName}`;
+      const content = 'bluey'
+      console.log('content', content)
+      const targetPath = 'ingestion-data/staging/dataset-config';
+      const fileName = collectionName;
+      const path = `${targetPath}/${fileName}.json`;
+      const branchName = `feat/${fileName}`;
 
-    // const appOctokit = new Octokit({
-    //   authStrategy: createAppAuth,
-    //   auth: {
-    //     appId,
-    //     privateKey,
-    //     installationId,
-    //   },
-    // });
+    const appOctokit = new Octokit({
+      authStrategy: createAppAuth,
+      auth: {
+        appId,
+        privateKey,
+        installationId,
+      },
+    });
 
-    // const { token } = await appOctokit.auth({
-    //   type: 'installation',
-    //   installationId,
-    // });
+    // @ts-expect-error dunno
+    const { token } = await appOctokit.auth({
+      type: 'installation',
+      installationId,
+    });
 
-    // const octokit = new Octokit({
-    //   auth: token,
-    // });
+    const octokit = new Octokit({
+      auth: token,
+    });
 
     // Get the current target branch reference to get the sha
-    // const sha = await octokit.rest.git.getRef({
-    //   owner,
-    //   repo,
-    //   ref: `heads/${targetBranch}`,
-    // });
+    const sha = await octokit.rest.git.getRef({
+      owner,
+      repo,
+      ref: `heads/${targetBranch}`,
+    });
 
     // Get the tree associated with master, and the content
     // of the template file to open the PR with.
-    // const tree = await octokit.rest.git.getTree({
-    //   owner,
-    //   repo,
-    //   tree_sha: sha.data.object.sha,
-    // });
+    const tree = await octokit.rest.git.getTree({
+      owner,
+      repo,
+      tree_sha: sha.data.object.sha,
+    });
 
     // Create a new blob with the content in formData
-    // const blob = await octokit.rest.git.createBlob({
-    //   owner,
-    //   repo,
-    //   content,
-    //   encoding: 'utf-8',
-    // });
+    const blob = await octokit.rest.git.createBlob({
+      owner,
+      repo,
+      content,
+      encoding: 'utf-8',
+    });
 
-    // const newTree = await octokit.rest.git.createTree({
-    //   owner,
-    //   repo,
-    //   tree: [
-    //     {
-    //       path,
-    //       sha: blob.data.sha,
-    //       mode: '100644',
-    //       type: 'blob',
-    //     },
-    //   ],
-    //   base_tree: tree.data.sha,
-    // });
+    const newTree = await octokit.rest.git.createTree({
+      owner,
+      repo,
+      tree: [
+        {
+          path,
+          sha: blob.data.sha,
+          mode: '100644',
+          type: 'blob',
+        },
+      ],
+      base_tree: tree.data.sha,
+    });
 
     // Create a commit and a reference using the new tree
-    // const newCommit = await octokit.rest.git.createCommit({
-    //   owner,
-    //   repo,
-    //   message: `Create ${path}`,
-    //   tree: newTree.data.sha,
-    //   parents: [sha.data.object.sha],
-    // });
+    const newCommit = await octokit.rest.git.createCommit({
+      owner,
+      repo,
+      message: `Create ${path}`,
+      tree: newTree.data.sha,
+      parents: [sha.data.object.sha],
+    });
 
-    // await octokit.rest.git.createRef({
-    //   owner,
-    //   repo,
-    //   ref: `refs/heads/${branchName}`,
-    //   sha: newCommit.data.sha,
-    // });
+    await octokit.rest.git.createRef({
+      owner,
+      repo,
+      ref: `refs/heads/${branchName}`,
+      sha: newCommit.data.sha,
+    });
 
     // open PR with new file added to targetBranch
-    // const pr = await octokit.rest.pulls.create({
-    //   owner,
-    //   repo,
-    //   head: branchName,
-    //   base: targetBranch,
-    //   title: `Create ${path}`,
-    // });
+    const pr = await octokit.rest.pulls.create({
+      owner,
+      repo,
+      head: branchName,
+      base: targetBranch,
+      title: `Create ${path}`,
+    });
 
-    // const pr_url = pr.data.html_url;
-    // console.log(`PR opened at URL ${pr_url}`);
-    // return pr_url;
-    return 'http://www.test.com'
+    const pr_url = pr.data.html_url;
+    console.log(`PR opened at URL ${pr_url}`);
+    return pr_url;
   } catch (error) {
     if (error instanceof RequestError) {
       // branch with branchName already exists
