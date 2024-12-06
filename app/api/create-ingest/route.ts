@@ -3,7 +3,12 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.json();
+    const data = await request.json(); 
+    console.log('data', typeof data)
+    const collectionName = data['collection']
+
+    console.log('collectionName', collectionName);
+    
     const githubResponse = await CreatePR(data);
    
     return NextResponse.json(githubResponse)

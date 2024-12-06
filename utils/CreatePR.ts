@@ -12,7 +12,8 @@ const privateKey = process.env.GITHUB_PRIVATE_KEY || '';
 const CreatePR = async (data: { [x: string]: unknown }) => {
   try {
     // const data = req.body;
-
+    console.log(data)
+    console.log('pr creating data type of', typeof data)
     const collectionName = data['collection'];
     // prettify stringify to preserve json formatting
     const content = JSON.stringify(data, null, 2);
