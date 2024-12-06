@@ -9,11 +9,12 @@ const appId = parseInt(process.env.APP_ID || '');
 const installationId = parseInt(process.env.INSTALLATION_ID || '');
 const privateKey = process.env.GITHUB_PRIVATE_KEY || '';
 
-const CreatePR = async (data: { [x: string]: unknown }) => {
+const CreatePR = async (data: unknown) => {
   try {
     // const data = req.body;
     console.log(data)
     console.log('pr creating data type of', typeof data)
+    //@ts-expect-error testing
     const collectionName = data['collection'];
     console.log('collectionName', collectionName)
     // prettify stringify to preserve json formatting
