@@ -21,15 +21,16 @@ function isJson(str: string) {
 
 const CreatePR = async (data: { [x: string]: unknown; }) => {
   try {
-    console.log('in route is json?', isJson(data as unknown as string))
-    console.log('data in CreatePR')
-    console.log({data})
-    console.log('pr creating data type of', typeof data)
+
     const collectionName = data['collection'];
+    console.log('in createPR is json?', isJson(data as unknown as string))
+    console.log('data in CreatePR')
+    console.log(data)
+    
     console.log('collectionName', collectionName)
     // prettify stringify to preserve json formatting
-    // const content = JSON.stringify(data, null, 2);
-    const content = data;
+    const content = JSON.stringify(data, null, 2);
+    console.log('content', content)
     const targetPath = 'ingestion-data/staging/dataset-config';
     const fileName = collectionName;
     const path = `${targetPath}/${fileName}.json`;
