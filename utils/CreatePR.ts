@@ -27,6 +27,7 @@ const CreatePR = async (data: unknown ) => {
       const branchName = `feat/${fileName}`;
 
       console.log('created: ', path, branchName);
+      console.log(owner, repo, appId, installationId)
     const appOctokit = new Octokit({
       authStrategy: createAppAuth,
       auth: {
@@ -42,18 +43,18 @@ const CreatePR = async (data: unknown ) => {
       installationId,
     });
 
-    const octokit = new Octokit({
-      auth: token,
-    });
+    // const octokit = new Octokit({
+    //   auth: token,
+    // });
 
+    console.log(token)
     // // Get the current target branch reference to get the sha
-    const sha = await octokit.rest.git.getRef({
-      owner,
-      repo,
-      ref: `heads/${targetBranch}`,
-    });
+    // const sha = await octokit.rest.git.getRef({
+    //   owner,
+    //   repo,
+    //   ref: `heads/${targetBranch}`,
+    // });
 
-    console.log('sha', sha)
 
     // // Get the tree associated with master, and the content
     // // of the template file to open the PR with.
