@@ -9,12 +9,22 @@ const appId = parseInt(process.env.APP_ID || '');
 const installationId = parseInt(process.env.INSTALLATION_ID || '');
 const privateKey = process.env.GITHUB_PRIVATE_KEY || '';
 
-const CreatePR = async (data: unknown) => {
+function isJson(str: string) {
   try {
-    // const data = req.body;
-    console.log(data)
+      JSON.parse(str);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (e) {
+      return false;
+  }
+  return true;
+}
+
+const CreatePR = async (data: { [x: string]: unknown; }) => {
+  try {
+    console.log('in route is json?', isJson(data as unknown as string))
+    console.log('data in CreatePR')
+    console.log({data})
     console.log('pr creating data type of', typeof data)
-    //@ts-expect-error testing
     const collectionName = data['collection'];
     console.log('collectionName', collectionName)
     // prettify stringify to preserve json formatting
