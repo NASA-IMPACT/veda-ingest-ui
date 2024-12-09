@@ -37,10 +37,15 @@ function ValidationForm({
     setStatus('loading');
     setCollectionName(formData.collection);
     console.log(formData);
+    const tempFormData = {
+      collection: formData.collection
+    }
+    const start = formData.temporal_extent.startdate
+    console.log("start: ", typeof start, start)
     const url = 'api/create-ingest';
     const requestOptions = {
       method: 'POST',
-      body: JSON.stringify(formData),
+      body: JSON.stringify(tempFormData),
       headers: { 'Content-Type': 'application/json' },
     };
     try {
