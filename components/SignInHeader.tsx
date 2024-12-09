@@ -11,13 +11,13 @@ const headerStyle: React.CSSProperties = {
   backgroundColor: '#2276AC',
   color: '#FFFFFF',
   width: '100%',
-  marginBottom: '24px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   flexDirection: 'column',
+  padding: '1.5em 0em',
 };
 
 export function SignInHeader() {
-  return <Header style={headerStyle}>Sign In To Begin VEDA Data Ingest</Header>;
+  return <Header style={headerStyle}>VEDA Data Ingest</Header>
 }
