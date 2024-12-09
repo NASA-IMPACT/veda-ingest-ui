@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React from 'react';
 import { SetStateAction, useState } from 'react';
 
 import { withTheme } from '@rjsf/core';
@@ -37,34 +35,30 @@ function ValidationForm({
   const onFormDataSubmit = async ({ formData }) => {
     setStatus('loading');
     setCollectionName(formData.collection);
-    console.log(formData);
-    // const tempFormData = {
-    //   collection: formData.collection
-    // }
 
-    // const url = 'api/create-ingest';
+    const url = 'api/create-ingest';
     
-    // const requestOptions = {
-    //   method: 'POST',
-    //   body: tempFormData,
-    //   headers: { 'Content-Type': 'application/json' },
-    // };
+    const requestOptions = {
+      method: 'POST',
+      body: JSON.stringify(formData),
+      headers: { 'Content-Type': 'application/json' },
+    };
     try {
       const start = formData.temporal_extent.startdate;
       console.log("start: ", typeof start, start);
-      // const response = await fetch(url, requestOptions);
+      const response = await fetch(url, requestOptions);
 
-      // if (!response.ok) {
-      //   const errorMessage = await response.text();
-      //   setApiErrorMessage(errorMessage);
-      //   setStatus('error');
-      //   throw new Error(`There was an error: ${errorMessage}`);
-      // }
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        setApiErrorMessage(errorMessage);
+        setStatus('error');
+        throw new Error(`There was an error: ${errorMessage}`);
+      }
 
-      // const githubUrl = await response.json();
-      // setPullRequestUrl(githubUrl);
-      // setFormData({});
-      // setStatus('success');
+      const githubUrl = await response.json();
+      setPullRequestUrl(githubUrl);
+      setFormData({});
+      setStatus('success');
     } catch (error) {
       console.error(error);
       setStatus('error');
