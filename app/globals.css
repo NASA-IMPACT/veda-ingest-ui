@@ -93,3 +93,7 @@ a {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+.rfjs {
+  background-color: purple;
+}
