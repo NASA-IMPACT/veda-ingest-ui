@@ -1,3 +1,5 @@
+'use client'
+
 import { SetStateAction, useState } from 'react';
 
 import { withTheme } from '@rjsf/core';
@@ -37,15 +39,13 @@ function ValidationForm({
     setCollectionName(formData.collection);
 
     const url = 'api/create-ingest';
-    
+    console.log(formData);
     const requestOptions = {
       method: 'POST',
       body: JSON.stringify(formData),
       headers: { 'Content-Type': 'application/json' },
     };
     try {
-      const start = formData.temporal_extent.startdate;
-      console.log("start: ", typeof start, start);
       const response = await fetch(url, requestOptions);
 
       if (!response.ok) {
