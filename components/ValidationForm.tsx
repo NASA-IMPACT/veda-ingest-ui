@@ -55,8 +55,8 @@ function ValidationForm({
         throw new Error(`There was an error: ${errorMessage}`);
       }
 
-      const githubUrl = await response.json();
-      setPullRequestUrl(githubUrl);
+      const responseJson = await response.json();
+      setPullRequestUrl(responseJson.githubURL);
       setFormData({});
       setStatus('success');
     } catch (error) {

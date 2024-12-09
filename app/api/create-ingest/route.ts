@@ -6,8 +6,9 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
 
     const githubResponse = await CreatePR(data);
+    console.log("got from githubResponse", githubResponse)
 
-    return NextResponse.json(githubResponse)
+    return NextResponse.json({ githubURL: githubResponse })
   } catch (error) {
     if (error instanceof Error ) {
       return NextResponse.json(
