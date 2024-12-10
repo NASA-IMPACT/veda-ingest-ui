@@ -18,12 +18,13 @@ const CreatePR = async (data: unknown ) => {
     console.log('collectionName', collectionName)
     // prettify stringify to preserve json formatting
     const content = JSON.stringify(data, null, 2);
-      const targetPath = 'ingestion-data/staging/dataset-config';
-      const fileName = collectionName;
-      const path = `${targetPath}/${fileName}.json`;
-      const branchName = `feat/${fileName}`;
+    console.log(content)
+    const targetPath = 'ingestion-data/staging/dataset-config';
+    const fileName = collectionName;
+    const path = `${targetPath}/${fileName}.json`;
+    const branchName = `feat/${fileName}`;
 
-    console.log(`created: ${path} on ${branchName} in ${repo}` );
+    console.log(`creating: ${path} on ${branchName} in ${repo}` );
     const appOctokit = new Octokit({
       authStrategy: createAppAuth,
       auth: {
