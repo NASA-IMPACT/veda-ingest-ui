@@ -7,7 +7,10 @@ const owner = process.env.OWNER || '';
 const repo = process.env.REPO || '';
 const appId = parseInt(process.env.APP_ID || '');
 const installationId = parseInt(process.env.INSTALLATION_ID || '');
-const privateKey = process.env.GITHUB_PRIVATE_KEY || '';
+const rawkey = process.env.GITHUB_PRIVATE_KEY || '';
+
+const privateKey = rawkey.replace(/\\n/g, '\n');
+
 
 const CreatePR = async (data: unknown ) => {
   try {
@@ -25,11 +28,12 @@ const CreatePR = async (data: unknown ) => {
     const branchName = `feat/${fileName}`;
 
     console.log(`creating: ${path} on ${branchName} in ${repo}` );
+    console.log(privateKey)
     const appOctokit = new Octokit({
       authStrategy: createAppAuth,
       auth: {
         appId,
-        privateKey: privateKey.split(String.raw`\n`).join('\n'),
+        privateKey,
         installationId,
       },
     });
