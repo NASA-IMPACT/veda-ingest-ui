@@ -18,10 +18,8 @@
     --amplify-components-button-link-focus-background-color: #4096ff !important;
     --amplify-components-button-focus-color: #1677ff !important;
     --amplify-components-button-focus-border-color: #1677ff !important;
-}
-
-.amplify-button--primary {
-  background-color: #2276AC;
+    --amplify-components-input-focus-border-color: #1677ff !important;
+    --amplify-components-fieldcontrol-focus-border-color: #1677ff !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -90,8 +88,4 @@ main > div {
   border-radius: 6px;
   border: none;
   box-shadow: 0px 3px 15px rgba(0,0,0,0.2);
-}
-
-.ant-layout-sider-collapsed {
-  background-color: purple;
 }
