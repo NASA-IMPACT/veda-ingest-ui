@@ -18,9 +18,10 @@ const LogoutButton = ({collapsed}: {collapsed: boolean}) => {
       icon={<LogoutOutlined/>}
       block
       style={{
-        width: 'calc(100% - 8px)',
-        marginInline: '4px',
+        width: 'calc(100% - 24px)',
+        marginInline: '12px',
         marginTop: '16px',
+        justifyContent: collapsed ? 'center' : 'flex-start',
       }}>
         {collapsed ? '' : 'Sign out'}
         </Button>
