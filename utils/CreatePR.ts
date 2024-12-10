@@ -29,7 +29,7 @@ const CreatePR = async (data: unknown ) => {
       authStrategy: createAppAuth,
       auth: {
         appId,
-        privateKey,
+        privateKey: privateKey.split(String.raw`\n`).join('\n'),
         installationId,
       },
     });
