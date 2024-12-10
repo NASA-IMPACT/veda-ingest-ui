@@ -29,8 +29,6 @@ const Home = function Home() {
         </Space>
       </section>
       </AppLayout>
-
-
     </ThemeProvider>
   );
 }

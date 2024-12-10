@@ -89,8 +89,6 @@ export default function ObjectFieldTemplate<T = any, S extends StrictRJSFSchema 
   return (
     <ConfigConsumer>
       {(configProps: ConfigConsumerProps) => {
-        console.log('config props are');
-        console.log(configProps);
         const { getPrefixCls } = configProps;
         const prefixCls = getPrefixCls('form');
         const labelClsBasic = `${prefixCls}-item-label`;

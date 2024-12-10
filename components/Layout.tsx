@@ -1,25 +1,37 @@
-import React, { ReactNode } from "react";
-
+import React, { ReactNode, useState } from "react";
 import { Layout } from 'antd';
-import Sidebar from './MenuBar';
 
-const { Header, Content, Sider } = Layout;
+import MenuBar from './MenuBar';
+import LogoutButton from './LogoutButton';
 
+
+const { Content, Sider } = Layout;
 
 const AppLayout = ({ children }: {children: ReactNode}) => {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider collapsible>
-        <Header
+      <Sider
+        collapsible
+        collapsed={collapsed}
+        onCollapse={() => setCollapsed(!collapsed)}
+        >
+        <div
           style={{
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'center',
             color: 'white',
-            padding: '20px'
+            padding: '20px',
+            width: 'calc(100% - 8px)',
+            fontSize: '1.5em',
+            textAlign: 'center',
             }} >
             VEDA Ingest UI
-        </Header>
-        <Sidebar />
+        </div>
+        <MenuBar />
+        <LogoutButton collapsed={collapsed} />
       </Sider>
       <Layout>
 

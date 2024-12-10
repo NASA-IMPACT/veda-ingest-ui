@@ -8,14 +8,14 @@ const headerStyle: React.CSSProperties = {
   fontWeight: 700,
   textAlign: 'center',
   lineHeight: '1.1',
-  backgroundColor: '#2276AC',
+  backgroundColor: '#1677ff',
   color: '#FFFFFF',
   width: '100%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   flexDirection: 'column',
-  padding: '1.5em 0em',
+  padding: '1.5em 1.5em',
 };
 
 export function SignInHeader() {
