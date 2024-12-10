@@ -40,7 +40,7 @@ const CreatePR = async (data: unknown ) => {
       installationId,
     });
 
-    console.log(token ? 'token is truthy' : 'no token')
+    console.log('token', token)
 
     const octokit = new Octokit({
       auth: token,
@@ -109,6 +109,8 @@ const CreatePR = async (data: unknown ) => {
       base: targetBranch,
       title: `Create ${path}`,
     });
+
+    console.log('pr', pr)
 
     const pr_url = pr.data.html_url;
     console.log(`PR opened at URL ${pr_url}`);
