@@ -116,8 +116,8 @@ const CreatePR = async (data: unknown ) => {
     console.log(`PR opened at URL ${pr_url}`);
     return pr_url;
   } catch (error) {
+    console.log(error)
     if (error instanceof RequestError) {
-      console.error(error)
       // branch with branchName already exists
       if (error['status'] === 422 && error.response) {
         console.error('we have an error');
