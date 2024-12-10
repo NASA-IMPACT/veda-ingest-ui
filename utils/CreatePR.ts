@@ -40,6 +40,8 @@ const CreatePR = async (data: unknown ) => {
       installationId,
     });
 
+    console.log(token ? 'token is truthy' : 'no token')
+
     const octokit = new Octokit({
       auth: token,
     });
@@ -51,6 +53,7 @@ const CreatePR = async (data: unknown ) => {
       ref: `heads/${targetBranch}`,
     });
 
+    console.log('sha ', sha)
 
     // // Get the tree associated with master, and the content
     // // of the template file to open the PR with.
@@ -112,6 +115,7 @@ const CreatePR = async (data: unknown ) => {
     return pr_url;
   } catch (error) {
     if (error instanceof RequestError) {
+      console.error(error)
       // branch with branchName already exists
       if (error['status'] === 422 && error.response) {
         console.error('we have an error');
