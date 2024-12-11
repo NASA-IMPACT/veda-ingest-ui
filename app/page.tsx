@@ -3,20 +3,13 @@
 import { Space } from 'antd';
 import { Amplify } from 'aws-amplify';
 import { withAuthenticator, ThemeProvider } from '@aws-amplify/ui-react';
-
+import {config} from '@/utils/aws-exports';
 
 import { SignInHeader } from '../components/SignInHeader';
 import AppLayout from '../components/Layout';
 
 
-Amplify.configure({
-  Auth: {
-    Cognito: {
-      userPoolId: process.env.NEXT_PUBLIC_USER_POOL_ID || '',
-      userPoolClientId: process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID || '',
-    },
-  },
-});
+Amplify.configure({...config}, {ssr:true});
 
 
 const Home = function Home() {

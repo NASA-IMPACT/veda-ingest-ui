@@ -1,7 +1,14 @@
 
 "use client"
 import { useState } from 'react';
-import AppLayout from '../../components/Layout';
+import AppLayout from '@/components/Layout';
+import { Amplify } from 'aws-amplify';
+import { withAuthenticator } from '@aws-amplify/ui-react';
+import {config} from '@/utils/aws-exports';
+import { SignInHeader } from '@/components/SignInHeader';
+
+
+Amplify.configure({...config}, {ssr:true});
 
 import { Spin } from 'antd';
 
@@ -26,4 +33,12 @@ const CreateIngest = function CreateIngest() {
   );
 };
 
-export default CreateIngest
+
+export default withAuthenticator(CreateIngest, {
+  hideSignUp: true,
+  components: {
+    SignIn: {
+      Header: SignInHeader,
+    },
+  },
+});
