@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
+
+
 import { Menu, MenuProps } from 'antd';
 import Link from 'next/link';
 import { HomeOutlined, PlusCircleOutlined } from '@ant-design/icons';
@@ -24,15 +27,17 @@ const items: MenuProps['items'] = [
 
 
 const MenuBar = () => {
-  const [activeLink, setActiveLink] = useState(location.pathname)
+  const pathname = usePathname();
+
+  const [activeLink, setActiveLink] = useState(pathname)
 
   useEffect(() => {
     if (location) {
-        if( activeLink !== location.pathname ) {
-            setActiveLink(location.pathname);
+        if( activeLink !== pathname) {
+            setActiveLink(pathname);
         }
     }
-}, [activeLink]);
+}, [activeLink, pathname]);
   
   return (
       <Menu 
