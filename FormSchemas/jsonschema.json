@@ -102,14 +102,16 @@
           }
         },
         "required": ["prefix", "bucket"]
-      }
+      },
+      "minItems": 1
     },
     "sample_files": {
       "title": "Sample Files",
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "minItems": 1
     },
     "data_type": {
       "title": "Data Type",
