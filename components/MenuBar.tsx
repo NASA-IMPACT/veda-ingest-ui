@@ -1,17 +1,47 @@
-import { Menu } from 'antd';
+import { useEffect, useState } from 'react';
+import { Menu, MenuProps } from 'antd';
 import Link from 'next/link';
 import { HomeOutlined, PlusCircleOutlined } from '@ant-design/icons';
 
+const items: MenuProps['items'] = [
+  {
+    label: (
+      <Link href="/">Home</Link>
+    ),
+    key: '/',
+    icon: <HomeOutlined />
+  },
+  {
+    label: (
+      <Link href="/create-ingest">
+        Create Ingest
+      </Link>
+    ),
+    key: '/create-ingest',
+    icon: <PlusCircleOutlined />
+  },
+];
+
 
 const MenuBar = () => {
+  const [activeLink, setActiveLink] = useState(location.pathname)
+
+  useEffect(() => {
+    if (location) {
+        if( activeLink !== location.pathname ) {
+            setActiveLink(location.pathname);
+        }
+    }
+}, [activeLink]);
+  
   return (
-      <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']} >
-        <Menu.Item key="1" icon={<HomeOutlined />}>
-          <Link href="/">Home</Link>
-        </Menu.Item>
-        <Menu.Item key="2" icon={<PlusCircleOutlined />}>
-          <Link href="/create-ingest">Create Ingest</Link>
-        </Menu.Item>
+      <Menu 
+        theme="dark"
+        mode="inline"
+        defaultSelectedKeys={['1']}
+        items={items}
+        selectedKeys={[activeLink]}
+        >
       </Menu>
   );
 };
