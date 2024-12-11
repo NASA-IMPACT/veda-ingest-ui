@@ -70,6 +70,14 @@
     resize-observer-polyfill "^1.5.1"
     throttle-debounce "^5.0.0"
 
+"@aws-amplify/adapter-nextjs@^1.2.32":
+  version "1.2.32"
+  resolved "https://registry.yarnpkg.com/@aws-amplify/adapter-nextjs/-/adapter-nextjs-1.2.32.tgz#0ec73f252f0834446445987fde48785d8afe93c5"
+  integrity sha512-5GcepCo0b40glhJiEeyV0KuVaU/0O3oWHI7jLThD6y+N37VO7sJ/SWGhyPqmE/eJMopDQh0ZecEjRLBOMylJdw==
+  dependencies:
+    aws-jwt-verify "^4.0.1"
+    cookie "^0.7.0"
+
 "@aws-amplify/analytics@7.0.62":
   version "7.0.62"
   resolved "https://registry.yarnpkg.com/@aws-amplify/analytics/-/analytics-7.0.62.tgz#57b093f72ca0d9887fe2e9dceb2291406fc8af3d"
@@ -2521,6 +2529,11 @@ aws-amplify@^6.10.2:
     "@aws-amplify/storage" "6.7.3"
     tslib "^2.5.0"
 
+aws-jwt-verify@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/aws-jwt-verify/-/aws-jwt-verify-4.0.1.tgz#d5f36f80f3d1cbe8ffa638347bb80daf72f6ae61"
+  integrity sha512-kzvi71eD3w/mCpYRUY7cz6DX4bfYihGdI2yV3FYQ2JuZZenqAqDPz0gWj0ew6vlAtdEVBNb7p+Dm2TAIxpVYMA==
+
 axe-core@^4.10.0:
   version "4.10.2"
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.10.2.tgz#85228e3e1d8b8532a27659b332e39b7fa0e022df"
@@ -2698,6 +2711,11 @@ concat-map@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
   integrity sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==
+
+cookie@^0.7.0:
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.7.2.tgz#556369c472a2ba910f2979891b526b3436237ed7"
+  integrity sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==
 
 copy-to-clipboard@^3.3.3:
   version "3.3.3"
