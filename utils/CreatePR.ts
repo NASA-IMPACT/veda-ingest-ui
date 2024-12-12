@@ -1,6 +1,7 @@
 import { Octokit } from '@octokit/rest';
 import { RequestError } from '@octokit/request-error';
 import { createAppAuth } from '@octokit/auth-app';
+import { formatFilename } from './FormatFilename';
 
 const targetBranch = 'master';
 const owner = process.env.OWNER || '';
@@ -23,7 +24,7 @@ const CreatePR = async (data: unknown ) => {
     const content = JSON.stringify(data, null, 2);
     console.log(content)
     const targetPath = 'ingestion-data/staging/dataset-config';
-    const fileName = collectionName;
+    const fileName = formatFilename(collectionName);
     const path = `${targetPath}/${fileName}.json`;
     const branchName = `feat/${fileName}`;
 
