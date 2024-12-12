@@ -8,21 +8,32 @@ async function handleSignOut() {
   await signOut();
 }
 
+const collapsedStyle = {
+  marginTop: '16px',
+  width: 'calc(100% - 24px)',
+  marginInline: '12px',
+  justifyContent: 'center',
+}
+
+const expandedStyle = {
+  marginTop: '16px',
+  width: 'calc(100% - 90px)',
+  marginInline: '45px',
+  justifyContent: 'flex-start',
+}
+
 const LogoutButton = ({collapsed}: {collapsed: boolean}) => {
   return (
     <Tooltip placement="right" title={collapsed ? 'Sign out' : ''} >
       <Button
-      type='primary'
-      danger
+      variant='solid'
+      color='danger'
       onClick={handleSignOut}
       icon={<LogoutOutlined/>}
       block
-      style={{
-        width: 'calc(100% - 24px)',
-        marginInline: '12px',
-        marginTop: '16px',
-        justifyContent: collapsed ? 'center' : 'flex-start',
-      }}>
+      style={
+        collapsed ? collapsedStyle : expandedStyle
+      }>
         {collapsed ? '' : 'Sign out'}
         </Button>
       </Tooltip>
