@@ -1,25 +1,25 @@
-@import "@aws-amplify/ui-react/styles.css";
+@import '@aws-amplify/ui-react/styles.css';
 
-@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap');
 
 :root {
-    --amplify-colors-radii-small: 0;
-    --amplify-colors-radii-medium: 2px;
-    --amplify-colors-radii-large: 4px;
-    --amplify-components-button-primary-background-color: #1677ff !important;
-    --amplify-components-button-primary-hover-background-color: #4096ff !important;
-    --amplify-components-button-primary-focus-background-color: #4096ff !important;
-    --amplify-components-button-primary-focus-color: #ffffff !important;
-    --amplify-components-input-focus-border-color: #1677ff !important;
-    --amplify-components-button-link-color: #1677ff !important;
-    --amplify-components-button-link-focus-color: #ffffff !important;
-    --amplify-components-button-link-hover-color: #ffffff !important;
-    --amplify-components-button-link-hover-background-color: #4096ff !important;
-    --amplify-components-button-link-focus-background-color: #4096ff !important;
-    --amplify-components-button-focus-color: #1677ff !important;
-    --amplify-components-button-focus-border-color: #1677ff !important;
-    --amplify-components-input-focus-border-color: #1677ff !important;
-    --amplify-components-fieldcontrol-focus-border-color: #1677ff !important;
+  --amplify-colors-radii-small: 0;
+  --amplify-colors-radii-medium: 2px;
+  --amplify-colors-radii-large: 4px;
+  --amplify-components-button-primary-background-color: #1677ff !important;
+  --amplify-components-button-primary-hover-background-color: #4096ff !important;
+  --amplify-components-button-primary-focus-background-color: #4096ff !important;
+  --amplify-components-button-primary-focus-color: #ffffff !important;
+  --amplify-components-input-focus-border-color: #1677ff !important;
+  --amplify-components-button-link-color: #1677ff !important;
+  --amplify-components-button-link-focus-color: #ffffff !important;
+  --amplify-components-button-link-hover-color: #ffffff !important;
+  --amplify-components-button-link-hover-background-color: #4096ff !important;
+  --amplify-components-button-link-focus-background-color: #4096ff !important;
+  --amplify-components-button-focus-color: #1677ff !important;
+  --amplify-components-button-focus-border-color: #1677ff !important;
+  --amplify-components-input-focus-border-color: #1677ff !important;
+  --amplify-components-fieldcontrol-focus-border-color: #1677ff !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -80,12 +80,16 @@ ant-form-item-control-input {
 
 main > div {
   border-radius: 6px;
-  box-shadow: 0px 3px 15px rgba(0,0,0,0.2);
+  box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.2);
 }
 
-.form-group .field .field-array, #root_spatial_extent, #root_temporal_extent, #root_discovery_items fieldset, #root_links fieldset {
+.form-group .field .field-array,
+#root_spatial_extent,
+#root_temporal_extent,
+#root_discovery_items fieldset,
+#root_links fieldset {
   padding: 6px 6px;
   border-radius: 6px;
   border: none;
-  box-shadow: 0px 3px 15px rgba(0,0,0,0.2);
+  box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.2);
 }

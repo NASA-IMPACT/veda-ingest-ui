@@ -20,7 +20,10 @@ import {
 } from '@rjsf/utils';
 import Col from 'antd/lib/col';
 import Row from 'antd/lib/row';
-import { ConfigConsumer, ConfigConsumerProps } from 'antd/lib/config-provider/context';
+import {
+  ConfigConsumer,
+  ConfigConsumerProps,
+} from 'antd/lib/config-provider/context';
 
 const DESCRIPTION_COL_STYLE = {
   paddingBottom: '8px',
@@ -32,28 +35,65 @@ const DESCRIPTION_COL_STYLE = {
  *
  * @param props - The `ObjectFieldTemplateProps` for this component
  */
-export default function ObjectFieldTemplate<T = any, S extends StrictRJSFSchema = RJSFSchema, F extends FormContextType = any>(props: ObjectFieldTemplateProps<T, S, F>) {
-  const { description, disabled, formContext, formData, idSchema, onAddClick, properties, readonly, required, registry, schema, title, uiSchema } = props;
+export default function ObjectFieldTemplate<
+  T = any,
+  S extends StrictRJSFSchema = RJSFSchema,
+  F extends FormContextType = any,
+>(props: ObjectFieldTemplateProps<T, S, F>) {
+  const {
+    description,
+    disabled,
+    formContext,
+    formData,
+    idSchema,
+    onAddClick,
+    properties,
+    readonly,
+    required,
+    registry,
+    schema,
+    title,
+    uiSchema,
+  } = props;
   console.log('ObjectFieldTemplate props: ');
   console.log(props);
   const uiOptions = getUiOptions<T, S, F>(uiSchema);
-  const TitleFieldTemplate = getTemplate<'TitleFieldTemplate', T, S, F>('TitleFieldTemplate', registry, uiOptions);
-  const DescriptionFieldTemplate = getTemplate<'DescriptionFieldTemplate', T, S, F>('DescriptionFieldTemplate', registry, uiOptions);
+  const TitleFieldTemplate = getTemplate<'TitleFieldTemplate', T, S, F>(
+    'TitleFieldTemplate',
+    registry,
+    uiOptions
+  );
+  const DescriptionFieldTemplate = getTemplate<
+    'DescriptionFieldTemplate',
+    T,
+    S,
+    F
+  >('DescriptionFieldTemplate', registry, uiOptions);
   // Button templates are not overridden in the uiSchema
   const {
     ButtonTemplates: { AddButton },
   } = registry.templates;
-  const { colSpan = 24, labelAlign = 'left', rowGutter = 12 } = formContext as GenericObjectType;
+  const {
+    colSpan = 24,
+    labelAlign = 'left',
+    rowGutter = 12,
+  } = formContext as GenericObjectType;
 
-  const findSchema = (element: ObjectFieldTemplatePropertyType): S => element.content.props.schema;
+  const findSchema = (element: ObjectFieldTemplatePropertyType): S =>
+    element.content.props.schema;
 
-  const findSchemaType = (element: ObjectFieldTemplatePropertyType) => findSchema(element).type;
+  const findSchemaType = (element: ObjectFieldTemplatePropertyType) =>
+    findSchema(element).type;
 
-  const findUiSchema = (element: ObjectFieldTemplatePropertyType): UiSchema<T, S, F> | undefined => element.content.props.uiSchema;
+  const findUiSchema = (
+    element: ObjectFieldTemplatePropertyType
+  ): UiSchema<T, S, F> | undefined => element.content.props.uiSchema;
 
-  const findUiSchemaField = (element: ObjectFieldTemplatePropertyType) => getUiOptions(findUiSchema(element)).field;
+  const findUiSchemaField = (element: ObjectFieldTemplatePropertyType) =>
+    getUiOptions(findUiSchema(element)).field;
 
-  const findUiSchemaWidget = (element: ObjectFieldTemplatePropertyType) => getUiOptions(findUiSchema(element)).widget;
+  const findUiSchemaWidget = (element: ObjectFieldTemplatePropertyType) =>
+    getUiOptions(findUiSchema(element)).widget;
 
   const calculateColSpan = (element: ObjectFieldTemplatePropertyType) => {
     const type = findSchemaType(element);
@@ -92,25 +132,43 @@ export default function ObjectFieldTemplate<T = any, S extends StrictRJSFSchema 
         const { getPrefixCls } = configProps;
         const prefixCls = getPrefixCls('form');
         const labelClsBasic = `${prefixCls}-item-label`;
-        const labelColClassName = classNames(labelClsBasic, labelAlign === 'left' && `${labelClsBasic}-left`);
+        const labelColClassName = classNames(
+          labelClsBasic,
+          labelAlign === 'left' && `${labelClsBasic}-left`
+        );
 
         return (
           <fieldset id={idSchema.$id}>
             <Row gutter={rowGutter}>
               {title && (
                 <Col className={labelColClassName} span={24}>
-                  <TitleFieldTemplate id={titleId<T>(idSchema)} title={title} required={required} schema={schema} uiSchema={uiSchema} registry={registry} />
+                  <TitleFieldTemplate
+                    id={titleId<T>(idSchema)}
+                    title={title}
+                    required={required}
+                    schema={schema}
+                    uiSchema={uiSchema}
+                    registry={registry}
+                  />
                 </Col>
               )}
               {description && (
                 <Col span={24} style={DESCRIPTION_COL_STYLE}>
-                  <DescriptionFieldTemplate id={descriptionId<T>(idSchema)} description={description} schema={schema} uiSchema={uiSchema} registry={registry} />
+                  <DescriptionFieldTemplate
+                    id={descriptionId<T>(idSchema)}
+                    description={description}
+                    schema={schema}
+                    uiSchema={uiSchema}
+                    registry={registry}
+                  />
                 </Col>
               )}
               {uiSchema?.['ui:grid'] && Array.isArray(uiSchema['ui:grid'])
                 ? uiSchema['ui:grid'].map((ui_row) => {
                     return Object.keys(ui_row).map((row_item) => {
-                      const element = properties.find((p) => p.name == row_item);
+                      const element = properties.find(
+                        (p) => p.name == row_item
+                      );
                       if (element) {
                         return (
                           <Col key={element.name} span={ui_row[row_item]}>
@@ -133,9 +191,15 @@ export default function ObjectFieldTemplate<T = any, S extends StrictRJSFSchema 
 
             {canExpand(schema, uiSchema, formData) && (
               <Col span={24}>
-                <Row gutter={rowGutter} justify='end'>
-                  <Col flex='192px'>
-                    <AddButton className='object-property-expand' disabled={disabled || readonly} onClick={onAddClick(schema)} uiSchema={uiSchema} registry={registry} />
+                <Row gutter={rowGutter} justify="end">
+                  <Col flex="192px">
+                    <AddButton
+                      className="object-property-expand"
+                      disabled={disabled || readonly}
+                      onClick={onAddClick(schema)}
+                      uiSchema={uiSchema}
+                      registry={registry}
+                    />
                   </Col>
                 </Row>
               </Col>

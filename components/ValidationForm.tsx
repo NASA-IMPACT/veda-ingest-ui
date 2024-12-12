@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { SetStateAction, useState } from 'react';
 
@@ -10,8 +10,8 @@ import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
 
 import ObjectFieldTemplate from '../ObjectFieldTemplate';
-import jsonSchema from '../FormSchemas/jsonschema.json';
-import uiSchema from '../FormSchemas/uischema.json';
+import jsonSchema from '@/FormSchemas/jsonschema.json';
+import uiSchema from '@/FormSchemas/uischema.json';
 import { Status } from '@/types/global';
 
 const Form = withTheme(AntDTheme);
@@ -29,7 +29,9 @@ function ValidationForm({
 }) {
   const [formData, setFormData] = useState<unknown>({});
 
-  const onFormDataChanged = (formState: { formData: SetStateAction<object | undefined> }) => {
+  const onFormDataChanged = (formState: {
+    formData: SetStateAction<object | undefined>;
+  }) => {
     setFormData(formState.formData);
   };
 

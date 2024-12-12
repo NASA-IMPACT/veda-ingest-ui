@@ -36,8 +36,7 @@ function Logo() {
         marginTop: 20,
         marginBottom: 10,
       }}
-    >
-    </div>
+    ></div>
   );
 }
 

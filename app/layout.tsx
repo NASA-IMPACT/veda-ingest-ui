@@ -1,25 +1,24 @@
-import './globals.css'
+import './globals.css';
 import React from 'react';
-import { Inter } from 'next/font/google'
+import { Inter } from 'next/font/google';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
   title: 'VEDA Ingest UI',
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-
   return (
     <html lang="en">
       <body className={inter.className}>
         <AntdRegistry>{children}</AntdRegistry>
       </body>
     </html>
-  )
+  );
 }

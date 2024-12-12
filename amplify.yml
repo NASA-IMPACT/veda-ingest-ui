@@ -13,9 +13,9 @@ frontend:
         - env | grep -e NEXT_PUBLIC_ >> .env.production
         - yarn build
   artifacts:
-      baseDirectory: .next
-      files:
-          - '**/*'
+    baseDirectory: .next
+    files:
+      - '**/*'
   cache:
     paths:
       - node_modules/**/*
