@@ -55,8 +55,6 @@ export default function ObjectFieldTemplate<
     title,
     uiSchema,
   } = props;
-  console.log('ObjectFieldTemplate props: ');
-  console.log(props);
   const uiOptions = getUiOptions<T, S, F>(uiSchema);
   const TitleFieldTemplate = getTemplate<'TitleFieldTemplate', T, S, F>(
     'TitleFieldTemplate',

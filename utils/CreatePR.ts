@@ -16,18 +16,13 @@ const CreatePR = async (data: unknown) => {
   try {
     //@ts-expect-error testing
     const collectionName = data['collection'];
-
-    console.log('collectionName', collectionName);
     // prettify stringify to preserve json formatting
     const content = JSON.stringify(data, null, 2);
-    console.log(content);
     const targetPath = 'ingestion-data/staging/dataset-config';
     const fileName = formatFilename(collectionName);
     const path = `${targetPath}/${fileName}.json`;
     const branchName = `feat/${fileName}`;
 
-    console.log(`creating: ${path} on ${branchName} in ${repo}`);
-    console.log(privateKey);
     const appOctokit = new Octokit({
       authStrategy: createAppAuth,
       auth: {
@@ -43,8 +38,6 @@ const CreatePR = async (data: unknown) => {
       installationId,
     });
 
-    console.log('token', token);
-
     const octokit = new Octokit({
       auth: token,
     });
@@ -56,7 +49,6 @@ const CreatePR = async (data: unknown) => {
       ref: `heads/${targetBranch}`,
     });
 
-    console.log('sha ', sha);
 
     // // Get the tree associated with master, and the content
     // // of the template file to open the PR with.
@@ -110,10 +102,8 @@ const CreatePR = async (data: unknown) => {
       repo,
       head: branchName,
       base: targetBranch,
-      title: `Create ${path}`,
+      title: `Ingest Request for ${collectionName}`,
     });
-
-    console.log('pr', pr);
 
     const pr_url = pr.data.html_url;
     console.log(`PR opened at URL ${pr_url}`);
