@@ -3,7 +3,6 @@
 import { SetStateAction, useState } from 'react';
 
 import { withTheme } from '@rjsf/core';
-
 import { Theme as AntDTheme } from '@rjsf/antd';
 
 import validator from '@rjsf/validator-ajv8';
@@ -41,7 +40,6 @@ function ValidationForm({
     setCollectionName(formData.collection);
 
     const url = 'api/create-ingest';
-    console.log(formData);
     const requestOptions = {
       method: 'POST',
       body: JSON.stringify(formData),
