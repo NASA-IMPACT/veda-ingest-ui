@@ -14,13 +14,10 @@ const rawkey = process.env.GITHUB_PRIVATE_KEY || '';
 
 const privateKey = rawkey.replace(/\\n/g, '\n');
 
-const UpdatePR = async (ref: string, sha: string, formData: any) => {
-  console.log('updating pr with: ', formData)
+const UpdatePR = async (ref: string, fileSha: string, filePath: string, formData: any) => {
   // prettify stringify to preserve json formatting
   const stringContent = JSON.stringify(formData, null, 2);
   const content = btoa(stringContent);
-
-  console.log('content will be:', content);
 
   try {
     const appOctokit = new Octokit({
@@ -32,7 +29,7 @@ const UpdatePR = async (ref: string, sha: string, formData: any) => {
       },
     });
 
-    //  @ts-expect-error dunno
+    //  @ts-expect-error token should work
     const { token } = await appOctokit.auth({
       type: 'installation',
       installationId,
@@ -42,30 +39,20 @@ const UpdatePR = async (ref: string, sha: string, formData: any) => {
       auth: token,
     });
 
-    const response = await octokit.rest.repos.createOrUpdateFileContents({
+    await octokit.rest.repos.createOrUpdateFileContents({
       owner,
       repo,
       branch: ref,
-      sha,
-      path: `${targetPath}/fridaythe13.json`,
+      sha: fileSha,
+      path: filePath,
       message: 'update via UI',
       content,
     })
 
-    console.log(response)
-    return;
+    return 
   } catch (error) {
-    console.log(error);
-    if (error instanceof RequestError) {
-      // branch with branchName already exists
-      if (error['status'] === 422 && error.response) {
-        console.error('we have an error');
-        // @ts-expect-error octokit typing issue
-        const errorMessage = error.response.data.message as string;
-        console.error(errorMessage);
-        throw new Error(errorMessage);
-      }
-    }
+    console.error('Unexpected Error:', error); 
+    throw error
   }
 };
 

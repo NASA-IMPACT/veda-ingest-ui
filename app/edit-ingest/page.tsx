@@ -5,7 +5,7 @@ import { Amplify } from 'aws-amplify';
 import { withAuthenticator } from '@aws-amplify/ui-react';
 import { config } from '@/utils/aws-exports';
 import { SignInHeader } from '@/components/SignInHeader';
-import { Button, List } from 'antd';
+import { Button, List, Spin } from 'antd';
 
 
 import { withTheme } from '@rjsf/core';
@@ -13,6 +13,8 @@ import { Theme as AntDTheme } from '@rjsf/antd';
 
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
+import { Status } from '@/types/global';
+
 
 import ObjectFieldTemplate from '../../ObjectFieldTemplate';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
@@ -25,13 +27,14 @@ Amplify.configure({ ...config }, { ssr: true });
 
 const EditIngest = function EditIngest() {
   const [data, setData] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [status, setStatus] = useState<Status>('idle');
   const [formData, setFormData] = useState<unknown>({});
   const [ref, updateRef] = useState('');
-  const [sha, updateSha] = useState('');
+  const [fileSha, updateFileSha] = useState('');
+  const [filePath, updateFilePath] = useState('');
 
   const fetchPRs = async function () {
-    setLoading(true);
+    setStatus('loadingPRs');
     const url = 'api/list-ingests';
     const requestOptions = {
       method: 'GET',
@@ -47,9 +50,10 @@ const EditIngest = function EditIngest() {
       const prs = await response.json();
       const openPRs = prs.githubResponse
       setData(openPRs)
-      setLoading(false);
+      setStatus('idle');
     } catch (err) {
       console.log(err.message)
+      setStatus('error')
     }
   }
 
@@ -58,13 +62,14 @@ const EditIngest = function EditIngest() {
   }, []);
 
   const handleClick = async (ref: string, sha: string) => {
+    setStatus('loadingIngest');
     const url = `api/retrieve-ingest?ref=${ref}`;
     const requestOptions = {
       method: 'GET',
     };
     try {
       const response = await fetch(url, requestOptions);
-      updateSha(sha);
+      console.log(`trying to update branch with sha: ${sha} and ref: ${ref}`)
       updateRef(ref)
 
       if (!response.ok) {
@@ -72,10 +77,12 @@ const EditIngest = function EditIngest() {
         throw new Error(`There was an error on handleClick: ${errorMessage}`);
       } 
 
-      const json = await response.json();
-      const content = json.content;
-      console.log(json)
+      const {fileSha, filePath, content} = await response.json();
+ 
+      updateFilePath(filePath);
+      updateFileSha(fileSha);
       setFormData(content);
+      setStatus('idle');
     } catch (err) {
       console.log(err.message)
     }
@@ -83,15 +90,15 @@ const EditIngest = function EditIngest() {
 
     // @ts-expect-error RJSF form data typing
     const onFormDataSubmit = async ({ formData }) => {
-      // setStatus('loading');
+      setStatus('loading');
       // setCollectionName(formData.collection);
   
       const url = 'api/create-ingest';
-      console.log(`creating pr in ${ref} with sha ${sha}`)
+      console.log(`creating pr in ${ref} with fileSha: ${fileSha}`)
       console.log(formData);
       const requestOptions = {
         method: 'PUT',
-        body: JSON.stringify({ref, sha, formData}),
+        body: JSON.stringify({ref, fileSha, filePath, formData}),
         headers: { 'Content-Type': 'application/json' },
       };
       try {
@@ -106,12 +113,12 @@ const EditIngest = function EditIngest() {
   
         const responseJson = await response.json();
         console.log(responseJson)
-        // setPullRequestUrl(responseJson.githubURL);
         setFormData({});
-        // setStatus('success');
+        setStatus('success');
+
       } catch (error) {
         console.error(error);
-        // setStatus('error');
+        setStatus('error');
       }
     };
 
@@ -123,7 +130,7 @@ const EditIngest = function EditIngest() {
 
   return (
     <AppLayout>
-      {Object.keys(formData).length === 0 ? 
+      {Object.keys(formData).length === 0 &&
               <List
               header={
               <div>
@@ -133,28 +140,31 @@ const EditIngest = function EditIngest() {
               // footer={<div>Footer</div>}
               bordered
               dataSource={data}
-              loading={loading}
+              loading={status === 'loadingPRs'}
               renderItem={(item) => (
                 <List.Item>
                   <Button onClick={() => handleClick(item.head.ref, item.head.sha)}>{item.title}</Button>
                 </List.Item>
               )}
-            /> : (
-              <Form
-              schema={jsonSchema as JSONSchema7}
-              uiSchema={uiSchema}
-              validator={validator}
-              templates={{
-                ObjectFieldTemplate: ObjectFieldTemplate,
-              }}
-              formData={formData}
-              // @ts-expect-error RJSF onChange typing
-              onChange={onFormDataChanged}
-              // @ts-expect-error RJSF onSubmit typing
-              onSubmit={onFormDataSubmit}
-            />
-            )
+            /> }
+      {status === 'loadingIngest' && <Spin fullscreen />}
+      { Object.keys(formData).length > 0 &&
+          <Form
+          schema={jsonSchema as JSONSchema7}
+          uiSchema={uiSchema}
+          validator={validator}
+          templates={{
+            ObjectFieldTemplate: ObjectFieldTemplate,
+          }}
+          formData={formData}
+          // @ts-expect-error RJSF onChange typing
+          onChange={onFormDataChanged}
+          // @ts-expect-error RJSF onSubmit typing
+          onSubmit={onFormDataSubmit}
+        />
       }
+
+
 
     </AppLayout>
   );

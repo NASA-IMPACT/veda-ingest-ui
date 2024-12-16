@@ -1,5 +1,4 @@
 import { Octokit } from '@octokit/rest';
-import { RequestError } from '@octokit/request-error';
 import { createAppAuth } from '@octokit/auth-app';
 
 
@@ -45,28 +44,24 @@ const RetrieveJSON = async (ref: string) => {
       }
     })
 
-    const sha = json.data['sha'];
+    // renaming to clarify file vs branch sha and path
+    // @ts-expect-error data has sha, content, and path
+    const fileSha = json.data['sha'];
+    // @ts-expect-error data has sha, content, and path
     const contentBase64 = json.data['content'];
+    // @ts-expect-error data has sha, content, and path
+    const filePath = json.data['path']
+
 
     const buffer = Buffer.from(contentBase64, 'base64');
 
     // Convert buffer to string and parse to JSON
     const jsonString = buffer.toString('utf-8');
     const content = JSON.parse(jsonString);
-
-    return {sha, content };
+    return {fileSha,filePath, content };
   } catch (error) {
     console.log(error);
-    if (error instanceof RequestError) {
-      // branch with branchName already exists
-      if (error['status'] === 422 && error.response) {
-        console.error('we have an error');
-        // @ts-expect-error octokit typing issue
-        const errorMessage = error.response.data.message as string;
-        console.error(errorMessage);
-        throw new Error(errorMessage);
-      }
-    }
+    throw error;
   }
 };
 

@@ -25,11 +25,11 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
 
-    const { branch, sha, formData } = await request.json();
+    const { ref, fileSha, filePath, formData } = await request.json();
 
-    const insertedData = await UpdatePR(branch, sha, formData)
+    await UpdatePR(ref, fileSha, filePath, formData)
 
-   return NextResponse.json({ insertedData });
+   return NextResponse.json({ message: 'Data updated successfully' }, { status: 200 });
   } catch (error) {
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
