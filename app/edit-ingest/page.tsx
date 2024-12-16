@@ -22,6 +22,11 @@ import uiSchema from '@/FormSchemas/uischema.json';
 
 const Form = withTheme(AntDTheme);
 
+const lockedFormFields =   {"collection": {
+  "ui:readonly": true
+}}
+
+const lockedSchema = {...uiSchema, ...lockedFormFields};
 
 Amplify.configure({ ...config }, { ssr: true });
 
@@ -52,7 +57,7 @@ const EditIngest = function EditIngest() {
       setData(openPRs)
       setStatus('idle');
     } catch (err) {
-      console.log(err.message)
+      console.error(err)
       setStatus('error')
     }
   }
@@ -84,14 +89,14 @@ const EditIngest = function EditIngest() {
       setFormData(content);
       setStatus('idle');
     } catch (err) {
-      console.log(err.message)
+      console.error(err);
+      setStatus('error');
     }
   }
 
     // @ts-expect-error RJSF form data typing
     const onFormDataSubmit = async ({ formData }) => {
       setStatus('loading');
-      // setCollectionName(formData.collection);
   
       const url = 'api/create-ingest';
       console.log(`creating pr in ${ref} with fileSha: ${fileSha}`)
@@ -106,8 +111,7 @@ const EditIngest = function EditIngest() {
   
         if (!response.ok) {
           const errorMessage = await response.text();
-          // setApiErrorMessage(errorMessage);
-          // setStatus('error');
+          setStatus('error');
           throw new Error(`There was an error onSubmit: ${errorMessage}`);
         }
   
@@ -151,7 +155,7 @@ const EditIngest = function EditIngest() {
       { Object.keys(formData).length > 0 &&
           <Form
           schema={jsonSchema as JSONSchema7}
-          uiSchema={uiSchema}
+          uiSchema={lockedSchema}
           validator={validator}
           templates={{
             ObjectFieldTemplate: ObjectFieldTemplate,
@@ -163,9 +167,6 @@ const EditIngest = function EditIngest() {
           onSubmit={onFormDataSubmit}
         />
       }
-
-
-
     </AppLayout>
   );
 };
