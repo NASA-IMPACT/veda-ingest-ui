@@ -8,7 +8,6 @@ import uiSchema from '@/FormSchemas/uischema.json';
 import { Button } from 'antd';
 import { RJSFSchema } from '@rjsf/utils';
 
-
 const lockedFormFields = {
   collection: {
     'ui:readonly': true,
@@ -29,11 +28,11 @@ function IngestEditForm({
   filePath,
   handleCancel,
 }: {
-  setStatus: (status: Status) => void,
-  ref: string,
-  fileSha: string,
-  filePath: string,
-  handleCancel: () => void,
+  setStatus: (status: Status) => void;
+  ref: string;
+  fileSha: string;
+  filePath: string;
+  handleCancel: () => void;
 }) {
   const [formData, setFormData] = useState<RJSFSchema>({});
 
@@ -76,9 +75,7 @@ function IngestEditForm({
       // @ts-expect-error testing
       onSubmit={onFormDataSubmit}
     >
-            <div
-        style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}
-        >
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
         <Button type="primary" size="large" htmlType="submit">
           Submit
         </Button>

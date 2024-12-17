@@ -3,11 +3,9 @@
 import { useState } from 'react';
 import { RJSFSchema } from '@rjsf/utils';
 
-
 import { Status } from '@/types/global';
 import IngestForm from './IngestForm';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
-
 
 function IngestCreationForm({
   setStatus,

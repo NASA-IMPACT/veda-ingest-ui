@@ -20,10 +20,13 @@ function IngestForm({
   schema,
   onSubmit,
 }: {
-  formData: RJSFSchema,
-  setFormData: unknown,
-  schema: unknown,
-  onSubmit: (data: IChangeEvent<any, RJSFSchema, any>, event: FormEvent<any>) => void,
+  formData: RJSFSchema;
+  setFormData: unknown;
+  schema: unknown;
+  onSubmit: (
+    data: IChangeEvent<any, RJSFSchema, any>,
+    event: FormEvent<any>
+  ) => void;
 }) {
   const onFormDataChanged = (formState: {
     formData: SetStateAction<object | undefined>;

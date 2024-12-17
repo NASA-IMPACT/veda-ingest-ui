@@ -15,7 +15,6 @@ type PullRequests =
 
 import IngestEditForm from '@/components/IngestEditForm';
 
-
 Amplify.configure({ ...config }, { ssr: true });
 
 const EditIngest = function EditIngest() {
@@ -90,52 +89,47 @@ const EditIngest = function EditIngest() {
     setFormData({});
   };
 
-
   return (
     <AppLayout>
-      {
-        Object.keys(formData).length === 0 && (
-          <List
-            header={
-              <div>
-                <div>Pending Ingest Requests</div>
-              </div>
-            }
-            bordered
-            dataSource={data}
-            loading={status === 'loadingPRs'}
-            renderItem={(item: PullRequests) => (
-              <List.Item>
-                <Button
-                  onClick={() =>
-                    handleClick(
-                      /* @ts-ignore head does exist */
-                      item.head.ref,
-                      /* @ts-ignore head does exist*/
-                      item.head.sha
-                    )
-                  }
-                >
-                  {/* @ts-expect-error: title does exist */}
-                  {item.title}
-                </Button>
-              </List.Item>
-            )}
-          />
-        )
-      }
+      {Object.keys(formData).length === 0 && (
+        <List
+          header={
+            <div>
+              <div>Pending Ingest Requests</div>
+            </div>
+          }
+          bordered
+          dataSource={data}
+          loading={status === 'loadingPRs'}
+          renderItem={(item: PullRequests) => (
+            <List.Item>
+              <Button
+                onClick={() =>
+                  handleClick(
+                    /* @ts-ignore head does exist */
+                    item.head.ref,
+                    /* @ts-ignore head does exist*/
+                    item.head.sha
+                  )
+                }
+              >
+                {/* @ts-expect-error: title does exist */}
+                {item.title}
+              </Button>
+            </List.Item>
+          )}
+        />
+      )}
       {status === 'loadingIngest' && <Spin fullscreen />}
-      {
-        Object.keys(formData).length > 0 && (
-            <IngestEditForm
-                setStatus={setStatus}
-                ref={ref}
-                filePath={filePath}
-                fileSha={fileSha}
-                handleCancel={handleCancel}
-              />
-        )
-      }
+      {Object.keys(formData).length > 0 && (
+        <IngestEditForm
+          setStatus={setStatus}
+          ref={ref}
+          filePath={filePath}
+          fileSha={fileSha}
+          handleCancel={handleCancel}
+        />
+      )}
     </AppLayout>
   );
 };
