@@ -23,5 +23,5 @@ export default async function GetGithubToken(): Promise<string> {
     installationId,
   });
 
-  return token as string
+  return token as string;
 }

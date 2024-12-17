@@ -7,14 +7,15 @@ import { config } from '@/utils/aws-exports';
 import { SignInHeader } from '@/components/SignInHeader';
 import { Button, List, Spin } from 'antd';
 
-
 import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
 
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
 import { Status } from '@/types/global';
-
+import { Endpoints } from '@octokit/types';
+type PullRequests =
+  Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'];
 
 import ObjectFieldTemplate from '../../ObjectFieldTemplate';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
@@ -22,23 +23,23 @@ import uiSchema from '@/FormSchemas/uischema.json';
 
 const Form = withTheme(AntDTheme);
 
-const lockedFormFields =   {
-  "collection": {
-  "ui:readonly": true
+const lockedFormFields = {
+  collection: {
+    'ui:readonly': true,
   },
-  "ui:submitButtonOptions": {
-    "props": {
-      "block": "false"
-    }
-  }
-}
+  'ui:submitButtonOptions': {
+    props: {
+      block: 'false',
+    },
+  },
+};
 
-const lockedSchema = {...uiSchema, ...lockedFormFields};
+const lockedSchema = { ...uiSchema, ...lockedFormFields };
 
 Amplify.configure({ ...config }, { ssr: true });
 
 const EditIngest = function EditIngest() {
-  const [data, setData] = useState([])
+  const [data, setData] = useState<PullRequests[]>();
   const [status, setStatus] = useState<Status>('idle');
   const [formData, setFormData] = useState<unknown>({});
   const [ref, setRef] = useState('');
@@ -57,16 +58,19 @@ const EditIngest = function EditIngest() {
       if (!response.ok) {
         const errorMessage = await response.text();
         throw new Error(`There was an error on fetchPR: ${errorMessage}`);
-      } 
+      }
 
       const { githubResponse } = await response.json();
-      setData(githubResponse)
+      // Type the response data
+      const pullRequests: Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][] =
+        githubResponse;
+      setData(pullRequests);
       setStatus('idle');
     } catch (err) {
-      console.error(err)
-      setStatus('error')
+      console.error(err);
+      setStatus('error');
     }
-  }
+  };
 
   useEffect(() => {
     fetchPRs();
@@ -80,16 +84,16 @@ const EditIngest = function EditIngest() {
     };
     try {
       const response = await fetch(url, requestOptions);
-      console.log(`trying to update branch with sha: ${sha} and ref: ${ref}`)
-      setRef(ref)
+      console.log(`trying to update branch with sha: ${sha} and ref: ${ref}`);
+      setRef(ref);
 
       if (!response.ok) {
         const errorMessage = await response.text();
         throw new Error(`There was an error on handleClick: ${errorMessage}`);
-      } 
+      }
 
-      const {fileSha, filePath, content} = await response.json();
- 
+      const { fileSha, filePath, content } = await response.json();
+
       setFilePath(filePath);
       setFileSha(fileSha);
       setFormData(content);
@@ -98,24 +102,24 @@ const EditIngest = function EditIngest() {
       console.error(err);
       setStatus('error');
     }
-  }
+  };
 
   const handleCancel = () => {
     setFilePath('');
     setFileSha('');
     setFormData('');
-  }
+  };
 
   // @ts-expect-error RJSF form data typing
   const onFormDataSubmit = async ({ formData }) => {
     setStatus('loading');
 
     const url = 'api/create-ingest';
-    console.log(`creating pr in ${ref} with fileSha: ${fileSha}`)
+    console.log(`creating pr in ${ref} with fileSha: ${fileSha}`);
     console.log(formData);
     const requestOptions = {
       method: 'PUT',
-      body: JSON.stringify({ref, fileSha, filePath, formData}),
+      body: JSON.stringify({ ref, fileSha, filePath, formData }),
       headers: { 'Content-Type': 'application/json' },
     };
     try {
@@ -128,10 +132,9 @@ const EditIngest = function EditIngest() {
       }
 
       const responseJson = await response.json();
-      console.log(responseJson)
+      console.log(responseJson);
       setFormData({});
       setStatus('success');
-
     } catch (error) {
       console.error(error);
       setStatus('error');
@@ -146,48 +149,72 @@ const EditIngest = function EditIngest() {
 
   return (
     <AppLayout>
-
       {
-      // @ts-expect-error formData is an object
-      Object.keys(formData).length === 0 &&
-              <List
-              header={
+        // @ts-expect-error formData is an object
+        Object.keys(formData).length === 0 && (
+          <List
+            header={
               <div>
-                  <div>Pending Ingest Requests</div>
+                <div>Pending Ingest Requests</div>
               </div>
             }
-              bordered
-              dataSource={data}
-              loading={status === 'loadingPRs'}
-              renderItem={(item: []) => (
-                <List.Item>
-                  {/* @ts-expect-error items returned as an array of pr objectss with head and title */}
-                  <Button onClick={() => handleClick(item.head.ref, item.head.sha)}>{item.title}</Button>
-                </List.Item>
-              )}
-            /> }
-      {status === 'loadingIngest' && <Spin fullscreen />}\
-      { 
+            bordered
+            dataSource={data}
+            loading={status === 'loadingPRs'}
+            renderItem={(item: PullRequests) => (
+              <List.Item>
+                <Button
+                  onClick={() =>
+                    handleClick(
+                      /* @ts-ignore head does exist */
+                      item.head.ref,
+                      /* @ts-ignore head does exist*/
+                      item.head.sha
+                    )
+                  }
+                >
+                  {/* @ts-expect-error: title does exist */}
+                  {item.title}
+                </Button>
+              </List.Item>
+            )}
+          />
+        )
+      }
+      {status === 'loadingIngest' && <Spin fullscreen />}
+      {
         // @ts-expect-error formData is an object
-        Object.keys(formData).length > 0 &&
+        Object.keys(formData).length > 0 && (
           <Form
-          schema={jsonSchema as JSONSchema7}
-          uiSchema={lockedSchema}
-          validator={validator}
-          templates={{
-            ObjectFieldTemplate: ObjectFieldTemplate,
-          }}
-          formData={formData}
-          // @ts-expect-error RJSF onChange typing
-          onChange={onFormDataChanged}
-          // @ts-expect-error RJSF onSubmit typing
-          onSubmit={onFormDataSubmit}
-        >
-            <div style={{display: 'flex', justifyContent: 'center', gap: '12px'}}>
-              <Button type='primary' size='large' htmlType='submit'>Submit</Button>
-              <Button color="danger" variant="outlined" size='large' onClick={handleCancel}>Cancel</Button>
+            schema={jsonSchema as JSONSchema7}
+            uiSchema={lockedSchema}
+            validator={validator}
+            templates={{
+              ObjectFieldTemplate: ObjectFieldTemplate,
+            }}
+            formData={formData}
+            // @ts-expect-error RJSF onChange typing
+            onChange={onFormDataChanged}
+            // @ts-expect-error RJSF onSubmit typing
+            onSubmit={onFormDataSubmit}
+          >
+            <div
+              style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}
+            >
+              <Button type="primary" size="large" htmlType="submit">
+                Submit
+              </Button>
+              <Button
+                color="danger"
+                variant="outlined"
+                size="large"
+                onClick={handleCancel}
+              >
+                Cancel
+              </Button>
             </div>
           </Form>
+        )
       }
     </AppLayout>
   );

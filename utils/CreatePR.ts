@@ -18,7 +18,7 @@ const CreatePR = async (data: unknown) => {
     const path = `${targetPath}/${fileName}.json`;
     const branchName = `feat/${fileName}`;
 
-    const token = await GetGithubToken()
+    const token = await GetGithubToken();
 
     const octokit = new Octokit({
       auth: token,
@@ -30,7 +30,6 @@ const CreatePR = async (data: unknown) => {
       repo,
       ref: `heads/${targetBranch}`,
     });
-
 
     // Get the tree associated with master, and the content
     // of the template file to open the PR with.

@@ -24,12 +24,14 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-
     const { ref, fileSha, filePath, formData } = await request.json();
 
-    await UpdatePR(ref, fileSha, filePath, formData)
+    await UpdatePR(ref, fileSha, filePath, formData);
 
-   return NextResponse.json({ message: 'Data updated successfully' }, { status: 200 });
+    return NextResponse.json(
+      { message: 'Data updated successfully' },
+      { status: 200 }
+    );
   } catch (error) {
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 });

@@ -1,4 +1,5 @@
 import { Octokit } from '@octokit/rest';
+import { Endpoints } from '@octokit/types';
 import GetGithubToken from './GetGithubToken';
 
 const base = 'master';
@@ -6,41 +7,32 @@ const prefix = 'Ingest Request for ';
 const owner = process.env.OWNER || '';
 const repo = process.env.REPO || '';
 
-
 const ListPRs = async () => {
   try {
-
-    const token = await GetGithubToken()
-    
+    const token = await GetGithubToken();
 
     const octokit = new Octokit({
       auth: token,
     });
 
     // list open PRs in branch
-    const prs = await octokit.rest.pulls.list({
+    const response = await octokit.rest.pulls.list({
       owner,
       repo,
       base,
       state: 'open',
     });
 
-  //filter request to only return matching Ingest UI prefix
-  const filteredRequests = prs.data.filter( item => item.title.startsWith(prefix))
+    // Type the response data
+    const pullRequests: Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'] =
+      response.data;
 
-    const desiredKeys = ['title', 'number', 'head'];
+    //filter request to only return matching Ingest UI prefix
+    const filteredRequests = pullRequests.filter((item) =>
+      item.title.startsWith(prefix)
+    );
 
-    const result = filteredRequests.map(({ ...obj }) => {
-      const newObj = {};
-      for (const key of desiredKeys) {
-        if (obj.hasOwnProperty(key)) {
-           // @ts-expect-error desired keys are all in filtered requests, so need to set types
-           newObj[key] = obj[key];
-        }
-      }
-      return newObj;
-    });
-    return result;
+    return filteredRequests;
   } catch (error) {
     console.error(error);
     throw error;

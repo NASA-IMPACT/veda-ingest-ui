@@ -1,5 +1,4 @@
 {
-  "title": "Validate Dataset",
   "type": "object",
   "required": [
     "collection",

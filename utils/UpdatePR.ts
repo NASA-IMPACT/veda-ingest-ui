@@ -4,13 +4,18 @@ import GetGithubToken from './GetGithubToken';
 const owner = process.env.OWNER || '';
 const repo = process.env.REPO || '';
 
-const UpdatePR = async (ref: string, fileSha: string, filePath: string, formData: any) => {
+const UpdatePR = async (
+  ref: string,
+  fileSha: string,
+  filePath: string,
+  formData: any
+) => {
   // prettify stringify to preserve json formatting
   const stringContent = JSON.stringify(formData, null, 2);
   const content = btoa(stringContent);
 
   try {
-    const token = await GetGithubToken()
+    const token = await GetGithubToken();
 
     const octokit = new Octokit({
       auth: token,
@@ -24,12 +29,12 @@ const UpdatePR = async (ref: string, fileSha: string, filePath: string, formData
       path: filePath,
       message: 'update via UI',
       content,
-    })
+    });
 
-    return 
+    return;
   } catch (error) {
-    console.error('Unexpected Error:', error); 
-    throw error
+    console.error('Unexpected Error:', error);
+    throw error;
   }
 };
 

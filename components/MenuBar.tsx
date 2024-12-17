@@ -3,7 +3,11 @@ import { usePathname } from 'next/navigation';
 
 import { Menu, MenuProps } from 'antd';
 import Link from 'next/link';
-import { HomeOutlined, PlusCircleOutlined, EditOutlined } from '@ant-design/icons';
+import {
+  HomeOutlined,
+  PlusCircleOutlined,
+  EditOutlined,
+} from '@ant-design/icons';
 
 const items: MenuProps['items'] = [
   {
