@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { RJSFSchema } from '@rjsf/utils';
 
 import { Status } from '@/types/global';
 import IngestForm from './IngestForm';
-import jsonSchema from '@/FormSchemas/jsonschema.json';
+import uiSchema from '@/FormSchemas/uischema.json';
 
 function IngestCreationForm({
   setStatus,
@@ -18,7 +17,7 @@ function IngestCreationForm({
   setApiErrorMessage: (apiErrorMessage: string) => void;
   setPullRequestUrl: (PullRequestUrl: string) => void;
 }) {
-  const [formData, setFormData] = useState<RJSFSchema>({});
+  const [formData, setFormData] = useState<Record<string, unknown>>({});
 
   // @ts-expect-error testing
   const onFormDataSubmit = async ({ formData }) => {
@@ -53,7 +52,7 @@ function IngestCreationForm({
 
   return (
     <IngestForm
-      schema={jsonSchema}
+      uiSchema={uiSchema}
       formData={formData}
       setFormData={setFormData}
       // @ts-expect-error testing

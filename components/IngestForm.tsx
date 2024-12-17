@@ -9,20 +9,20 @@ import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
 
 import ObjectFieldTemplate from '../ObjectFieldTemplate';
-import uiSchema from '@/FormSchemas/uischema.json';
-import { RJSFSchema } from '@rjsf/utils';
+import jsonSchema from '@/FormSchemas/jsonschema.json';
+import { RJSFSchema, UiSchema } from '@rjsf/utils';
 
 const Form = withTheme(AntDTheme);
 
 function IngestForm({
   formData,
   setFormData,
-  schema,
+  uiSchema,
   onSubmit,
 }: {
-  formData: RJSFSchema;
+  formData: Record<string, unknown>;
   setFormData: unknown;
-  schema: unknown;
+  uiSchema: UiSchema<any, RJSFSchema, any> | undefined;
   onSubmit: (
     data: IChangeEvent<any, RJSFSchema, any>,
     event: FormEvent<any>
@@ -37,7 +37,7 @@ function IngestForm({
 
   return (
     <Form
-      schema={schema as JSONSchema7}
+      schema={jsonSchema as JSONSchema7}
       uiSchema={uiSchema}
       validator={validator}
       templates={{

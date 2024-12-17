@@ -38,6 +38,7 @@ const CreateIngest = function CreateIngest() {
       )}
       {status === 'success' && (
         <SuccessModal
+          type="create"
           setStatus={setStatus}
           collectionName={collectionName}
           pullRequestUrl={pullRequestUrl}

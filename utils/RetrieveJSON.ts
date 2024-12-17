@@ -37,7 +37,7 @@ const RetrieveJSON = async (ref: string) => {
 
     // Convert buffer to string and parse to JSON
     const jsonString = buffer.toString('utf-8');
-    const content = JSON.parse(jsonString);
+    const content = await JSON.parse(jsonString);
     return { fileSha, filePath, content };
   } catch (error) {
     console.error(error);
