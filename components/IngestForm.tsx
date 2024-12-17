@@ -14,12 +14,7 @@ import { RJSFSchema, UiSchema } from '@rjsf/utils';
 
 const Form = withTheme(AntDTheme);
 
-function IngestForm({
-  formData,
-  setFormData,
-  uiSchema,
-  onSubmit,
-}: {
+type FormProps = {
   formData: Record<string, unknown>;
   setFormData: unknown;
   uiSchema: UiSchema<any, RJSFSchema, any> | undefined;
@@ -27,13 +22,24 @@ function IngestForm({
     data: IChangeEvent<any, RJSFSchema, any>,
     event: FormEvent<any>
   ) => void;
-}) {
+    children?: React.ReactNode;
+  };
+
+function IngestForm({
+  formData,
+  setFormData,
+  uiSchema,
+  onSubmit,
+  children,
+}: FormProps ) {
+
   const onFormDataChanged = (formState: {
     formData: SetStateAction<object | undefined>;
   }) => {
     // @ts-expect-error something
     setFormData(formState.formData);
   };
+
 
   return (
     <Form
@@ -47,7 +53,9 @@ function IngestForm({
       // @ts-expect-error RJSF onChange typing
       onChange={onFormDataChanged}
       onSubmit={onSubmit}
-    />
+    >
+      {children}
+    </Form>
   );
 }
 
