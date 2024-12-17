@@ -1,18 +1,8 @@
 import { Octokit } from '@octokit/rest';
-import { RequestError } from '@octokit/request-error';
-import { createAppAuth } from '@octokit/auth-app';
-import { head } from 'lodash';
+import GetGithubToken from './GetGithubToken';
 
-const base = 'master';
-const prefix = 'Ingest Request for ';
-const targetPath = 'ingestion-data/staging/dataset-config';
 const owner = process.env.OWNER || '';
 const repo = process.env.REPO || '';
-const appId = parseInt(process.env.APP_ID || '');
-const installationId = parseInt(process.env.INSTALLATION_ID || '');
-const rawkey = process.env.GITHUB_PRIVATE_KEY || '';
-
-const privateKey = rawkey.replace(/\\n/g, '\n');
 
 const UpdatePR = async (ref: string, fileSha: string, filePath: string, formData: any) => {
   // prettify stringify to preserve json formatting
@@ -20,20 +10,7 @@ const UpdatePR = async (ref: string, fileSha: string, filePath: string, formData
   const content = btoa(stringContent);
 
   try {
-    const appOctokit = new Octokit({
-      authStrategy: createAppAuth,
-      auth: {
-        appId,
-        privateKey,
-        installationId,
-      },
-    });
-
-    //  @ts-expect-error token should work
-    const { token } = await appOctokit.auth({
-      type: 'installation',
-      installationId,
-    });
+    const token = await GetGithubToken()
 
     const octokit = new Octokit({
       auth: token,

@@ -1,33 +1,15 @@
 import { Octokit } from '@octokit/rest';
-import { createAppAuth } from '@octokit/auth-app';
+import GetGithubToken from './GetGithubToken';
 
 
 const targetPath = 'ingestion-data/staging/dataset-config';
 const owner = process.env.OWNER || '';
 const repo = process.env.REPO || '';
-const appId = parseInt(process.env.APP_ID || '');
-const installationId = parseInt(process.env.INSTALLATION_ID || '');
-const rawkey = process.env.GITHUB_PRIVATE_KEY || '';
-
-const privateKey = rawkey.replace(/\\n/g, '\n');
 
 const RetrieveJSON = async (ref: string) => {
   const fileName = ref.replace('feat/', '');
   try {
-    const appOctokit = new Octokit({
-      authStrategy: createAppAuth,
-      auth: {
-        appId,
-        privateKey,
-        installationId,
-      },
-    });
-
-    //  @ts-expect-error dunno
-    const { token } = await appOctokit.auth({
-      type: 'installation',
-      installationId,
-    });
+    const token = await GetGithubToken()
 
     const octokit = new Octokit({
       auth: token,
@@ -60,7 +42,7 @@ const RetrieveJSON = async (ref: string) => {
     const content = JSON.parse(jsonString);
     return {fileSha,filePath, content };
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };

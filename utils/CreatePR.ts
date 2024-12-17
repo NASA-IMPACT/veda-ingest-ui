@@ -1,16 +1,11 @@
 import { Octokit } from '@octokit/rest';
 import { RequestError } from '@octokit/request-error';
-import { createAppAuth } from '@octokit/auth-app';
 import { formatFilename } from './FormatFilename';
+import GetGithubToken from './GetGithubToken';
 
 const targetBranch = 'master';
 const owner = process.env.OWNER || '';
 const repo = process.env.REPO || '';
-const appId = parseInt(process.env.APP_ID || '');
-const installationId = parseInt(process.env.INSTALLATION_ID || '');
-const rawkey = process.env.GITHUB_PRIVATE_KEY || '';
-
-const privateKey = rawkey.replace(/\\n/g, '\n');
 
 const CreatePR = async (data: unknown) => {
   try {
@@ -23,20 +18,7 @@ const CreatePR = async (data: unknown) => {
     const path = `${targetPath}/${fileName}.json`;
     const branchName = `feat/${fileName}`;
 
-    const appOctokit = new Octokit({
-      authStrategy: createAppAuth,
-      auth: {
-        appId,
-        privateKey,
-        installationId,
-      },
-    });
-
-    //  @ts-expect-error dunno
-    const { token } = await appOctokit.auth({
-      type: 'installation',
-      installationId,
-    });
+    const token = await GetGithubToken()
 
     const octokit = new Octokit({
       auth: token,
