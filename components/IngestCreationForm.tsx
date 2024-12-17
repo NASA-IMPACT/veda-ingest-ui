@@ -1,21 +1,15 @@
 'use client';
 
-import { SetStateAction, useState } from 'react';
+import { useState } from 'react';
+import { RJSFSchema } from '@rjsf/utils';
 
-import { withTheme } from '@rjsf/core';
-import { Theme as AntDTheme } from '@rjsf/antd';
 
-import validator from '@rjsf/validator-ajv8';
-import { JSONSchema7 } from 'json-schema';
-
-import ObjectFieldTemplate from '../ObjectFieldTemplate';
-import jsonSchema from '@/FormSchemas/jsonschema.json';
-import uiSchema from '@/FormSchemas/uischema.json';
 import { Status } from '@/types/global';
+import IngestForm from './IngestForm';
+import jsonSchema from '@/FormSchemas/jsonschema.json';
 
-const Form = withTheme(AntDTheme);
 
-function ValidationForm({
+function IngestCreationForm({
   setStatus,
   setCollectionName,
   setApiErrorMessage,
@@ -26,15 +20,9 @@ function ValidationForm({
   setApiErrorMessage: (apiErrorMessage: string) => void;
   setPullRequestUrl: (PullRequestUrl: string) => void;
 }) {
-  const [formData, setFormData] = useState<unknown>({});
+  const [formData, setFormData] = useState<RJSFSchema>({});
 
-  const onFormDataChanged = (formState: {
-    formData: SetStateAction<object | undefined>;
-  }) => {
-    setFormData(formState.formData);
-  };
-
-  // @ts-expect-error RJSF form data typing
+  // @ts-expect-error testing
   const onFormDataSubmit = async ({ formData }) => {
     setStatus('loading');
     setCollectionName(formData.collection);
@@ -66,20 +54,14 @@ function ValidationForm({
   };
 
   return (
-    <Form
-      schema={jsonSchema as JSONSchema7}
-      uiSchema={uiSchema}
-      validator={validator}
-      templates={{
-        ObjectFieldTemplate: ObjectFieldTemplate,
-      }}
+    <IngestForm
+      schema={jsonSchema}
       formData={formData}
-      // @ts-expect-error RJSF onChange typing
-      onChange={onFormDataChanged}
-      // @ts-expect-error RJSF onSubmit typing
+      setFormData={setFormData}
+      // @ts-expect-error testing
       onSubmit={onFormDataSubmit}
     />
   );
 }
 
-export default ValidationForm;
+export default IngestCreationForm;

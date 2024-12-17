@@ -1,5 +1,5 @@
 'use client';
-import { SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppLayout from '@/components/Layout';
 import { Amplify } from 'aws-amplify';
 import { withAuthenticator } from '@aws-amplify/ui-react';
@@ -7,41 +7,21 @@ import { config } from '@/utils/aws-exports';
 import { SignInHeader } from '@/components/SignInHeader';
 import { Button, List, Spin } from 'antd';
 
-import { withTheme } from '@rjsf/core';
-import { Theme as AntDTheme } from '@rjsf/antd';
-
-import validator from '@rjsf/validator-ajv8';
-import { JSONSchema7 } from 'json-schema';
 import { Status } from '@/types/global';
+import { RJSFSchema } from '@rjsf/utils';
 import { Endpoints } from '@octokit/types';
 type PullRequests =
   Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'];
 
-import ObjectFieldTemplate from '../../ObjectFieldTemplate';
-import jsonSchema from '@/FormSchemas/jsonschema.json';
-import uiSchema from '@/FormSchemas/uischema.json';
+import IngestEditForm from '@/components/IngestEditForm';
 
-const Form = withTheme(AntDTheme);
-
-const lockedFormFields = {
-  collection: {
-    'ui:readonly': true,
-  },
-  'ui:submitButtonOptions': {
-    props: {
-      block: 'false',
-    },
-  },
-};
-
-const lockedSchema = { ...uiSchema, ...lockedFormFields };
 
 Amplify.configure({ ...config }, { ssr: true });
 
 const EditIngest = function EditIngest() {
   const [data, setData] = useState<PullRequests[]>();
   const [status, setStatus] = useState<Status>('idle');
-  const [formData, setFormData] = useState<unknown>({});
+  const [formData, setFormData] = useState<RJSFSchema>({});
   const [ref, setRef] = useState('');
   const [fileSha, setFileSha] = useState('');
   const [filePath, setFilePath] = useState('');
@@ -107,50 +87,13 @@ const EditIngest = function EditIngest() {
   const handleCancel = () => {
     setFilePath('');
     setFileSha('');
-    setFormData('');
+    setFormData({});
   };
 
-  // @ts-expect-error RJSF form data typing
-  const onFormDataSubmit = async ({ formData }) => {
-    setStatus('loading');
-
-    const url = 'api/create-ingest';
-    console.log(`creating pr in ${ref} with fileSha: ${fileSha}`);
-    console.log(formData);
-    const requestOptions = {
-      method: 'PUT',
-      body: JSON.stringify({ ref, fileSha, filePath, formData }),
-      headers: { 'Content-Type': 'application/json' },
-    };
-    try {
-      const response = await fetch(url, requestOptions);
-
-      if (!response.ok) {
-        const errorMessage = await response.text();
-        setStatus('error');
-        throw new Error(`There was an error onSubmit: ${errorMessage}`);
-      }
-
-      const responseJson = await response.json();
-      console.log(responseJson);
-      setFormData({});
-      setStatus('success');
-    } catch (error) {
-      console.error(error);
-      setStatus('error');
-    }
-  };
-
-  const onFormDataChanged = (formState: {
-    formData: SetStateAction<object | undefined>;
-  }) => {
-    setFormData(formState.formData);
-  };
 
   return (
     <AppLayout>
       {
-        // @ts-expect-error formData is an object
         Object.keys(formData).length === 0 && (
           <List
             header={
@@ -183,37 +126,14 @@ const EditIngest = function EditIngest() {
       }
       {status === 'loadingIngest' && <Spin fullscreen />}
       {
-        // @ts-expect-error formData is an object
         Object.keys(formData).length > 0 && (
-          <Form
-            schema={jsonSchema as JSONSchema7}
-            uiSchema={lockedSchema}
-            validator={validator}
-            templates={{
-              ObjectFieldTemplate: ObjectFieldTemplate,
-            }}
-            formData={formData}
-            // @ts-expect-error RJSF onChange typing
-            onChange={onFormDataChanged}
-            // @ts-expect-error RJSF onSubmit typing
-            onSubmit={onFormDataSubmit}
-          >
-            <div
-              style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}
-            >
-              <Button type="primary" size="large" htmlType="submit">
-                Submit
-              </Button>
-              <Button
-                color="danger"
-                variant="outlined"
-                size="large"
-                onClick={handleCancel}
-              >
-                Cancel
-              </Button>
-            </div>
-          </Form>
+            <IngestEditForm
+                setStatus={setStatus}
+                ref={ref}
+                filePath={filePath}
+                fileSha={fileSha}
+                handleCancel={handleCancel}
+              />
         )
       }
     </AppLayout>
