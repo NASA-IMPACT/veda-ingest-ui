@@ -6,9 +6,9 @@ export default function ErrorModal({
   apiErrorMessage,
 }: {
   collectionName: string;
-  apiErrorMessage: string;
+  apiErrorMessage?: string;
 }) {
-  if (apiErrorMessage.includes('Reference already exists')) {
+  if (apiErrorMessage && apiErrorMessage.includes('Reference already exists')) {
     return (
       <StyledModal
         title="Collection Name Exists"
@@ -27,10 +27,7 @@ export default function ErrorModal({
         title="Something Went Wrong"
         cancelButtonProps={{ style: { display: 'none' } }}
       >
-        <p>
-          Something went wrong submitting the <strong>{collectionName}</strong>{' '}
-          collection.
-        </p>
+        <strong>Something went wrong with updating {collectionName}.</strong>
         <p>Please try again.</p>
       </StyledModal>
     );

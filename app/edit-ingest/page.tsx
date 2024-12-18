@@ -1,5 +1,5 @@
 'use client';
-import { SetStateAction, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppLayout from '@/components/Layout';
 import { Amplify } from 'aws-amplify';
 import { withAuthenticator } from '@aws-amplify/ui-react';
@@ -10,6 +10,8 @@ import { Button, List, Spin } from 'antd';
 
 import { Status } from '@/types/global';
 import { Endpoints } from '@octokit/types';
+import ErrorModal from '@/components/ErrorModal';
+import SuccessModal from '@/components/SuccessModal';
 type PullRequests =
   Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'];
 
@@ -22,6 +24,7 @@ const EditIngest = function EditIngest() {
   const [ref, setRef] = useState('');
   const [fileSha, setFileSha] = useState('');
   const [filePath, setFilePath] = useState('');
+  const [collectionName, setCollectionName] = useState('');
 
   const fetchPRs = async function () {
     setStatus('loadingPRs');
@@ -53,8 +56,13 @@ const EditIngest = function EditIngest() {
     fetchPRs();
   }, []);
 
-  const handleClick = async (ref: string, sha: string) => {
+  const handleClick = async (
+    ref: string,
+    sha: string,
+    collectionName: string
+  ) => {
     setStatus('loadingIngest');
+    setCollectionName(collectionName);
     const url = `api/retrieve-ingest?ref=${ref}`;
     const requestOptions = {
       method: 'GET',
@@ -108,7 +116,9 @@ const EditIngest = function EditIngest() {
                     /* @ts-ignore head does exist */
                     item.head.ref,
                     /* @ts-ignore head does exist*/
-                    item.head.sha
+                    item.head.sha,
+                    /* @ts-expect-error: title does exist*/
+                    item.title
                   )
                 }
               >
@@ -129,6 +139,15 @@ const EditIngest = function EditIngest() {
           setFormData={setFormData}
           setStatus={setStatus}
           handleCancel={handleCancel}
+        />
+      )}
+      {status === 'loading' && <Spin fullscreen />}
+      {status === 'error' && <ErrorModal collectionName={collectionName} />}
+      {status === 'success' && (
+        <SuccessModal
+          type="edit"
+          collectionName={collectionName}
+          setStatus={setStatus}
         />
       )}
     </AppLayout>

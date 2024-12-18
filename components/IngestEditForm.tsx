@@ -35,7 +35,6 @@ function IngestEditForm({
   setFormData: any;
   handleCancel: () => void;
 }) {
-
   // @ts-expect-error RJSF form data typing
   const onFormDataSubmit = async ({ formData }) => {
     setStatus('loading');

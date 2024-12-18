@@ -22,8 +22,8 @@ type FormProps = {
     data: IChangeEvent<any, RJSFSchema, any>,
     event: FormEvent<any>
   ) => void;
-    children?: React.ReactNode;
-  };
+  children?: React.ReactNode;
+};
 
 function IngestForm({
   formData,
@@ -31,15 +31,13 @@ function IngestForm({
   uiSchema,
   onSubmit,
   children,
-}: FormProps ) {
-
+}: FormProps) {
   const onFormDataChanged = (formState: {
     formData: SetStateAction<object | undefined>;
   }) => {
     // @ts-expect-error something
     setFormData(formState.formData);
   };
-
 
   return (
     <Form

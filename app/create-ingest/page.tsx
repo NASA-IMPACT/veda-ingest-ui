@@ -13,9 +13,10 @@ import { Spin } from 'antd';
 import IngestCreationForm from '@/components/IngestCreationForm';
 import ErrorModal from '@/components/ErrorModal';
 import SuccessModal from '@/components/SuccessModal';
+import { Status } from '@/types/global';
 
 const CreateIngest = function CreateIngest() {
-  const [status, setStatus] = useState('idle');
+  const [status, setStatus] = useState<Status>('idle');
   const [collectionName, setCollectionName] = useState('');
   const [apiErrorMessage, setApiErrorMessage] = useState('');
   const [pullRequestUrl, setPullRequestUrl] = useState('');
