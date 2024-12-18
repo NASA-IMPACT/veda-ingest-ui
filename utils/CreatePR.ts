@@ -1,16 +1,11 @@
 import { Octokit } from '@octokit/rest';
 import { RequestError } from '@octokit/request-error';
-import { createAppAuth } from '@octokit/auth-app';
 import { formatFilename } from './FormatFilename';
+import GetGithubToken from './GetGithubToken';
 
 const targetBranch = 'master';
 const owner = process.env.OWNER || '';
 const repo = process.env.REPO || '';
-const appId = parseInt(process.env.APP_ID || '');
-const installationId = parseInt(process.env.INSTALLATION_ID || '');
-const rawkey = process.env.GITHUB_PRIVATE_KEY || '';
-
-const privateKey = rawkey.replace(/\\n/g, '\n');
 
 const CreatePR = async (data: unknown) => {
   try {
@@ -23,42 +18,28 @@ const CreatePR = async (data: unknown) => {
     const path = `${targetPath}/${fileName}.json`;
     const branchName = `feat/${fileName}`;
 
-    const appOctokit = new Octokit({
-      authStrategy: createAppAuth,
-      auth: {
-        appId,
-        privateKey,
-        installationId,
-      },
-    });
-
-    //  @ts-expect-error dunno
-    const { token } = await appOctokit.auth({
-      type: 'installation',
-      installationId,
-    });
+    const token = await GetGithubToken();
 
     const octokit = new Octokit({
       auth: token,
     });
 
-    // // Get the current target branch reference to get the sha
+    // Get the current target branch reference to get the sha
     const sha = await octokit.rest.git.getRef({
       owner,
       repo,
       ref: `heads/${targetBranch}`,
     });
 
-
-    // // Get the tree associated with master, and the content
-    // // of the template file to open the PR with.
+    // Get the tree associated with master, and the content
+    // of the template file to open the PR with.
     const tree = await octokit.rest.git.getTree({
       owner,
       repo,
       tree_sha: sha.data.object.sha,
     });
 
-    // // Create a new blob with the content in formData
+    // Create a new blob with the content in formData
     const blob = await octokit.rest.git.createBlob({
       owner,
       repo,
@@ -80,7 +61,7 @@ const CreatePR = async (data: unknown) => {
       base_tree: tree.data.sha,
     });
 
-    // // Create a commit and a reference using the new tree
+    // Create a commit and a reference using the new tree
     const newCommit = await octokit.rest.git.createCommit({
       owner,
       repo,
@@ -96,7 +77,7 @@ const CreatePR = async (data: unknown) => {
       sha: newCommit.data.sha,
     });
 
-    // // open PR with new file added to targetBranch
+    // open PR with new file added to targetBranch
     const pr = await octokit.rest.pulls.create({
       owner,
       repo,
@@ -106,7 +87,6 @@ const CreatePR = async (data: unknown) => {
     });
 
     const pr_url = pr.data.html_url;
-    console.log(`PR opened at URL ${pr_url}`);
     return pr_url;
   } catch (error) {
     console.log(error);

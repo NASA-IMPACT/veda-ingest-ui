@@ -1,1 +1,7 @@
-export type Status = 'idle' | 'loading' | 'success' | 'error';
+export type Status =
+  | 'idle'
+  | 'loading'
+  | 'loadingIngest'
+  | 'loadingPRs'
+  | 'success'
+  | 'error';

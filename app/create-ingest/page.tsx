@@ -10,19 +10,20 @@ Amplify.configure({ ...config }, { ssr: true });
 
 import { Spin } from 'antd';
 
-import ValidationForm from '../../components/ValidationForm';
-import ErrorModal from '../../components/ErrorModal';
-import SuccessModal from '../../components/SuccessModal';
+import IngestCreationForm from '@/components/IngestCreationForm';
+import ErrorModal from '@/components/ErrorModal';
+import SuccessModal from '@/components/SuccessModal';
+import { Status } from '@/types/global';
 
 const CreateIngest = function CreateIngest() {
-  const [status, setStatus] = useState('idle');
+  const [status, setStatus] = useState<Status>('idle');
   const [collectionName, setCollectionName] = useState('');
   const [apiErrorMessage, setApiErrorMessage] = useState('');
   const [pullRequestUrl, setPullRequestUrl] = useState('');
 
   return (
     <AppLayout>
-      <ValidationForm
+      <IngestCreationForm
         setStatus={setStatus}
         setCollectionName={setCollectionName}
         setApiErrorMessage={setApiErrorMessage}
@@ -38,6 +39,7 @@ const CreateIngest = function CreateIngest() {
       )}
       {status === 'success' && (
         <SuccessModal
+          type="create"
           setStatus={setStatus}
           collectionName={collectionName}
           pullRequestUrl={pullRequestUrl}
