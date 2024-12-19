@@ -87,7 +87,12 @@ main > div {
 #root_spatial_extent,
 #root_temporal_extent,
 #root_discovery_items fieldset,
-#root_links fieldset {
+#root_links fieldset,
+#root_item_assets,
+#root_item_assets fieldset,
+#root_providers fieldset,
+#root_assets,
+#root_assets fieldset {
   padding: 6px 6px;
   border-radius: 6px;
   border: none;
