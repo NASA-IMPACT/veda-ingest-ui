@@ -91,6 +91,28 @@
       "items": {
         "type": "object",
         "properties": {
+          "upload": {
+            "type": "boolean",
+            "title": "Upload",
+            "default": false
+          },
+          "cogify": {
+            "type": "boolean",
+            "title": "Cogify",
+            "default": false
+          },
+          "dry_run": {
+            "type": "boolean",
+            "title": "Dry Run",
+            "default": false
+          },
+          "discovery": {
+            "type": "string",
+            "enum": [
+              "s3"
+            ],
+            "title": "Discovery"
+          },
           "prefix": {
             "type": "string",
             "title": "Prefix"
@@ -98,6 +120,43 @@
           "bucket": {
             "type": "string",
             "title": "Bucket"
+          },
+          "filename_regex": {
+            "type": "string",
+            "title": "Filename Regex",
+            "default": "[\\s\\S]*"
+          },
+          "datetime_range": {
+            "type": "string",
+            "title": "Datetime Range"
+          },
+          "start_datetime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start Datetime"
+          },
+          "end_datetime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End Datetime"
+          },
+          "single_datetime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Single Datetime"
+          },
+          "id_regex": {
+            "type": "string",
+            "title": "Id Regex"
+          },
+          "id_template": {
+            "type": "string",
+            "title": "Id Template"
+          },
+          "use_multithreading":{
+            "type": "string",
+            "title": "Use Multithreading",
+            "default": "false"
           }
         },
         "required": ["prefix", "bucket"]
@@ -121,6 +180,93 @@
       "type": "array",
       "items": {
         "type": "string"
+      }
+    },
+    "item_assets": {
+      "type": "object",
+      "title": "Item Assets",
+      "properties": {
+      "cog_default": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "default":"image/tiff; application=geotiff; profile=cloud-optimized"
+          },
+          "roles": {
+            "type": "array",
+            "items": [
+              {
+                "type": "string"
+              }
+            ],
+            "default":[
+              "data",
+              "layer"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "default":"Default COG Layer"
+          },
+          "description": {
+            "type": "string",
+            "default":"Cloud optimized default layer to display on map"
+          }
+        },
+        "required": [
+          "type",
+          "roles",
+          "title",
+          "description"
+        ]
+      }
+    },
+    "required": [
+      "cog_default"
+      ]
+    },
+    "renders": {
+      "type": "object",
+      "title": "Renders"
+    },
+    "providers": {
+      "title": "Providers",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "title": "Organization name",
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "title": "Organization description",
+            "type": "string"
+          },
+          "roles": {
+            "title": "Organization roles",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "producer",
+                "licensor",
+                "processor",
+                "host"
+              ]
+            }
+          },
+          "url": {
+            "title": "Organization homepage",
+            "type": "string",
+            "format": "iri"
+          }
+        }
       }
     }
   }
