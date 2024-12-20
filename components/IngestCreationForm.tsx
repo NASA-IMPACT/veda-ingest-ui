@@ -21,7 +21,7 @@ function IngestCreationForm({
 
   // @ts-expect-error testing
   const onFormDataSubmit = async ({ formData }) => {
-    setStatus('loading');
+    setStatus('loadingGithub');
     setCollectionName(formData.collection);
 
     const url = 'api/create-ingest';

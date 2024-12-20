@@ -3,7 +3,7 @@ import { RequestError } from '@octokit/request-error';
 import { formatFilename } from './FormatFilename';
 import GetGithubToken from './GetGithubToken';
 
-const targetBranch = 'main';
+const targetBranch = process.env.TARGET_BRANCH ||'main';
 const owner = process.env.OWNER || '';
 const repo = process.env.REPO || '';
 

@@ -141,7 +141,7 @@ const EditIngest = function EditIngest() {
           handleCancel={handleCancel}
         />
       )}
-      {status === 'loading' && <Spin fullscreen />}
+      {status === 'loadingGithub' && <Spin fullscreen />}
       {status === 'error' && <ErrorModal collectionName={collectionName} />}
       {status === 'success' && (
         <SuccessModal

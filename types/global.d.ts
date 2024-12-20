@@ -1,6 +1,6 @@
 export type Status =
   | 'idle'
-  | 'loading'
+  | 'loadingGithub'
   | 'loadingIngest'
   | 'loadingPRs'
   | 'success'

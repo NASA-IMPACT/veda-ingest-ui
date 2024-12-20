@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.0.2",
-    "@apidevtools/json-schema-ref-parser": "^11.7.3",
     "@aws-amplify/adapter-nextjs": "^1.2.32",
     "@aws-amplify/ui-react": "^6.7.1",
     "@octokit/auth-app": "^7.1.3",

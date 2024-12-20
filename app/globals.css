@@ -83,17 +83,7 @@ main > div {
   box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.2);
 }
 
-.form-group .field .field-array,
-#root_spatial_extent,
-#root_temporal_extent,
-#root_discovery_items fieldset,
-#root_links fieldset,
-#root_item_assets,
-#root_item_assets fieldset,
-#root_providers fieldset,
-#root_renders,
-#root_assets,
-#root_assets fieldset {
+fieldset[id^="root_"] {
   padding: 6px 6px;
   border-radius: 6px;
   border: none;

@@ -11,15 +11,17 @@ Accessing the Github API is done through the [@octokit/rest](https://github.com/
 Deployment is handled by AWS Amplify
 
 # Architecture
-The application is designed to allow users to create and edit PRs in the veda-data repository.New PRs are created wwith a prefix of `'Ingest Request for [collectionName]'`. The branch name and file name of the json for these new PRs is set by the Collection Name field in the form after any non-alphanumeric characters are removed from the collection name: 
+
+The application is designed to allow users to create and edit PRs in the veda-data repository.New PRs are created with a prefix of `'Ingest Request for [collectionName]'`. The branch name and file name of the json for these new PRs is set by the Collection Name field in the form after any non-alphanumeric characters are removed from the collection name:
 
 ```
 const fileName = 'ingestion-data/staging/dataset-config/${collectionName}.json`;
 const branchName = `feat/${collectionName}`;
 ```
-All API calls require users to be authenticated via AWS Cognito.  The API then obtains a github token and makes the desired calls with the github token.
 
-Users are allowed to edit PRs starting with the prefix `'Ingest Request for '`.  It is assumed that all PRs will have the appropriate json file in the standard filepath.  The existing values in the json will be loaded into a form. A user can update those values and a new commit will be added to the PR with the new values. 
+All API calls require users to be authenticated via AWS Cognito. The API then obtains a github token and makes the desired calls with the github token.
+
+Users are allowed to edit PRs starting with the prefix `'Ingest Request for '`. It is assumed that all PRs will have the appropriate json file in the standard filepath. The existing values in the json will be loaded into a form. A user can update those values and a new commit will be added to the PR with the new values.
 
 # Requirements
 
@@ -61,6 +63,7 @@ cp .env.example .env
 ### Github Access
 
 A Github access to the veda-data repo is handled by installing the veda-ingest-api app in the veda-data repo's settings and saving the following values as environment variables:
+
 ```
 INSTALLATION_ID
 APP_ID
@@ -81,7 +84,8 @@ This will start the app and make it available at <http://localhost:5173/>.
 
 The fields in the Validation Form are configured by a combination of the json schema in the [jsonschema.json file](src/data/jsonschema.json) and the UI Schema in the [uischema.json file](src/data/uischema.json). To modify fields in the form, a developer must update the json schema to include the proper JSON schema data fields and then modify the ui Schema to have any new or renamed fields in the desired location.
 
-The Form uses a 24 column grid format and the layout of each row is dictated by the "ui:grid" array in that json. Each row is defined as an object with each field allowed up to 24 columns wide.  For example: 
+The Form uses a 24 column grid format and the layout of each row is dictated by the "ui:grid" array in that json. Each row is defined as an object with each field allowed up to 24 columns wide. For example:
+
 ```json
   "ui:grid": [
     {
@@ -93,7 +97,9 @@ The Form uses a 24 column grid format and the layout of each row is dictated by 
     ...
   ]
 ```
- the new first row has 4 fields with a combined width of 24. Nested objects in the field can be defined with their own grid.  For example,
+
+the new first row has 4 fields with a combined width of 24. Nested objects in the field can be defined with their own grid. For example,
+
 ```json
   "spatial_extent": {
     "ui:grid": [

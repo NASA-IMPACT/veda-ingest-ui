@@ -30,7 +30,7 @@ const CreateIngest = function CreateIngest() {
         setPullRequestUrl={setPullRequestUrl}
       />
 
-      {status === 'loading' && <Spin fullscreen />}
+      {status === 'loadingGithub' && <Spin fullscreen />}
       {status === 'error' && (
         <ErrorModal
           collectionName={collectionName}
