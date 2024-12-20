@@ -2,7 +2,7 @@ import { Octokit } from '@octokit/rest';
 import { Endpoints } from '@octokit/types';
 import GetGithubToken from './GetGithubToken';
 
-const base = 'master';
+const base = 'main';
 const prefix = 'Ingest Request for ';
 const owner = process.env.OWNER || '';
 const repo = process.env.REPO || '';

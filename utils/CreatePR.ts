@@ -3,7 +3,7 @@ import { RequestError } from '@octokit/request-error';
 import { formatFilename } from './FormatFilename';
 import GetGithubToken from './GetGithubToken';
 
-const targetBranch = 'master';
+const targetBranch = 'main';
 const owner = process.env.OWNER || '';
 const repo = process.env.REPO || '';
 
@@ -100,6 +100,7 @@ const CreatePR = async (data: unknown) => {
         throw new Error(errorMessage);
       }
     }
+    else throw error;
   }
 };
 
