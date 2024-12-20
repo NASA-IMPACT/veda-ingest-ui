@@ -1,18 +1,14 @@
 'use client';
+import { useState } from 'react';
 
-import { Status } from '@/types/global';
 import IngestForm from '@/components/IngestForm';
 import uiSchema from '@/FormSchemas/uischema.json';
 import { Button } from 'antd';
+import { Status } from '@/types/global';
 
 const lockedFormFields = {
   collection: {
     'ui:readonly': true,
-  },
-  'ui:submitButtonOptions': {
-    props: {
-      block: 'false',
-    },
   },
 };
 
@@ -35,9 +31,11 @@ function IngestEditForm({
   setFormData: any;
   handleCancel: () => void;
 }) {
+  const [disabled, setDisabled] = useState(true);
+
   // @ts-expect-error RJSF form data typing
   const onFormDataSubmit = async ({ formData }) => {
-    setStatus('loading');
+    setStatus('loadingGithub');
 
     const url = 'api/create-ingest';
     console.log(`creating pr in ${ref} with fileSha: ${fileSha}`);
@@ -73,9 +71,15 @@ function IngestEditForm({
       setFormData={setFormData}
       // @ts-expect-error testing
       onSubmit={onFormDataSubmit}
+      setDisabled={setDisabled}
     >
       <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
-        <Button type="primary" size="large" htmlType="submit">
+        <Button
+          type="primary"
+          size="large"
+          htmlType="submit"
+          disabled={disabled}
+        >
           Submit
         </Button>
         <Button

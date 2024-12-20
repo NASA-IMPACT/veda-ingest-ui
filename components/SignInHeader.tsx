@@ -2,6 +2,7 @@ import React from 'react';
 import { Layout } from 'antd';
 const { Header } = Layout;
 
+// Styled header for AWS Cognito Login //
 const headerStyle: React.CSSProperties = {
   fontSize: '2em',
   fontFamily: '"Open Sans",sans-serif',
