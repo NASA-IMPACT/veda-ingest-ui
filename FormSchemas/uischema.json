@@ -148,6 +148,14 @@
       "rows": 2
     }
   },
+  "renders": {
+    "renders_object": {
+      "ui:widget": "textarea",
+      "ui:options": {
+        "rows": 12
+      }
+    }
+  },
   "ui:submitButtonOptions": {
     "props": {
       "color": "primary",

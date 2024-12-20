@@ -174,9 +174,9 @@
                         "title": "Id Template"
                     },
                     "use_multithreading": {
-                        "type": "string",
+                        "type": "boolean",
                         "title": "Use Multithreading",
-                        "default": "false"
+                        "default": false
                     }
                 },
                 "required": [
@@ -220,7 +220,7 @@
                             "type": "array",
                             "items": [
                                 {
-                                  "type": "string"
+                                    "type": "string"
                                 }
                             ],
                             "default": [
@@ -252,7 +252,12 @@
         "renders": {
             "title": "Renders",
             "type": "object",
-            "$ref": "./renderSchema.json"
+            "properties": {
+                "renders_object": {
+                    "type": "string",
+                    "title": "Renders Object"
+                }
+            }
         },
         "providers": {
             "title": "Providers",
