@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, SetStateAction } from 'react';
+import { FormEvent, SetStateAction, useEffect, useState } from 'react';
 
 import { IChangeEvent, withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
@@ -9,8 +9,8 @@ import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
 
 import ObjectFieldTemplate from '../ObjectFieldTemplate';
-import jsonSchema from '@/FormSchemas/jsonschema.json';
 import { RJSFSchema, UiSchema } from '@rjsf/utils';
+import $RefParser from "@apidevtools/json-schema-ref-parser";
 
 const Form = withTheme(AntDTheme);
 
@@ -32,6 +32,23 @@ function IngestForm({
   onSubmit,
   children,
 }: FormProps) {
+  const [schema, setSchema] = useState({});
+
+  useEffect(() => {
+    const fetchSchema = async () => {
+      try {
+        const parser = new $RefParser();
+        const dereferencedSchema = await parser.dereference('/FormSchemas/jsonschema.json');
+        console.log('dereferencedSchema', dereferencedSchema)
+        setSchema(dereferencedSchema);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchSchema();
+  }, []);
+
   const onFormDataChanged = (formState: {
     formData: SetStateAction<object | undefined>;
   }) => {
@@ -41,7 +58,7 @@ function IngestForm({
 
   return (
     <Form
-      schema={jsonSchema as JSONSchema7}
+      schema={schema as JSONSchema7}
       uiSchema={uiSchema}
       validator={validator}
       templates={{

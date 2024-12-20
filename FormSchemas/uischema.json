@@ -14,12 +14,26 @@
       "temporal_extent": 6
     },
     {
-      "sample_files": 8,
-      "discovery_items": 8,
-      "stac_extensions": 8
+      "discovery_items": 24
+    },
+    {
+      "sample_files": 12,
+      "stac_extensions": 12
     },
     {
       "links": 24
+    },
+    {
+      "item_assets": 24
+    },
+    {
+      "providers": 24
+    },
+    {
+      "renders": 24
+    },
+    {
+      "assets":24
     }
   ],
   "spatial_extent": {
@@ -36,10 +50,34 @@
   },
   "discovery_items": {
     "items": {
-      "ui-grid": [
+      "ui:grid": [
         {
-          "prefix": 12,
-          "bucket": 12
+          "upload": 8,
+          "cogify": 8,
+          "dry_run": 8
+        },
+        {
+          "discovery": 8,
+          "prefix": 8,
+          "bucket": 8
+        },
+        {
+          "filename_regex": 12,
+          "datetime_range": 12
+        },
+        {
+          "stac_extensions": 12,
+          "links": 12
+        },
+        {
+          "start_datetime": 8,
+          "end_datetime": 8,
+          "single_datetime": 8
+        },
+        {
+          "id_regex": 8,
+          "id_template": 8,
+          "use_multithreading": 8
         }
       ]
     }
@@ -61,10 +99,61 @@
       ]
     }
   },
+  "item_assets": {
+    "cog_default": {
+      "ui:grid": [
+        {
+          "type": 12,
+          "roles": 12
+        },
+        {
+          "title": 12,
+          "description": 12
+        }
+      ]
+    }
+  },
+  "providers": {
+    "items": {
+      "ui:grid": [
+        {
+          "name": 12,
+          "description": 12
+        },
+        {
+          "roles": 12,
+          "url": 12
+        }
+      ]
+    }
+  },
+  "assets": {
+    "thumbnail": {
+      "ui:grid": [
+        {
+        "title": 12,
+        "description": 12
+        },
+        {
+          "href": 8,
+          "type": 8,
+          "roles": 8
+        }
+      ]
+    }
+  },
   "description": {
     "ui:widget": "textarea",
     "ui:options": {
       "rows": 2
+    }
+  },
+  "renders": {
+    "renders_object": {
+      "ui:widget": "textarea",
+      "ui:options": {
+        "rows": 12
+      }
     }
   },
   "ui:submitButtonOptions": {
