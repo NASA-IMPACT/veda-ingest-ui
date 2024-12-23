@@ -39,5 +39,3 @@ export default withAuthenticator(Home, {
     },
   },
 });
-
-export {Home as UnauthenticatedHome};
