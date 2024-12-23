@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint --fix",
     "format": "prettier --write .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "vitest"
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.0.2",
@@ -31,21 +32,28 @@
   },
   "devDependencies": {
     "@octokit/types": "^13.6.2",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
     "@types/lodash": "^4.17.13",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",
+    "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.17.0",
     "eslint-config-next": "15.0.3",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-unused-imports": "^4.1.4",
     "husky": "^9.1.7",
+    "jsdom": "^25.0.1",
     "lint-staged": "^15.2.11",
     "prettier": "^3.4.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^2.1.8"
   },
   "husky": {
     "hooks": {

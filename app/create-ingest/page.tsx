@@ -57,3 +57,6 @@ export default withAuthenticator(CreateIngest, {
     },
   },
 });
+
+export {CreateIngest as UnauthenticatedCreateIngest};
+
