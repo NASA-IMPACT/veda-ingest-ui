@@ -58,7 +58,6 @@ const EditIngest = function EditIngest() {
 
   const handleClick = async (
     ref: string,
-    sha: string,
     collectionName: string
   ) => {
     setStatus('loadingIngest');
@@ -69,7 +68,6 @@ const EditIngest = function EditIngest() {
     };
     try {
       const response = await fetch(url, requestOptions);
-      console.log(`trying to update branch with sha: ${sha} and ref: ${ref}`);
       setRef(ref);
 
       if (!response.ok) {
@@ -82,7 +80,6 @@ const EditIngest = function EditIngest() {
       setFilePath(filePath);
       setFileSha(fileSha);
       setFormData(content);
-      console.log(content);
       setStatus('idle');
     } catch (err) {
       console.error(err);

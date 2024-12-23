@@ -38,8 +38,6 @@ function IngestEditForm({
     setStatus('loadingGithub');
 
     const url = 'api/create-ingest';
-    console.log(`creating pr in ${ref} with fileSha: ${fileSha}`);
-    console.log(formData);
     const requestOptions = {
       method: 'PUT',
       body: JSON.stringify({ ref, fileSha, filePath, formData }),
@@ -54,8 +52,6 @@ function IngestEditForm({
         throw new Error(`There was an error onSubmit: ${errorMessage}`);
       }
 
-      const responseJson = await response.json();
-      console.log(responseJson);
       setFormData({});
       setStatus('success');
     } catch (error) {
