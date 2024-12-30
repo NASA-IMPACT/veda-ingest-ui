@@ -19,7 +19,7 @@ describe('Edit Ingest Page', () => {
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 
-it.only('renders the page without crashing', async () => {
+it('renders the page without crashing', async () => {
   render(<EditIngest />);
   
   // Check for the main content
