@@ -10,7 +10,7 @@ describe('Create Ingest Page', () => {
     Amplify.configure({ ...config }, { ssr: true });
   });
 
-  it.only('renders the page without crashing', () => {
+  it('renders the page without crashing', () => {
     render(<CreateIngest />);
     
     // Check for the main content

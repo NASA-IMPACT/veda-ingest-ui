@@ -9,7 +9,8 @@
     "lint": "next lint --fix",
     "format": "prettier --write .",
     "prepare": "husky",
-    "test": "vitest"
+    "test": "vitest",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.0.2",
