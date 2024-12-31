@@ -1,17 +1,24 @@
-import { Octokit } from '@octokit/rest';
+import { createOctokit } from './OctokitFactory';
 import { RequestError } from '@octokit/request-error';
 import { formatFilename } from './FormatFilename';
 import GetGithubToken from './GetGithubToken';
 
-const targetBranch = process.env.TARGET_BRANCH ||'main';
-const owner = process.env.OWNER || '';
-const repo = process.env.REPO || '';
+interface Data {
+  collection: string;
+  [key: string]: unknown;
+}
 
-const CreatePR = async (data: unknown) => {
+const CreatePR = async (data: Data): Promise<string> => {
+  const targetBranch = process.env.TARGET_BRANCH || 'main';
+  const owner = process.env.OWNER;
+  const repo = process.env.REPO;
+
+  if (!owner || !repo) {
+    throw new Error('Missing required environment variables: OWNER or REPO');
+  }
+
   try {
-    //@ts-expect-error testing
-    const collectionName = data['collection'];
-    // prettify stringify to preserve json formatting
+    const collectionName = data.collection;
     const content = JSON.stringify(data, null, 2);
     const targetPath = 'ingestion-data/staging/dataset-config';
     const fileName = formatFilename(collectionName);
@@ -19,27 +26,20 @@ const CreatePR = async (data: unknown) => {
     const branchName = `feat/${fileName}`;
 
     const token = await GetGithubToken();
+    const octokit = createOctokit(token);
 
-    const octokit = new Octokit({
-      auth: token,
-    });
-
-    // Get the current target branch reference to get the sha
     const sha = await octokit.rest.git.getRef({
       owner,
       repo,
       ref: `heads/${targetBranch}`,
     });
 
-    // Get the tree associated with master, and the content
-    // of the template file to open the PR with.
     const tree = await octokit.rest.git.getTree({
       owner,
       repo,
-      tree_sha: sha.data.object.sha,
+      tree_sha: sha.data.object?.sha,
     });
 
-    // Create a new blob with the content in formData
     const blob = await octokit.rest.git.createBlob({
       owner,
       repo,
@@ -61,13 +61,12 @@ const CreatePR = async (data: unknown) => {
       base_tree: tree.data.sha,
     });
 
-    // Create a commit and a reference using the new tree
     const newCommit = await octokit.rest.git.createCommit({
       owner,
       repo,
       message: `Create ${path}`,
       tree: newTree.data.sha,
-      parents: [sha.data.object.sha],
+      parents: [sha.data.object?.sha],
     });
 
     await octokit.rest.git.createRef({
@@ -77,7 +76,6 @@ const CreatePR = async (data: unknown) => {
       sha: newCommit.data.sha,
     });
 
-    // open PR with new file added to targetBranch
     const pr = await octokit.rest.pulls.create({
       owner,
       repo,
@@ -86,22 +84,19 @@ const CreatePR = async (data: unknown) => {
       title: `Ingest Request for ${collectionName}`,
     });
 
-    const pr_url = pr.data.html_url;
-    return pr_url;
+    return pr.data.html_url;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     if (error instanceof RequestError) {
-      // branch with branchName already exists
-      if (error['status'] === 422 && error.response) {
-        console.error('we have an error');
-        // @ts-expect-error octokit typing issue
-        const errorMessage = error.response.data.message as string;
+      if (error.status === 422 && error.response?.data) {
+        const errorMessage = (error.response.data as { message?: string }).message || 'Unknown error';
         console.error(errorMessage);
         throw new Error(errorMessage);
       }
     }
-    else throw error;
+    throw error;
   }
 };
+
 
 export default CreatePR;

@@ -1,9 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import GetGithubToken from './GetGithubToken';
 
-const owner = process.env.OWNER || '';
-const repo = process.env.REPO || '';
-
 const UpdatePR = async (
   ref: string,
   fileSha: string,
@@ -13,6 +10,13 @@ const UpdatePR = async (
   // prettify stringify to preserve json formatting
   const stringContent = JSON.stringify(formData, null, 2);
   const content = btoa(stringContent);
+
+  const owner = process.env.OWNER;
+  const repo = process.env.REPO;
+
+  if (!owner || !repo) {
+    throw new Error('Missing required environment variables: OWNER or REPO');
+  }
 
   try {
     const token = await GetGithubToken();

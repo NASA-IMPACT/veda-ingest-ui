@@ -2,11 +2,17 @@ import { Octokit } from '@octokit/rest';
 import GetGithubToken from './GetGithubToken';
 
 const targetPath = 'ingestion-data/staging/dataset-config';
-const owner = process.env.OWNER || '';
-const repo = process.env.REPO || '';
 
 const RetrieveJSON = async (ref: string) => {
+  const owner = process.env.OWNER;
+  const repo = process.env.REPO;
+
+  if (!owner || !repo) {
+    throw new Error('Missing required environment variables: OWNER or REPO');
+  }
+
   const fileName = ref.replace('feat/', '');
+
   try {
     const token = await GetGithubToken();
 
