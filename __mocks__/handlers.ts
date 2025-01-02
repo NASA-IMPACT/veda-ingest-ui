@@ -3,7 +3,9 @@ import { githubResponse } from './githubResponse';
 import { retrieveIngestResponse } from './retrieveIngestResponse';
 
 interface EditIngestRequestBody {
-  description: string;
+  formData: {
+    description: string;
+  }
 }
 
 export const handlers = [
@@ -21,13 +23,13 @@ export const handlers = [
     return HttpResponse.json({ ...retrieveIngestResponse });
   }),
 
-  http.put('/api/edit-ingest', async ({ request }) => {
+  http.put('/api/create-ingest', async ({ request }) => {
     const body = (await request.json()) as EditIngestRequestBody;
 
-    if (!body.description) {
+    if (!body.formData.description) {
       return new HttpResponse('Missing description', { status: 400 });
     }
 
-    return HttpResponse.json({ message: 'Edit Successful' });
+    return HttpResponse.json({ message: 'Data updated successfully' });
   }),
 ];

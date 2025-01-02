@@ -102,7 +102,7 @@ const EditIngest = function EditIngest() {
           dataSource={data}
           loading={status === 'loadingPRs'}
           renderItem={(item: PullRequest) => (
-            <List.Item>
+            <List.Item key={item.id}>
               <Button
                 onClick={() =>
                   handleClick(

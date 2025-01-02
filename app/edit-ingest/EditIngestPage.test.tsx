@@ -1,12 +1,18 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, it, expect, beforeAll, afterEach, afterAll } from 'vitest';
-import EditIngest from './page';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest';
 import { Amplify } from 'aws-amplify';
 import { config } from '@/utils/aws-exports';
 import { setupServer } from 'msw/node';
 import { handlers } from '@/__mocks__/handlers';
 import { http, HttpResponse } from 'msw';
+
+import EditIngest from './page';
+
+global.window.getComputedStyle = vi.fn().mockImplementation(() => ({
+  getPropertyValue: vi.fn(),
+  display: 'block',
+}));
 
 describe('Edit Ingest Page', () => {
   const server = setupServer(...handlers);
@@ -18,14 +24,18 @@ describe('Edit Ingest Page', () => {
 
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
+  
 
-  it('displays the ErrorModal on API error', async () => {
+  it('displays the ErrorModal on API error when loading an ingest', async () => {
     // Mock API error for `retrieve-ingest`
     server.use(
       http.get('api/retrieve-ingest', () => {
         return new HttpResponse(null, { status: 500 });
       })
     );
+
+    // Suppress console.error for this test
+    const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     render(<EditIngest />);
 
@@ -38,15 +48,12 @@ describe('Edit Ingest Page', () => {
       /Something went wrong with updating Ingest Request for seeded ingest #1/i
     );
     expect(errorModal).toBeInTheDocument();
+        
+    // Restore console.error
+    consoleErrorMock.mockRestore();
   });
 
   it('displays the SuccessModal on successful edit', async () => {
-    // Mock API success for `edit-ingest`
-    server.use(
-      http.put('api/edit-ingest', () => {
-        return new HttpResponse('Data updated successfully', { status: 200 });
-      })
-    );
 
     render(<EditIngest />);
 
@@ -55,21 +62,23 @@ describe('Edit Ingest Page', () => {
     fireEvent.click(pendingPullRequest);
 
     // Verify the form is displayed
-
     await screen.findByLabelText('Collection');
-    console.log(document.body.innerHTML);
 
-    const descriptionInput = await screen.findByRole('textarea', { name: /description/i });
+    await screen.findByDisplayValue(/seeded-ingest-1/i );
+    const descriptionInput = await screen.findByDisplayValue(/seeded ingest description #1/i );
 
-    fireEvent.change(descriptionInput, { target: { value: 'updated description' } });
+    // update something other than collection name
+    fireEvent.input(descriptionInput, { target: { value: 'updated description' } });
 
     // Submit the form
     const submitButton = await screen.findByRole('button', { name: /submit/i });
     fireEvent.click(submitButton);
 
-    // Verify SuccessModal appears
-    const successModal = await screen.findByTestId('success-modal');
-    expect(successModal).toBeInTheDocument();
-    expect(successModal).toHaveTextContent('Success Modal');
+    // // Verify SuccessModal appears
+    await waitFor(() => {
+      const modalTitle = screen.getByText(/Collection Updated/i);
+      expect(modalTitle).toBeInTheDocument();
+    });
   });
+
 });

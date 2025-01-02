@@ -84,6 +84,9 @@ describe('CreatePR', () => {
   it('throws an error when GitHub API returns a 422 error', async () => {
     const mockData = { collection: 'Test Collection', key: 'value' };
 
+    // Suppress console.error for this test
+    const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     // Mock 422 error for `octokit.rest.pulls.create`
     mockCreatePullRequest.mockRejectedValue(
       new RequestError('Validation Failed', 422, {
@@ -112,6 +115,9 @@ describe('CreatePR', () => {
       base: 'my_branch',
       title: 'Ingest Request for Test Collection',
     });
+    
+    // Restore console.error
+    consoleErrorMock.mockRestore();
   });
 
   it('creates a pull request successfully in main branch if no TARGET_BRANCH env var supplied', async () => {
