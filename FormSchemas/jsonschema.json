@@ -293,7 +293,7 @@
                     "url": {
                         "title": "Organization homepage",
                         "type": "string",
-                        "format": "iri"
+                        "format": "uri"
                     }
                 }
             }

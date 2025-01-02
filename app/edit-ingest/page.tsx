@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import AppLayout from '@/components/Layout';
 import { Amplify } from 'aws-amplify';
@@ -12,13 +13,14 @@ import { Status } from '@/types/global';
 import { Endpoints } from '@octokit/types';
 import ErrorModal from '@/components/ErrorModal';
 import SuccessModal from '@/components/SuccessModal';
-type PullRequests =
-  Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'];
+
+// Type definitions
+type PullRequest = Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][number];
 
 Amplify.configure({ ...config }, { ssr: true });
 
 const EditIngest = function EditIngest() {
-  const [data, setData] = useState<PullRequests[]>();
+  const [data, setData] = useState<PullRequest[]>([]);
   const [status, setStatus] = useState<Status>('idle');
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [ref, setRef] = useState('');
@@ -26,7 +28,7 @@ const EditIngest = function EditIngest() {
   const [filePath, setFilePath] = useState('');
   const [collectionName, setCollectionName] = useState('');
 
-  const fetchPRs = async function () {
+  const fetchPRs = async () => {
     setStatus('loadingPRs');
     const url = 'api/list-ingests';
     const requestOptions = {
@@ -40,11 +42,8 @@ const EditIngest = function EditIngest() {
         throw new Error(`There was an error on fetchPR: ${errorMessage}`);
       }
 
-      const { githubResponse } = await response.json();
-      // Type the response data
-      const pullRequests: Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][] =
-        githubResponse;
-      setData(pullRequests);
+      const { githubResponse }: { githubResponse: PullRequest[] } = await response.json();
+      setData(githubResponse);
       setStatus('idle');
     } catch (err) {
       console.error(err);
@@ -56,12 +55,9 @@ const EditIngest = function EditIngest() {
     fetchPRs();
   }, []);
 
-  const handleClick = async (
-    ref: string,
-    collectionName: string
-  ) => {
+  const handleClick = async (ref: string, title: string) => {
     setStatus('loadingIngest');
-    setCollectionName(collectionName);
+    setCollectionName(title);
     const url = `api/retrieve-ingest?ref=${ref}`;
     const requestOptions = {
       method: 'GET',
@@ -105,21 +101,16 @@ const EditIngest = function EditIngest() {
           bordered
           dataSource={data}
           loading={status === 'loadingPRs'}
-          renderItem={(item: PullRequests) => (
-            <List.Item>
+          renderItem={(item: PullRequest) => (
+            <List.Item key={item.id}>
               <Button
                 onClick={() =>
                   handleClick(
-                    /* @ts-ignore head does exist */
                     item.head.ref,
-                    /* @ts-ignore head does exist*/
-                    item.head.sha,
-                    /* @ts-expect-error: title does exist*/
                     item.title
                   )
                 }
               >
-                {/* @ts-expect-error: title does exist */}
                 {item.title}
               </Button>
             </List.Item>
