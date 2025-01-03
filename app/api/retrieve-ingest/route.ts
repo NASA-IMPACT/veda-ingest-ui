@@ -3,7 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
-    const ref = request?.nextUrl?.searchParams.get('ref') || '';
+    const ref = request?.nextUrl?.searchParams.get('ref');
+    if (!ref) {
+      return NextResponse.json({ error: 'Invalid or missing query parameter. "ref" is required' }, { status: 400 });
+    }
     const response = await RetrieveJSON(ref);
     return NextResponse.json({ ...response });
   } catch (error) {
@@ -18,3 +21,4 @@ export async function GET(request: NextRequest) {
     }
   }
 }
+
