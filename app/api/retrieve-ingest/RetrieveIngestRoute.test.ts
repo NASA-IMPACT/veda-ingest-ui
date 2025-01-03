@@ -95,7 +95,7 @@ describe('GET /api/retrieve-json', () => {
     const jsonResponse = await response.json();
   
     expect(RetrieveJSON).not.toHaveBeenCalled();
-    expect(jsonResponse).toEqual({ error: 'Invalid or missing query parameter' });
+    expect(jsonResponse).toEqual({ error: 'Invalid or missing query parameter. "ref" is required' });
     expect(response.status).toBe(400);
   });
 });
