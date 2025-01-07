@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
-import UpdatePR from './UpdatePR';
-import GetGithubToken from './GetGithubToken';
+import UpdatePR from '@/utils/githubUtils/UpdatePR';
+import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 import { Octokit } from '@octokit/rest';
 
 vi.mock('@octokit/rest', () => ({
   Octokit: vi.fn(),
 }));
 
-vi.mock('./GetGithubToken');
+vi.mock('@/utils/githubUtils/GetGithubToken');
 
 describe('UpdatePR', () => {
   const mockCreateOrUpdateFileContents = vi.fn();

@@ -29,7 +29,6 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "./types/global.d.ts",
-    "./jest-setup.ts"
   ],
   "exclude": ["node_modules"]
 }

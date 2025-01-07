@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { GET } from '@/app/api/list-ingests/route';
-import ListPRs from '@/utils/ListPRs';
+import ListPRs from '@/utils/githubUtils/ListPRs';
 import { NextRequest } from 'next/server';
 import { Endpoints } from '@octokit/types';
 
@@ -12,7 +12,7 @@ type SimplifiedPullRequest = Pick<PullRequest, 'id' | 'title'> & {
 };
 
 // Mock implementation
-vi.mock('@/utils/ListPRs', () => {
+vi.mock('@/utils/githubUtils/ListPRs', () => {
   const mockPRs: SimplifiedPullRequest[] = [
     {
       id: 1,

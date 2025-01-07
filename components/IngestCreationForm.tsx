@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import { Status } from '@/types/global';
-import IngestForm from './IngestForm';
+import IngestForm from '@/components/IngestForm';
 import uiSchema from '@/FormSchemas/uischema.json';
 
 function IngestCreationForm({

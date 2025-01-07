@@ -1,4 +1,4 @@
-import ListPRs from '@/utils/ListPRs';
+import ListPRs from '@/utils/githubUtils/ListPRs';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {

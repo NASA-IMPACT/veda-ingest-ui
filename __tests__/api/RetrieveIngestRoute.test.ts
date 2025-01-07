@@ -1,10 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { GET } from '@/app/api/retrieve-ingest/route';
-import RetrieveJSON from '@/utils/RetrieveJSON';
+import RetrieveJSON from '@/utils/githubUtils/RetrieveJSON';
 import { NextRequest } from 'next/server';
 
 // Mock implementation
-vi.mock('@/utils/RetrieveJSON', () => {
+vi.mock('@/utils/githubUtils/RetrieveJSON', () => {
   return {
     default: vi.fn(),
   };

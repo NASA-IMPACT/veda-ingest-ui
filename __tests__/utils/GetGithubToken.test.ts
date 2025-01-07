@@ -1,6 +1,6 @@
 
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
-import GetGithubToken from './GetGithubToken';
+import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 import { Octokit } from '@octokit/rest';
 
 vi.mock('@octokit/rest', () => ({

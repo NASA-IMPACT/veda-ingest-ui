@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { POST, PUT } from '@/app/api/create-ingest/route';
-import UpdatePR from '@/utils/UpdatePR';
 import { NextRequest } from 'next/server';
-import CreatePR from '@/utils/CreatePR';
+import UpdatePR from '@/utils/githubUtils/UpdatePR';
+import CreatePR from '@/utils/githubUtils/CreatePR';
 
-vi.mock('@/utils/UpdatePR');
-vi.mock('@/utils/CreatePR');
+vi.mock('@/utils/githubUtils/UpdatePR');
+vi.mock('@/utils/githubUtils/CreatePR');
 
 describe('POST /create-ingest', () => {
   it('returns GitHub URL on successful PR creation', async () => {

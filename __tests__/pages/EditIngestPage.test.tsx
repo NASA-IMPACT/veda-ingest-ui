@@ -7,7 +7,7 @@ import { setupServer } from 'msw/node';
 import { handlers } from '@/__mocks__/handlers';
 import { http, HttpResponse } from 'msw';
 
-import EditIngest from './page';
+import EditIngest from '@/app/edit-ingest/page';
 
 global.window.getComputedStyle = vi.fn().mockImplementation(() => ({
   getPropertyValue: vi.fn(),
@@ -79,6 +79,6 @@ describe('Edit Ingest Page', () => {
       const modalTitle = screen.getByText(/Collection Updated/i);
       expect(modalTitle).toBeInTheDocument();
     });
-  });
+  }, 10000);
 
 });

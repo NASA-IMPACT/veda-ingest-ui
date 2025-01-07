@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import GetGithubToken from './GetGithubToken';
+import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 
 const targetPath = 'ingestion-data/staging/dataset-config';
 

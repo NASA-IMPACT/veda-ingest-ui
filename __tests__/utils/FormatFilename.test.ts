@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatFilename } from './FormatFilename';
+import { formatFilename } from '@/utils/FormatFilename';
 
 describe('formatFilename', () => {
   it('removes non-alphanumeric characters except dash and underscore', () => {
