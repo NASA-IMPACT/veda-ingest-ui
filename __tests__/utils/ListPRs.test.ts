@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { Octokit } from '@octokit/rest';
-import ListPRs from './ListPRs';
-import GetGithubToken from './GetGithubToken';
+import ListPRs from '@/utils/githubUtils/ListPRs';
+import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 
-vi.mock('./GetGithubToken', () => ({
+vi.mock('@/utils/githubUtils/GetGithubToken', () => ({
   default: vi.fn(),
 }));
 

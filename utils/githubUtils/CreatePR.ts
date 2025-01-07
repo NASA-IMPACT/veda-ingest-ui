@@ -1,6 +1,6 @@
 import { createOctokit } from './OctokitFactory';
 import { RequestError } from '@octokit/request-error';
-import { formatFilename } from './FormatFilename';
+import { formatFilename } from '@/utils/FormatFilename';
 import GetGithubToken from './GetGithubToken';
 
 interface Data {

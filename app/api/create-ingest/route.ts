@@ -1,5 +1,5 @@
-import CreatePR from '@/utils/CreatePR';
-import UpdatePR from '@/utils/UpdatePR';
+import CreatePR from '@/utils/githubUtils/CreatePR';
+import UpdatePR from '@/utils/githubUtils/UpdatePR';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {

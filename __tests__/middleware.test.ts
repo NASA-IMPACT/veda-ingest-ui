@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { middleware } from './middleware';
+import { middleware } from '@/middleware';
 import { runWithAmplifyServerContext } from '@/utils/amplify-server-util';
 import { fetchAuthSession } from 'aws-amplify/auth/server';
 

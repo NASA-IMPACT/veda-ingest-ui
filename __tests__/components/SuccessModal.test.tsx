@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { describe, it, vi, expect, afterEach } from 'vitest';
-import SuccessModal from './SuccessModal';
+import SuccessModal from '@/components/SuccessModal';
 
 
 // Mock StyledModal
-vi.mock('./StyledModal', () => ({
+vi.mock('@/components/StyledModal', () => ({
   __esModule: true,
   default: vi.fn(({ children, okText, onOk }) => (
     <div data-testid="styled-modal">

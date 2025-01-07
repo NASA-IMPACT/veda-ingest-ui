@@ -8,7 +8,7 @@ import { Theme as AntDTheme } from '@rjsf/antd';
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
 
-import ObjectFieldTemplate from '../ObjectFieldTemplate';
+import ObjectFieldTemplate from '@/utils/ObjectFieldTemplate';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
 import { RJSFSchema, UiSchema } from '@rjsf/utils';
 

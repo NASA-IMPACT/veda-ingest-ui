@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { Endpoints } from '@octokit/types';
-import GetGithubToken from './GetGithubToken';
+import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 
 const base = process.env.TARGET_BRANCH ||'main';
 const prefix = 'Ingest Request for ';

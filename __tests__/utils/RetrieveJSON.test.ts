@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
-import RetrieveJSON from './RetrieveJSON';
-import GetGithubToken from './GetGithubToken';
+import RetrieveJSON from '@/utils/githubUtils/RetrieveJSON';
+import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 import { Octokit } from '@octokit/rest';
 
 vi.mock('@octokit/rest', () => ({
   Octokit: vi.fn(),
 }));
 
-vi.mock('./GetGithubToken');
+vi.mock('@/utils/githubUtils/GetGithubToken');
 
 describe('RetrieveJSON', () => {
   const mockGetContent = vi.fn();

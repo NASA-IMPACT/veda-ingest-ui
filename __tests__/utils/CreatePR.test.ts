@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, beforeAll, afterAll, Mock } from 'vitest';
-import CreatePR from './CreatePR';
-import { createOctokit } from './OctokitFactory';
-import GetGithubToken from './GetGithubToken';
+import CreatePR from '@/utils/githubUtils/CreatePR';
+import { createOctokit } from '@/utils/githubUtils/OctokitFactory';
+import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 import { RequestError } from '@octokit/request-error';
 
-vi.mock('./OctokitFactory');
-vi.mock('./GetGithubToken');
-vi.mock('./FormatFilename', () => ({
+vi.mock('@/utils/githubUtils/OctokitFactory');
+vi.mock('@/utils/githubUtils/GetGithubToken');
+vi.mock('@/utils/FormatFilename', () => ({
   formatFilename: (name: string) => name.replace(/\s+/g, '-').toLowerCase(),
 }));
 

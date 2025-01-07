@@ -1,4 +1,4 @@
-import RetrieveJSON from '@/utils/RetrieveJSON';
+import RetrieveJSON from '@/utils/githubUtils/RetrieveJSON';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {

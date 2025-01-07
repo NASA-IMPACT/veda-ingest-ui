@@ -1,7 +1,7 @@
 import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import ErrorModal from './ErrorModal';
+import ErrorModal from '@/components/ErrorModal';
 
 // Mock StyledModal
 vi.mock('@/components/StyledModal', () => ({

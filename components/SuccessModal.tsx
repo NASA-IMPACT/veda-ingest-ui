@@ -1,5 +1,5 @@
 import React from 'react';
-import StyledModal from './StyledModal';
+import StyledModal from '@/components/StyledModal';
 import { Status } from '@/types/global';
 
 type SuccessModalProps =
