@@ -7,6 +7,7 @@ import {
   HomeOutlined,
   PlusCircleOutlined,
   EditOutlined,
+  GlobalOutlined,
 } from '@ant-design/icons';
 
 const items: MenuProps['items'] = [
@@ -24,6 +25,11 @@ const items: MenuProps['items'] = [
     label: <Link href="/edit-ingest">Edit Ingest</Link>,
     key: '/edit-ingest',
     icon: <EditOutlined />,
+  },
+  {
+    label: <Link href="/renders">Renders</Link>,
+    key: '/renders',
+    icon: <GlobalOutlined />,
   },
 ];
 
