@@ -1,21 +1,21 @@
 import React from "react";
-import { Button, InputNumber, Select, Form, Row, Col } from "antd";
+import { Button, InputNumber, Select, Form, Row, Col, Input } from "antd";
 
 const { Option } = Select;
 
 interface COGControlsFormProps {
   metadata: any;
   selectedBand: number;
-  rescaleMin: number;
-  rescaleMax: number;
+  rescaleMin: number | null;
+  rescaleMax: number | null;
   selectedColormap: string;
   colorFormula: string;
   selectedResampling: string;
   noDataValue: string;
   hasChanges: boolean;
   onBandChange: (value: number) => void;
-  onRescaleMinChange: (value: number) => void;
-  onRescaleMaxChange: (value: number) => void;
+  onRescaleMinChange: (value: number | null) => void;
+  onRescaleMaxChange: (value: number | null) => void;
   onColormapChange: (value: string) => void;
   onColorFormulaChange: (value: string) => void;
   onResamplingChange: (value: string) => void;
@@ -48,7 +48,6 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
 }) => {
   return (
     <Form layout="vertical">
-      {/* First Row */}
       <Row gutter={16}>
         {/* Band */}
         <Col span={6}>
@@ -71,8 +70,8 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
         <Col span={6}>
           <Form.Item label="Rescale Min">
             <InputNumber
-              value={rescaleMin}
-              onChange={(value) => onRescaleMinChange(value as number)}
+              value={rescaleMin ?? undefined}
+              onChange={(value) => onRescaleMinChange(value)}
               style={{ width: "100%" }}
             />
           </Form.Item>
@@ -82,8 +81,8 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
         <Col span={6}>
           <Form.Item label="Rescale Max">
             <InputNumber
-              value={rescaleMax}
-              onChange={(value) => onRescaleMaxChange(value as number)}
+              value={rescaleMax ?? undefined}
+              onChange={(value) => onRescaleMaxChange(value)}
               style={{ width: "100%" }}
             />
           </Form.Item>
@@ -105,21 +104,20 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
         </Col>
       </Row>
 
-      {/* Second Row */}
       <Row gutter={16}>
         {/* Color Formula */}
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item label="Color Formula">
-            <InputNumber
+            <Input
               value={colorFormula}
-              onChange={(value) => onColorFormulaChange(value as string)}
-              style={{ width: "100%" }}
+              onChange={(e) => onColorFormulaChange(e.target.value)}
+              placeholder="e.g., gamma RGB 2.2"
             />
           </Form.Item>
         </Col>
 
         {/* Resampling */}
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item label="Resampling">
             <Select
               value={selectedResampling}
@@ -139,18 +137,18 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
         </Col>
 
         {/* NoData Value */}
-        <Col span={6}>
+        <Col span={8}>
           <Form.Item label="NoData Value">
-            <InputNumber
+            <Input
               value={noDataValue}
-              onChange={(value) => onNoDataValueChange(value as string)}
-              style={{ width: "100%" }}
+              onChange={(e) => onNoDataValueChange(e.target.value)}
+              placeholder="e.g., -9999"
             />
           </Form.Item>
         </Col>
       </Row>
 
-      {/* Buttons Row */}
+      {/* Buttons */}
       <Row justify="center" style={{ marginTop: "16px" }}>
         <Col>
           <Button

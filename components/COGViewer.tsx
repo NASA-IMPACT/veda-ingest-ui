@@ -7,15 +7,14 @@ import L, { Map } from "leaflet";
 
 const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false });
-
-const baseUrl = 'https://openveda.cloud';
+const baseUrl = 'https://staging.openveda.cloud';
 
 const COGViewer: React.FC = () => {
   const [cogUrl, setCogUrl] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<any>(null);
   const [selectedBand, setSelectedBand] = useState<number>(1);
-  const [rescaleMin, setRescaleMin] = useState<number>(-3.4028235e38);
-  const [rescaleMax, setRescaleMax] = useState<number>(3.4028235e38);
+  const [rescaleMin, setRescaleMin] = useState<number | null>(null);
+  const [rescaleMax, setRescaleMax] = useState<number | null>(null);
   const [selectedColormap, setSelectedColormap] = useState<string>("Internal");
   const [colorFormula, setColorFormula] = useState<string>("");
   const [selectedResampling, setSelectedResampling] = useState<string>("nearest");
@@ -35,16 +34,10 @@ const COGViewer: React.FC = () => {
       setMetadata(data);
       setSelectedBand(1);
       message.success("COG metadata loaded successfully!");
-      fetchTileUrl(
-        url,
-        1, // Default to the first band
-        rescaleMin,
-        rescaleMax,
-        selectedColormap,
-        colorFormula,
-        selectedResampling,
-        noDataValue
-      );
+
+      // Request only the first 3 bands for the initial tile load
+      const bands = data.band_descriptions.slice(0, 3).map((_: any, index: number) => index + 1);
+      fetchTileUrl(url, bands, null, null, selectedColormap, colorFormula, selectedResampling, noDataValue);
     } catch (error) {
       console.error("Error fetching metadata:", error);
       message.error("Failed to load COG metadata. Check the URL.");
@@ -55,9 +48,9 @@ const COGViewer: React.FC = () => {
 
   const fetchTileUrl = async (
     url: string,
-    band: number,
-    rescaleMin: number,
-    rescaleMax: number,
+    bands: number | number[],
+    rescaleMin: number | null,
+    rescaleMax: number | null,
     colormap: string,
     colorFormula?: string,
     resampling?: string,
@@ -72,17 +65,24 @@ const COGViewer: React.FC = () => {
       const colorFormulaParam = colorFormula ? `&color_formula=${encodeURIComponent(colorFormula)}` : "";
       const resamplingParam = resampling && resampling !== "nearest" ? `&resampling=${resampling}` : "";
       const noDataParam = noData ? `&nodata=${encodeURIComponent(noData)}` : "";
+      const rescaleParam =
+        rescaleMin !== null && rescaleMax !== null ? `&rescale=${rescaleMin},${rescaleMax}` : "";
+
+      const bidxParams = Array.isArray(bands)
+        ? bands.map((band) => `&bidx=${band}`).join("")
+        : `&bidx=${bands}`;
 
       const response = await fetch(
         `${baseUrl}/api/raster/cog/WebMercatorQuad/tilejson.json?url=${encodeURIComponent(
           url
-        )}&bidx=${band}&rescale=${rescaleMin},${rescaleMax}${colormapParam}${colorFormulaParam}${resamplingParam}${noDataParam}`
+        )}${bidxParams}${colormapParam}${colorFormulaParam}${resamplingParam}${noDataParam}${rescaleParam}`
       );
 
       if (!response.ok) throw new Error("Failed to fetch tile URL");
       const data = await response.json();
       setTileUrl(data.tiles[0]);
 
+      // Fit map bounds to the COG
       if (mapRef.current && data.bounds) {
         const bounds = L.latLngBounds([
           [data.bounds[1], data.bounds[0]],
@@ -115,78 +115,6 @@ const COGViewer: React.FC = () => {
         />
       </div>
 
-      {metadata && (
-        <div style={{ padding: "10px", backgroundColor: "#f8f9fa", borderBottom: "1px solid #ddd" }}>
-          <COGControlsForm
-            metadata={metadata}
-            selectedBand={selectedBand}
-            rescaleMin={rescaleMin}
-            rescaleMax={rescaleMax}
-            selectedColormap={selectedColormap}
-            colorFormula={colorFormula}
-            selectedResampling={selectedResampling}
-            noDataValue={noDataValue}
-            hasChanges={hasChanges}
-            onBandChange={(value) => {
-              setSelectedBand(value);
-              setHasChanges(true);
-            }}
-            onRescaleMinChange={(value) => {
-              setRescaleMin(value);
-              setHasChanges(true);
-            }}
-            onRescaleMaxChange={(value) => {
-              setRescaleMax(value);
-              setHasChanges(true);
-            }}
-            onColormapChange={(value) => {
-              setSelectedColormap(value);
-              setHasChanges(true);
-            }}
-            onColorFormulaChange={(value) => {
-              setColorFormula(value);
-              setHasChanges(true);
-            }}
-            onResamplingChange={(value) => {
-              setSelectedResampling(value);
-              setHasChanges(true);
-            }}
-            onNoDataValueChange={(value) => {
-              setNoDataValue(value);
-              setHasChanges(true);
-            }}
-            onUpdateTileLayer={() => {
-              if (cogUrl) {
-                fetchTileUrl(
-                  cogUrl,
-                  selectedBand,
-                  rescaleMin,
-                  rescaleMax,
-                  selectedColormap,
-                  colorFormula,
-                  selectedResampling,
-                  noDataValue
-                );
-              }
-            }}
-            onViewRenderingOptions={() => setIsModalVisible(true)}
-            loading={loading}
-          />
-        </div>
-      )}
-
-      <RenderingOptionsModal
-        visible={isModalVisible}
-        options={{
-          bidx: [selectedBand],
-          colormap_name: selectedColormap.toLowerCase(),
-          ...(selectedResampling !== "nearest" && { resampling: selectedResampling }),
-          ...(colorFormula && { color_formula: colorFormula }),
-          ...(noDataValue && { nodata: noDataValue }),
-        }}
-        onClose={() => setIsModalVisible(false)}
-      />
-
       <div style={{ flex: 1, position: "relative" }}>
         {loading && (
           <div
@@ -206,19 +134,63 @@ const COGViewer: React.FC = () => {
             <Spin size="large" tip="Loading..." />
           </div>
         )}
+        {metadata && (
+    <div style={{ padding: "10px", backgroundColor: "#f8f9fa", borderBottom: "1px solid #ddd" }}>
+      <COGControlsForm
+        metadata={metadata}
+        selectedBand={selectedBand}
+        rescaleMin={rescaleMin}
+        rescaleMax={rescaleMax}
+        selectedColormap={selectedColormap}
+        colorFormula={colorFormula}
+        selectedResampling={selectedResampling}
+        noDataValue={noDataValue}
+        hasChanges={hasChanges}
+        onBandChange={setSelectedBand}
+        onRescaleMinChange={setRescaleMin}
+        onRescaleMaxChange={setRescaleMax}
+        onColormapChange={setSelectedColormap}
+        onColorFormulaChange={setColorFormula}
+        onResamplingChange={setSelectedResampling}
+        onNoDataValueChange={setNoDataValue}
+        onUpdateTileLayer={() =>
+          fetchTileUrl(
+            cogUrl!,
+            selectedBand,
+            rescaleMin,
+            rescaleMax,
+            selectedColormap,
+            colorFormula,
+            selectedResampling,
+            noDataValue
+          )
+        }
+        onViewRenderingOptions={() => setIsModalVisible(true)}
+        loading={loading}
+      />
+    </div>
+  )}
+
         <MapContainer
           center={[0, 0]}
           zoom={2}
           style={{ height: "100%", width: "100%" }}
-          //@ts-expect-error leaflet something
+          // @ts-expect-error leaflet
           whenReady={(map) => {
             mapRef.current = map.target;
           }}
         >
           <TileLayer
-            url={tileUrl || "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"}
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="&copy; OpenStreetMap contributors"
           />
+          {tileUrl && (
+            <TileLayer
+              url={tileUrl}
+              opacity={1.0}
+              attribution="&copy; Your COG Data"
+            />
+          )}
         </MapContainer>
       </div>
     </div>
