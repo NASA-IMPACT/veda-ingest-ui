@@ -1,7 +1,8 @@
 import React, { useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Input, message, Spin } from "antd";
-import COGControlsForm from "./COGControlsForm";
+import COGControlsForm from "@/components/COGControlsForm";
+import RenderingOptionsModal from "@/components/RenderingOptionsModal";
 import L, { Map } from "leaflet";
 
 // Dynamically import Leaflet components to avoid SSR issues
@@ -27,6 +28,10 @@ const COGViewer: React.FC = () => {
   const mapRef = useRef<Map | null>(null);
 
   const fetchMetadata = async (url: string) => {
+    if (!url) {
+      message.error("COG URL is required");
+      return
+    }
     setLoading(true);
     try {
       const response = await fetch(`${baseUrl}/api/raster/cog/info?url=${encodeURIComponent(url)}`);
@@ -34,10 +39,10 @@ const COGViewer: React.FC = () => {
       const data = await response.json();
       setMetadata(data);
 
-      // Default bands for RGB selection
+      // Default RGB bands
       const bands = data.band_descriptions.slice(0, 3).map((_: any, index: number) => index + 1);
       setSelectedBands(bands.length === 1 ? [1, 1, 1] : bands);
-
+      
       message.success("COG metadata loaded successfully!");
 
       // Fetch tiles for the default bands
@@ -64,16 +69,13 @@ const COGViewer: React.FC = () => {
     try {
       if (!url) throw new Error("COG URL is required.");
 
-      const colormapName = colormap?.toLowerCase() || "internal";
-      const colormapParam = colormapName !== "internal" ? `&colormap_name=${colormapName}` : "";
+      const bidxParams = bands.map((band) => `&bidx=${band}`).join("");
+      const colormapParam = colormap.toLowerCase() !== "internal" ? `&colormap_name=${colormap.toLowerCase()}` : "";
       const colorFormulaParam = colorFormula ? `&color_formula=${encodeURIComponent(colorFormula)}` : "";
-      const resamplingParam = resampling && resampling !== "nearest" ? `&resampling=${resampling}` : "";
+      const resamplingParam = resampling !== "nearest" ? `&resampling=${resampling}` : "";
       const noDataParam = noData ? `&nodata=${encodeURIComponent(noData)}` : "";
       const rescaleParam =
         rescaleMin !== null && rescaleMax !== null ? `&rescale=${rescaleMin},${rescaleMax}` : "";
-
-      // Generate multiple bidx query parameters for the RGB bands
-      const bidxParams = bands.map((band) => `&bidx=${band}`).join("");
 
       const response = await fetch(
         `${baseUrl}/api/raster/cog/WebMercatorQuad/tilejson.json?url=${encodeURIComponent(
@@ -108,11 +110,11 @@ const COGViewer: React.FC = () => {
     const channelIndex = colorChannel === "R" ? 0 : colorChannel === "G" ? 1 : 2;
     newBands[channelIndex] = bandIndex;
     setSelectedBands(newBands);
-    setHasChanges(true); // Mark as changed
+    setHasChanges(true);
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       {/* URL Input */}
       <div style={{ padding: "10px", backgroundColor: "#f8f9fa", borderBottom: "1px solid #ddd" }}>
         <Input.Search
@@ -140,13 +142,37 @@ const COGViewer: React.FC = () => {
             selectedResampling={selectedResampling}
             noDataValue={noDataValue}
             hasChanges={hasChanges}
-            onBandChange={handleBandChange}
-            onRescaleMinChange={setRescaleMin}
-            onRescaleMaxChange={setRescaleMax}
-            onColormapChange={setSelectedColormap}
-            onColorFormulaChange={setColorFormula}
-            onResamplingChange={setSelectedResampling}
-            onNoDataValueChange={setNoDataValue}
+            onBandChange={(bandIndex, colorChannel) => {
+              const newBands = [...selectedBands];
+              const channelIndex = colorChannel === "R" ? 0 : colorChannel === "G" ? 1 : 2;
+              newBands[channelIndex] = bandIndex;
+              setSelectedBands(newBands);
+              setHasChanges(true);
+            }}
+            onRescaleMinChange={(value) => {
+              setRescaleMin(value);
+              setHasChanges(true);
+            }}
+            onRescaleMaxChange={(value) => {
+              setRescaleMax(value);
+              setHasChanges(true);
+            }}
+            onColormapChange={(value) => {
+              setSelectedColormap(value);
+              setHasChanges(true);
+            }}
+            onColorFormulaChange={(value) => {
+              setColorFormula(value);
+              setHasChanges(true);
+            }}
+            onResamplingChange={(value) => {
+              setSelectedResampling(value);
+              setHasChanges(true);
+            }}
+            onNoDataValueChange={(value) => {
+              setNoDataValue(value);
+              setHasChanges(true);
+            }}
             onUpdateTileLayer={() =>
               fetchTileUrl(
                 cogUrl!,
@@ -166,7 +192,7 @@ const COGViewer: React.FC = () => {
       )}
 
       {/* Map */}
-      <div style={{ flex: 1, position: "relative" }}>
+      <div style={{ height: metadata ? "70vh" : "80vh", position: "relative" }}>
         {loading && (
           <div
             style={{
@@ -189,8 +215,8 @@ const COGViewer: React.FC = () => {
           center={[0, 0]}
           zoom={2}
           style={{ height: "100%", width: "100%" }}
-          // @ts-expect-error something from leaflet
-          whenReady={(map: { target: L.Map | null; }) => {
+          // @ts-expect-error leaflet something
+          whenReady={(map) => {
             mapRef.current = map.target;
           }}
         >
@@ -207,6 +233,19 @@ const COGViewer: React.FC = () => {
           )}
         </MapContainer>
       </div>
+
+      {/* Rendering Options Modal */}
+      <RenderingOptionsModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        options={{
+          bidx: selectedBands,
+          colormap_name: selectedColormap.toLowerCase(),
+          color_formula: colorFormula || undefined,
+          resampling: selectedResampling !== "nearest" ? selectedResampling : undefined,
+          nodata: noDataValue || undefined,
+        }}
+      />
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Select, Form, Row, Col } from "antd";
+import { Button, InputNumber, Select, Form, Row, Col, Input } from "antd";
 
 const { Option } = Select;
 
@@ -52,71 +52,136 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
     <Form layout="vertical">
       {/* RGB Band Selection */}
       {hasMultipleBands && (
-        <>
-          <Row gutter={16}>
-            {/* R Band */}
-            <Col span={8}>
-              <Form.Item label="R Band">
-                <Select
-                  value={selectedBands[0]}
-                  onChange={(value) => onBandChange(value, "R")}
-                >
-                  {metadata.band_descriptions.map(([band, description]: [string, string], index: number) => (
-                    <Option key={index} value={index + 1}>
-                      {`${band} - ${description}`}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
+        <Row gutter={16}>
+          {/* R Band */}
+          <Col span={8}>
+            <Form.Item label="R Band">
+              <Select
+                value={selectedBands[0]}
+                onChange={(value) => onBandChange(value, "R")}
+              >
+                {metadata.band_descriptions.map(([band, description]: [string, string], index: number) => (
+                  <Option key={index} value={index + 1}>
+                    {`${band} - ${description}`}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
 
-            {/* G Band */}
-            <Col span={8}>
-              <Form.Item label="G Band">
-                <Select
-                  value={selectedBands[1]}
-                  onChange={(value) => onBandChange(value, "G")}
-                >
-                  {metadata.band_descriptions.map(([band, description]: [string, string], index: number) => (
-                    <Option key={index} value={index + 1}>
-                      {`${band} - ${description}`}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
+          {/* G Band */}
+          <Col span={8}>
+            <Form.Item label="G Band">
+              <Select
+                value={selectedBands[1]}
+                onChange={(value) => onBandChange(value, "G")}
+              >
+                {metadata.band_descriptions.map(([band, description]: [string, string], index: number) => (
+                  <Option key={index} value={index + 1}>
+                    {`${band} - ${description}`}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
 
-            {/* B Band */}
-            <Col span={8}>
-              <Form.Item label="B Band">
-                <Select
-                  value={selectedBands[2]}
-                  onChange={(value) => onBandChange(value, "B")}
-                >
-                  {metadata.band_descriptions.map(([band, description]: [string, string], index: number) => (
-                    <Option key={index} value={index + 1}>
-                      {`${band} - ${description}`}
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-        </>
+          {/* B Band */}
+          <Col span={8}>
+            <Form.Item label="B Band">
+              <Select
+                value={selectedBands[2]}
+                onChange={(value) => onBandChange(value, "B")}
+              >
+                {metadata.band_descriptions.map(([band, description]: [string, string], index: number) => (
+                  <Option key={index} value={index + 1}>
+                    {`${band} - ${description}`}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
       )}
 
-      {/* Rescale, Colormap, and Buttons */}
+      {/* Rescale Min and Max */}
       <Row gutter={16}>
-        {/* Rescale Min */}
-        <Col span={6}>
+        <Col span={12}>
           <Form.Item label="Rescale Min">
-            <Select value={rescaleMin} onChange={(value) => onRescaleMinChange(value)} />
+            <InputNumber
+              value={rescaleMin ?? undefined}
+              onChange={(value) => onRescaleMinChange(value)}
+              style={{ width: "100%" }}
+            />
           </Form.Item>
         </Col>
-        {/* Rescale Max */}
-        <Col span={6}>
+        <Col span={12}>
           <Form.Item label="Rescale Max">
-            <Select value={rescaleMax} onChange={(value) => onRescaleMaxChange(value)} />
+            <InputNumber
+              value={rescaleMax ?? undefined}
+              onChange={(value) => onRescaleMaxChange(value)}
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
+        </Col>
+      </Row>
+
+      {/* Colormap */}
+      <Row gutter={16}>
+        <Col span={8}>
+          <Form.Item label="Colormap">
+            <Select
+              value={selectedColormap}
+              onChange={(value) => onColormapChange(value)}
+            >
+              <Option value="Internal">Internal</Option>
+              <Option value="CFastie">CFastie</Option>
+              <Option value="RPlumbo">RPlumbo</Option>
+              <Option value="Schwarzwald">Schwarzwald</Option>
+            </Select>
+          </Form.Item>
+        </Col>
+
+        {/* Color Formula */}
+        <Col span={8}>
+          <Form.Item label="Color Formula">
+            <Input
+              value={colorFormula}
+              onChange={(e) => onColorFormulaChange(e.target.value)}
+              placeholder="e.g., gamma RGB 2.2"
+            />
+          </Form.Item>
+        </Col>
+
+        {/* Resampling */}
+        <Col span={8}>
+          <Form.Item label="Resampling">
+            <Select
+              value={selectedResampling}
+              onChange={(value) => onResamplingChange(value)}
+            >
+              <Option value="nearest">Nearest</Option>
+              <Option value="bilinear">Bilinear</Option>
+              <Option value="cubic">Cubic</Option>
+              <Option value="cubic_spline">Cubic Spline</Option>
+              <Option value="lanczos">Lanczos</Option>
+              <Option value="average">Average</Option>
+              <Option value="mode">Mode</Option>
+              <Option value="gauss">Gauss</Option>
+              <Option value="rms">RMS</Option>
+            </Select>
+          </Form.Item>
+        </Col>
+      </Row>
+
+      {/* NoData */}
+      <Row gutter={16}>
+        <Col span={24}>
+          <Form.Item label="NoData Value">
+            <Input
+              value={noDataValue}
+              onChange={(e) => onNoDataValueChange(e.target.value)}
+              placeholder="e.g., -9999"
+            />
           </Form.Item>
         </Col>
       </Row>
