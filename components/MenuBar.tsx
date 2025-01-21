@@ -27,8 +27,8 @@ const items: MenuProps['items'] = [
     icon: <EditOutlined />,
   },
   {
-    label: <Link href="/renders">Renders</Link>,
-    key: '/renders',
+    label: <Link href="/cog-viewer">COG Viewer</Link>,
+    key: '/cog-viewer',
     icon: <GlobalOutlined />,
   },
 ];

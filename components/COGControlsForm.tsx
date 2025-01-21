@@ -1,11 +1,11 @@
 import React from "react";
-import { Button, InputNumber, Select, Form, Row, Col, Input } from "antd";
+import { Button, Select, Form, Row, Col } from "antd";
 
 const { Option } = Select;
 
 interface COGControlsFormProps {
   metadata: any;
-  selectedBand: number;
+  selectedBands: number[]; // [R, G, B]
   rescaleMin: number | null;
   rescaleMax: number | null;
   selectedColormap: string;
@@ -13,7 +13,7 @@ interface COGControlsFormProps {
   selectedResampling: string;
   noDataValue: string;
   hasChanges: boolean;
-  onBandChange: (value: number) => void;
+  onBandChange: (bandIndex: number, colorChannel: "R" | "G" | "B") => void;
   onRescaleMinChange: (value: number | null) => void;
   onRescaleMaxChange: (value: number | null) => void;
   onColormapChange: (value: string) => void;
@@ -27,7 +27,7 @@ interface COGControlsFormProps {
 
 const COGControlsForm: React.FC<COGControlsFormProps> = ({
   metadata,
-  selectedBand,
+  selectedBands,
   rescaleMin,
   rescaleMax,
   selectedColormap,
@@ -46,121 +46,92 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
   onViewRenderingOptions,
   loading,
 }) => {
+  const hasMultipleBands = metadata?.band_descriptions?.length > 1;
+
   return (
     <Form layout="vertical">
-      <Row gutter={16}>
-        {/* Band */}
-        <Col span={6}>
-          <Form.Item label="Band">
-            <Select
-              value={selectedBand}
-              onChange={(value) => onBandChange(value)}
-              disabled={!metadata || !metadata.band_descriptions}
-            >
-              {metadata?.band_descriptions?.map(([band, description]: [string, string], index: number) => (
-                <Option key={index} value={index + 1}>
-                  {`${band} - ${description}`}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Col>
+      {/* RGB Band Selection */}
+      {hasMultipleBands && (
+        <>
+          <Row gutter={16}>
+            {/* R Band */}
+            <Col span={8}>
+              <Form.Item label="R Band">
+                <Select
+                  value={selectedBands[0]}
+                  onChange={(value) => onBandChange(value, "R")}
+                >
+                  {metadata.band_descriptions.map(([band, description]: [string, string], index: number) => (
+                    <Option key={index} value={index + 1}>
+                      {`${band} - ${description}`}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
 
+            {/* G Band */}
+            <Col span={8}>
+              <Form.Item label="G Band">
+                <Select
+                  value={selectedBands[1]}
+                  onChange={(value) => onBandChange(value, "G")}
+                >
+                  {metadata.band_descriptions.map(([band, description]: [string, string], index: number) => (
+                    <Option key={index} value={index + 1}>
+                      {`${band} - ${description}`}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+
+            {/* B Band */}
+            <Col span={8}>
+              <Form.Item label="B Band">
+                <Select
+                  value={selectedBands[2]}
+                  onChange={(value) => onBandChange(value, "B")}
+                >
+                  {metadata.band_descriptions.map(([band, description]: [string, string], index: number) => (
+                    <Option key={index} value={index + 1}>
+                      {`${band} - ${description}`}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+        </>
+      )}
+
+      {/* Rescale, Colormap, and Buttons */}
+      <Row gutter={16}>
         {/* Rescale Min */}
         <Col span={6}>
           <Form.Item label="Rescale Min">
-            <InputNumber
-              value={rescaleMin ?? undefined}
-              onChange={(value) => onRescaleMinChange(value)}
-              style={{ width: "100%" }}
-            />
+            <Select value={rescaleMin} onChange={(value) => onRescaleMinChange(value)} />
           </Form.Item>
         </Col>
-
         {/* Rescale Max */}
         <Col span={6}>
           <Form.Item label="Rescale Max">
-            <InputNumber
-              value={rescaleMax ?? undefined}
-              onChange={(value) => onRescaleMaxChange(value)}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-        </Col>
-
-        {/* Colormap */}
-        <Col span={6}>
-          <Form.Item label="Colormap">
-            <Select
-              value={selectedColormap}
-              onChange={(value) => onColormapChange(value)}
-            >
-              <Option value="Internal">Internal</Option>
-              <Option value="CFastie">CFastie</Option>
-              <Option value="RPlumbo">RPlumbo</Option>
-              <Option value="Schwarzwald">Schwarzwald</Option>
-            </Select>
-          </Form.Item>
-        </Col>
-      </Row>
-
-      <Row gutter={16}>
-        {/* Color Formula */}
-        <Col span={8}>
-          <Form.Item label="Color Formula">
-            <Input
-              value={colorFormula}
-              onChange={(e) => onColorFormulaChange(e.target.value)}
-              placeholder="e.g., gamma RGB 2.2"
-            />
-          </Form.Item>
-        </Col>
-
-        {/* Resampling */}
-        <Col span={8}>
-          <Form.Item label="Resampling">
-            <Select
-              value={selectedResampling}
-              onChange={(value) => onResamplingChange(value)}
-            >
-              <Option value="nearest">Nearest</Option>
-              <Option value="bilinear">Bilinear</Option>
-              <Option value="cubic">Cubic</Option>
-              <Option value="cubic_spline">Cubic Spline</Option>
-              <Option value="lanczos">Lanczos</Option>
-              <Option value="average">Average</Option>
-              <Option value="mode">Mode</Option>
-              <Option value="gauss">Gauss</Option>
-              <Option value="rms">RMS</Option>
-            </Select>
-          </Form.Item>
-        </Col>
-
-        {/* NoData Value */}
-        <Col span={8}>
-          <Form.Item label="NoData Value">
-            <Input
-              value={noDataValue}
-              onChange={(e) => onNoDataValueChange(e.target.value)}
-              placeholder="e.g., -9999"
-            />
+            <Select value={rescaleMax} onChange={(value) => onRescaleMaxChange(value)} />
           </Form.Item>
         </Col>
       </Row>
 
       {/* Buttons */}
       <Row justify="center" style={{ marginTop: "16px" }}>
-        <Col>
-          <Button
-            type="primary"
-            onClick={onUpdateTileLayer}
-            disabled={!hasChanges || loading}
-            style={{ marginRight: "10px" }}
-          >
-            Update Tile Layer
-          </Button>
-          <Button onClick={onViewRenderingOptions}>View Rendering Options</Button>
-        </Col>
+        <Button
+          type="primary"
+          onClick={onUpdateTileLayer}
+          disabled={!hasChanges || loading}
+          style={{ marginRight: "10px" }}
+        >
+          Update Tile Layer
+        </Button>
+        <Button onClick={onViewRenderingOptions}>View Rendering Options</Button>
       </Row>
     </Form>
   );
