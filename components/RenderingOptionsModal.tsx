@@ -8,10 +8,15 @@ interface RenderingOptionsModalProps {
 }
 
 const RenderingOptionsModal: React.FC<RenderingOptionsModalProps> = ({ visible, options, onClose }) => {
+  const displayedOptions = {
+    ...options, 
+    "assets": [
+              "cog_default"
+          ]}
   return (
-    <Modal title="COG Rendering Options" visible={visible} onCancel={onClose} footer={null}>
+    <Modal title="COG Rendering Options" open={visible} onCancel={onClose} footer={null}>
       <pre style={{ background: "#f8f9fa", padding: "10px", borderRadius: "5px" }}>
-        {JSON.stringify(options, null, 2)}
+        {JSON.stringify(displayedOptions, null, 2)}
       </pre>
     </Modal>
   );
