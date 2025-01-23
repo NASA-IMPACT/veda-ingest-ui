@@ -1,25 +1,24 @@
 import React from "react";
-import { Button, InputNumber, Select, Form, Row, Col, Input } from "antd";
+import { Form, InputNumber, Select, Button, Row, Col, Card, Typography } from "antd";
 
 const { Option } = Select;
+const { Title } = Typography;
 
 interface COGControlsFormProps {
   metadata: any;
-  selectedBands: number[]; // [R, G, B]
-  rescaleMin: number | null;
-  rescaleMax: number | null;
+  selectedBands: number[];
+  rescale: [number | null, number | null][];
   selectedColormap: string;
-  colorFormula: string;
-  selectedResampling: string;
-  noDataValue: string;
+  colorFormula: string | null;
+  selectedResampling: string | null;
+  noDataValue: string | null;
   hasChanges: boolean;
   onBandChange: (bandIndex: number, colorChannel: "R" | "G" | "B") => void;
-  onRescaleMinChange: (value: number | null) => void;
-  onRescaleMaxChange: (value: number | null) => void;
+  onRescaleChange: (index: number, values: [number | null, number | null]) => void;
   onColormapChange: (value: string) => void;
-  onColorFormulaChange: (value: string) => void;
-  onResamplingChange: (value: string) => void;
-  onNoDataValueChange: (value: string) => void;
+  onColorFormulaChange: (value: string | null) => void;
+  onResamplingChange: (value: string | null) => void;
+  onNoDataValueChange: (value: string | null) => void;
   onUpdateTileLayer: () => void;
   onViewRenderingOptions: () => void;
   loading: boolean;
@@ -28,16 +27,14 @@ interface COGControlsFormProps {
 const COGControlsForm: React.FC<COGControlsFormProps> = ({
   metadata,
   selectedBands,
-  rescaleMin,
-  rescaleMax,
+  rescale,
   selectedColormap,
   colorFormula,
   selectedResampling,
   noDataValue,
   hasChanges,
   onBandChange,
-  onRescaleMinChange,
-  onRescaleMaxChange,
+  onRescaleChange,
   onColormapChange,
   onColorFormulaChange,
   onResamplingChange,
@@ -46,92 +43,76 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
   onViewRenderingOptions,
   loading,
 }) => {
-  const hasMultipleBands = metadata?.band_descriptions?.length > 1;
+  const bandOptions = metadata.band_descriptions.map((desc: any, index: number) => ({
+    value: index + 1,
+    label: `${desc[0]} - ${desc[1]}`,
+  }));
+
+  const singleBand = metadata.band_descriptions.length === 1;
 
   return (
     <Form layout="vertical">
-      {/* RGB Band Selection */}
-      {hasMultipleBands && (
+      {/* Single Band Heading */}
+      {singleBand ? (
+        <Row>
+          <Col span={24}>
+            <Title level={5}>
+              Band: {metadata.band_descriptions[0][1]} (Index: 1)
+            </Title>
+          </Col>
+        </Row>
+      ) : (
+        /* RGB Band Selectors */
         <Row gutter={16}>
-          {/* R Band */}
-          <Col span={8}>
-            <Form.Item label="R Band">
-              <Select
-                value={selectedBands[0]}
-                onChange={(value) => onBandChange(value, "R")}
-              >
-                {metadata.band_descriptions.map(([band, description]: [string, string], index: number) => (
-                  <Option key={index} value={index + 1}>
-                    {`${band} - ${description}`}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-
-          {/* G Band */}
-          <Col span={8}>
-            <Form.Item label="G Band">
-              <Select
-                value={selectedBands[1]}
-                onChange={(value) => onBandChange(value, "G")}
-              >
-                {metadata.band_descriptions.map(([band, description]: [string, string], index: number) => (
-                  <Option key={index} value={index + 1}>
-                    {`${band} - ${description}`}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-
-          {/* B Band */}
-          <Col span={8}>
-            <Form.Item label="B Band">
-              <Select
-                value={selectedBands[2]}
-                onChange={(value) => onBandChange(value, "B")}
-              >
-                {metadata.band_descriptions.map(([band, description]: [string, string], index: number) => (
-                  <Option key={index} value={index + 1}>
-                    {`${band} - ${description}`}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
+          {["R", "G", "B"].map((channel, index) => (
+            <Col key={channel} span={8}>
+              <Form.Item label={`Band (${channel})`}>
+                <Select
+                  value={selectedBands[index]}
+                  onChange={(value) => onBandChange(value, channel as "R" | "G" | "B")}
+                  options={bandOptions}
+                />
+              </Form.Item>
+            </Col>
+          ))}
         </Row>
       )}
 
-      {/* Rescale Min and Max */}
-      <Row gutter={16}>
-        <Col span={12}>
-          <Form.Item label="Rescale Min">
-            <InputNumber
-              value={rescaleMin ?? undefined}
-              onChange={(value) => onRescaleMinChange(value)}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item label="Rescale Max">
-            <InputNumber
-              value={rescaleMax ?? undefined}
-              onChange={(value) => onRescaleMaxChange(value)}
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
-        </Col>
-      </Row>
+      {/* Rescale Inputs */}
+      <Form.Item label="Rescale">
+        <Row gutter={16}>
+          {rescale.map((values, index) => (
+            <Col key={`rescale-${index}`} span={6}>
+              <Card size="small" title={`Band ${index + 1}`}>
+                <InputNumber
+                  value={values[0]}
+                  onChange={(value) =>
+                    onRescaleChange(index, [value !== null ? value : null, values[1]])
+                  }
+                  placeholder="Min"
+                  style={{ width: "45%", marginRight: "10%" }}
+                />
+                <InputNumber
+                  value={values[1]}
+                  onChange={(value) =>
+                    onRescaleChange(index, [values[0], value !== null ? value : null])
+                  }
+                  placeholder="Max"
+                  style={{ width: "45%" }}
+                />
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </Form.Item>
 
-      {/* Colormap */}
+      {/* Other Inputs */}
       <Row gutter={16}>
-        <Col span={8}>
+        <Col span={12}>
           <Form.Item label="Colormap">
             <Select
               value={selectedColormap}
-              onChange={(value) => onColormapChange(value)}
+              onChange={onColormapChange}
             >
               <Option value="Internal">Internal</Option>
               <Option value="CFastie">CFastie</Option>
@@ -140,24 +121,25 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
             </Select>
           </Form.Item>
         </Col>
-
-        {/* Color Formula */}
-        <Col span={8}>
+        <Col span={12}>
           <Form.Item label="Color Formula">
-            <Input
-              value={colorFormula}
-              onChange={(e) => onColorFormulaChange(e.target.value)}
-              placeholder="e.g., gamma RGB 2.2"
+            <InputNumber
+              value={colorFormula !== null ? Number(colorFormula) : undefined}
+              onChange={(value) =>
+                onColorFormulaChange(value !== null ? String(value) : null)
+              }
+              style={{ width: "100%" }}
             />
           </Form.Item>
         </Col>
+      </Row>
 
-        {/* Resampling */}
-        <Col span={8}>
+      <Row gutter={16}>
+        <Col span={12}>
           <Form.Item label="Resampling">
             <Select
               value={selectedResampling}
-              onChange={(value) => onResamplingChange(value)}
+              onChange={onResamplingChange}
             >
               <Option value="nearest">Nearest</Option>
               <Option value="bilinear">Bilinear</Option>
@@ -171,32 +153,39 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
             </Select>
           </Form.Item>
         </Col>
-      </Row>
-
-      {/* NoData */}
-      <Row gutter={16}>
-        <Col span={24}>
-          <Form.Item label="NoData Value">
-            <Input
-              value={noDataValue}
-              onChange={(e) => onNoDataValueChange(e.target.value)}
-              placeholder="e.g., -9999"
+        <Col span={12}>
+          <Form.Item label="No Data Value">
+            <InputNumber
+              value={noDataValue !== null ? Number(noDataValue) : undefined}
+              onChange={(value) =>
+                onNoDataValueChange(value !== null ? String(value) : null)
+              }
+              style={{ width: "100%" }}
             />
           </Form.Item>
         </Col>
       </Row>
 
       {/* Buttons */}
-      <Row justify="center" style={{ marginTop: "16px" }}>
-        <Button
-          type="primary"
-          onClick={onUpdateTileLayer}
-          disabled={!hasChanges || loading}
-          style={{ marginRight: "10px" }}
-        >
-          Update Tile Layer
-        </Button>
-        <Button onClick={onViewRenderingOptions}>View Rendering Options</Button>
+      <Row gutter={16} justify="center">
+        <Col span={12}>
+          <Button
+            type="primary"
+            onClick={onUpdateTileLayer}
+            disabled={!hasChanges || loading}
+            block
+          >
+            Update Tile Layer
+          </Button>
+        </Col>
+        <Col span={12}>
+          <Button
+            onClick={onViewRenderingOptions}
+            block
+          >
+            View Rendering Options
+          </Button>
+        </Col>
       </Row>
     </Form>
   );

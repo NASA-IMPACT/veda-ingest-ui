@@ -13,14 +13,13 @@ const baseUrl = 'https://staging.openveda.cloud';
 
 const COGViewer: React.FC = () => {
   const [cogUrl, setCogUrl] = useState<string | null>(null);
-  const [metadata, setMetadata] = useState<any>(null);
-  const [selectedBands, setSelectedBands] = useState<number[]>([1, 1, 1]); // Default to first band for R, G, and B
-  const [rescaleMin, setRescaleMin] = useState<number | null>(null);
-  const [rescaleMax, setRescaleMax] = useState<number | null>(null);
+  const [metadata, setMetadata] = useState<any | null>(null);
+  const [selectedBands, setSelectedBands] = useState<number[]>([]); // Initially empty
+  const [rescale, setRescale] = useState<[number | null, number | null][]>([]);
   const [selectedColormap, setSelectedColormap] = useState<string>("Internal");
-  const [colorFormula, setColorFormula] = useState<string>("");
-  const [selectedResampling, setSelectedResampling] = useState<string>("nearest");
-  const [noDataValue, setNoDataValue] = useState<string>("");
+  const [colorFormula, setColorFormula] = useState<string | null>(null);
+  const [selectedResampling, setSelectedResampling] = useState<string | null>(null);
+  const [noDataValue, setNoDataValue] = useState<string | null>(null);
   const [tileUrl, setTileUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -39,14 +38,21 @@ const COGViewer: React.FC = () => {
       const data = await response.json();
       setMetadata(data);
 
-      // Default RGB bands
-      const bands = data.band_descriptions.slice(0, 3).map((_: any, index: number) => index + 1);
-      setSelectedBands(bands.length === 1 ? [1, 1, 1] : bands);
-      
-      message.success("COG metadata loaded successfully!");
+      // Initialize bands and rescale based on metadata
+      const bandCount = data.band_descriptions.length;
+      const bands = Array.from({ length: bandCount }, (_, i) => i + 1); // [1, 2, ...]
+      setSelectedBands(bandCount === 1 ? [1] : bands.slice(0, 3)); // Single band or first 3 bands for RGB
+      setRescale(bands.map(() => [null, null])); // Default rescale to null for each band
 
-      // Fetch tiles for the default bands
-      fetchTileUrl(url, bands, null, null, selectedColormap, colorFormula, selectedResampling, noDataValue);
+      // Fetch initial tile URL
+      fetchTileUrl(
+        url,
+        bandCount === 1 ? [1] : bands.slice(0, 3), // Single band or first 3 bands
+        [],
+        "Internal"
+      );
+
+      message.success("COG metadata loaded successfully!");
     } catch (error) {
       console.error("Error fetching metadata:", error);
       message.error("Failed to load COG metadata. Check the URL.");
@@ -58,29 +64,32 @@ const COGViewer: React.FC = () => {
   const fetchTileUrl = async (
     url: string,
     bands: number[],
-    rescaleMin: number | null,
-    rescaleMax: number | null,
+    rescale: [number | null, number | null][],
     colormap: string,
-    colorFormula?: string,
-    resampling?: string,
-    noData?: string
+    colorFormula?: string | null,
+    resampling?: string | null,
+    noData?: string | null,
   ) => {
     setLoading(true);
     try {
       if (!url) throw new Error("COG URL is required.");
 
-      const bidxParams = bands.map((band) => `&bidx=${band}`).join("");
+      const bidxParams = bands.length > 1 
+        ? bands.map((band) => `&bidx=${band}`).join("") 
+        : `&bidx=${bands[0]}`;
+      const rescaleParams = rescale
+        .filter((range) => range[0] !== null && range[1] !== null)
+        .map((range) => `&rescale=${range[0]},${range[1]}`)
+        .join("");
       const colormapParam = colormap.toLowerCase() !== "internal" ? `&colormap_name=${colormap.toLowerCase()}` : "";
       const colorFormulaParam = colorFormula ? `&color_formula=${encodeURIComponent(colorFormula)}` : "";
-      const resamplingParam = resampling !== "nearest" ? `&resampling=${resampling}` : "";
+      const resamplingParam = resampling && resampling !== "nearest" ? `&resampling=${resampling}` : "";
       const noDataParam = noData ? `&nodata=${encodeURIComponent(noData)}` : "";
-      const rescaleParam =
-        rescaleMin !== null && rescaleMax !== null ? `&rescale=${rescaleMin},${rescaleMax}` : "";
 
       const response = await fetch(
         `${baseUrl}/api/raster/cog/WebMercatorQuad/tilejson.json?url=${encodeURIComponent(
           url
-        )}${bidxParams}${colormapParam}${colorFormulaParam}${resamplingParam}${noDataParam}${rescaleParam}`
+        )}${bidxParams}${rescaleParams}${colormapParam}${colorFormulaParam}${resamplingParam}${noDataParam}`
       );
 
       if (!response.ok) throw new Error("Failed to fetch tile URL");
@@ -105,28 +114,26 @@ const COGViewer: React.FC = () => {
     }
   };
 
-  const handleBandChange = (bandIndex: number, colorChannel: "R" | "G" | "B") => {
-    const newBands = [...selectedBands];
-    const channelIndex = colorChannel === "R" ? 0 : colorChannel === "G" ? 1 : 2;
-    newBands[channelIndex] = bandIndex;
-    setSelectedBands(newBands);
-    setHasChanges(true);
-  };
-
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       {/* URL Input */}
       <div style={{ padding: "10px", backgroundColor: "#f8f9fa", borderBottom: "1px solid #ddd" }}>
-        <Input.Search
-          placeholder="Enter COG URL"
-          enterButton="Load"
-          onSearch={(url) => {
-            setCogUrl(url.trim());
-            fetchMetadata(url.trim());
-          }}
-          loading={loading}
-          style={{ maxWidth: "500px", width: "100%" }}
-        />
+      <Input.Search
+  placeholder="Enter COG URL"
+  enterButton="Load"
+  onSearch={(url) => {
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl) {
+      message.error("Please enter a valid URL.");
+      return;
+    }
+    setCogUrl(trimmedUrl);
+    fetchMetadata(trimmedUrl);
+  }}
+  loading={loading}
+  style={{ maxWidth: "500px", width: "100%" }}
+/>
+
       </div>
 
       {/* COG Controls */}
@@ -135,26 +142,22 @@ const COGViewer: React.FC = () => {
           <COGControlsForm
             metadata={metadata}
             selectedBands={selectedBands}
-            rescaleMin={rescaleMin}
-            rescaleMax={rescaleMax}
+            rescale={rescale}
             selectedColormap={selectedColormap}
             colorFormula={colorFormula}
             selectedResampling={selectedResampling}
             noDataValue={noDataValue}
             hasChanges={hasChanges}
-            onBandChange={(bandIndex, colorChannel) => {
-              const newBands = [...selectedBands];
-              const channelIndex = colorChannel === "R" ? 0 : colorChannel === "G" ? 1 : 2;
-              newBands[channelIndex] = bandIndex;
-              setSelectedBands(newBands);
+            onBandChange={(bandIndex, channel) => {
+              const updatedBands = [...selectedBands];
+              updatedBands[channel === "R" ? 0 : channel === "G" ? 1 : 2] = bandIndex;
+              setSelectedBands(updatedBands);
               setHasChanges(true);
             }}
-            onRescaleMinChange={(value) => {
-              setRescaleMin(value);
-              setHasChanges(true);
-            }}
-            onRescaleMaxChange={(value) => {
-              setRescaleMax(value);
+            onRescaleChange={(index, values) => {
+              const updatedRescale = [...rescale];
+              updatedRescale[index] = values;
+              setRescale(updatedRescale);
               setHasChanges(true);
             }}
             onColormapChange={(value) => {
@@ -177,8 +180,7 @@ const COGViewer: React.FC = () => {
               fetchTileUrl(
                 cogUrl!,
                 selectedBands,
-                rescaleMin,
-                rescaleMax,
+                rescale,
                 selectedColormap,
                 colorFormula,
                 selectedResampling,
@@ -239,7 +241,8 @@ const COGViewer: React.FC = () => {
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
         options={{
-          bidx: selectedBands,
+          bidx: selectedBands.length > 1 ? selectedBands : [selectedBands[0]],
+          rescale,
           colormap_name: selectedColormap.toLowerCase(),
           color_formula: colorFormula || undefined,
           resampling: selectedResampling !== "nearest" ? selectedResampling : undefined,
@@ -251,3 +254,4 @@ const COGViewer: React.FC = () => {
 };
 
 export default COGViewer;
+
