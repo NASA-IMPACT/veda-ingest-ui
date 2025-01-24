@@ -1,7 +1,8 @@
 import React from 'react';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, cleanup } from '@testing-library/react';
 import { describe, it, vi, expect, afterEach } from 'vitest';
 import SuccessModal from '@/components/SuccessModal';
+import userEvent from '@testing-library/user-event';
 
 
 // Mock StyledModal
@@ -60,7 +61,7 @@ describe('SuccessModal Component', () => {
     ).toBeInTheDocument();
   });
 
-  it('calls setStatus with "idle" when OK is clicked', () => {
+  it('calls setStatus with "idle" when OK is clicked', async () => {
     const mockSetStatus = vi.fn();
     const props = {
       type: 'edit' as const,
@@ -72,7 +73,7 @@ describe('SuccessModal Component', () => {
 
     // Simulate clicking the OK button
     const okButton = screen.getByText('OK');
-    fireEvent.click(okButton);
+    await userEvent.click(okButton);
 
     // Verify setStatus is called
     expect(mockSetStatus).toHaveBeenCalledWith('idle');

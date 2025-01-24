@@ -14,6 +14,7 @@ import IngestCreationForm from '@/components/IngestCreationForm';
 import ErrorModal from '@/components/ErrorModal';
 import SuccessModal from '@/components/SuccessModal';
 import { Status } from '@/types/global';
+import { withConditionalAuthenticator } from '@/utils/withConditionalAuthenticator';
 
 const CreateIngest = function CreateIngest() {
   const [status, setStatus] = useState<Status>('idle');
@@ -49,7 +50,7 @@ const CreateIngest = function CreateIngest() {
   );
 };
 
-export default withAuthenticator(CreateIngest, {
+export default withConditionalAuthenticator(CreateIngest, {
   hideSignUp: true,
   components: {
     SignIn: {

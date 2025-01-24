@@ -5,6 +5,8 @@ import { Amplify } from 'aws-amplify';
 import { withAuthenticator } from '@aws-amplify/ui-react';
 import { config } from '@/utils/aws-exports';
 import { SignInHeader } from '@/components/SignInHeader';
+import { withConditionalAuthenticator } from "@/utils/withConditionalAuthenticator";
+
 
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
@@ -26,7 +28,7 @@ const Renders = function Renders() {
   );
 };
 
-export default withAuthenticator(Renders, {
+export default withConditionalAuthenticator(Renders, {
   hideSignUp: true,
   components: {
     SignIn: {

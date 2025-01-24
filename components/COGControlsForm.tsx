@@ -66,8 +66,10 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
         <Row gutter={16}>
           {["R", "G", "B"].map((channel, index) => (
             <Col key={channel} span={8}>
-              <Form.Item label={`Band (${channel})`}>
+              <Form.Item label={`Band (${channel})`} htmlFor={`band-${channel}`}>
                 <Select
+                  id={`band-${channel}`}
+                  data-testid={`band-${channel}`}
                   value={selectedBands[index]}
                   onChange={(value) => onBandChange(value, channel as "R" | "G" | "B")}
                   options={bandOptions}
@@ -109,8 +111,9 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
       {/* Other Inputs */}
       <Row gutter={16}>
         <Col span={12}>
-          <Form.Item label="Colormap">
+          <Form.Item label="Colormap" htmlFor="colormap">
             <Select
+              id="colormap"
               value={selectedColormap}
               onChange={onColormapChange}
             >
@@ -122,8 +125,9 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
           </Form.Item>
         </Col>
         <Col span={12}>
-          <Form.Item label="Color Formula">
+          <Form.Item label="Color Formula" htmlFor="colorFormula">
             <InputNumber
+              id="colorFormula"
               value={colorFormula !== null ? Number(colorFormula) : undefined}
               onChange={(value) =>
                 onColorFormulaChange(value !== null ? String(value) : null)
@@ -136,8 +140,9 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
 
       <Row gutter={16}>
         <Col span={12}>
-          <Form.Item label="Resampling">
+          <Form.Item label="Resampling" htmlFor="resampling">
             <Select
+              id="resampling"
               value={selectedResampling}
               onChange={onResamplingChange}
             >
@@ -154,8 +159,9 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
           </Form.Item>
         </Col>
         <Col span={12}>
-          <Form.Item label="No Data Value">
+          <Form.Item label="Nodata Value" htmlFor="nodata">
             <InputNumber
+              id="nodata"
               value={noDataValue !== null ? Number(noDataValue) : undefined}
               onChange={(value) =>
                 onNoDataValueChange(value !== null ? String(value) : null)

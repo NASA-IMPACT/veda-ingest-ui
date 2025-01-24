@@ -13,6 +13,7 @@ import { Status } from '@/types/global';
 import { Endpoints } from '@octokit/types';
 import ErrorModal from '@/components/ErrorModal';
 import SuccessModal from '@/components/SuccessModal';
+import { withConditionalAuthenticator } from '@/utils/withConditionalAuthenticator';
 
 // Type definitions
 type PullRequest = Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][number];
@@ -142,7 +143,7 @@ const EditIngest = function EditIngest() {
   );
 };
 
-export default withAuthenticator(EditIngest, {
+export default withConditionalAuthenticator(EditIngest, {
   hideSignUp: true,
   components: {
     SignIn: {

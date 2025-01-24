@@ -1,5 +1,6 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest';
 import { Amplify } from 'aws-amplify';
 import { config } from '@/utils/aws-exports';
@@ -41,7 +42,7 @@ describe('Edit Ingest Page', () => {
 
     // Simulate interaction to trigger the error
     const pendingPullRequest = await screen.findByRole('button', { name: /seeded ingest #1/i });
-    fireEvent.click(pendingPullRequest);
+    await userEvent.click(pendingPullRequest);
 
     // Verify ErrorModal appears
     const errorModal = await screen.findByText(
@@ -59,7 +60,7 @@ describe('Edit Ingest Page', () => {
 
     // Simulate interaction to open the form
     const pendingPullRequest = await screen.findByRole('button', { name: /seeded ingest #1/i });
-    fireEvent.click(pendingPullRequest);
+    await userEvent.click(pendingPullRequest);
 
     // Verify the form is displayed
     await screen.findByLabelText('Collection');
@@ -68,11 +69,11 @@ describe('Edit Ingest Page', () => {
     const descriptionInput = await screen.findByDisplayValue(/seeded ingest description #1/i );
 
     // update something other than collection name
-    fireEvent.input(descriptionInput, { target: { value: 'updated description' } });
+    await userEvent.type(descriptionInput, 'updated description');
 
     // Submit the form
     const submitButton = await screen.findByRole('button', { name: /submit/i });
-    fireEvent.click(submitButton);
+    userEvent.click(submitButton);
 
     // // Verify SuccessModal appears
     await waitFor(() => {

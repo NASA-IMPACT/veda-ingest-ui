@@ -7,8 +7,11 @@ import { config } from '@/utils/aws-exports';
 
 import { SignInHeader } from '@/components/SignInHeader';
 import AppLayout from '@/components/Layout';
+import { withConditionalAuthenticator } from '@/utils/withConditionalAuthenticator';
 
 Amplify.configure({ ...config }, { ssr: true });
+
+
 
 const Home = function Home() {
   return (
@@ -31,7 +34,7 @@ const Home = function Home() {
   );
 };
 
-export default withAuthenticator(Home, {
+export default withConditionalAuthenticator(Home, {
   hideSignUp: true,
   components: {
     SignIn: {
