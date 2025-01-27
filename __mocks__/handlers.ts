@@ -33,12 +33,13 @@ export const handlers = [
     return HttpResponse.json({ message: 'Data updated successfully' });
   }),
 
-  http.get('https://staging.openveda.cloud/api/raster/cog/info', ({ request }) => {
+  http.get('/api/raster/cog/info', ({ request }) => {
     return HttpResponse.json({
         band_descriptions: [
           ['b1', 'Band 1'],
           ['b2', 'Band 2'],
           ['b3', 'Band 3'],
+          ['b4', 'Band 4'],
         ],
     });
   }),

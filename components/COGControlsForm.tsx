@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, InputNumber, Select, Button, Row, Col, Card, Typography } from "antd";
+import { Form, InputNumber, Select, Button, Row, Col, Card, Typography, Input } from "antd";
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -114,6 +114,7 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
           <Form.Item label="Colormap" htmlFor="colormap">
             <Select
               id="colormap"
+              data-testid="colormap"
               value={selectedColormap}
               onChange={onColormapChange}
             >
@@ -125,16 +126,17 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
           </Form.Item>
         </Col>
         <Col span={12}>
-          <Form.Item label="Color Formula" htmlFor="colorFormula">
-            <InputNumber
-              id="colorFormula"
-              value={colorFormula !== null ? Number(colorFormula) : undefined}
-              onChange={(value) =>
-                onColorFormulaChange(value !== null ? String(value) : null)
-              }
-              style={{ width: "100%" }}
-            />
-          </Form.Item>
+        <Form.Item label="Color Formula" htmlFor="colorFormula">
+          <Input
+            id="colorFormula"
+            value={colorFormula || ""} 
+            onChange={(e) => {
+              const newValue = e.target.value;
+              onColorFormulaChange(newValue || null); // Pass `null` if the input is empty
+            }}
+            style={{ width: "100%" }}
+          />
+        </Form.Item>
         </Col>
       </Row>
 
@@ -143,6 +145,7 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
           <Form.Item label="Resampling" htmlFor="resampling">
             <Select
               id="resampling"
+              data-testid="resampling"
               value={selectedResampling}
               onChange={onResamplingChange}
             >
