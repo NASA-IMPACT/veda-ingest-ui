@@ -1,5 +1,5 @@
-import { expect, test, server } from '@/__tests__/playwright/setup-msw';
-import { http, HttpResponse } from 'msw'
+import { expect, test } from '@/__tests__/playwright/setup-msw';
+import { HttpResponse } from 'msw'
 
 const testBands = ['R', 'G', "B"]
 test.describe('COGControlsForm', () => {

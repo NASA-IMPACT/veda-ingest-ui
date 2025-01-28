@@ -6,6 +6,10 @@ export default defineConfig({
   plugins: [tsconfigPaths(), react()],
   test: {
     environment: 'jsdom',
-    setupFiles: ['./vitest-setup.tsx']
+    setupFiles: ['./vitest-setup.tsx'],
+    exclude: [
+      '**/__tests__/playwright/**',
+      '**/node_modules/**',
+    ]
   }
 })

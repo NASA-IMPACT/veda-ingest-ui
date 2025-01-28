@@ -10,6 +10,6 @@ export default defineConfig({
     baseURL: 'http://localhost:3000',
     headless: true,
   },
-  testMatch: ['**/*.test.tsx'],
+  testMatch: ['**/__tests__/playwright/**/*.test.tsx'],
   timeout: 30000,
 });
