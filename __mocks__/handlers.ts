@@ -32,4 +32,29 @@ export const handlers = [
 
     return HttpResponse.json({ message: 'Data updated successfully' });
   }),
+
+  http.get('/api/raster/cog/info', ({ request }) => {
+    return HttpResponse.json({
+        band_descriptions: [
+          ['b1', 'Band 1'],
+          ['b2', 'Band 2'],
+          ['b3', 'Band 3'],
+          ['b4', 'Band 4'],
+        ],
+    });
+  }),
+
+  http.get('/api/raster/cog/WebMercatorQuad/tilejson.json', ({ request }) => {
+    return HttpResponse.json({
+      tilejson: "2.2.0",
+      tiles: [
+        "https://example.com/api/raster/cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png"
+      ],
+      minzoom: 0,
+      maxzoom: 22,
+      bounds: [-180, -85.0511, 180, 85.0511],
+      center: [0, 0, 2]
+    }
+    )
+  }),
 ];

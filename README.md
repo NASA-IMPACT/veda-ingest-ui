@@ -78,7 +78,7 @@ To preview the app use:
 yarn dev
 ```
 
-This will start the app and make it available at <http://localhost:5173/>.
+This will start the app and make it available at <http://localhost:3000/>.
 
 ## Configuring the Validation Form
 
