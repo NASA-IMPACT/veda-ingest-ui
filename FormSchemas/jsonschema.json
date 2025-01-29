@@ -95,12 +95,12 @@
             "properties": {
                 "startdate": {
                     "type": "string",
-                    "format": "date",
+                    "format": "date-time",
                     "title": "Start Date"
                 },
                 "enddate": {
                     "type": "string",
-                    "format": "date",
+                    "format": "date-time",
                     "title": "End Date"
                 }
             }
