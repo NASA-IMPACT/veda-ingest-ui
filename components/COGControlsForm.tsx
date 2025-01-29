@@ -43,12 +43,13 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
   onViewRenderingOptions,
   loading,
 }) => {
-  const bandOptions = metadata.band_descriptions.map((desc: any, index: number) => ({
+  const bandOptions =
+  metadata?.band_descriptions?.map((desc: any, index: number) => ({
     value: index + 1,
     label: `${desc[0]} - ${desc[1]}`,
-  }));
+  })) || [];
 
-  const singleBand = metadata.band_descriptions.length === 1;
+  const singleBand = metadata?.band_descriptions?.length === 1;
 
   return (
     <Form layout="vertical">

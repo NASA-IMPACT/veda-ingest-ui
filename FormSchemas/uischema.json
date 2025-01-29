@@ -17,8 +17,13 @@
       "discovery_items": 24
     },
     {
-      "sample_files": 12,
+      "sample_files": 24
+    },
+    {
+      "renders": 12,
+
       "stac_extensions": 12
+
     },
     {
       "links": 24
@@ -29,9 +34,7 @@
     {
       "providers": 24
     },
-    {
-      "renders": 24
-    },
+
     {
       "assets":24
     }
