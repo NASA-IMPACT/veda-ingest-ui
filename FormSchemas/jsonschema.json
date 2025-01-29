@@ -251,13 +251,8 @@
         },
         "renders": {
             "title": "Renders",
-            "type": "object",
-            "properties": {
-                "renders_object": {
-                    "type": "string",
-                    "title": "Renders Object"
-                }
-            }
+            "type": "string",
+            "format": "json"
         },
         "providers": {
             "title": "Providers",

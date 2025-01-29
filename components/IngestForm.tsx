@@ -57,6 +57,25 @@ function IngestForm({
       schema={jsonSchema as JSONSchema7}
       uiSchema={uiSchema}
       validator={validator}
+      customValidate={(formData, errors) => {
+        try {
+          if (formData.renders) {
+            const parsed = JSON.parse(formData.renders);
+            
+            // Ensure it's a JSON object (not a string, number, array, etc.)
+            if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+              if (errors.renders) {
+                errors.renders.addError("Input must be a valid JSON object.");
+              }
+            }
+          }
+        } catch {
+          if (errors.renders) {
+            errors.renders.addError("Invalid JSON format. Please enter a valid JSON object.");
+          }
+        }
+        return errors;
+      }}
       templates={{
         ObjectFieldTemplate: ObjectFieldTemplate,
       }}
