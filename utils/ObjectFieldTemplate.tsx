@@ -141,7 +141,7 @@ export default function ObjectFieldTemplate<
     setdrawerOpen(false);
   };
 
-  const handleAcceptRenderOptions = (renderOptions: object) => {
+  const handleAcceptRenderOptions = (renderOptions: string) => {
     if (!formContext || typeof formContext.updateFormData !== "function") {
       console.error("❌ formContext or updateFormData is not available.");
       return;
@@ -149,10 +149,12 @@ export default function ObjectFieldTemplate<
     
     const updatedFormData = { ...typedFormData };
     updatedFormData.renders = updatedFormData.renders || {};
-    updatedFormData.renders.renders_object = JSON.stringify(renderOptions, null, 2);
+
+    updatedFormData.renders = renderOptions;
   
     formContext.updateFormData(updatedFormData);
   };
+  
   
   return (
     <ConfigConsumer>
@@ -261,12 +263,11 @@ export default function ObjectFieldTemplate<
             {/* COGDrawerViewer Component */}
             <COGDrawerViewer
               drawerOpen={drawerOpen}
-              url={drawerUrl}
+              url={drawerUrl || ''}
               onClose={handleCloseDrawer}
               onAcceptRenderOptions={handleAcceptRenderOptions}
               formContext={formContext} // Pass it explicitly
             />
-
           </>
         );
       }}

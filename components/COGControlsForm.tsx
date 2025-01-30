@@ -1,5 +1,5 @@
 import React from "react";
-import { Form, InputNumber, Select, Button, Row, Col, Card, Typography, Input } from "antd";
+import { Form, InputNumber, Select, Button, Row, Col, Card, Typography, Input, Divider } from "antd";
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -120,9 +120,9 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
               onChange={onColormapChange}
             >
               <Option value="Internal">Internal</Option>
-              <Option value="CFastie">CFastie</Option>
-              <Option value="RPlumbo">RPlumbo</Option>
-              <Option value="Schwarzwald">Schwarzwald</Option>
+              <Option value="cfastie">CFastie</Option>
+              <Option value="rplumbo">RPlumbo</Option>
+              <Option value="schwarzwald">Schwarzwald</Option>
             </Select>
           </Form.Item>
         </Col>
@@ -197,6 +197,7 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
           </Button>
         </Col>
       </Row>
+      <Divider />
     </Form>
   );
 };

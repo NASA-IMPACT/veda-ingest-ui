@@ -1,0 +1,189 @@
+import React, { useEffect, useRef } from "react";
+import { Spin } from "antd";
+import { MapContainer, TileLayer } from "react-leaflet";
+import COGControlsForm from "./COGControlsForm";
+import RenderingOptionsModal from "./RenderingOptionsModal";
+
+interface COGViewerContentProps {
+  metadata: any | null;
+  tileUrl: string | null;
+  loading: boolean;
+  isModalVisible: boolean;
+  setIsModalVisible: (visible: boolean) => void;
+  selectedBands: number[];
+  setSelectedBands: (bands: number[]) => void;
+  rescale: [number | null, number | null][];
+  setRescale: (rescale: [number | null, number | null][]) => void;
+  selectedColormap: string;
+  setSelectedColormap: (colormap: string) => void;
+  colorFormula: string | null;
+  setColorFormula: (formula: string | null) => void;
+  selectedResampling: string | null;
+  setSelectedResampling: (resampling: string | null) => void;
+  noDataValue: string | null;
+  setNoDataValue: (value: string | null) => void;
+  hasChanges: boolean;
+  setHasChanges: (hasChanges: boolean) => void;
+  fetchTileUrl: (
+    url: string,
+    bands: number[],
+    rescale: [number | null, number | null][],
+    colormap: string,
+    colorFormula?: string | null,
+    resampling?: string | null,
+    noData?: string | null
+  ) => void;
+  cogUrl: string | null;
+  mapRef: React.MutableRefObject<any>;
+}
+
+const COGViewerContent: React.FC<COGViewerContentProps> = ({
+  metadata,
+  tileUrl,
+  loading,
+  isModalVisible,
+  setIsModalVisible,
+  selectedBands,
+  setSelectedBands,
+  rescale,
+  setRescale,
+  selectedColormap,
+  setSelectedColormap,
+  colorFormula,
+  setColorFormula,
+  selectedResampling,
+  setSelectedResampling,
+  noDataValue,
+  setNoDataValue,
+  hasChanges,
+  setHasChanges,
+  fetchTileUrl,
+  cogUrl,
+  mapRef,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Automatically adjust map size when container resizes
+  useEffect(() => {
+    if (!mapRef.current || !containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (mapRef.current) {
+        mapRef.current.invalidateSize();
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  return (
+    <>
+      {metadata && (
+        <COGControlsForm
+          metadata={metadata}
+          selectedBands={selectedBands}
+          rescale={rescale}
+          selectedColormap={selectedColormap}
+          colorFormula={colorFormula}
+          selectedResampling={selectedResampling}
+          noDataValue={noDataValue}
+          hasChanges={hasChanges}
+          onBandChange={(bandIndex, channel) => {
+            const updatedBands = [...selectedBands];
+            updatedBands[channel === "R" ? 0 : channel === "G" ? 1 : 2] = bandIndex;
+            setSelectedBands(updatedBands);
+            setHasChanges(true);
+          }}
+          onRescaleChange={(index, values) => {
+            const updatedRescale = [...rescale];
+            updatedRescale[index] = values;
+            setRescale(updatedRescale);
+            setHasChanges(true);
+          }}
+          onColormapChange={(value) => {
+            setSelectedColormap(value);
+            setHasChanges(true);
+          }}
+          onColorFormulaChange={(value) => {
+            setColorFormula(value);
+            setHasChanges(true);
+          }}
+          onResamplingChange={(value) => {
+            setSelectedResampling(value);
+            setHasChanges(true);
+          }}
+          onNoDataValueChange={(value) => {
+            setNoDataValue(value);
+            setHasChanges(true);
+          }}
+          onUpdateTileLayer={() =>
+            fetchTileUrl(
+              cogUrl!,
+              selectedBands,
+              rescale,
+              selectedColormap,
+              colorFormula,
+              selectedResampling,
+              noDataValue
+            )
+          }
+          onViewRenderingOptions={() => setIsModalVisible(true)}
+          loading={loading}
+        />
+
+      )}
+      <div ref={containerRef} style={{ height: metadata ? "70vh" : "80vh", position: "relative"}}>
+        {loading && (
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              background: "rgba(255, 255, 255, 0.7)",
+              zIndex: 1000,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Spin size="large" tip="Loading..." />
+          </div>
+        )}
+        <MapContainer
+          center={[0, 0]}
+          zoom={2}
+          style={{ height: "100%", width: "100%" }}
+          // @ts-expect-error leaflet something
+          whenReady={(map) => {
+            mapRef.current = map.target;
+          }}
+        >
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
+          {tileUrl && <TileLayer url={tileUrl} opacity={1.0} attribution="&copy; Your COG Data" />}
+        </MapContainer>
+      </div>
+
+      {/* Rendering Options Modal */}
+      <RenderingOptionsModal
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        options={{
+          bidx: selectedBands.length > 1 ? selectedBands : [selectedBands[0]],
+          rescale,
+          colormap_name: selectedColormap.toLowerCase(),
+          color_formula: colorFormula || undefined,
+          resampling: selectedResampling !== "nearest" ? selectedResampling : undefined,
+          nodata: noDataValue || undefined,
+        }}
+      />
+    </>
+  );
+};
+
+export default COGViewerContent;
