@@ -12,7 +12,7 @@ import { useCOGViewer } from "@/hooks/useCOGViewer";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 
-// Dynamically load the COGOverlay component to prevent SSR issues
+// Dynamically load the COGViewerContent component to prevent SSR issues
 const COGViewerContent = dynamic(() => import('@/components/COGViewerContent'), {
   ssr: false,
 });
@@ -25,8 +25,7 @@ const Renders = function Renders() {
 
   return (
     <AppLayout>
-       <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      {/* URL Input (Now Only on the Page) */}
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <div style={{ padding: "10px", backgroundColor: "#f8f9fa", borderBottom: "1px solid #ddd" }}>
         <Input.Search
           placeholder="Enter COG URL"
@@ -45,7 +44,6 @@ const Renders = function Renders() {
         />
       </div>
 
-      {/* COG Viewer Content */}
       <COGViewerContent {...cogViewer} />
     </div>
     </AppLayout>
