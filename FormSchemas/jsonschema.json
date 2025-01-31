@@ -251,8 +251,7 @@
         },
         "renders": {
             "title": "Renders",
-            "type": "string",
-            "format": "json"
+            "type": "string"
         },
         "providers": {
             "title": "Providers",

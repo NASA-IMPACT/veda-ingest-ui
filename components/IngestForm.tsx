@@ -59,23 +59,23 @@ function IngestForm({
       validator={validator}
       customValidate={(formData, errors) => {
         try {
-          if (formData.renders) {
+            // Allow empty field without validation errors
+            if (!formData.renders) {
+                return errors;
+            }
+    
             const parsed = JSON.parse(formData.renders);
-            
+    
             // Ensure it's a JSON object (not a string, number, array, etc.)
             if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-              if (errors.renders) {
-                errors.renders.addError("Input must be a valid JSON object.");
-              }
+                errors.renders?.addError("Input must be a valid JSON object.");
             }
-          }
         } catch {
-          if (errors.renders) {
-            errors.renders.addError("Invalid JSON format. Please enter a valid JSON object.");
-          }
+            errors.renders?.addError("Invalid JSON format. Please enter a valid JSON object.");
         }
         return errors;
-      }}
+    }}
+    
       templates={{
         ObjectFieldTemplate: ObjectFieldTemplate,
       }}
