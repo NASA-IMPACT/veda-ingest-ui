@@ -33,31 +33,39 @@ function IngestEditForm({
 }) {
   const [disabled, setDisabled] = useState(true);
 
-  // @ts-expect-error RJSF form data typing
-  const onFormDataSubmit = async ({ formData }) => {
-    setStatus('loadingGithub');
+  const onFormDataSubmit = (formData?: Record<string, unknown>) => {
+    console.log('updating data: ', formData)
 
-    const url = 'api/create-ingest';
-    const requestOptions = {
-      method: 'PUT',
-      body: JSON.stringify({ ref, fileSha, filePath, formData }),
-      headers: { 'Content-Type': 'application/json' },
-    };
-    try {
-      const response = await fetch(url, requestOptions);
-
-      if (!response.ok) {
-        const errorMessage = await response.text();
-        setStatus('error');
-        throw new Error(`There was an error onSubmit: ${errorMessage}`);
-      }
-
-      setFormData({});
-      setStatus('success');
-    } catch (error) {
-      console.error(error);
-      setStatus('error');
+    if (!formData) {
+      console.error("No form data provided.");
+      return;
     }
+  
+    setStatus("loadingGithub");
+
+
+  
+    const url = "api/create-ingest";
+    const requestOptions = {
+      method: "PUT",
+      body: JSON.stringify({ref, fileSha, filePath, formData }),
+      headers: { "Content-Type": "application/json" },
+    };
+  
+    fetch(url, requestOptions)
+      .then(async (response) => {
+        if (!response.ok) {
+          const errorMessage = await response.text();
+          setStatus("error");
+          throw new Error(`There was an error: ${errorMessage}`);
+        }
+        setFormData({});
+        setStatus("success");
+      })
+      .catch((error) => {
+        console.error(error);
+        setStatus("error");
+      });
   };
 
   return (
@@ -65,7 +73,6 @@ function IngestEditForm({
       uiSchema={lockedUiSchema}
       formData={formData}
       setFormData={setFormData}
-      // @ts-expect-error testing
       onSubmit={onFormDataSubmit}
       setDisabled={setDisabled}
     >

@@ -17,7 +17,10 @@
       "discovery_items": 24
     },
     {
-      "sample_files": 12,
+      "sample_files": 24
+    },
+    {
+      "renders": 12,
       "stac_extensions": 12
     },
     {
@@ -29,9 +32,7 @@
     {
       "providers": 24
     },
-    {
-      "renders": 24
-    },
+
     {
       "assets":24
     }
@@ -149,12 +150,10 @@
     }
   },
   "renders": {
-    "renders_object": {
       "ui:widget": "textarea",
       "ui:options": {
         "rows": 12
       }
-    }
   },
   "ui:submitButtonOptions": {
     "props": {

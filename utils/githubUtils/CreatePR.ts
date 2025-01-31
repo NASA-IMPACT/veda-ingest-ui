@@ -2,10 +2,12 @@ import { createOctokit } from './OctokitFactory';
 import { RequestError } from '@octokit/request-error';
 import { formatFilename } from '@/utils/FormatFilename';
 import GetGithubToken from './GetGithubToken';
+import { CleanAndPrettifyJSON } from '@/utils/CleanAndPrettifyJson';
 
 interface Data {
   collection: string;
   [key: string]: unknown;
+  renders?: string;
 }
 
 const CreatePR = async (data: Data): Promise<string> => {
@@ -19,7 +21,7 @@ const CreatePR = async (data: Data): Promise<string> => {
 
   try {
     const collectionName = data.collection;
-    const content = JSON.stringify(data, null, 2);
+    const content = CleanAndPrettifyJSON(data);
     const targetPath = 'ingestion-data/staging/dataset-config';
     const fileName = formatFilename(collectionName);
     const path = `${targetPath}/${fileName}.json`;

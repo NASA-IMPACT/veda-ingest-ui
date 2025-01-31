@@ -10,8 +10,8 @@ export const retrieveIngestResponse = {
             "ymax": 1
         },
         "temporal_extent": {
-            "startdate": "2024-12-01",
-            "enddate": "2024-12-01"
+            "startdate": "2024-02-01T07:00:00.000Z",
+            "enddate": "2025-01-31T07:00:00.000Z"
         },
         "discovery_items": [
             {

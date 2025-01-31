@@ -95,12 +95,12 @@
             "properties": {
                 "startdate": {
                     "type": "string",
-                    "format": "date",
+                    "format": "date-time",
                     "title": "Start Date"
                 },
                 "enddate": {
                     "type": "string",
-                    "format": "date",
+                    "format": "date-time",
                     "title": "End Date"
                 }
             }
@@ -251,13 +251,7 @@
         },
         "renders": {
             "title": "Renders",
-            "type": "object",
-            "properties": {
-                "renders_object": {
-                    "type": "string",
-                    "title": "Renders Object"
-                }
-            }
+            "type": "string"
         },
         "providers": {
             "title": "Providers",
