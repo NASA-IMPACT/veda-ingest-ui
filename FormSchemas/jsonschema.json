@@ -31,6 +31,11 @@
             "title": "License",
             "default": "CC0-1.0"
         },
+        "stac_version": {
+            "type": "string",
+            "title": "STAC Version",
+            "default": "1.0.0"
+        },
         "dashboard:is_periodic": {
             "type": "boolean",
             "title": "Is Periodic?"
@@ -110,11 +115,7 @@
                     "format": "date-time",
                     "title": "End Date"
                 }
-            },
-            "required": [
-                "startdate",
-                "enddate"
-            ]
+            }
         },
         "discovery_items": {
             "type": "array",

@@ -2,14 +2,15 @@
     "ui:grid": [
         {
             "collection": 4,
-            "title": 4,
-            "license": 4,
+            "title": 6,
+            "license": 2,
             "description": 12
         },
         {
-            "dashboard:is_periodic": 4,
-            "dashboard:time_density": 4,
-            "data_type": 4,
+          "stac_version": 3,
+            "dashboard:is_periodic": 3,
+            "dashboard:time_density": 3,
+            "data_type": 3,
             "spatial_extent": 6,
             "temporal_extent": 6
         },

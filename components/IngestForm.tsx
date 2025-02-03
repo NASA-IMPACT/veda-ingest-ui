@@ -10,8 +10,9 @@ import { JSONSchema7 } from 'json-schema';
 
 import ObjectFieldTemplate from '@/utils/ObjectFieldTemplate';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
-import { RJSFSchema, UiSchema } from '@rjsf/utils';
-import { customValidate } from '@/utils/formValidation';
+import { UiSchema } from '@rjsf/utils';
+import { customValidate } from '@/utils/FormValidation';
+import { handleSubmit } from "@/utils/FormHandlers";
 
 const Form = withTheme(AntDTheme);
 
@@ -82,13 +83,6 @@ function IngestForm({
     setFormData((updatedData ?? {}) as Record<string, unknown>);
   };
 
-  const handleSubmit = (data: IChangeEvent<any, RJSFSchema, any>) => {
-    if (onSubmit) {
-      onSubmit(data.formData as Record<string, unknown>);
-    }
-  };
-  
-
   return (
     <Form
       schema={jsonSchema as JSONSchema7}
@@ -100,7 +94,7 @@ function IngestForm({
       }}
       formData={formData}
       onChange={onFormDataChanged}
-      onSubmit={handleSubmit}
+      onSubmit={(data) => handleSubmit(data, onSubmit)}
       formContext={{ updateFormData }}
     >
       {children}
