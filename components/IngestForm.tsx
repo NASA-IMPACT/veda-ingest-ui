@@ -1,6 +1,6 @@
 'use client';
 
-import { SetStateAction } from 'react';
+import { SetStateAction, useEffect } from 'react';
 
 import { IChangeEvent, withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
@@ -14,6 +14,15 @@ import { RJSFSchema, UiSchema } from '@rjsf/utils';
 
 const Form = withTheme(AntDTheme);
 
+interface TemporalExtent {
+  startdate?: string;
+  enddate?: string;
+}
+
+interface FormData {
+  temporal_extent?: TemporalExtent;
+}
+
 interface FormProps {
   formData: Record<string, unknown> | undefined;
   setFormData: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
@@ -21,6 +30,7 @@ interface FormProps {
   onSubmit: (formData: Record<string, unknown> | undefined) => void;
   setDisabled?: (disabled: boolean) => void;
   children?: React.ReactNode;
+  defaultTemporalExtent?: boolean;
 }
 
 function IngestForm({
@@ -30,7 +40,24 @@ function IngestForm({
   onSubmit,
   setDisabled,
   children,
+  defaultTemporalExtent = false,
 }: FormProps) {
+
+  useEffect(() => {
+    if (defaultTemporalExtent) {
+      setFormData((prevFormData: FormData | undefined) => {
+        const nowUtc = new Date().toISOString();
+  
+        return {
+          ...prevFormData,
+          temporal_extent: {
+            startdate: prevFormData?.temporal_extent?.startdate || nowUtc,
+            enddate: prevFormData?.temporal_extent?.enddate || nowUtc,
+          },
+        };
+      });
+    }
+  }, [defaultTemporalExtent, setFormData]);
   
   const onFormDataChanged = (formState: { formData?: object }) => {
     setFormData(formState.formData as Record<string, unknown> ?? {});

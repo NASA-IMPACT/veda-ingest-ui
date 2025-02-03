@@ -60,6 +60,7 @@ function IngestCreationForm({
       formData={formData}
       setFormData={setFormData}
       onSubmit={onFormDataSubmit}
+      defaultTemporalExtent={true}
     />
   );
 }
