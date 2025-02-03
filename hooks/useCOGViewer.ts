@@ -1,7 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { message } from "antd";
-import L, { Map } from "leaflet";
-
 const baseUrl = "https://staging.openveda.cloud";
 
 export const useCOGViewer = () => {
@@ -17,7 +15,17 @@ export const useCOGViewer = () => {
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const mapRef = useRef<Map | null>(null);
+  const mapRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      import("leaflet").then((L) => {
+        if (!mapRef.current) {
+          mapRef.current = L.map; // Ensure Leaflet map is only initialized on the client
+        }
+      });
+    }
+  }, []);
 
   const fetchMetadata = async (url: string) => {
     if (!url) {
@@ -80,11 +88,13 @@ export const useCOGViewer = () => {
       setTileUrl(data.tiles[0]);
 
       if (mapRef.current && data.bounds) {
-        const bounds = L.latLngBounds([
-          [data.bounds[1], data.bounds[0]],
-          [data.bounds[3], data.bounds[2]],
-        ]);
-        mapRef.current.fitBounds(bounds);
+        import("leaflet").then((L) => {
+          const bounds = L.latLngBounds([
+            [data.bounds[1], data.bounds[0]],
+            [data.bounds[3], data.bounds[2]],
+          ]);
+          mapRef.current.fitBounds(bounds);
+        });
       }
 
       message.success("COG tile layer loaded successfully!");

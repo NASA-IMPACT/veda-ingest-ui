@@ -1,7 +1,12 @@
 import React, { useEffect } from "react";
 import { Drawer, Button, message, Spin } from "antd";
 import { useCOGViewer } from "@/hooks/useCOGViewer";
-import COGViewerContent from "./COGViewerContent";
+import dynamic from "next/dynamic";
+
+// Dynamically load the COGViewerContent component to prevent SSR issues
+const COGViewerContent = dynamic(() => import('@/components/COGViewerContent'), {
+  ssr: false,
+});
 
 interface COGDrawerViewerProps {
   url: string;

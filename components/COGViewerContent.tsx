@@ -1,8 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import { Spin } from "antd";
-import { MapContainer, TileLayer } from "react-leaflet";
+
 import COGControlsForm from "./COGControlsForm";
 import RenderingOptionsModal from "./RenderingOptionsModal";
+
+// Dynamically import react-leaflet components to avoid SSR issues
+import dynamic from "next/dynamic";
+const DynamicMap = dynamic(() => import("./DynamicMap"), { ssr: false });
 
 interface COGViewerContentProps {
   metadata: any | null;
@@ -65,20 +69,21 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
 
   // Automatically adjust map size when container resizes
   useEffect(() => {
-    if (!mapRef.current || !containerRef.current) return;
-
-    const resizeObserver = new ResizeObserver(() => {
-      if (mapRef.current) {
-        mapRef.current.invalidateSize();
-      }
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
+    if (typeof window !== 'undefined' && mapRef.current && containerRef.current) {
+      const resizeObserver = new ResizeObserver(() => {
+        if (mapRef.current) {
+          mapRef.current.invalidateSize();
+        }
+      });
+  
+      resizeObserver.observe(containerRef.current);
+  
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }
   }, []);
+  
 
   return (
     <>
@@ -155,18 +160,7 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
             <Spin size="large" tip="Loading..." />
           </div>
         )}
-        <MapContainer
-          center={[0, 0]}
-          zoom={2}
-          style={{ height: "100%", width: "100%" }}
-          // @ts-expect-error leaflet something
-          whenReady={(map) => {
-            mapRef.current = map.target;
-          }}
-        >
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution="&copy; OpenStreetMap contributors" />
-          {tileUrl && <TileLayer url={tileUrl} opacity={1.0} attribution="&copy; Your COG Data" />}
-        </MapContainer>
+        <DynamicMap tileUrl={tileUrl} mapRef={mapRef} />;
       </div>
 
       {/* Rendering Options Modal */}
