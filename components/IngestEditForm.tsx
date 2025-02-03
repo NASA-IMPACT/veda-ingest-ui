@@ -22,6 +22,7 @@ function IngestEditForm({
   formData,
   setFormData,
   handleCancel,
+  setApiErrorMessage
 }: {
   setStatus: (status: Status) => void;
   ref: string;
@@ -30,6 +31,7 @@ function IngestEditForm({
   formData: Record<string, unknown>;
   setFormData: any;
   handleCancel: () => void;
+  setApiErrorMessage: (apiErrorMessage: string) => void;
 }) {
   const [disabled, setDisabled] = useState(true);
 
@@ -56,8 +58,8 @@ function IngestEditForm({
       .then(async (response) => {
         if (!response.ok) {
           const errorMessage = await response.text();
-          setStatus("error");
-          throw new Error(`There was an error: ${errorMessage}`);
+          setApiErrorMessage(errorMessage);
+          setStatus("error"); new Error(`There was an error: ${errorMessage}`);
         }
         setFormData({});
         setStatus("success");

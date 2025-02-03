@@ -41,7 +41,6 @@ function IngestCreationForm({
           const errorMessage = await response.text();
           setApiErrorMessage(errorMessage);
           setStatus("error");
-          throw new Error(`There was an error: ${errorMessage}`);
         }
         const responseJson = await response.json();
         setPullRequestUrl(responseJson.githubURL);
