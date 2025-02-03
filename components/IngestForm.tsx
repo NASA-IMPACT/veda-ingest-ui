@@ -11,6 +11,7 @@ import { JSONSchema7 } from 'json-schema';
 import ObjectFieldTemplate from '@/utils/ObjectFieldTemplate';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
 import { RJSFSchema, UiSchema } from '@rjsf/utils';
+import { customValidate } from '@/utils/formValidation';
 
 const Form = withTheme(AntDTheme);
 
@@ -93,25 +94,7 @@ function IngestForm({
       schema={jsonSchema as JSONSchema7}
       uiSchema={uiSchema}
       validator={validator}
-      customValidate={(formData, errors) => {
-        try {
-            // Allow empty field without validation errors
-            if (!formData.renders) {
-                return errors;
-            }
-    
-            const parsed = JSON.parse(formData.renders);
-    
-            // Ensure it's a JSON object (not a string, number, array, etc.)
-            if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-                errors.renders?.addError("Input must be a valid JSON object.");
-            }
-        } catch {
-            errors.renders?.addError("Invalid JSON format. Please enter a valid JSON object.");
-        }
-        return errors;
-    }}
-    
+      customValidate={customValidate}
       templates={{
         ObjectFieldTemplate: ObjectFieldTemplate,
       }}
