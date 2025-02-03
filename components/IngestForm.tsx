@@ -46,13 +46,22 @@ function IngestForm({
   useEffect(() => {
     if (defaultTemporalExtent) {
       setFormData((prevFormData: FormData | undefined) => {
-        const nowUtc = new Date().toISOString();
+        const now = new Date();
+      
+        // Start of the current UTC day
+        const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0))
+          .toISOString();
+        
+        // End of the current UTC day
+        const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59))
+          .toISOString();
   
+        console.log('startOfDay', startOfDay)
         return {
           ...prevFormData,
           temporal_extent: {
-            startdate: prevFormData?.temporal_extent?.startdate || nowUtc,
-            enddate: prevFormData?.temporal_extent?.enddate || nowUtc,
+            startdate: prevFormData?.temporal_extent?.startdate || startOfDay,
+            enddate: prevFormData?.temporal_extent?.enddate || endOfDay,
           },
         };
       });
