@@ -10,21 +10,19 @@ export const customValidate = (formData: any, errors: any) => {
       }
     }
 
-    // Allow empty strings for startdate & enddate, but enforce RFC 3339 when filled
+    // Allow `null` or empty strings for `startdate` and `enddate`
     if (formData.temporal_extent) {
-      if (
-        formData.temporal_extent.startdate &&
-        formData.temporal_extent.startdate !== "" &&
-        !rfc3339Regex.test(formData.temporal_extent.startdate)
-      ) {
+      const { startdate, enddate } = formData.temporal_extent;
+
+      if (startdate !== null && startdate !== "" && typeof startdate !== "string") {
+        errors.temporal_extent?.startdate?.addError("Start Date must be a string, null, or in RFC 3339 format.");
+      } else if (typeof startdate === "string" && !rfc3339Regex.test(startdate)) {
         errors.temporal_extent?.startdate?.addError("Start Date must be in RFC 3339 format (YYYY-MM-DDTHH:mm:ss.sssZ) or empty.");
       }
 
-      if (
-        formData.temporal_extent.enddate &&
-        formData.temporal_extent.enddate !== "" &&
-        !rfc3339Regex.test(formData.temporal_extent.enddate)
-      ) {
+      if (enddate !== null && enddate !== "" && typeof enddate !== "string") {
+        errors.temporal_extent?.enddate?.addError("End Date must be a string, null, or in RFC 3339 format.");
+      } else if (typeof enddate === "string" && !rfc3339Regex.test(enddate)) {
         errors.temporal_extent?.enddate?.addError("End Date must be in RFC 3339 format (YYYY-MM-DDTHH:mm:ss.sssZ) or empty.");
       }
     }

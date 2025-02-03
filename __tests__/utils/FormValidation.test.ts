@@ -54,6 +54,20 @@ describe("customValidate", () => {
     );
   });
 
+  it("should allow null for startdate and enddate", () => {
+    const formData = {
+      temporal_extent: {
+        startdate: null,
+        enddate: null,
+      },
+    };
+    const errors: any = { temporal_extent: {} };
+    customValidate(formData, errors);
+  
+    expect(errors.temporal_extent.startdate).toBeUndefined();
+    expect(errors.temporal_extent.enddate).toBeUndefined();
+  });
+
   it("should validate correct JSON in the 'renders' field", () => {
     const formData = { renders: '{"key": "value"}' };
     const errors: any = { renders: {} };

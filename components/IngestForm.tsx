@@ -2,7 +2,7 @@
 
 import { SetStateAction, useEffect } from 'react';
 
-import { IChangeEvent, withTheme } from '@rjsf/core';
+import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
 
 import validator from '@rjsf/validator-ajv8';
