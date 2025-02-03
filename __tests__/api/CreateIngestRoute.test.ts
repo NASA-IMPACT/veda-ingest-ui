@@ -91,7 +91,6 @@ describe('PUT /create-ingest', () => {
 
     const response = await PUT(mockRequest);
 
-    // Verify UpdatePR is called with the correct data
     expect(UpdatePR).toHaveBeenCalledWith(
       'test-ref',
       'test-sha',
@@ -99,11 +98,8 @@ describe('PUT /create-ingest', () => {
       { key: 'value' }
     );
 
-    // Parse the response to validate content
     const jsonResponse = await response.json();
     expect(jsonResponse).toEqual({ message: 'Data updated successfully' });
-
-    // Check response status
     expect(response.status).toBe(200);
   });
 
@@ -117,16 +113,12 @@ describe('PUT /create-ingest', () => {
       }),
     } as unknown as NextRequest;
 
-    // Mock the UpdatePR function to reject
     vi.mocked(UpdatePR).mockRejectedValue(new Error('Failed to update PR'));
 
     const response = await PUT(mockRequest);
 
-    // Parse the response to validate content
     const jsonResponse = await response.json();
     expect(jsonResponse).toEqual({ error: 'Failed to update PR' });
-
-    // Check response status
     expect(response.status).toBe(400);
   });
 
@@ -140,18 +132,61 @@ describe('PUT /create-ingest', () => {
       }),
     } as unknown as NextRequest;
 
-    // Mock the UpdatePR function to throw a non-error object
     vi.mocked(UpdatePR).mockImplementation(() => {
       throw 'Unexpected Error';
     });
 
     const response = await PUT(mockRequest);
 
-    // Parse the response to validate content
     const jsonResponse = await response.json();
     expect(jsonResponse).toEqual({ error: 'Internal Server Error' });
-
-    // Check response status
     expect(response.status).toBe(500);
+  });
+
+  it('returns error when a required field is missing', async () => {
+    const mockRequest = {
+      json: vi.fn().mockResolvedValue({
+        ref: 'test-ref',
+        fileSha: 'test-sha',
+        // filePath is missing
+        formData: { key: 'value' },
+      }),
+    } as unknown as NextRequest;
+
+    const response = await PUT(mockRequest);
+
+    const jsonResponse = await response.json();
+    expect(jsonResponse).toEqual({ error: 'Missing required fields: filePath' });
+    expect(response.status).toBe(400);
+  });
+
+  it('returns error when multiple required fields are missing', async () => {
+    const mockRequest = {
+      json: vi.fn().mockResolvedValue({
+        ref: 'test-ref',
+        // fileSha and filePath are missing
+        formData: { key: 'value' },
+      }),
+    } as unknown as NextRequest;
+
+    const response = await PUT(mockRequest);
+
+    const jsonResponse = await response.json();
+    expect(jsonResponse).toEqual({ error: 'Missing required fields: fileSha, filePath' });
+    expect(response.status).toBe(400);
+  });
+
+  it('returns error when all required fields are missing', async () => {
+    const mockRequest = {
+      json: vi.fn().mockResolvedValue({}),
+    } as unknown as NextRequest;
+
+    const response = await PUT(mockRequest);
+
+    const jsonResponse = await response.json();
+    expect(jsonResponse).toEqual({
+      error: 'Missing required fields: ref, fileSha, filePath, formData',
+    });
+    expect(response.status).toBe(400);
   });
 });

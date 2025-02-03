@@ -1,0 +1,125 @@
+import { useState, useRef } from "react";
+import { message } from "antd";
+import L, { Map } from "leaflet";
+
+const baseUrl = "https://staging.openveda.cloud";
+
+export const useCOGViewer = () => {
+  const [cogUrl, setCogUrl] = useState<string | null>(null);
+  const [metadata, setMetadata] = useState<any | null>(null);
+  const [selectedBands, setSelectedBands] = useState<number[]>([]);
+  const [rescale, setRescale] = useState<[number | null, number | null][]>([]);
+  const [selectedColormap, setSelectedColormap] = useState<string>("Internal");
+  const [colorFormula, setColorFormula] = useState<string | null>(null);
+  const [selectedResampling, setSelectedResampling] = useState<string | null>(null);
+  const [noDataValue, setNoDataValue] = useState<string | null>(null);
+  const [tileUrl, setTileUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const mapRef = useRef<Map | null>(null);
+
+  const fetchMetadata = async (url: string) => {
+    if (!url) {
+      message.error("COG URL is required");
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await fetch(`${baseUrl}/api/raster/cog/info?url=${encodeURIComponent(url)}`);
+      if (!response.ok) throw new Error("Failed to fetch metadata");
+      const data = await response.json();
+      setMetadata(data);
+
+      const bandCount = data.band_descriptions.length;
+      const bands = Array.from({ length: bandCount }, (_, i) => i + 1);
+      setSelectedBands(bandCount === 1 ? [1] : bands.slice(0, 3));
+      setRescale(bands.map(() => [null, null]));
+
+      fetchTileUrl(url, bands.slice(0, 3), [], "Internal");
+      message.success("COG metadata loaded successfully!");
+    } catch (error) {
+      console.error("Error fetching metadata:", error);
+      message.error("Failed to load COG metadata.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTileUrl = async (
+    url: string,
+    bands: number[],
+    rescale: [number | null, number | null][],
+    colormap: string,
+    colorFormula?: string | null,
+    resampling?: string | null,
+    noData?: string | null
+  ) => {
+    setLoading(true);
+    try {
+      if (!url) throw new Error("COG URL is required.");
+
+      const bidxParams = bands.map((band) => `&bidx=${band}`).join("");
+      const rescaleParams = rescale
+        .filter((range) => range[0] !== null && range[1] !== null)
+        .map((range) => `&rescale=${range[0]},${range[1]}`)
+        .join("");
+      const colormapParam = colormap !== "Internal" ? `&colormap_name=${colormap}` : "";
+      const colorFormulaParam = colorFormula ? `&color_formula=${encodeURIComponent(colorFormula)}` : "";
+      const resamplingParam = resampling ? `&resampling=${resampling}` : "";
+      const noDataParam = noData ? `&nodata=${encodeURIComponent(noData)}` : "";
+
+      const response = await fetch(
+        `${baseUrl}/api/raster/cog/WebMercatorQuad/tilejson.json?url=${encodeURIComponent(
+          url
+        )}${bidxParams}${rescaleParams}${colormapParam}${colorFormulaParam}${resamplingParam}${noDataParam}`
+      );
+
+      if (!response.ok) throw new Error("Failed to fetch tile URL");
+      const data = await response.json();
+      setTileUrl(data.tiles[0]);
+
+      if (mapRef.current && data.bounds) {
+        const bounds = L.latLngBounds([
+          [data.bounds[1], data.bounds[0]],
+          [data.bounds[3], data.bounds[2]],
+        ]);
+        mapRef.current.fitBounds(bounds);
+      }
+
+      message.success("COG tile layer loaded successfully!");
+    } catch (error) {
+      console.error("Error fetching tile URL:", error);
+      message.error("Failed to load tile layer.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    cogUrl,
+    setCogUrl,
+    metadata,
+    fetchMetadata,
+    selectedBands,
+    setSelectedBands,
+    rescale,
+    setRescale,
+    selectedColormap,
+    setSelectedColormap,
+    colorFormula,
+    setColorFormula,
+    selectedResampling,
+    setSelectedResampling,
+    noDataValue,
+    setNoDataValue,
+    tileUrl,
+    loading,
+    isModalVisible,
+    setIsModalVisible,
+    hasChanges,
+    setHasChanges,
+    fetchTileUrl,
+    mapRef,
+  };
+};

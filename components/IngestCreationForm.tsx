@@ -19,43 +19,46 @@ function IngestCreationForm({
 }) {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
 
-  // @ts-expect-error testing
-  const onFormDataSubmit = async ({ formData }) => {
-    setStatus('loadingGithub');
-    setCollectionName(formData.collection);
-
-    const url = 'api/create-ingest';
-    const requestOptions = {
-      method: 'POST',
-      body: JSON.stringify(formData),
-      headers: { 'Content-Type': 'application/json' },
-    };
-    try {
-      const response = await fetch(url, requestOptions);
-
-      if (!response.ok) {
-        const errorMessage = await response.text();
-        setApiErrorMessage(errorMessage);
-        setStatus('error');
-        throw new Error(`There was an error: ${errorMessage}`);
-      }
-
-      const responseJson = await response.json();
-      setPullRequestUrl(responseJson.githubURL);
-      setFormData({});
-      setStatus('success');
-    } catch (error) {
-      console.error(error);
-      setStatus('error');
+  const onFormDataSubmit = (data?: Record<string, unknown>) => {
+    if (!data) {
+      console.error("No form data provided.");
+      return;
     }
+  
+    setStatus("loadingGithub");
+    setCollectionName(data.collection as string);
+  
+    const url = "api/create-ingest";
+    const requestOptions = {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" },
+    };
+  
+    fetch(url, requestOptions)
+      .then(async (response) => {
+        if (!response.ok) {
+          const errorMessage = await response.text();
+          setApiErrorMessage(errorMessage);
+          setStatus("error");
+        }
+        const responseJson = await response.json();
+        setPullRequestUrl(responseJson.githubURL);
+        setFormData({});
+        setStatus("success");
+      })
+      .catch((error) => {
+        console.error(error);
+        setStatus("error");
+      });
   };
+  
 
   return (
     <IngestForm
       uiSchema={uiSchema}
       formData={formData}
       setFormData={setFormData}
-      // @ts-expect-error testing
       onSubmit={onFormDataSubmit}
     />
   );

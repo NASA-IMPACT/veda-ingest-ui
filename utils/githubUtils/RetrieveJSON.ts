@@ -31,7 +31,7 @@ const RetrieveJSON = async (ref: string) => {
       },
     });
 
-    // renaming to clarify file vs branch sha and path
+    // Extract content
     // @ts-expect-error data has sha, content, and path
     const fileSha = json.data['sha'];
     // @ts-expect-error data has sha, content, and path
@@ -40,10 +40,16 @@ const RetrieveJSON = async (ref: string) => {
     const filePath = json.data['path'];
 
     const buffer = Buffer.from(contentBase64, 'base64');
-
-    // Convert buffer to string and parse to JSON
     const jsonString = buffer.toString('utf-8');
-    const content = await JSON.parse(jsonString);
+
+    // Handle JSON parsing safely
+    let content;
+    try {
+      content = JSON.parse(jsonString);
+    } catch (parseError) {
+      throw new Error(`Invalid JSON format in GitHub file: ${filePath}`);
+    }
+
     return { fileSha, filePath, content };
   } catch (error) {
     console.error(error);

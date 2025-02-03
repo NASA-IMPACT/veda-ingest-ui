@@ -1,5 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
+import { CleanAndPrettifyJSON } from '../CleanAndPrettifyJson';
 
 const UpdatePR = async (
   ref: string,
@@ -8,7 +9,7 @@ const UpdatePR = async (
   formData: any
 ) => {
   // prettify stringify to preserve json formatting
-  const stringContent = JSON.stringify(formData, null, 2);
+  const stringContent = CleanAndPrettifyJSON(formData)
   const content = btoa(stringContent);
 
   const owner = process.env.OWNER;

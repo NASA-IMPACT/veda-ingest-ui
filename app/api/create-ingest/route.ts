@@ -24,12 +24,27 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const { ref, fileSha, filePath, formData } = await request.json();
+    const body = await request.json();
+
+    // Required fields
+    const requiredFields = ["ref", "fileSha", "filePath", "formData"];
+    
+    // Check for missing fields
+    const missingFields = requiredFields.filter(field => !(field in body));
+
+    if (missingFields.length > 0) {
+      return NextResponse.json(
+        { error: `Missing required fields: ${missingFields.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    const { ref, fileSha, filePath, formData } = body;
 
     await UpdatePR(ref, fileSha, filePath, formData);
 
     return NextResponse.json(
-      { message: 'Data updated successfully' },
+      { message: "Data updated successfully" },
       { status: 200 }
     );
   } catch (error) {
@@ -38,9 +53,10 @@ export async function PUT(request: NextRequest) {
     } else {
       console.log(error);
       return NextResponse.json(
-        { error: 'Internal Server Error' },
+        { error: "Internal Server Error" },
         { status: 500 }
       );
     }
   }
 }
+

@@ -23,6 +23,7 @@ Amplify.configure({ ...config }, { ssr: true });
 const EditIngest = function EditIngest() {
   const [data, setData] = useState<PullRequest[]>([]);
   const [status, setStatus] = useState<Status>('idle');
+  const [apiErrorMessage, setApiErrorMessage] = useState('');
   const [formData, setFormData] = useState<Record<string, unknown>>({});
   const [ref, setRef] = useState('');
   const [fileSha, setFileSha] = useState('');
@@ -68,11 +69,17 @@ const EditIngest = function EditIngest() {
       setRef(ref);
 
       if (!response.ok) {
-        const errorMessage = await response.text();
-        throw new Error(`There was an error on handleClick: ${errorMessage}`);
+        const errorResponse = await response.json();
+        const errorMessage = errorResponse.error || 'Unknown error occurred.';
+        throw new Error(errorMessage);
       }
 
       const { fileSha, filePath, content } = await response.json();
+
+      // Ensure renders is stored as a pretty string if it's an object
+      if (content.renders && typeof content.renders === 'object') {
+        content.renders = JSON.stringify(content.renders, null, 2);
+      }
 
       setFilePath(filePath);
       setFileSha(fileSha);
@@ -80,6 +87,8 @@ const EditIngest = function EditIngest() {
       setStatus('idle');
     } catch (err) {
       console.error(err);
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setApiErrorMessage(errorMessage)
       setStatus('error');
     }
   };
@@ -128,10 +137,16 @@ const EditIngest = function EditIngest() {
           setFormData={setFormData}
           setStatus={setStatus}
           handleCancel={handleCancel}
+          setApiErrorMessage={setApiErrorMessage}
         />
       )}
       {status === 'loadingGithub' && <Spin fullscreen />}
-      {status === 'error' && <ErrorModal collectionName={collectionName} />}
+      {status === 'error' && 
+        <ErrorModal
+          collectionName={collectionName}
+          apiErrorMessage={apiErrorMessage}
+        />
+      }
       {status === 'success' && (
         <SuccessModal
           type="edit"
