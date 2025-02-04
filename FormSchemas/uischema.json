@@ -104,12 +104,12 @@
         "cog_default": {
             "ui:grid": [
                 {
-                    "type": 12,
-                    "roles": 12
+                    "title": 12,
+                    "type": 12
                 },
                 {
-                    "title": 12,
-                    "description": 12
+                    "description": 12,
+                    "roles": 12
                 }
             ]
         }
