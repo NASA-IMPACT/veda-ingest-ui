@@ -106,12 +106,18 @@
             "type": "object",
             "properties": {
                 "startdate": {
-                    "type": ["string", "null"],
+                    "type": [
+                        "string",
+                        "null"
+                    ],
                     "format": "date-time",
                     "title": "Start Date"
                 },
                 "enddate": {
-                    "type": ["string", "null"],
+                    "type": [
+                        "string",
+                        "null"
+                    ],
                     "format": "date-time",
                     "title": "End Date"
                 }
@@ -234,14 +240,13 @@
                         },
                         "roles": {
                             "type": "array",
-                            "items": 
-                                {
-                                    "type": "string"
-                                },
-                                "default": [
-                                    "data",
-                                    "layer"
-                                ]
+                            "items": {
+                                "type": "string"
+                            },
+                            "default": [
+                                "data",
+                                "layer"
+                            ]
                         },
                         "title": {
                             "type": "string",
@@ -317,10 +322,12 @@
             ]
         },
         "assets": {
+            "title": "Assets",
             "type": "object",
             "properties": {
                 "thumbnail": {
                     "type": "object",
+                    "title": "Thumbnail",
                     "properties": {
                         "title": {
                             "type": "string"
@@ -336,11 +343,9 @@
                         },
                         "roles": {
                             "type": "array",
-                            "items": [
-                                {
-                                    "type": "string"
-                                }
-                            ]
+                            "items": {
+                                "type": "string"
+                            }
                         }
                     },
                     "required": [
