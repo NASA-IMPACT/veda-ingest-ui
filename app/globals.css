@@ -90,22 +90,25 @@ fieldset[id^="root_"] {
   box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.2);
 }
 
-#root_discovery_items > .ant-row > .ant-col:first-child label,
-#root_links > .ant-row > .ant-col:first-child label,
-#root_item_assets > .ant-row > .ant-col:first-child label,
-#root_stac_extensions > .ant-row > .ant-col:first-child label,
-#root_providers > .ant-row > .ant-col:first-child label,
-#root_sample_files > .ant-row > .ant-col:first-child label,
-#root_assets > .ant-row > .ant-col:first-child label {
+label[title="Discovery Items"],
+label[title="Links"],
+label[title="Item Assets"],
+label[title="STAC Extensions"],
+label[title="Providers"],
+label[title="Sample Files"],
+label[title="Assets"],
+label[title="Renders"] {
   font-size: 16px;
   font-weight: 600;
 }
 
-#root_assets_thumbnail > .ant-row > .ant-col:first-child label,
-#root_item_assets_cog_default > .ant-row > .ant-col:first-child label,
+label[title="Spatial Extent"],
+label[title="Temporal Extent"],
+label[title="Thumbnail"],
+label[title="cog_default"],
 [id^="root_discovery_items_"] > .ant-row > .ant-col:first-child label,
 [id^="root_links_"] > .ant-row > .ant-col:first-child label,
 [id^="root_providers_"] > .ant-row > .ant-col:first-child label {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
 }
