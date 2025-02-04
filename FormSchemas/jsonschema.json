@@ -234,15 +234,14 @@
                         },
                         "roles": {
                             "type": "array",
-                            "items": [
+                            "items": 
                                 {
                                     "type": "string"
-                                }
-                            ],
-                            "default": [
-                                "data",
-                                "layer"
-                            ]
+                                },
+                                "default": [
+                                    "data",
+                                    "layer"
+                                ]
                         },
                         "title": {
                             "type": "string",
