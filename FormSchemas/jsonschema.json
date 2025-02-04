@@ -28,7 +28,13 @@
         },
         "license": {
             "type": "string",
-            "title": "License"
+            "title": "License",
+            "default": "CC0-1.0"
+        },
+        "stac_version": {
+            "type": "string",
+            "title": "STAC Version",
+            "default": "1.0.0"
         },
         "dashboard:is_periodic": {
             "type": "boolean",
@@ -87,6 +93,12 @@
                     "type": "number",
                     "title": "ymax"
                 }
+            },
+            "default": {
+                "xmin": -180,
+                "ymin": -90,
+                "xmax": 180,
+                "ymax": 90
             }
         },
         "temporal_extent": {
@@ -94,12 +106,12 @@
             "type": "object",
             "properties": {
                 "startdate": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "format": "date-time",
                     "title": "Start Date"
                 },
                 "enddate": {
-                    "type": "string",
+                    "type": ["string", "null"],
                     "format": "date-time",
                     "title": "End Date"
                 }
@@ -203,7 +215,11 @@
             "type": "array",
             "items": {
                 "type": "string"
-            }
+            },
+            "default": [
+                "https://stac-extensions.github.io/render/v1.0.0/schema.json",
+                "https://stac-extensions.github.io/item-assets/v1.0.0/schema.json"
+            ]
         },
         "item_assets": {
             "type": "object",
@@ -290,7 +306,16 @@
                         "format": "uri"
                     }
                 }
-            }
+            },
+            "default": [
+                {
+                    "name": "NASA VEDA",
+                    "roles": [
+                        "host"
+                    ],
+                    "url": "https://www.earthdata.nasa.gov/dashboard/"
+                }
+            ]
         },
         "assets": {
             "type": "object",
@@ -325,7 +350,14 @@
                         "href",
                         "type",
                         "roles"
-                    ]
+                    ],
+                    "default": {
+                        "title": "Thumbnail",
+                        "type": "image/jpeg",
+                        "roles": [
+                            "thumbnail"
+                        ]
+                    }
                 }
             }
         }
