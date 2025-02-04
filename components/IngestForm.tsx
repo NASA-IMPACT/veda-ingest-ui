@@ -11,7 +11,7 @@ import { JSONSchema7 } from 'json-schema';
 import ObjectFieldTemplate from '@/utils/ObjectFieldTemplate';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
 import { UiSchema } from '@rjsf/utils';
-import { customValidate } from '@/utils/FormValidation';
+import { customValidate } from '@/utils/formValidation';
 import { handleSubmit } from "@/utils/FormHandlers";
 
 const Form = withTheme(AntDTheme);

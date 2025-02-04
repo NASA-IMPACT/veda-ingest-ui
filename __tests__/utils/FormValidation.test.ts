@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { customValidate } from "@/utils/FormValidation";
+import { customValidate } from "@/utils/formValidation";
 
 describe("customValidate", () => {
   it("should validate a correct RFC 3339 datetime format", () => {
