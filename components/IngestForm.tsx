@@ -1,10 +1,9 @@
 'use client';
 
-import { SetStateAction, useEffect } from 'react';
-
+import { SetStateAction, useEffect, useState } from 'react';
+import { Tabs } from 'antd';
 import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
-
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
 
@@ -12,9 +11,12 @@ import ObjectFieldTemplate from '@/utils/ObjectFieldTemplate';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
 import { UiSchema } from '@rjsf/utils';
 import { customValidate } from '@/utils/formValidation';
-import { handleSubmit } from "@/utils/FormHandlers";
+import { handleSubmit } from '@/utils/FormHandlers';
+import JSONEditor from '@/components/JSONEditor';
 
+const { TabPane } = Tabs;
 const Form = withTheme(AntDTheme);
+
 
 interface TemporalExtent {
   startdate?: string;
@@ -44,6 +46,9 @@ function IngestForm({
   children,
   defaultTemporalExtent = false,
 }: FormProps) {
+  
+  const [activeTab, setActiveTab] = useState<string>('form');
+  const [forceRenderKey, setForceRenderKey] = useState<number>(0); // Force refresh RJSF to clear validation errors
 
   useEffect(() => {
     if (defaultTemporalExtent) {
@@ -69,36 +74,50 @@ function IngestForm({
       });
     }
   }, [defaultTemporalExtent, setFormData]);
-  
+
   const onFormDataChanged = (formState: { formData?: object }) => {
     setFormData(formState.formData as Record<string, unknown> ?? {});
-
     if (setDisabled) {
       setDisabled(false);
     }
   };
   
+  const handleJsonEditorChange = (updatedData: Record<string, unknown>) => {
+    setFormData(updatedData);
+    setForceRenderKey(prev => prev + 1); // Forces RJSF to re-render and re-validate
+    setActiveTab('form');
+  };
 
   const updateFormData = (updatedData: SetStateAction<object | undefined>) => {
     setFormData((updatedData ?? {}) as Record<string, unknown>);
   };
 
   return (
-    <Form
-      schema={jsonSchema as JSONSchema7}
-      uiSchema={uiSchema}
-      validator={validator}
-      customValidate={customValidate}
-      templates={{
-        ObjectFieldTemplate: ObjectFieldTemplate,
-      }}
-      formData={formData}
-      onChange={onFormDataChanged}
-      onSubmit={(data) => handleSubmit(data, onSubmit)}
-      formContext={{ updateFormData }}
-    >
-      {children}
-    </Form>
+    <Tabs activeKey={activeTab} onChange={setActiveTab}>
+      <TabPane tab="Form" key="form">
+        <Form
+          key={forceRenderKey} // Forces re-render when data updates
+          schema={jsonSchema as JSONSchema7}
+          uiSchema={uiSchema}
+          validator={validator}
+          customValidate={customValidate}
+          templates={{
+            ObjectFieldTemplate: ObjectFieldTemplate,
+          }}
+          formData={formData}
+          onChange={onFormDataChanged}
+          onSubmit={(data) => handleSubmit(data, onSubmit)}
+          formContext={{ updateFormData }}
+
+        >
+          {children}
+        </Form>
+      </TabPane>
+
+      <TabPane tab="Manual JSON Edit" key="json">
+        <JSONEditor value={formData || {}} onChange={handleJsonEditorChange} />
+      </TabPane>
+    </Tabs>
   );
 }
 
