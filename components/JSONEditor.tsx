@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { Input, Button, Typography, Checkbox, message, Flex } from 'antd';
+import { useState, useEffect } from 'react';
+import { Input, Button, Typography, Checkbox, Flex, message } from 'antd';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
@@ -27,7 +27,17 @@ const JSONEditor: React.FC<JSONEditorProps> = ({ value, onChange, hasJSONChanges
   )[0];
 
   useEffect(() => {
-    setEditorValue(JSON.stringify(value, null, 2));
+    // If "renders" is a stringified object, convert it back to an object before displaying in JSON Editor
+    let updatedValue = { ...value };
+    if (typeof value.renders === "string") {
+      try {
+        updatedValue.renders = JSON.parse(value.renders);
+      } catch (err) {
+        console.warn("Could not parse 'renders' as JSON, leaving it as-is.");
+      }
+    }
+
+    setEditorValue(JSON.stringify(updatedValue, null, 2));
   }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -38,7 +48,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({ value, onChange, hasJSONChanges
 
   const applyChanges = () => {
     try {
-      const parsedValue = JSON.parse(editorValue) as Record<string, unknown>;
+      let parsedValue = JSON.parse(editorValue) as Record<string, unknown>;
       setJsonError(null);
 
       if (disableCollectionNameChange && initialCollectionValue !== undefined) {
@@ -46,6 +56,11 @@ const JSONEditor: React.FC<JSONEditorProps> = ({ value, onChange, hasJSONChanges
           message.error(`Collection name cannot be changed! Expected: "${initialCollectionValue}"`);
           return;
         }
+      }
+
+      // If "renders" is an object, convert it to a pretty JSON string before saving
+      if (parsedValue.renders && typeof parsedValue.renders === "object") {
+        parsedValue.renders = JSON.stringify(parsedValue.renders, null, 2);
       }
 
       // Create a deep copy of the JSON schema
