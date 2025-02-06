@@ -28,22 +28,22 @@ const JSONEditor: React.FC<JSONEditorProps> = ({ value, onChange }) => {
 
   const applyChanges = () => {
     try {
-      const parsedValue = JSON.parse(editorValue);
+      const parsedValue = JSON.parse(editorValue) as Record<string, unknown>;
       setJsonError(null);
 
-      // Create a deep copy of the JSON schema to modify it
-      const modifiedSchema = structuredClone(jsonSchema);
+      // Create a deep copy of the JSON schema
+      const modifiedSchema = structuredClone(jsonSchema) as Record<string, unknown>;
 
       // Ensure strict mode affects additional properties
       if (strictSchema) {
-        modifiedSchema.additionalProperties = false; // Enforce no extra fields
+        (modifiedSchema as any).additionalProperties = false; // Enforce no extra fields
       } else {
-        modifiedSchema.additionalProperties = true; // Allow extra fields
+        (modifiedSchema as any).additionalProperties = true; // Allow extra fields
       }
 
       // Override "renders" property to allow both string & object
-      if (modifiedSchema.properties && modifiedSchema.properties.renders) {
-        modifiedSchema.properties.renders = {
+      if (modifiedSchema.properties && (modifiedSchema.properties as any).renders) {
+        (modifiedSchema.properties as any).renders = {
           oneOf: [
             { type: "string" }, // Original: string
             { type: "object", additionalProperties: true } // Allow object
