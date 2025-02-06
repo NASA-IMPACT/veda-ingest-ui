@@ -77,6 +77,7 @@ function IngestEditForm({
       setFormData={setFormData}
       onSubmit={onFormDataSubmit}
       setDisabled={setDisabled}
+      disableCollectionNameChange={true}
     >
       <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
         <Button

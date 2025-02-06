@@ -35,6 +35,7 @@ interface FormProps {
   setDisabled?: (disabled: boolean) => void;
   children?: React.ReactNode;
   defaultTemporalExtent?: boolean;
+  disableCollectionNameChange?: boolean;
 }
 
 function IngestForm({
@@ -44,11 +45,13 @@ function IngestForm({
   onSubmit,
   setDisabled,
   children,
+  disableCollectionNameChange = false,
   defaultTemporalExtent = false,
 }: FormProps) {
   
   const [activeTab, setActiveTab] = useState<string>('form');
   const [forceRenderKey, setForceRenderKey] = useState<number>(0); // Force refresh RJSF to clear validation errors
+  const [hasJSONChanges, setHasJSONChanges] = useState<boolean>(false)
 
   useEffect(() => {
     if (defaultTemporalExtent) {
@@ -86,6 +89,7 @@ function IngestForm({
     setFormData(updatedData);
     setForceRenderKey(prev => prev + 1); // Forces RJSF to re-render and re-validate
     setActiveTab('form');
+    setHasJSONChanges(false);
   };
 
   const updateFormData = (updatedData: SetStateAction<object | undefined>) => {
@@ -115,7 +119,12 @@ function IngestForm({
       </TabPane>
 
       <TabPane tab="Manual JSON Edit" key="json">
-        <JSONEditor value={formData || {}} onChange={handleJsonEditorChange} />
+        <JSONEditor
+          value={formData || {}} onChange={handleJsonEditorChange}
+          disableCollectionNameChange={disableCollectionNameChange}
+          hasJSONChanges={hasJSONChanges}
+          setHasJSONChanges={setHasJSONChanges}
+          />
       </TabPane>
     </Tabs>
   );

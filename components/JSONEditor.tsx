@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Input, Button, Typography, Checkbox } from 'antd';
+import { useState, useEffect, useRef } from 'react';
+import { Input, Button, Typography, Checkbox, message, Flex } from 'antd';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
@@ -10,13 +10,21 @@ const { Text } = Typography;
 interface JSONEditorProps {
   value: Record<string, unknown>;
   onChange: (updatedValue: Record<string, unknown>) => void;
+  disableCollectionNameChange?: boolean;
+  hasJSONChanges?: boolean;
+  setHasJSONChanges: (hasJSONChanges: boolean) => void;
 }
 
-const JSONEditor: React.FC<JSONEditorProps> = ({ value, onChange }) => {
+const JSONEditor: React.FC<JSONEditorProps> = ({ value, onChange, hasJSONChanges, setHasJSONChanges, disableCollectionNameChange = false }) => {
   const [editorValue, setEditorValue] = useState<string>(JSON.stringify(value, null, 2));
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [schemaErrors, setSchemaErrors] = useState<string[]>([]);
-  const [strictSchema, setStrictSchema] = useState<boolean>(true); // Default: strict mode
+  const [strictSchema, setStrictSchema] = useState<boolean>(true);
+
+  // Store initial collection value (only if disableCollectionNameChange is true)
+  const initialCollectionValue = useState<string | undefined>(
+    disableCollectionNameChange ? (value.collection as string | undefined) : undefined
+  )[0];
 
   useEffect(() => {
     setEditorValue(JSON.stringify(value, null, 2));
@@ -24,6 +32,8 @@ const JSONEditor: React.FC<JSONEditorProps> = ({ value, onChange }) => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setEditorValue(e.target.value);
+    setHasJSONChanges(true);
+    setJsonError(null);
   };
 
   const applyChanges = () => {
@@ -31,32 +41,38 @@ const JSONEditor: React.FC<JSONEditorProps> = ({ value, onChange }) => {
       const parsedValue = JSON.parse(editorValue) as Record<string, unknown>;
       setJsonError(null);
 
+      if (disableCollectionNameChange && initialCollectionValue !== undefined) {
+        if (parsedValue.collection !== initialCollectionValue) {
+          message.error(`Collection name cannot be changed! Expected: "${initialCollectionValue}"`);
+          return;
+        }
+      }
+
       // Create a deep copy of the JSON schema
       const modifiedSchema = structuredClone(jsonSchema) as Record<string, unknown>;
 
       // Ensure strict mode affects additional properties
       if (strictSchema) {
-        (modifiedSchema as any).additionalProperties = false; // Enforce no extra fields
+        (modifiedSchema as any).additionalProperties = false;
       } else {
-        (modifiedSchema as any).additionalProperties = true; // Allow extra fields
+        (modifiedSchema as any).additionalProperties = true;
       }
 
       // Override "renders" property to allow both string & object
       if (modifiedSchema.properties && (modifiedSchema.properties as any).renders) {
         (modifiedSchema.properties as any).renders = {
           oneOf: [
-            { type: "string" }, // Original: string
-            { type: "object", additionalProperties: true } // Allow object
+            { type: "string" },
+            { type: "object", additionalProperties: true }
           ]
         };
       }
 
-      // Dynamically create AJV instance based on strictSchema state
+      // Validate JSON using AJV
       const ajv = new Ajv({ allErrors: true });
       addFormats(ajv);
       const validateSchema = ajv.compile(modifiedSchema);
 
-      // Validate against schema
       const isValid = validateSchema(parsedValue);
       if (!isValid) {
         setSchemaErrors(validateSchema.errors?.map(err => `${err.instancePath} ${err.message}`) || []);
@@ -72,7 +88,12 @@ const JSONEditor: React.FC<JSONEditorProps> = ({ value, onChange }) => {
   };
 
   return (
-    <div>
+    <Flex vertical gap="middle">
+      {disableCollectionNameChange && (
+        <Typography.Text type="warning">
+          Editing <strong>{initialCollectionValue}</strong>
+        </Typography.Text>
+      )}
       <Checkbox 
         checked={strictSchema} 
         onChange={(e) => setStrictSchema(e.target.checked)}
@@ -87,6 +108,9 @@ const JSONEditor: React.FC<JSONEditorProps> = ({ value, onChange }) => {
         onChange={handleInputChange}
         style={{ fontFamily: 'monospace' }}
       />
+      <Button onClick={applyChanges} type="primary" style={{ marginTop: '10px' }} disabled={!hasJSONChanges}>
+        Apply Changes
+      </Button>
 
       {jsonError && <Text type="danger">{jsonError}</Text>}
       {schemaErrors.length > 0 && (
@@ -101,11 +125,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({ value, onChange }) => {
           </ul>
         </div>
       )}
-
-      <Button onClick={applyChanges} type="primary" style={{ marginTop: '10px' }}>
-        Apply Changes
-      </Button>
-    </div>
+    </Flex>
   );
 };
 
