@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 import { Octokit } from '@octokit/rest';
@@ -49,11 +48,29 @@ describe('GetGithubToken', () => {
     });
   });
 
-  it('throws an error when environment variables are missing', async () => {
+  it('throws an error when APP ID environment variable is missing', async () => {
     delete process.env.APP_ID;
-  
+
     // Suppress console.error for this test
-    const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    await expect(GetGithubToken()).rejects.toThrow(
+      'Missing or invalid environment variables for GitHub authentication'
+    );
+    expect(Octokit).not.toHaveBeenCalled();
+    // Restore console.error
+    consoleErrorMock.mockRestore();
+  });
+
+  it('throws an error when INSTALLATION ID environment variable is missing', async () => {
+    delete process.env.INSTALLATION_ID;
+
+    // Suppress console.error for this test
+    const consoleErrorMock = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     await expect(GetGithubToken()).rejects.toThrow(
       'Missing or invalid environment variables for GitHub authentication'
@@ -65,11 +82,15 @@ describe('GetGithubToken', () => {
 
   it('throws an error when Octokit auth fails', async () => {
     mockAuth.mockRejectedValue(new Error('Failed to fetch GitHub token'));
-  
-    // Suppress console.error for this test
-    const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    await expect(GetGithubToken()).rejects.toThrow('Failed to fetch GitHub token');
+    // Suppress console.error for this test
+    const consoleErrorMock = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    await expect(GetGithubToken()).rejects.toThrow(
+      'Failed to fetch GitHub token'
+    );
     expect(mockAuth).toHaveBeenCalled();
     // Restore console.error
     consoleErrorMock.mockRestore();

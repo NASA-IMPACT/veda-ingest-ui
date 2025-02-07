@@ -31,22 +31,14 @@ describe('ErrorModal Component', () => {
     expect(modal).toBeInTheDocument();
     expect(screen.getByText('Collection Name Exists')).toBeInTheDocument();
     expect(
-      screen.getByText(
-        /A branch with the collection name/i
-      )
+      screen.getByText(/A branch with the collection name/i)
     ).toBeInTheDocument();
+    expect(screen.getByText(/Test Collection/i)).toBeInTheDocument();
+    expect(screen.getByText(/already exists\./i)).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Test Collection/i
+        /Please try another collection name or delete the feature branch\./i
       )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /already exists\./i
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Please try another collection name or delete the feature branch\./i)
     ).toBeInTheDocument();
   });
 

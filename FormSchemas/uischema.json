@@ -1,190 +1,187 @@
 {
-    "ui:grid": [
-        {
-            "collection": 4,
-            "title": 6,
-            "license": 2,
-            "dashboard:is_periodic": 3,
-            "dashboard:time_density": 3,
-            "data_type": 3,
-            "stac_version": 3
-            
-        },
-        {
-          
-            "description": 12,
-            "spatial_extent": 6,
-            "temporal_extent": 6
-        },
-        {
-            "discovery_items": 24
-        },
-        {
-            "sample_files": 24
-        },
-        {
-            "renders": 12,
-            "stac_extensions": 12
-        },
-        {
-            "links": 24
-        },
-        {
-            "item_assets": 24
-        },
-        {
-            "providers": 24
-        },
-        {
-            "assets": 24
-        }
-    ],
-    "spatial_extent": {
-        "ui:grid": [
-            {
-                "xmin": 12,
-                "ymin": 12
-            },
-            {
-                "xmax": 12,
-                "ymax": 12
-            }
-        ]
+  "ui:grid": [
+    {
+      "collection": 4,
+      "title": 6,
+      "license": 2,
+      "dashboard:is_periodic": 3,
+      "dashboard:time_density": 3,
+      "data_type": 3,
+      "stac_version": 3
     },
-    "discovery_items": {
-        "items": {
-            "ui:grid": [
-                {
-                    "upload": 8,
-                    "cogify": 8,
-                    "dry_run": 8
-                },
-                {
-                    "discovery": 8,
-                    "prefix": 8,
-                    "bucket": 8
-                },
-                {
-                    "filename_regex": 12,
-                    "datetime_range": 12
-                },
-                {
-                    "stac_extensions": 12,
-                    "links": 12
-                },
-                {
-                    "start_datetime": 8,
-                    "end_datetime": 8,
-                    "single_datetime": 8
-                },
-                {
-                    "id_regex": 8,
-                    "id_template": 8,
-                    "use_multithreading": 8
-                }
-            ]
-        }
+    {
+      "description": 12,
+      "spatial_extent": 6,
+      "temporal_extent": 6
     },
-    "links": {
-        "items": {
-            "ui:grid": [
-                {
-                    "href": 12,
-                    "rel": 12
-                },
-                {
-                    "type": 12,
-                    "title": 12
-                },
-                {
-                    "label:assets": 12
-                }
-            ]
-        }
+    {
+      "discovery_items": 24
     },
-    "item_assets": {
-        "cog_default": {
-            "ui:grid": [
-                {
-                    "title": 12,
-                    "type": 12
-                },
-                {
-                    "description": 12,
-                    "roles": 12
-                }
-            ],
-            "description": {
-                "ui:widget": "textarea",
-                "ui:options": {
-                    "rows": 8
-                }
-            }
-        }
+    {
+      "sample_files": 24
     },
-    "providers": {
-        "items": {
-            "ui:grid": [
-                {
-                    "name": 12,
-                    "description": 12
-                },
-                {
-                    "roles": 12,
-                    "url": 12
-                }
-            ]
-        }
+    {
+      "renders": 12,
+      "stac_extensions": 12
     },
-    "assets": {
-        "thumbnail": {
-            "ui:grid": [
-                {
-                    "title": 12,
-                    "href": 8,
-                    "type": 4
-                },
-                {
-                    "description": 12,
-                    "roles": 8
-                }
-            ],
-            "description": {
-                "ui:widget": "textarea",
-                "ui:options": {
-                    "rows": 8
-                }
-            }
-        }
-        
+    {
+      "links": 24
     },
-    "description": {
-        "ui:widget": "textarea",
-        "ui:options": {
-            "rows": 8
-        }
+    {
+      "item_assets": 24
     },
-    "renders": {
-        "ui:widget": "textarea",
-        "ui:options": {
-            "rows": 12
-        },
-        "classNames": "renders"
+    {
+      "providers": 24
     },
-    "temporal_extent": {
-        "startdate": {
-            "ui:widget": "text"
-        },
-        "enddate": {
-            "ui:widget": "text"
-        }
-    },
-    "ui:submitButtonOptions": {
-        "props": {
-            "color": "primary",
-            "variant": "solid",
-            "size": "large",
-            "block": "true"
-        }
+    {
+      "assets": 24
     }
+  ],
+  "spatial_extent": {
+    "ui:grid": [
+      {
+        "xmin": 12,
+        "ymin": 12
+      },
+      {
+        "xmax": 12,
+        "ymax": 12
+      }
+    ]
+  },
+  "discovery_items": {
+    "items": {
+      "ui:grid": [
+        {
+          "upload": 8,
+          "cogify": 8,
+          "dry_run": 8
+        },
+        {
+          "discovery": 8,
+          "prefix": 8,
+          "bucket": 8
+        },
+        {
+          "filename_regex": 12,
+          "datetime_range": 12
+        },
+        {
+          "stac_extensions": 12,
+          "links": 12
+        },
+        {
+          "start_datetime": 8,
+          "end_datetime": 8,
+          "single_datetime": 8
+        },
+        {
+          "id_regex": 8,
+          "id_template": 8,
+          "use_multithreading": 8
+        }
+      ]
+    }
+  },
+  "links": {
+    "items": {
+      "ui:grid": [
+        {
+          "href": 12,
+          "rel": 12
+        },
+        {
+          "type": 12,
+          "title": 12
+        },
+        {
+          "label:assets": 12
+        }
+      ]
+    }
+  },
+  "item_assets": {
+    "cog_default": {
+      "ui:grid": [
+        {
+          "title": 12,
+          "type": 12
+        },
+        {
+          "description": 12,
+          "roles": 12
+        }
+      ],
+      "description": {
+        "ui:widget": "textarea",
+        "ui:options": {
+          "rows": 8
+        }
+      }
+    }
+  },
+  "providers": {
+    "items": {
+      "ui:grid": [
+        {
+          "name": 12,
+          "description": 12
+        },
+        {
+          "roles": 12,
+          "url": 12
+        }
+      ]
+    }
+  },
+  "assets": {
+    "thumbnail": {
+      "ui:grid": [
+        {
+          "title": 12,
+          "href": 8,
+          "type": 4
+        },
+        {
+          "description": 12,
+          "roles": 8
+        }
+      ],
+      "description": {
+        "ui:widget": "textarea",
+        "ui:options": {
+          "rows": 8
+        }
+      }
+    }
+  },
+  "description": {
+    "ui:widget": "textarea",
+    "ui:options": {
+      "rows": 8
+    }
+  },
+  "renders": {
+    "ui:widget": "textarea",
+    "ui:options": {
+      "rows": 12
+    },
+    "classNames": "renders"
+  },
+  "temporal_extent": {
+    "startdate": {
+      "ui:widget": "text"
+    },
+    "enddate": {
+      "ui:widget": "text"
+    }
+  },
+  "ui:submitButtonOptions": {
+    "props": {
+      "color": "primary",
+      "variant": "solid",
+      "size": "large",
+      "block": "true"
+    }
+  }
 }

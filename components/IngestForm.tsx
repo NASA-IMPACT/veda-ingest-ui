@@ -17,7 +17,6 @@ import JSONEditor from '@/components/JSONEditor';
 const { TabPane } = Tabs;
 const Form = withTheme(AntDTheme);
 
-
 interface TemporalExtent {
   startdate?: string;
   enddate?: string;
@@ -48,25 +47,40 @@ function IngestForm({
   disableCollectionNameChange = false,
   defaultTemporalExtent = false,
 }: FormProps) {
-  
   const [activeTab, setActiveTab] = useState<string>('form');
   const [forceRenderKey, setForceRenderKey] = useState<number>(0); // Force refresh RJSF to clear validation errors
-  const [hasJSONChanges, setHasJSONChanges] = useState<boolean>(false)
+  const [hasJSONChanges, setHasJSONChanges] = useState<boolean>(false);
 
   useEffect(() => {
     if (defaultTemporalExtent) {
       setFormData((prevFormData: FormData | undefined) => {
         const now = new Date();
-      
+
         // Start of the current UTC day
-        const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0))
-          .toISOString();
-        
+        const startOfDay = new Date(
+          Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate(),
+            0,
+            0,
+            0
+          )
+        ).toISOString();
+
         // End of the current UTC day
-        const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59))
-          .toISOString();
-  
-        console.log('startOfDay', startOfDay)
+        const endOfDay = new Date(
+          Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate(),
+            23,
+            59,
+            59
+          )
+        ).toISOString();
+
+        console.log('startOfDay', startOfDay);
         return {
           ...prevFormData,
           temporal_extent: {
@@ -79,15 +93,15 @@ function IngestForm({
   }, [defaultTemporalExtent, setFormData]);
 
   const onFormDataChanged = (formState: { formData?: object }) => {
-    setFormData(formState.formData as Record<string, unknown> ?? {});
+    setFormData((formState.formData as Record<string, unknown>) ?? {});
     if (setDisabled) {
       setDisabled(false);
     }
   };
-  
+
   const handleJsonEditorChange = (updatedData: Record<string, unknown>) => {
     setFormData(updatedData);
-    setForceRenderKey(prev => prev + 1); // Forces RJSF to re-render and re-validate
+    setForceRenderKey((prev) => prev + 1); // Forces RJSF to re-render and re-validate
     setActiveTab('form');
     setHasJSONChanges(false);
   };
@@ -112,7 +126,6 @@ function IngestForm({
           onChange={onFormDataChanged}
           onSubmit={(data) => handleSubmit(data, onSubmit)}
           formContext={{ updateFormData }}
-
         >
           {children}
         </Form>
@@ -120,11 +133,12 @@ function IngestForm({
 
       <TabPane tab="Manual JSON Edit" key="json">
         <JSONEditor
-          value={formData || {}} onChange={handleJsonEditorChange}
+          value={formData || {}}
+          onChange={handleJsonEditorChange}
           disableCollectionNameChange={disableCollectionNameChange}
           hasJSONChanges={hasJSONChanges}
           setHasJSONChanges={setHasJSONChanges}
-          />
+        />
       </TabPane>
     </Tabs>
   );

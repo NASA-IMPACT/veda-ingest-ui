@@ -1,12 +1,12 @@
-import React, { useEffect, useRef } from "react";
-import { Spin } from "antd";
+import React, { useEffect, useRef } from 'react';
+import { Spin } from 'antd';
 
-import COGControlsForm from "./COGControlsForm";
-import RenderingOptionsModal from "./RenderingOptionsModal";
+import COGControlsForm from './COGControlsForm';
+import RenderingOptionsModal from './RenderingOptionsModal';
 
 // Dynamically import react-leaflet components to avoid SSR issues
-import dynamic from "next/dynamic";
-const DynamicMap = dynamic(() => import("./DynamicMap"), { ssr: false });
+import dynamic from 'next/dynamic';
+const DynamicMap = dynamic(() => import('./DynamicMap'), { ssr: false });
 
 interface COGViewerContentProps {
   metadata: any | null;
@@ -69,21 +69,24 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
 
   // Automatically adjust map size when container resizes
   useEffect(() => {
-    if (typeof window !== 'undefined' && mapRef.current && containerRef.current) {
+    if (
+      typeof window !== 'undefined' &&
+      mapRef.current &&
+      containerRef.current
+    ) {
       const resizeObserver = new ResizeObserver(() => {
         if (mapRef.current) {
           mapRef.current.invalidateSize();
         }
       });
-  
+
       resizeObserver.observe(containerRef.current);
-  
+
       return () => {
         resizeObserver.disconnect();
       };
     }
   }, []);
-  
 
   return (
     <>
@@ -99,7 +102,8 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
           hasChanges={hasChanges}
           onBandChange={(bandIndex, channel) => {
             const updatedBands = [...selectedBands];
-            updatedBands[channel === "R" ? 0 : channel === "G" ? 1 : 2] = bandIndex;
+            updatedBands[channel === 'R' ? 0 : channel === 'G' ? 1 : 2] =
+              bandIndex;
             setSelectedBands(updatedBands);
             setHasChanges(true);
           }}
@@ -139,22 +143,24 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
           onViewRenderingOptions={() => setIsModalVisible(true)}
           loading={loading}
         />
-
       )}
-      <div ref={containerRef} style={{ height: metadata ? "70vh" : "80vh", position: "relative"}}>
+      <div
+        ref={containerRef}
+        style={{ height: metadata ? '70vh' : '80vh', position: 'relative' }}
+      >
         {loading && (
           <div
             style={{
-              position: "absolute",
+              position: 'absolute',
               top: 0,
               left: 0,
-              width: "100%",
-              height: "100%",
-              background: "rgba(255, 255, 255, 0.7)",
+              width: '100%',
+              height: '100%',
+              background: 'rgba(255, 255, 255, 0.7)',
               zIndex: 1000,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
             <Spin size="large" tip="Loading..." />
@@ -172,7 +178,8 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
           rescale,
           colormap_name: selectedColormap.toLowerCase(),
           color_formula: colorFormula || undefined,
-          resampling: selectedResampling !== "nearest" ? selectedResampling : undefined,
+          resampling:
+            selectedResampling !== 'nearest' ? selectedResampling : undefined,
           nodata: noDataValue || undefined,
         }}
       />

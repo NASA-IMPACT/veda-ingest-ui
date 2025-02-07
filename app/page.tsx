@@ -11,8 +11,6 @@ import { withConditionalAuthenticator } from '@/utils/withConditionalAuthenticat
 
 Amplify.configure({ ...config }, { ssr: true });
 
-
-
 const Home = function Home() {
   return (
     <ThemeProvider>

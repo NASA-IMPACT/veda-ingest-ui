@@ -15,7 +15,8 @@ import SuccessModal from '@/components/SuccessModal';
 import { withConditionalAuthenticator } from '@/utils/withConditionalAuthenticator';
 
 // Type definitions
-type PullRequest = Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][number];
+type PullRequest =
+  Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][number];
 
 Amplify.configure({ ...config }, { ssr: true });
 
@@ -43,7 +44,8 @@ const EditIngest = function EditIngest() {
         throw new Error(`There was an error on fetchPR: ${errorMessage}`);
       }
 
-      const { githubResponse }: { githubResponse: PullRequest[] } = await response.json();
+      const { githubResponse }: { githubResponse: PullRequest[] } =
+        await response.json();
       setData(githubResponse);
       setStatus('idle');
     } catch (err) {
@@ -86,8 +88,9 @@ const EditIngest = function EditIngest() {
       setStatus('idle');
     } catch (err) {
       console.error(err);
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
-      setApiErrorMessage(errorMessage)
+      const errorMessage =
+        err instanceof Error ? err.message : 'An unexpected error occurred';
+      setApiErrorMessage(errorMessage);
       setStatus('error');
     }
   };
@@ -112,14 +115,7 @@ const EditIngest = function EditIngest() {
           loading={status === 'loadingPRs'}
           renderItem={(item: PullRequest) => (
             <List.Item key={item.id}>
-              <Button
-                onClick={() =>
-                  handleClick(
-                    item.head.ref,
-                    item.title
-                  )
-                }
-              >
+              <Button onClick={() => handleClick(item.head.ref, item.title)}>
                 {item.title}
               </Button>
             </List.Item>
@@ -140,12 +136,12 @@ const EditIngest = function EditIngest() {
         />
       )}
       {status === 'loadingGithub' && <Spin fullscreen />}
-      {status === 'error' && 
+      {status === 'error' && (
         <ErrorModal
           collectionName={collectionName}
           apiErrorMessage={apiErrorMessage}
         />
-      }
+      )}
       {status === 'success' && (
         <SuccessModal
           type="edit"

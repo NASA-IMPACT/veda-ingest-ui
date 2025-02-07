@@ -1,7 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { createAppAuth } from '@octokit/auth-app';
 
-
 interface AuthResult {
   token: string;
 }
@@ -12,7 +11,9 @@ export default async function GetGithubToken(): Promise<string> {
   const rawKey = process.env.GITHUB_PRIVATE_KEY;
 
   if (isNaN(appId) || isNaN(installationId) || !rawKey) {
-    throw new Error('Missing or invalid environment variables for GitHub authentication');
+    throw new Error(
+      'Missing or invalid environment variables for GitHub authentication'
+    );
   }
 
   const privateKey = rawKey.replace(/\\n/g, '\n');

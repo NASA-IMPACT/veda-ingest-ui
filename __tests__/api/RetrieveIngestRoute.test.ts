@@ -60,7 +60,8 @@ describe('GET /api/retrieve-ingest', () => {
 
     expect(RetrieveJSON).toHaveBeenCalledWith('mockRef');
     expect(jsonResponse).toEqual({
-      error: 'Invalid file format. Expected a JSON with a non-empty collection key as a string.',
+      error:
+        'Invalid file format. Expected a JSON with a non-empty collection key as a string.',
     });
     expect(response.status).toBe(400);
   });
@@ -86,7 +87,8 @@ describe('GET /api/retrieve-ingest', () => {
 
     expect(RetrieveJSON).toHaveBeenCalledWith('mockRef');
     expect(jsonResponse).toEqual({
-      error: "Invalid file format. Expected a JSON with a non-empty collection key as a string.",
+      error:
+        'Invalid file format. Expected a JSON with a non-empty collection key as a string.',
     });
     expect(response.status).toBe(400);
   });
@@ -141,12 +143,14 @@ describe('GET /api/retrieve-ingest', () => {
         },
       },
     } as unknown as NextRequest;
-  
+
     const response = await GET(mockRequest);
     const jsonResponse = await response.json();
-  
+
     expect(RetrieveJSON).not.toHaveBeenCalled();
-    expect(jsonResponse).toEqual({ error: 'Invalid or missing query parameter. "ref" is required' });
+    expect(jsonResponse).toEqual({
+      error: 'Invalid or missing query parameter. "ref" is required',
+    });
     expect(response.status).toBe(400);
   });
 });

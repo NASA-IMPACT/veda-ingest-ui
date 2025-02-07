@@ -72,7 +72,6 @@ describe('POST /create-ingest', () => {
     // Check response status
     expect(response.status).toBe(500);
   });
-
 });
 
 describe('PUT /create-ingest', () => {
@@ -91,12 +90,9 @@ describe('PUT /create-ingest', () => {
 
     const response = await PUT(mockRequest);
 
-    expect(UpdatePR).toHaveBeenCalledWith(
-      'test-ref',
-      'test-sha',
-      'test-path',
-      { key: 'value' }
-    );
+    expect(UpdatePR).toHaveBeenCalledWith('test-ref', 'test-sha', 'test-path', {
+      key: 'value',
+    });
 
     const jsonResponse = await response.json();
     expect(jsonResponse).toEqual({ message: 'Data updated successfully' });
@@ -156,7 +152,9 @@ describe('PUT /create-ingest', () => {
     const response = await PUT(mockRequest);
 
     const jsonResponse = await response.json();
-    expect(jsonResponse).toEqual({ error: 'Missing required fields: filePath' });
+    expect(jsonResponse).toEqual({
+      error: 'Missing required fields: filePath',
+    });
     expect(response.status).toBe(400);
   });
 
@@ -172,7 +170,9 @@ describe('PUT /create-ingest', () => {
     const response = await PUT(mockRequest);
 
     const jsonResponse = await response.json();
-    expect(jsonResponse).toEqual({ error: 'Missing required fields: fileSha, filePath' });
+    expect(jsonResponse).toEqual({
+      error: 'Missing required fields: fileSha, filePath',
+    });
     expect(response.status).toBe(400);
   });
 

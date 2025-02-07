@@ -21,10 +21,13 @@ export async function GET(request: NextRequest) {
       response.content.collection.trim() === ''
     ) {
       return NextResponse.json(
-        { error: 'Invalid file format. Expected a JSON with a non-empty collection key as a string.' },
+        {
+          error:
+            'Invalid file format. Expected a JSON with a non-empty collection key as a string.',
+        },
         { status: 400 }
       );
-    }    
+    }
 
     return NextResponse.json(response);
   } catch (error) {

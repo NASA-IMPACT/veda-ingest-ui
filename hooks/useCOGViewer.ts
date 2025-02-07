@@ -1,15 +1,17 @@
-import { useState, useRef, useEffect } from "react";
-import { message } from "antd";
-const baseUrl = "https://staging.openveda.cloud";
+import { useState, useRef, useEffect } from 'react';
+import { message } from 'antd';
+const baseUrl = 'https://staging.openveda.cloud';
 
 export const useCOGViewer = () => {
   const [cogUrl, setCogUrl] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<any | null>(null);
   const [selectedBands, setSelectedBands] = useState<number[]>([]);
   const [rescale, setRescale] = useState<[number | null, number | null][]>([]);
-  const [selectedColormap, setSelectedColormap] = useState<string>("Internal");
+  const [selectedColormap, setSelectedColormap] = useState<string>('Internal');
   const [colorFormula, setColorFormula] = useState<string | null>(null);
-  const [selectedResampling, setSelectedResampling] = useState<string | null>(null);
+  const [selectedResampling, setSelectedResampling] = useState<string | null>(
+    null
+  );
   const [noDataValue, setNoDataValue] = useState<string | null>(null);
   const [tileUrl, setTileUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -18,8 +20,8 @@ export const useCOGViewer = () => {
   const mapRef = useRef<any>(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      import("leaflet").then((L) => {
+    if (typeof window !== 'undefined') {
+      import('leaflet').then((L) => {
         if (!mapRef.current) {
           mapRef.current = L.map; // Ensure Leaflet map is only initialized on the client
         }
@@ -29,13 +31,15 @@ export const useCOGViewer = () => {
 
   const fetchMetadata = async (url: string) => {
     if (!url) {
-      message.error("COG URL is required");
+      message.error('COG URL is required');
       return;
     }
     setLoading(true);
     try {
-      const response = await fetch(`${baseUrl}/api/raster/cog/info?url=${encodeURIComponent(url)}`);
-      if (!response.ok) throw new Error("Failed to fetch metadata");
+      const response = await fetch(
+        `${baseUrl}/api/raster/cog/info?url=${encodeURIComponent(url)}`
+      );
+      if (!response.ok) throw new Error('Failed to fetch metadata');
       const data = await response.json();
       setMetadata(data);
 
@@ -44,11 +48,11 @@ export const useCOGViewer = () => {
       setSelectedBands(bandCount === 1 ? [1] : bands.slice(0, 3));
       setRescale(bands.map(() => [null, null]));
 
-      fetchTileUrl(url, bands.slice(0, 3), [], "Internal");
-      message.success("COG metadata loaded successfully!");
+      fetchTileUrl(url, bands.slice(0, 3), [], 'Internal');
+      message.success('COG metadata loaded successfully!');
     } catch (error) {
-      console.error("Error fetching metadata:", error);
-      message.error("Failed to load COG metadata.");
+      console.error('Error fetching metadata:', error);
+      message.error('Failed to load COG metadata.');
     } finally {
       setLoading(false);
     }
@@ -65,17 +69,20 @@ export const useCOGViewer = () => {
   ) => {
     setLoading(true);
     try {
-      if (!url) throw new Error("COG URL is required.");
+      if (!url) throw new Error('COG URL is required.');
 
-      const bidxParams = bands.map((band) => `&bidx=${band}`).join("");
+      const bidxParams = bands.map((band) => `&bidx=${band}`).join('');
       const rescaleParams = rescale
         .filter((range) => range[0] !== null && range[1] !== null)
         .map((range) => `&rescale=${range[0]},${range[1]}`)
-        .join("");
-      const colormapParam = colormap !== "Internal" ? `&colormap_name=${colormap}` : "";
-      const colorFormulaParam = colorFormula ? `&color_formula=${encodeURIComponent(colorFormula)}` : "";
-      const resamplingParam = resampling ? `&resampling=${resampling}` : "";
-      const noDataParam = noData ? `&nodata=${encodeURIComponent(noData)}` : "";
+        .join('');
+      const colormapParam =
+        colormap !== 'Internal' ? `&colormap_name=${colormap}` : '';
+      const colorFormulaParam = colorFormula
+        ? `&color_formula=${encodeURIComponent(colorFormula)}`
+        : '';
+      const resamplingParam = resampling ? `&resampling=${resampling}` : '';
+      const noDataParam = noData ? `&nodata=${encodeURIComponent(noData)}` : '';
 
       const response = await fetch(
         `${baseUrl}/api/raster/cog/WebMercatorQuad/tilejson.json?url=${encodeURIComponent(
@@ -83,12 +90,12 @@ export const useCOGViewer = () => {
         )}${bidxParams}${rescaleParams}${colormapParam}${colorFormulaParam}${resamplingParam}${noDataParam}`
       );
 
-      if (!response.ok) throw new Error("Failed to fetch tile URL");
+      if (!response.ok) throw new Error('Failed to fetch tile URL');
       const data = await response.json();
       setTileUrl(data.tiles[0]);
 
       if (mapRef.current && data.bounds) {
-        import("leaflet").then((L) => {
+        import('leaflet').then((L) => {
           const bounds = L.latLngBounds([
             [data.bounds[1], data.bounds[0]],
             [data.bounds[3], data.bounds[2]],
@@ -97,10 +104,10 @@ export const useCOGViewer = () => {
         });
       }
 
-      message.success("COG tile layer loaded successfully!");
+      message.success('COG tile layer loaded successfully!');
     } catch (error) {
-      console.error("Error fetching tile URL:", error);
-      message.error("Failed to load tile layer.");
+      console.error('Error fetching tile URL:', error);
+      message.error('Failed to load tile layer.');
     } finally {
       setLoading(false);
     }

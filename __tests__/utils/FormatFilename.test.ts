@@ -18,7 +18,9 @@ describe('formatFilename', () => {
 
   it('does not modify strings that are already valid', () => {
     expect(formatFilename('filename-123_456')).toBe('filename-123_456');
-    expect(formatFilename('another_valid-filename')).toBe('another_valid-filename');
+    expect(formatFilename('another_valid-filename')).toBe(
+      'another_valid-filename'
+    );
   });
 
   it('preserves case sensitivity', () => {

@@ -41,7 +41,9 @@ describe('UpdatePR', () => {
     // Mock Octokit response
     mockCreateOrUpdateFileContents.mockResolvedValue({});
 
-    await expect(UpdatePR(mockRef, mockFileSha, mockFilePath, mockFormData)).resolves.toBeUndefined();
+    await expect(
+      UpdatePR(mockRef, mockFileSha, mockFilePath, mockFormData)
+    ).resolves.toBeUndefined();
 
     expect(GetGithubToken).toHaveBeenCalled();
     expect(Octokit).toHaveBeenCalledWith({
@@ -66,28 +68,32 @@ describe('UpdatePR', () => {
     const mockFilePath = 'path/to/file.json';
     const mockFormData = { key: 'value' };
 
-    await expect(UpdatePR(mockRef, mockFileSha, mockFilePath, mockFormData)).rejects.toThrow(
-      'Missing required environment variables: OWNER or REPO'
-    );
+    await expect(
+      UpdatePR(mockRef, mockFileSha, mockFilePath, mockFormData)
+    ).rejects.toThrow('Missing required environment variables: OWNER or REPO');
 
     expect(GetGithubToken).not.toHaveBeenCalled();
     expect(Octokit).not.toHaveBeenCalled();
   });
 
   it('throws an error when GetGithubToken fails', async () => {
-    (GetGithubToken as Mock).mockRejectedValue(new Error('Token retrieval failed'));
+    (GetGithubToken as Mock).mockRejectedValue(
+      new Error('Token retrieval failed')
+    );
 
     const mockRef = 'feat/mock-branch';
     const mockFileSha = 'mockSha';
     const mockFilePath = 'path/to/file.json';
     const mockFormData = { key: 'value' };
 
-     // Suppress console.error for this test
-     const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
+    // Suppress console.error for this test
+    const consoleErrorMock = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
-    await expect(UpdatePR(mockRef, mockFileSha, mockFilePath, mockFormData)).rejects.toThrow(
-      'Token retrieval failed'
-    );
+    await expect(
+      UpdatePR(mockRef, mockFileSha, mockFilePath, mockFormData)
+    ).rejects.toThrow('Token retrieval failed');
 
     expect(GetGithubToken).toHaveBeenCalled();
     expect(Octokit).not.toHaveBeenCalled();
@@ -101,15 +107,16 @@ describe('UpdatePR', () => {
     const mockFilePath = 'path/to/file.json';
     const mockFormData = { key: 'value' };
     // Suppress console.error for this test
-    const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
-
+    const consoleErrorMock = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     // Mock Octokit failure
     mockCreateOrUpdateFileContents.mockRejectedValue(new Error('API error'));
 
-    await expect(UpdatePR(mockRef, mockFileSha, mockFilePath, mockFormData)).rejects.toThrow(
-      'API error'
-    );
+    await expect(
+      UpdatePR(mockRef, mockFileSha, mockFilePath, mockFormData)
+    ).rejects.toThrow('API error');
 
     expect(GetGithubToken).toHaveBeenCalled();
     expect(Octokit).toHaveBeenCalled();

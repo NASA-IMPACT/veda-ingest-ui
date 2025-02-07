@@ -9,7 +9,7 @@ const UpdatePR = async (
   formData: any
 ) => {
   // prettify stringify to preserve json formatting
-  const stringContent = CleanAndPrettifyJSON(formData)
+  const stringContent = CleanAndPrettifyJSON(formData);
   const content = btoa(stringContent);
 
   const owner = process.env.OWNER;
