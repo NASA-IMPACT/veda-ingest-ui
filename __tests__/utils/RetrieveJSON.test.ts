@@ -35,8 +35,11 @@ describe('RetrieveJSON', () => {
   it('successfully retrieves JSON content', async () => {
     const mockRef = 'feat/mock-branch';
     const mockFileSha = 'mockSha';
-    const mockFilePath = 'ingestion-data/staging/dataset-config/mock-branch.json';
-    const mockContentBase64 = Buffer.from(JSON.stringify({ key: 'value' })).toString('base64');
+    const mockFilePath =
+      'ingestion-data/staging/dataset-config/mock-branch.json';
+    const mockContentBase64 = Buffer.from(
+      JSON.stringify({ key: 'value' })
+    ).toString('base64');
 
     // Mock Octokit response
     mockGetContent.mockResolvedValue({
@@ -82,16 +85,20 @@ describe('RetrieveJSON', () => {
   it('throws an error when Octokit API call fails', async () => {
     const mockRef = 'feat/mock-branch';
     // Suppress console.error for this test
-    const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     // Mock Octokit failure
     mockGetContent.mockRejectedValue(new Error('Failed to fetch content'));
 
-    await expect(RetrieveJSON(mockRef)).rejects.toThrow('Failed to fetch content');
+    await expect(RetrieveJSON(mockRef)).rejects.toThrow(
+      'Failed to fetch content'
+    );
     expect(GetGithubToken).toHaveBeenCalled();
     expect(Octokit).toHaveBeenCalled();
     expect(mockGetContent).toHaveBeenCalled();
-    
+
     // Restore console.error
     consoleErrorMock.mockRestore();
   });

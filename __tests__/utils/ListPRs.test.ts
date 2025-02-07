@@ -26,7 +26,9 @@ describe('ListPRs', () => {
       { title: 'Ingest Request for Feature B', id: 2 },
       { title: 'Other Request', id: 3 },
     ];
-    const GetGithubTokenMock = GetGithubToken as unknown as ReturnType<typeof vi.fn>;
+    const GetGithubTokenMock = GetGithubToken as unknown as ReturnType<
+      typeof vi.fn
+    >;
     const OctokitMock = Octokit as unknown as ReturnType<typeof vi.fn>;
 
     // Mock GetGithubToken to return a token
@@ -53,13 +55,17 @@ describe('ListPRs', () => {
   });
 
   it('should throw an error when GetGithubToken fails', async () => {
-    const GetGithubTokenMock = GetGithubToken as unknown as ReturnType<typeof vi.fn>;
+    const GetGithubTokenMock = GetGithubToken as unknown as ReturnType<
+      typeof vi.fn
+    >;
 
     // Mock GetGithubToken to throw an error
     GetGithubTokenMock.mockRejectedValue(new Error('Token fetch failed'));
 
     // Suppress console.error for this test
-    const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     await expect(ListPRs()).rejects.toThrow('Token fetch failed');
 
@@ -69,13 +75,17 @@ describe('ListPRs', () => {
 
   it('should throw an error when Octokit fails', async () => {
     const mockToken = 'mocked-github-token';
-    const GetGithubTokenMock = GetGithubToken as unknown as ReturnType<typeof vi.fn>;
+    const GetGithubTokenMock = GetGithubToken as unknown as ReturnType<
+      typeof vi.fn
+    >;
     const OctokitMock = Octokit as unknown as ReturnType<typeof vi.fn>;
 
     // Mock GetGithubToken to return a token
     GetGithubTokenMock.mockResolvedValue(mockToken);
     // Suppress console.error for this test
-    const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     // Mock Octokit to throw an error
     OctokitMock.mockImplementation(() => ({
@@ -87,7 +97,7 @@ describe('ListPRs', () => {
     }));
 
     await expect(ListPRs()).rejects.toThrow('API call failed');
-    
+
     // Restore console.error
     consoleErrorMock.mockRestore();
   });

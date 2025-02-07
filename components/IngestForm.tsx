@@ -1,10 +1,9 @@
 'use client';
 
-import { SetStateAction, useEffect } from 'react';
-
+import { SetStateAction, useEffect, useState } from 'react';
+import { Tabs } from 'antd';
 import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
-
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
 
@@ -12,8 +11,10 @@ import ObjectFieldTemplate from '@/utils/ObjectFieldTemplate';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
 import { UiSchema } from '@rjsf/utils';
 import { customValidate } from '@/utils/formValidation';
-import { handleSubmit } from "@/utils/FormHandlers";
+import { handleSubmit } from '@/utils/FormHandlers';
+import JSONEditor from '@/components/JSONEditor';
 
+const { TabPane } = Tabs;
 const Form = withTheme(AntDTheme);
 
 interface TemporalExtent {
@@ -33,6 +34,7 @@ interface FormProps {
   setDisabled?: (disabled: boolean) => void;
   children?: React.ReactNode;
   defaultTemporalExtent?: boolean;
+  disableCollectionNameChange?: boolean;
 }
 
 function IngestForm({
@@ -42,23 +44,43 @@ function IngestForm({
   onSubmit,
   setDisabled,
   children,
+  disableCollectionNameChange = false,
   defaultTemporalExtent = false,
 }: FormProps) {
+  const [activeTab, setActiveTab] = useState<string>('form');
+  const [forceRenderKey, setForceRenderKey] = useState<number>(0); // Force refresh RJSF to clear validation errors
+  const [hasJSONChanges, setHasJSONChanges] = useState<boolean>(false);
 
   useEffect(() => {
     if (defaultTemporalExtent) {
       setFormData((prevFormData: FormData | undefined) => {
         const now = new Date();
-      
+
         // Start of the current UTC day
-        const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0))
-          .toISOString();
-        
+        const startOfDay = new Date(
+          Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate(),
+            0,
+            0,
+            0
+          )
+        ).toISOString();
+
         // End of the current UTC day
-        const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59))
-          .toISOString();
-  
-        console.log('startOfDay', startOfDay)
+        const endOfDay = new Date(
+          Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate(),
+            23,
+            59,
+            59
+          )
+        ).toISOString();
+
+        console.log('startOfDay', startOfDay);
         return {
           ...prevFormData,
           temporal_extent: {
@@ -69,36 +91,56 @@ function IngestForm({
       });
     }
   }, [defaultTemporalExtent, setFormData]);
-  
-  const onFormDataChanged = (formState: { formData?: object }) => {
-    setFormData(formState.formData as Record<string, unknown> ?? {});
 
+  const onFormDataChanged = (formState: { formData?: object }) => {
+    setFormData((formState.formData as Record<string, unknown>) ?? {});
     if (setDisabled) {
       setDisabled(false);
     }
   };
-  
+
+  const handleJsonEditorChange = (updatedData: Record<string, unknown>) => {
+    setFormData(updatedData);
+    setForceRenderKey((prev) => prev + 1); // Forces RJSF to re-render and re-validate
+    setActiveTab('form');
+    setHasJSONChanges(false);
+  };
 
   const updateFormData = (updatedData: SetStateAction<object | undefined>) => {
     setFormData((updatedData ?? {}) as Record<string, unknown>);
   };
 
   return (
-    <Form
-      schema={jsonSchema as JSONSchema7}
-      uiSchema={uiSchema}
-      validator={validator}
-      customValidate={customValidate}
-      templates={{
-        ObjectFieldTemplate: ObjectFieldTemplate,
-      }}
-      formData={formData}
-      onChange={onFormDataChanged}
-      onSubmit={(data) => handleSubmit(data, onSubmit)}
-      formContext={{ updateFormData }}
-    >
-      {children}
-    </Form>
+    <Tabs activeKey={activeTab} onChange={setActiveTab}>
+      <TabPane tab="Form" key="form">
+        <Form
+          key={forceRenderKey} // Forces re-render when data updates
+          schema={jsonSchema as JSONSchema7}
+          uiSchema={uiSchema}
+          validator={validator}
+          customValidate={customValidate}
+          templates={{
+            ObjectFieldTemplate: ObjectFieldTemplate,
+          }}
+          formData={formData}
+          onChange={onFormDataChanged}
+          onSubmit={(data) => handleSubmit(data, onSubmit)}
+          formContext={{ updateFormData }}
+        >
+          {children}
+        </Form>
+      </TabPane>
+
+      <TabPane tab="Manual JSON Edit" key="json">
+        <JSONEditor
+          value={formData || {}}
+          onChange={handleJsonEditorChange}
+          disableCollectionNameChange={disableCollectionNameChange}
+          hasJSONChanges={hasJSONChanges}
+          setHasJSONChanges={setHasJSONChanges}
+        />
+      </TabPane>
+    </Tabs>
   );
 }
 

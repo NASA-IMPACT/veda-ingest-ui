@@ -1,4 +1,13 @@
-import { describe, it, expect, vi, beforeEach, beforeAll, afterAll, Mock } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  beforeAll,
+  afterAll,
+  Mock,
+} from 'vitest';
 import CreatePR from '@/utils/githubUtils/CreatePR';
 import { createOctokit } from '@/utils/githubUtils/OctokitFactory';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
@@ -21,13 +30,13 @@ describe('CreatePR', () => {
 
   beforeAll(() => {
     vi.stubEnv('TARGET_BRANCH', 'my_branch');
-    vi.stubEnv('OWNER', 'mockOwner')
-    vi.stubEnv('REPO', 'mockRepo')
-  })
+    vi.stubEnv('OWNER', 'mockOwner');
+    vi.stubEnv('REPO', 'mockRepo');
+  });
   afterAll(() => {
     vi.unstubAllEnvs();
   });
-  
+
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -55,7 +64,9 @@ describe('CreatePR', () => {
     mockCreateTree.mockResolvedValue({ data: { sha: 'mockNewTreeSha' } });
     mockCreateCommit.mockResolvedValue({ data: { sha: 'mockCommitSha' } });
     mockCreateRef.mockResolvedValue({});
-    mockCreatePullRequest.mockResolvedValue({ data: { html_url: 'mockPullRequestUrl' } });
+    mockCreatePullRequest.mockResolvedValue({
+      data: { html_url: 'mockPullRequestUrl' },
+    });
   });
 
   it('creates a pull request successfully', async () => {
@@ -73,10 +84,14 @@ describe('CreatePR', () => {
   it('throws an error when RequestError occurs', async () => {
     mockGetRef.mockRejectedValue(new Error('Test Error'));
     // Suppress console.error for this test
-    const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
-    await expect(CreatePR({ collection: 'Test Collection' })).rejects.toThrow('Test Error');
-    
+    await expect(CreatePR({ collection: 'Test Collection' })).rejects.toThrow(
+      'Test Error'
+    );
+
     // Restore console.error
     consoleErrorMock.mockRestore();
   });
@@ -85,7 +100,9 @@ describe('CreatePR', () => {
     const mockData = { collection: 'Test Collection', key: 'value' };
 
     // Suppress console.error for this test
-    const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     // Mock 422 error for `octokit.rest.pulls.create`
     mockCreatePullRequest.mockRejectedValue(
@@ -115,7 +132,7 @@ describe('CreatePR', () => {
       base: 'my_branch',
       title: 'Ingest Request for Test Collection',
     });
-    
+
     // Restore console.error
     consoleErrorMock.mockRestore();
   });
@@ -132,7 +149,6 @@ describe('CreatePR', () => {
       ref: 'heads/main',
     });
     expect(result).toBe('mockPullRequestUrl');
-
   });
 
   it('throws an error when environment variables are missing', async () => {
@@ -142,5 +158,4 @@ describe('CreatePR', () => {
       'Missing required environment variables: OWNER or REPO'
     );
   });
-
 });

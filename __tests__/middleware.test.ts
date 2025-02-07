@@ -31,11 +31,13 @@ describe('Middleware - Protected Routes', () => {
   protectedRoutes.forEach((route) => {
     it(`allows authenticated users to proceed for ${route}`, async () => {
       // Mock authenticated behavior
-      vi.mocked(runWithAmplifyServerContext).mockImplementation(async ({ operation }) => {
-        return operation({
-          token: { value: Symbol('mockToken') },
-        });
-      });
+      vi.mocked(runWithAmplifyServerContext).mockImplementation(
+        async ({ operation }) => {
+          return operation({
+            token: { value: Symbol('mockToken') },
+          });
+        }
+      );
 
       vi.mocked(fetchAuthSession).mockResolvedValue({
         tokens: { accessToken: mockJWT },
@@ -50,11 +52,13 @@ describe('Middleware - Protected Routes', () => {
 
     it(`rejects unauthenticated users for ${route}`, async () => {
       // Mock unauthenticated behavior
-      vi.mocked(runWithAmplifyServerContext).mockImplementation(async ({ operation }) => {
-        return operation({
-          token: { value: Symbol('mockToken') },
-        });
-      });
+      vi.mocked(runWithAmplifyServerContext).mockImplementation(
+        async ({ operation }) => {
+          return operation({
+            token: { value: Symbol('mockToken') },
+          });
+        }
+      );
 
       vi.mocked(fetchAuthSession).mockResolvedValue({
         tokens: undefined, // Simulate missing tokens for unauthenticated users

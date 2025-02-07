@@ -1,5 +1,16 @@
-import React from "react";
-import { Form, InputNumber, Select, Button, Row, Col, Card, Typography, Input, Divider } from "antd";
+import React from 'react';
+import {
+  Form,
+  InputNumber,
+  Select,
+  Button,
+  Row,
+  Col,
+  Card,
+  Typography,
+  Input,
+  Divider,
+} from 'antd';
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -13,8 +24,11 @@ interface COGControlsFormProps {
   selectedResampling: string | null;
   noDataValue: string | null;
   hasChanges: boolean;
-  onBandChange: (bandIndex: number, colorChannel: "R" | "G" | "B") => void;
-  onRescaleChange: (index: number, values: [number | null, number | null]) => void;
+  onBandChange: (bandIndex: number, colorChannel: 'R' | 'G' | 'B') => void;
+  onRescaleChange: (
+    index: number,
+    values: [number | null, number | null]
+  ) => void;
   onColormapChange: (value: string) => void;
   onColorFormulaChange: (value: string | null) => void;
   onResamplingChange: (value: string | null) => void;
@@ -44,10 +58,10 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
   loading,
 }) => {
   const bandOptions =
-  metadata?.band_descriptions?.map((desc: any, index: number) => ({
-    value: index + 1,
-    label: `${desc[0]} - ${desc[1]}`,
-  })) || [];
+    metadata?.band_descriptions?.map((desc: any, index: number) => ({
+      value: index + 1,
+      label: `${desc[0]} - ${desc[1]}`,
+    })) || [];
 
   const singleBand = metadata?.band_descriptions?.length === 1;
 
@@ -65,14 +79,19 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
       ) : (
         /* RGB Band Selectors */
         <Row gutter={16}>
-          {["R", "G", "B"].map((channel, index) => (
+          {['R', 'G', 'B'].map((channel, index) => (
             <Col key={channel} span={8}>
-              <Form.Item label={`Band (${channel})`} htmlFor={`band-${channel}`}>
+              <Form.Item
+                label={`Band (${channel})`}
+                htmlFor={`band-${channel}`}
+              >
                 <Select
                   id={`band-${channel}`}
                   data-testid={`band-${channel}`}
                   value={selectedBands[index]}
-                  onChange={(value) => onBandChange(value, channel as "R" | "G" | "B")}
+                  onChange={(value) =>
+                    onBandChange(value, channel as 'R' | 'G' | 'B')
+                  }
                   options={bandOptions}
                 />
               </Form.Item>
@@ -90,18 +109,24 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
                 <InputNumber
                   value={values[0]}
                   onChange={(value) =>
-                    onRescaleChange(index, [value !== null ? value : null, values[1]])
+                    onRescaleChange(index, [
+                      value !== null ? value : null,
+                      values[1],
+                    ])
                   }
                   placeholder="Min"
-                  style={{ width: "45%", marginRight: "10%" }}
+                  style={{ width: '45%', marginRight: '10%' }}
                 />
                 <InputNumber
                   value={values[1]}
                   onChange={(value) =>
-                    onRescaleChange(index, [values[0], value !== null ? value : null])
+                    onRescaleChange(index, [
+                      values[0],
+                      value !== null ? value : null,
+                    ])
                   }
                   placeholder="Max"
-                  style={{ width: "45%" }}
+                  style={{ width: '45%' }}
                 />
               </Card>
             </Col>
@@ -127,17 +152,17 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
           </Form.Item>
         </Col>
         <Col span={12}>
-        <Form.Item label="Color Formula" htmlFor="colorFormula">
-          <Input
-            id="colorFormula"
-            value={colorFormula || ""} 
-            onChange={(e) => {
-              const newValue = e.target.value;
-              onColorFormulaChange(newValue || null); // Pass `null` if the input is empty
-            }}
-            style={{ width: "100%" }}
-          />
-        </Form.Item>
+          <Form.Item label="Color Formula" htmlFor="colorFormula">
+            <Input
+              id="colorFormula"
+              value={colorFormula || ''}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                onColorFormulaChange(newValue || null); // Pass `null` if the input is empty
+              }}
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
         </Col>
       </Row>
 
@@ -170,7 +195,7 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
               onChange={(value) =>
                 onNoDataValueChange(value !== null ? String(value) : null)
               }
-              style={{ width: "100%" }}
+              style={{ width: '100%' }}
             />
           </Form.Item>
         </Col>
@@ -189,10 +214,7 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
           </Button>
         </Col>
         <Col span={12}>
-          <Button
-            onClick={onViewRenderingOptions}
-            block
-          >
+          <Button onClick={onViewRenderingOptions} block>
             View Rendering Options
           </Button>
         </Col>

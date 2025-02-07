@@ -62,7 +62,6 @@ vi.mock('@/components/SuccessModal', () => ({
 }));
 
 describe('CreateIngest Page', () => {
-
   afterEach(() => {
     cleanup();
   });
@@ -71,20 +70,26 @@ describe('CreateIngest Page', () => {
     render(<CreateIngest />);
 
     const formContainer = screen.getByTestId('ingest-creation-form');
-    const successButton = within(formContainer).getByRole('button', {name: 'Simulate Success'});
+    const successButton = within(formContainer).getByRole('button', {
+      name: 'Simulate Success',
+    });
     userEvent.click(successButton);
 
     const successModal = await screen.findByTestId('success-modal');
     expect(successModal).toHaveTextContent('Success Modal');
     expect(successModal).toHaveTextContent('Collection: Test Collection');
-    expect(successModal).toHaveTextContent('Pull Request: http://example.com/pull-request');
+    expect(successModal).toHaveTextContent(
+      'Pull Request: http://example.com/pull-request'
+    );
   });
 
   it('displays the ErrorModal on a failed API call', async () => {
     render(<CreateIngest />);
 
     const formContainer = screen.getByTestId('ingest-creation-form');
-    const errorButton = within(formContainer).getByRole('button', {name: 'Simulate Error'});;
+    const errorButton = within(formContainer).getByRole('button', {
+      name: 'Simulate Error',
+    });
     userEvent.click(errorButton);
 
     const errorModal = await screen.findByTestId('error-modal');
@@ -92,6 +97,4 @@ describe('CreateIngest Page', () => {
     expect(errorModal).toHaveTextContent('Collection: Failed Collection');
     expect(errorModal).toHaveTextContent('Message: API error occurred');
   });
-  
-
 });

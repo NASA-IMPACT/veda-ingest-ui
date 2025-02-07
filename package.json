@@ -26,6 +26,8 @@
     "@rjsf/core": "^5.23.1",
     "@rjsf/utils": "^5.23.1",
     "@rjsf/validator-ajv8": "^5.23.1",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "antd": "^5.22.3",
     "aws-amplify": "^6.10.2",
     "axios": "^1.7.9",

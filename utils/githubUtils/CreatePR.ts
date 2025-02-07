@@ -91,7 +91,9 @@ const CreatePR = async (data: Data): Promise<string> => {
     console.error(error);
     if (error instanceof RequestError) {
       if (error.status === 422 && error.response?.data) {
-        const errorMessage = (error.response.data as { message?: string }).message || 'Unknown error';
+        const errorMessage =
+          (error.response.data as { message?: string }).message ||
+          'Unknown error';
         console.error(errorMessage);
         throw new Error(errorMessage);
       }
@@ -99,6 +101,5 @@ const CreatePR = async (data: Data): Promise<string> => {
     throw error;
   }
 };
-
 
 export default CreatePR;

@@ -21,38 +21,37 @@ function IngestCreationForm({
 
   const onFormDataSubmit = (data?: Record<string, unknown>) => {
     if (!data) {
-      console.error("No form data provided.");
+      console.error('No form data provided.');
       return;
     }
-  
-    setStatus("loadingGithub");
+
+    setStatus('loadingGithub');
     setCollectionName(data.collection as string);
-  
-    const url = "api/create-ingest";
+
+    const url = 'api/create-ingest';
     const requestOptions = {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify(data),
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     };
-  
+
     fetch(url, requestOptions)
       .then(async (response) => {
         if (!response.ok) {
           const errorMessage = await response.text();
           setApiErrorMessage(errorMessage);
-          setStatus("error");
+          setStatus('error');
         }
         const responseJson = await response.json();
         setPullRequestUrl(responseJson.githubURL);
         setFormData({});
-        setStatus("success");
+        setStatus('success');
       })
       .catch((error) => {
         console.error(error);
-        setStatus("error");
+        setStatus('error');
       });
   };
-  
 
   return (
     <IngestForm

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import classNames from "classnames";
+import React, { useState } from 'react';
+import classNames from 'classnames';
 import isObject from 'lodash/isObject';
 import isNumber from 'lodash/isNumber';
 import isString from 'lodash/isString';
@@ -16,25 +16,28 @@ import {
   getTemplate,
   getUiOptions,
   titleId,
-} from "@rjsf/utils";
-import Col from "antd/lib/col";
-import Row from "antd/lib/row";
-import { ConfigConsumer, ConfigConsumerProps } from "antd/lib/config-provider/context";
-import Button from "antd/lib/button";
-import message from "antd/lib/message";
-import {  ImportOutlined } from '@ant-design/icons';
+} from '@rjsf/utils';
+import Col from 'antd/lib/col';
+import Row from 'antd/lib/row';
+import {
+  ConfigConsumer,
+  ConfigConsumerProps,
+} from 'antd/lib/config-provider/context';
+import Button from 'antd/lib/button';
+import message from 'antd/lib/message';
+import { ImportOutlined } from '@ant-design/icons';
 import '@ant-design/v5-patch-for-react-19';
 
-import COGDrawerViewer from "@/components/COGDrawerViewer";
+import COGDrawerViewer from '@/components/COGDrawerViewer';
 
 const DESCRIPTION_COL_STYLE = {
-  paddingBottom: "8px",
+  paddingBottom: '8px',
 };
 
 export default function ObjectFieldTemplate<
   T = any,
   S extends StrictRJSFSchema = RJSFSchema,
-  F extends FormContextType = any
+  F extends FormContextType = any,
 >(props: ObjectFieldTemplateProps<T, S, F>) {
   const {
     description,
@@ -53,16 +56,17 @@ export default function ObjectFieldTemplate<
   } = props;
 
   const uiOptions = getUiOptions<T, S, F>(uiSchema);
-  const TitleFieldTemplate = getTemplate<"TitleFieldTemplate", T, S, F>(
-    "TitleFieldTemplate",
+  const TitleFieldTemplate = getTemplate<'TitleFieldTemplate', T, S, F>(
+    'TitleFieldTemplate',
     registry,
     uiOptions
   );
-  const DescriptionFieldTemplate = getTemplate<"DescriptionFieldTemplate", T, S, F>(
-    "DescriptionFieldTemplate",
-    registry,
-    uiOptions
-  );
+  const DescriptionFieldTemplate = getTemplate<
+    'DescriptionFieldTemplate',
+    T,
+    S,
+    F
+  >('DescriptionFieldTemplate', registry, uiOptions);
 
   const {
     ButtonTemplates: { AddButton },
@@ -122,7 +126,6 @@ export default function ObjectFieldTemplate<
   };
 
   const typedFormData = formData as Record<string, any>;
-  
 
   const [drawerOpen, setdrawerOpen] = useState(false);
   const [drawerUrl, setDrawerUrl] = useState<string | null>(null);
@@ -133,7 +136,7 @@ export default function ObjectFieldTemplate<
       setDrawerUrl(sampleUrl);
       setdrawerOpen(true);
     } else {
-      console.error("A sample URL is required to open the viewer.");
+      console.error('A sample URL is required to open the viewer.');
     }
   };
 
@@ -142,29 +145,28 @@ export default function ObjectFieldTemplate<
   };
 
   const handleAcceptRenderOptions = (renderOptions: string) => {
-    if (!formContext || typeof formContext.updateFormData !== "function") {
-      console.error("❌ formContext or updateFormData is not available.");
+    if (!formContext || typeof formContext.updateFormData !== 'function') {
+      console.error('❌ formContext or updateFormData is not available.');
       return;
     }
-    
+
     const updatedFormData = { ...typedFormData };
     updatedFormData.renders = updatedFormData.renders || {};
 
     updatedFormData.renders = renderOptions;
-  
+
     formContext.updateFormData(updatedFormData);
   };
-  
-  
+
   return (
     <ConfigConsumer>
       {(configProps: ConfigConsumerProps) => {
         const { getPrefixCls } = configProps;
-        const prefixCls = getPrefixCls("form");
+        const prefixCls = getPrefixCls('form');
         const labelClsBasic = `${prefixCls}-item-label`;
         const labelColClassName = classNames(
           labelClsBasic,
-          labelAlign === "left" && `${labelClsBasic}-left`
+          labelAlign === 'left' && `${labelClsBasic}-left`
         );
 
         return (
@@ -194,21 +196,31 @@ export default function ObjectFieldTemplate<
                     />
                   </Col>
                 )}
-                {uiSchema?.["ui:grid"] && Array.isArray(uiSchema["ui:grid"])
-                  ? uiSchema["ui:grid"].map((ui_row) =>
+                {uiSchema?.['ui:grid'] && Array.isArray(uiSchema['ui:grid'])
+                  ? uiSchema['ui:grid'].map((ui_row) =>
                       Object.keys(ui_row).map((row_item) => {
-                        const element = properties.find((p) => p.name === row_item);
+                        const element = properties.find(
+                          (p) => p.name === row_item
+                        );
                         if (element) {
-                          const isRendersField = element.name === "renders";
+                          const isRendersField = element.name === 'renders';
                           return (
                             <Col key={element.name} span={ui_row[row_item]}>
                               {isRendersField ? (
-                                <div style={{ display: "flex", flexDirection: "column", alignItems: "stretch", gap: "10px" }}>
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'stretch',
+                                    gap: '10px',
+                                  }}
+                                >
                                   <Button
                                     type="primary"
                                     onClick={handleOpenDrawer}
                                     icon={<ImportOutlined />}
-                                  >Generate Renders Object From Sample File
+                                  >
+                                    Generate Renders Object From Sample File
                                   </Button>
                                   {element.content}
                                 </div>
@@ -225,13 +237,19 @@ export default function ObjectFieldTemplate<
                       .filter((e) => !e.hidden)
                       .map((element: ObjectFieldTemplatePropertyType) => (
                         <Col key={element.name} span={24}>
-                          {element.name === "renders" ? (
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          {element.name === 'renders' ? (
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                              }}
+                            >
                               {element.content}
                               <Button
                                 type="primary"
                                 onClick={handleOpenDrawer}
-                                style={{ marginLeft: "10px" }}
+                                style={{ marginLeft: '10px' }}
                               >
                                 Open Viewer
                               </Button>

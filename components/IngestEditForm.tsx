@@ -22,7 +22,7 @@ function IngestEditForm({
   formData,
   setFormData,
   handleCancel,
-  setApiErrorMessage
+  setApiErrorMessage,
 }: {
   setStatus: (status: Status) => void;
   ref: string;
@@ -36,37 +36,36 @@ function IngestEditForm({
   const [disabled, setDisabled] = useState(true);
 
   const onFormDataSubmit = (formData?: Record<string, unknown>) => {
-    console.log('updating data: ', formData)
+    console.log('updating data: ', formData);
 
     if (!formData) {
-      console.error("No form data provided.");
+      console.error('No form data provided.');
       return;
     }
-  
-    setStatus("loadingGithub");
 
+    setStatus('loadingGithub');
 
-  
-    const url = "api/create-ingest";
+    const url = 'api/create-ingest';
     const requestOptions = {
-      method: "PUT",
-      body: JSON.stringify({ref, fileSha, filePath, formData }),
-      headers: { "Content-Type": "application/json" },
+      method: 'PUT',
+      body: JSON.stringify({ ref, fileSha, filePath, formData }),
+      headers: { 'Content-Type': 'application/json' },
     };
-  
+
     fetch(url, requestOptions)
       .then(async (response) => {
         if (!response.ok) {
           const errorMessage = await response.text();
           setApiErrorMessage(errorMessage);
-          setStatus("error"); new Error(`There was an error: ${errorMessage}`);
+          setStatus('error');
+          new Error(`There was an error: ${errorMessage}`);
         }
         setFormData({});
-        setStatus("success");
+        setStatus('success');
       })
       .catch((error) => {
         console.error(error);
-        setStatus("error");
+        setStatus('error');
       });
   };
 
@@ -77,6 +76,7 @@ function IngestEditForm({
       setFormData={setFormData}
       onSubmit={onFormDataSubmit}
       setDisabled={setDisabled}
+      disableCollectionNameChange={true}
     >
       <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
         <Button

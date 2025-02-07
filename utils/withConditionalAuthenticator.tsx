@@ -1,6 +1,6 @@
-import { withAuthenticator } from "@aws-amplify/ui-react";
+import { withAuthenticator } from '@aws-amplify/ui-react';
 
-const isAuthDisabled = process.env.NEXT_PUBLIC_DISABLE_AUTH === "true";
+const isAuthDisabled = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
 export function withConditionalAuthenticator(
   Component: React.ComponentType<any>,

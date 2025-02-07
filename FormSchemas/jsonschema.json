@@ -1,369 +1,331 @@
 {
-    "type": "object",
-    "required": [
-        "collection",
-        "title",
-        "description",
-        "license",
-        "discovery_items",
-        "spatial_extent",
-        "temporal_extent",
-        "sample_files",
-        "data_type",
-        "providers",
-        "item_assets"
-    ],
-    "properties": {
-        "collection": {
+  "type": "object",
+  "required": [
+    "collection",
+    "title",
+    "description",
+    "license",
+    "discovery_items",
+    "spatial_extent",
+    "temporal_extent",
+    "sample_files",
+    "data_type",
+    "providers",
+    "item_assets"
+  ],
+  "properties": {
+    "collection": {
+      "type": "string",
+      "title": "Collection"
+    },
+    "title": {
+      "type": "string",
+      "title": "Title"
+    },
+    "description": {
+      "type": "string",
+      "title": "Description"
+    },
+    "license": {
+      "type": "string",
+      "title": "License",
+      "default": "CC0-1.0"
+    },
+    "stac_version": {
+      "type": "string",
+      "title": "STAC Version",
+      "default": "1.0.0"
+    },
+    "dashboard:is_periodic": {
+      "type": "boolean",
+      "title": "Is Periodic?"
+    },
+    "dashboard:time_density": {
+      "type": "string",
+      "title": "Time Density"
+    },
+    "links": {
+      "title": "Links",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "href": {
             "type": "string",
-            "title": "Collection"
-        },
-        "title": {
+            "title": "href"
+          },
+          "rel": {
             "type": "string",
-            "title": "Title"
-        },
-        "description": {
+            "title": "rel"
+          },
+          "type": {
             "type": "string",
-            "title": "Description"
-        },
-        "license": {
+            "title": "type"
+          },
+          "title": {
             "type": "string",
-            "title": "License",
-            "default": "CC0-1.0"
-        },
-        "stac_version": {
+            "title": "title"
+          },
+          "label:assets": {
             "type": "string",
-            "title": "STAC Version",
-            "default": "1.0.0"
-        },
-        "dashboard:is_periodic": {
-            "type": "boolean",
-            "title": "Is Periodic?"
-        },
-        "dashboard:time_density": {
-            "type": "string",
-            "title": "Time Density"
-        },
-        "links": {
-            "title": "Links",
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "href": {
-                        "type": "string",
-                        "title": "href"
-                    },
-                    "rel": {
-                        "type": "string",
-                        "title": "rel"
-                    },
-                    "type": {
-                        "type": "string",
-                        "title": "type"
-                    },
-                    "title": {
-                        "type": "string",
-                        "title": "title"
-                    },
-                    "label:assets": {
-                        "type": "string",
-                        "title": "label:assets"
-                    }
-                }
-            }
-        },
-        "spatial_extent": {
-            "title": "Spatial Extent",
-            "type": "object",
-            "properties": {
-                "xmin": {
-                    "type": "number",
-                    "title": "xmin"
-                },
-                "ymin": {
-                    "type": "number",
-                    "title": "ymin"
-                },
-                "xmax": {
-                    "type": "number",
-                    "title": "xmax"
-                },
-                "ymax": {
-                    "type": "number",
-                    "title": "ymax"
-                }
-            },
-            "default": {
-                "xmin": -180,
-                "ymin": -90,
-                "xmax": 180,
-                "ymax": 90
-            }
-        },
-        "temporal_extent": {
-            "title": "Temporal Extent",
-            "type": "object",
-            "properties": {
-                "startdate": {
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "format": "date-time",
-                    "title": "Start Date"
-                },
-                "enddate": {
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "format": "date-time",
-                    "title": "End Date"
-                }
-            }
-        },
-        "discovery_items": {
-            "type": "array",
-            "title": "Discovery Items",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "upload": {
-                        "type": "boolean",
-                        "title": "Upload",
-                        "default": false
-                    },
-                    "cogify": {
-                        "type": "boolean",
-                        "title": "Cogify",
-                        "default": false
-                    },
-                    "dry_run": {
-                        "type": "boolean",
-                        "title": "Dry Run",
-                        "default": false
-                    },
-                    "discovery": {
-                        "type": "string",
-                        "enum": [
-                            "s3"
-                        ],
-                        "title": "Discovery"
-                    },
-                    "prefix": {
-                        "type": "string",
-                        "title": "Prefix"
-                    },
-                    "bucket": {
-                        "type": "string",
-                        "title": "Bucket"
-                    },
-                    "filename_regex": {
-                        "type": "string",
-                        "title": "Filename Regex",
-                        "default": "[\\s\\S]*"
-                    },
-                    "datetime_range": {
-                        "type": "string",
-                        "title": "Datetime Range"
-                    },
-                    "start_datetime": {
-                        "type": "string",
-                        "format": "date-time",
-                        "title": "Start Datetime"
-                    },
-                    "end_datetime": {
-                        "type": "string",
-                        "format": "date-time",
-                        "title": "End Datetime"
-                    },
-                    "single_datetime": {
-                        "type": "string",
-                        "format": "date-time",
-                        "title": "Single Datetime"
-                    },
-                    "id_regex": {
-                        "type": "string",
-                        "title": "Id Regex"
-                    },
-                    "id_template": {
-                        "type": "string",
-                        "title": "Id Template"
-                    },
-                    "use_multithreading": {
-                        "type": "boolean",
-                        "title": "Use Multithreading",
-                        "default": false
-                    }
-                },
-                "required": [
-                    "prefix",
-                    "bucket"
-                ]
-            },
-            "minItems": 1
-        },
-        "sample_files": {
-            "title": "Sample Files",
-            "type": "array",
-            "items": {
-                "type": "string"
-            },
-            "minItems": 1
-        },
-        "data_type": {
-            "title": "Data Type",
-            "const": "cog"
-        },
-        "stac_extensions": {
-            "title": "STAC Extensions",
-            "type": "array",
-            "items": {
-                "type": "string"
-            },
-            "default": [
-                "https://stac-extensions.github.io/render/v1.0.0/schema.json",
-                "https://stac-extensions.github.io/item-assets/v1.0.0/schema.json"
-            ]
-        },
-        "item_assets": {
-            "type": "object",
-            "title": "Item Assets",
-            "properties": {
-                "cog_default": {
-                    "type": "object",
-                    "properties": {
-                        "type": {
-                            "type": "string",
-                            "default": "image/tiff; application=geotiff; profile=cloud-optimized"
-                        },
-                        "roles": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            },
-                            "default": [
-                                "data",
-                                "layer"
-                            ]
-                        },
-                        "title": {
-                            "type": "string",
-                            "default": "Default COG Layer"
-                        },
-                        "description": {
-                            "type": "string",
-                            "default": "Cloud optimized default layer to display on map"
-                        }
-                    },
-                    "required": [
-                        "type",
-                        "roles",
-                        "title",
-                        "description"
-                    ]
-                }
-            },
-            "required": [
-                "cog_default"
-            ]
-        },
-        "renders": {
-            "title": "Renders",
-            "type": "string"
-        },
-        "providers": {
-            "title": "Providers",
-            "type": "array",
-            "items": {
-                "type": "object",
-                "required": [
-                    "name"
-                ],
-                "properties": {
-                    "name": {
-                        "title": "Organization name",
-                        "type": "string",
-                        "minLength": 1
-                    },
-                    "description": {
-                        "title": "Organization description",
-                        "type": "string"
-                    },
-                    "roles": {
-                        "title": "Organization roles",
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "enum": [
-                                "producer",
-                                "licensor",
-                                "processor",
-                                "host"
-                            ]
-                        }
-                    },
-                    "url": {
-                        "title": "Organization homepage",
-                        "type": "string",
-                        "format": "uri"
-                    }
-                }
-            },
-            "default": [
-                {
-                    "name": "NASA VEDA",
-                    "roles": [
-                        "host"
-                    ],
-                    "url": "https://www.earthdata.nasa.gov/dashboard/"
-                }
-            ]
-        },
-        "assets": {
-            "title": "Assets",
-            "type": "object",
-            "properties": {
-                "thumbnail": {
-                    "type": "object",
-                    "title": "Thumbnail",
-                    "properties": {
-                        "title": {
-                            "type": "string"
-                        },
-                        "description": {
-                            "type": "string"
-                        },
-                        "href": {
-                            "type": "string"
-                        },
-                        "type": {
-                            "type": "string"
-                        },
-                        "roles": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "required": [
-                        "title",
-                        "description",
-                        "href",
-                        "type",
-                        "roles"
-                    ],
-                    "default": {
-                        "title": "Thumbnail",
-                        "type": "image/jpeg",
-                        "roles": [
-                            "thumbnail"
-                        ]
-                    }
-                }
-            }
+            "title": "label:assets"
+          }
         }
+      }
+    },
+    "spatial_extent": {
+      "title": "Spatial Extent",
+      "type": "object",
+      "properties": {
+        "xmin": {
+          "type": "number",
+          "title": "xmin"
+        },
+        "ymin": {
+          "type": "number",
+          "title": "ymin"
+        },
+        "xmax": {
+          "type": "number",
+          "title": "xmax"
+        },
+        "ymax": {
+          "type": "number",
+          "title": "ymax"
+        }
+      },
+      "default": {
+        "xmin": -180,
+        "ymin": -90,
+        "xmax": 180,
+        "ymax": 90
+      }
+    },
+    "temporal_extent": {
+      "title": "Temporal Extent",
+      "type": "object",
+      "properties": {
+        "startdate": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "title": "Start Date"
+        },
+        "enddate": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "title": "End Date"
+        }
+      }
+    },
+    "discovery_items": {
+      "type": "array",
+      "title": "Discovery Items",
+      "items": {
+        "type": "object",
+        "properties": {
+          "upload": {
+            "type": "boolean",
+            "title": "Upload",
+            "default": false
+          },
+          "cogify": {
+            "type": "boolean",
+            "title": "Cogify",
+            "default": false
+          },
+          "dry_run": {
+            "type": "boolean",
+            "title": "Dry Run",
+            "default": false
+          },
+          "discovery": {
+            "type": "string",
+            "enum": ["s3"],
+            "title": "Discovery"
+          },
+          "prefix": {
+            "type": "string",
+            "title": "Prefix"
+          },
+          "bucket": {
+            "type": "string",
+            "title": "Bucket"
+          },
+          "filename_regex": {
+            "type": "string",
+            "title": "Filename Regex",
+            "default": "[\\s\\S]*"
+          },
+          "datetime_range": {
+            "type": "string",
+            "title": "Datetime Range"
+          },
+          "start_datetime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start Datetime"
+          },
+          "end_datetime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End Datetime"
+          },
+          "single_datetime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Single Datetime"
+          },
+          "id_regex": {
+            "type": "string",
+            "title": "Id Regex"
+          },
+          "id_template": {
+            "type": "string",
+            "title": "Id Template"
+          },
+          "use_multithreading": {
+            "type": "boolean",
+            "title": "Use Multithreading",
+            "default": false
+          }
+        },
+        "required": ["prefix", "bucket"]
+      },
+      "minItems": 1
+    },
+    "sample_files": {
+      "title": "Sample Files",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "data_type": {
+      "title": "Data Type",
+      "const": "cog"
+    },
+    "stac_extensions": {
+      "title": "STAC Extensions",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [
+        "https://stac-extensions.github.io/render/v1.0.0/schema.json",
+        "https://stac-extensions.github.io/item-assets/v1.0.0/schema.json"
+      ]
+    },
+    "item_assets": {
+      "type": "object",
+      "title": "Item Assets",
+      "properties": {
+        "cog_default": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "default": "image/tiff; application=geotiff; profile=cloud-optimized"
+            },
+            "roles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": ["data", "layer"]
+            },
+            "title": {
+              "type": "string",
+              "default": "Default COG Layer"
+            },
+            "description": {
+              "type": "string",
+              "default": "Cloud optimized default layer to display on map"
+            }
+          },
+          "required": ["type", "roles", "title", "description"]
+        }
+      },
+      "required": ["cog_default"]
+    },
+    "renders": {
+      "title": "Renders",
+      "type": "string"
+    },
+    "providers": {
+      "title": "Providers",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "title": "Organization name",
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "title": "Organization description",
+            "type": "string"
+          },
+          "roles": {
+            "title": "Organization roles",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["producer", "licensor", "processor", "host"]
+            }
+          },
+          "url": {
+            "title": "Organization homepage",
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "default": [
+        {
+          "name": "NASA VEDA",
+          "roles": ["host"],
+          "url": "https://www.earthdata.nasa.gov/dashboard/"
+        }
+      ]
+    },
+    "assets": {
+      "title": "Assets",
+      "type": "object",
+      "properties": {
+        "thumbnail": {
+          "type": "object",
+          "title": "Thumbnail",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "href": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "roles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": ["title", "description", "href", "type", "roles"],
+          "default": {
+            "title": "Thumbnail",
+            "type": "image/jpeg",
+            "roles": ["thumbnail"]
+          }
+        }
+      }
     }
+  }
 }

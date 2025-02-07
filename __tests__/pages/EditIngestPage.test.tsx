@@ -1,7 +1,15 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterEach,
+  afterAll,
+  vi,
+} from 'vitest';
 import { Amplify } from 'aws-amplify';
 import { config } from '@/utils/aws-exports';
 import { setupServer } from 'msw/node';
@@ -25,7 +33,6 @@ describe('Edit Ingest Page', () => {
 
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
-  
 
   it('displays the ErrorModal on API error when loading an ingest', async () => {
     // Mock API error for `retrieve-ingest`
@@ -36,12 +43,16 @@ describe('Edit Ingest Page', () => {
     );
 
     // Suppress console.error for this test
-    const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorMock = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     render(<EditIngest />);
 
     // Simulate interaction to trigger the error
-    const pendingPullRequest = await screen.findByRole('button', { name: /seeded ingest #1/i });
+    const pendingPullRequest = await screen.findByRole('button', {
+      name: /seeded ingest #1/i,
+    });
     await userEvent.click(pendingPullRequest);
 
     // Verify ErrorModal appears
@@ -49,24 +60,27 @@ describe('Edit Ingest Page', () => {
       /Something went wrong with updating Ingest Request for seeded ingest #1/i
     );
     expect(errorModal).toBeInTheDocument();
-        
+
     // Restore console.error
     consoleErrorMock.mockRestore();
   });
 
   it('displays the SuccessModal on successful edit', async () => {
-
     render(<EditIngest />);
 
     // Simulate interaction to open the form
-    const pendingPullRequest = await screen.findByRole('button', { name: /seeded ingest #1/i });
+    const pendingPullRequest = await screen.findByRole('button', {
+      name: /seeded ingest #1/i,
+    });
     await userEvent.click(pendingPullRequest);
 
     // Verify the form is displayed
     await screen.findByLabelText('Collection');
 
-    await screen.findByDisplayValue(/seeded-ingest-1/i );
-    const descriptionInput = await screen.findByDisplayValue(/seeded ingest description #1/i );
+    await screen.findByDisplayValue(/seeded-ingest-1/i);
+    const descriptionInput = await screen.findByDisplayValue(
+      /seeded ingest description #1/i
+    );
 
     // update something other than collection name
     await userEvent.type(descriptionInput, 'updated description');
@@ -81,5 +95,4 @@ describe('Edit Ingest Page', () => {
       expect(modalTitle).toBeInTheDocument();
     });
   }, 10000);
-
 });

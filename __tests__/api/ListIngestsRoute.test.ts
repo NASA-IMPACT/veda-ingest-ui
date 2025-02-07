@@ -4,7 +4,8 @@ import ListPRs from '@/utils/githubUtils/ListPRs';
 import { NextRequest } from 'next/server';
 import { Endpoints } from '@octokit/types';
 
-type PullRequest = Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][number];
+type PullRequest =
+  Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][number];
 
 // pick values from pull requests that we care about in front end
 type SimplifiedPullRequest = Pick<PullRequest, 'id' | 'title'> & {

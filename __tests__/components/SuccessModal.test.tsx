@@ -4,7 +4,6 @@ import { describe, it, vi, expect, afterEach } from 'vitest';
 import SuccessModal from '@/components/SuccessModal';
 import userEvent from '@testing-library/user-event';
 
-
 // Mock StyledModal
 vi.mock('@/components/StyledModal', () => ({
   __esModule: true,
@@ -17,11 +16,10 @@ vi.mock('@/components/StyledModal', () => ({
 }));
 
 describe('SuccessModal Component', () => {
-
   afterEach(() => {
     cleanup();
   });
-  
+
   it('renders correctly for "create" type', () => {
     const mockSetStatus = vi.fn();
     const props = {
@@ -56,9 +54,7 @@ describe('SuccessModal Component', () => {
 
     // Verify modal content
     expect(screen.getByTestId('styled-modal')).toBeInTheDocument();
-    expect(
-      screen.getByText(/The update to/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/The update to/i)).toBeInTheDocument();
   });
 
   it('calls setStatus with "idle" when OK is clicked', async () => {

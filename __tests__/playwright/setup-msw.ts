@@ -3,14 +3,14 @@ import { http } from 'msw';
 import type { MockServiceWorker } from 'playwright-msw';
 import { createWorkerFixture } from 'playwright-msw';
 
-import {handlers} from '@/__mocks__/handlers';
+import { handlers } from '@/__mocks__/handlers';
 
 const test = base.extend<{
   worker: MockServiceWorker;
   http: typeof http;
 }>({
   worker: createWorkerFixture(handlers),
-  http
+  http,
 });
 
 export { expect, test };

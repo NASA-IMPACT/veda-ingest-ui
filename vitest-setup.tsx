@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom/vitest'
+import '@testing-library/jest-dom/vitest';
 
 import { vi } from 'vitest';
 import React from 'react';
@@ -13,13 +13,17 @@ vi.mock('aws-amplify', () => ({
 // Mock components from AWS Amplify UI React
 vi.mock('@aws-amplify/ui-react', () => ({
   withAuthenticator: (Component: React.ComponentType) => Component, // HOC typing
-  ThemeProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>, // ThemeProvider typing
+  ThemeProvider: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ), // ThemeProvider typing
 }));
 
 // Mock AppLayout
 vi.mock('@/components/Layout', () => ({
   __esModule: true,
-  default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  default: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
 }));
 
 // Mock SignInHeader
@@ -30,7 +34,7 @@ vi.mock('@/components/SignInHeader', () => ({
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -40,4 +44,4 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
-})
+});

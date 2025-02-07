@@ -12,7 +12,7 @@ describe('Create Ingest Page', () => {
 
   it('renders the page without crashing', () => {
     render(<CreateIngest />);
-    
+
     // Check for the main content
     expect(screen.getByLabelText(/collection/i)).toBeInTheDocument();
   });
