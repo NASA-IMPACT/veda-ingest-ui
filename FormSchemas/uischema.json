@@ -162,9 +162,11 @@
     }
   },
   "renders": {
-    "ui:widget": "textarea",
-    "ui:options": {
-      "rows": 12
+    "dashboard": {
+      "ui:widget": "textarea",
+      "ui:options": {
+        "rows": 12
+      }
     },
     "classNames": "renders"
   },

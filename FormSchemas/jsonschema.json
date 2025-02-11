@@ -250,7 +250,13 @@
     },
     "renders": {
       "title": "Renders",
-      "type": "string"
+      "type": "object",
+      "properties": {
+        "dashboard": {
+          "type": "string",
+          "title": "Dashboard"
+        }
+      }
     },
     "providers": {
       "title": "Providers",
