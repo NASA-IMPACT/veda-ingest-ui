@@ -146,6 +146,7 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
             >
               <Option value="Internal">Internal</Option>
               <Option value="cfastie">CFastie</Option>
+              <Option value="rdbu">rdbu</Option>
               <Option value="rplumbo">RPlumbo</Option>
               <Option value="schwarzwald">Schwarzwald</Option>
             </Select>
