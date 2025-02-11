@@ -1,4 +1,4 @@
-export const rfc3339Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+export const rfc3339Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 
 export const customValidate = (formData: any, errors: any) => {
   try {
@@ -31,7 +31,7 @@ export const customValidate = (formData: any, errors: any) => {
         !rfc3339Regex.test(startdate)
       ) {
         errors.temporal_extent?.startdate?.addError(
-          'Start Date must be in RFC 3339 format (YYYY-MM-DDTHH:mm:ss.sssZ) or empty.'
+          'Start Date must be in RFC 3339 format (YYYY-MM-DDTHH:mm:ssZ) or empty.'
         );
       }
 

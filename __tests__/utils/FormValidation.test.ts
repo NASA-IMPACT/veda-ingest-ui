@@ -71,7 +71,7 @@ describe('customValidate', () => {
     customValidate(formData, mockErrors);
 
     expect(mockErrors.temporal_extent.startdate.addError).toHaveBeenCalledWith(
-      'Start Date must be in RFC 3339 format (YYYY-MM-DDTHH:mm:ss.sssZ) or empty.'
+      'Start Date must be in RFC 3339 format (YYYY-MM-DDTHH:mm:ssZ) or empty.'
     );
   });
 
