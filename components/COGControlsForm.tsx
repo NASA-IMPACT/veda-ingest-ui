@@ -89,6 +89,39 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
 
   return (
     <Form layout="vertical" form={form}>
+       {/* Rescale Inputs */}
+       <Form.Item label="Rescale">
+        <Row gutter={16}>
+          {rescale.map((values, index) => (
+            <Col key={`rescale-${index}`} span={6}>
+              <Card size="small" title={`Band ${index + 1}`}>
+                <InputNumber
+                  value={values[0]}
+                  onChange={(value) =>
+                    onRescaleChange(index, [
+                      value !== null ? value : null,
+                      values[1],
+                    ])
+                  }
+                  placeholder="Min"
+                  style={{ width: '45%', marginRight: '10%' }}
+                />
+                <InputNumber
+                  value={values[1]}
+                  onChange={(value) =>
+                    onRescaleChange(index, [
+                      values[0],
+                      value !== null ? value : null,
+                    ])
+                  }
+                  placeholder="Max"
+                  style={{ width: '45%' }}
+                />
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      </Form.Item>
       <Row gutter={16}>
         <Col span={12}>
           <Form.Item label="Colormap" name="selectedColormap" >
