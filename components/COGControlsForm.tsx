@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState, useEffect } from 'react';
 import {
   Form,
   InputNumber,
@@ -57,6 +58,8 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
   onViewRenderingOptions,
   loading,
 }) => {
+  const [colorMapsList, setColorMapsList] = useState([]);
+
   const bandOptions =
     metadata?.band_descriptions?.map((desc: any, index: number) => ({
       value: index + 1,
@@ -64,6 +67,17 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
     })) || [];
 
   const singleBand = metadata?.band_descriptions?.length === 1;
+
+  const getColorMaps = async () => {
+    const response = await fetch(
+      'https://staging.openveda.cloud/api/raster/colorMaps'
+    );
+    const data = await response.json();
+    setColorMapsList(data.colorMaps);
+  };
+  useEffect(() => {
+    getColorMaps();
+  }, []);
 
   return (
     <Form layout="vertical">
@@ -144,11 +158,11 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
               value={selectedColormap}
               onChange={onColormapChange}
             >
-              <Option value="Internal">Internal</Option>
-              <Option value="cfastie">CFastie</Option>
-              <Option value="rdbu">rdbu</Option>
-              <Option value="rplumbo">RPlumbo</Option>
-              <Option value="schwarzwald">Schwarzwald</Option>
+              {colorMapsList.map((colorMap) => (
+                <Option key={colorMap} value={colorMap}>
+                  {colorMap}
+                </Option>
+              ))}
             </Select>
           </Form.Item>
         </Col>
