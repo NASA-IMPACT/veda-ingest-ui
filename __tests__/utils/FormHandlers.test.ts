@@ -4,6 +4,50 @@ import { IChangeEvent } from '@rjsf/core';
 import { RJSFSchema } from '@rjsf/utils';
 
 describe('handleSubmit', () => {
+
+  it('should allow startdate and enddate with YYYY-MM-DDT00:00:00.000Z format', () => {
+    const formData = {
+      temporal_extent: {
+        startdate: '2000-01-01T00:00:00.123Z',
+        enddate: '2000-01-01T00:00:00.123Z',
+      },
+    };
+
+    const mockSubmit = vi.fn();
+    handleSubmit(
+      { formData } as unknown as IChangeEvent<any, RJSFSchema, any>,
+      mockSubmit
+    );
+
+    expect(mockSubmit).toHaveBeenCalledWith({
+      temporal_extent: {
+        startdate: '2000-01-01T00:00:00.123Z',
+        enddate: '2000-01-01T00:00:00.123Z',
+      },
+    });
+  });
+
+  it('should allow startdate and enddate with YYYY-MM-DDT00:00:00Z format', () => {
+    const formData = {
+      temporal_extent: {
+        startdate: '2000-01-01T00:00:00Z',
+        enddate: '2000-01-01T00:00:00Z',
+      },
+    };
+
+    const mockSubmit = vi.fn();
+    handleSubmit(
+      { formData } as unknown as IChangeEvent<any, RJSFSchema, any>,
+      mockSubmit
+    );
+
+    expect(mockSubmit).toHaveBeenCalledWith({
+      temporal_extent: {
+        startdate: '2000-01-01T00:00:00Z',
+        enddate: '2000-01-01T00:00:00Z',
+      },
+    });
+  });
   it('should convert empty startdate to null when field is missing', () => {
     const formData = {
       temporal_extent: {

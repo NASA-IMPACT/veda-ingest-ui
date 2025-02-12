@@ -7,13 +7,25 @@ import jsonSchema from '@/FormSchemas/jsonschema.json';
 const { TextArea } = Input;
 const { Text } = Typography;
 
+interface Renders {
+  dashboard?: string | object;
+}
+
+export interface JSONEditorValue {
+  collection?: string;
+  renders?: Renders;
+  [key: string]: unknown; // Allows additional dynamic properties
+}
+
+
 interface JSONEditorProps {
-  value: Record<string, unknown>;
-  onChange: (updatedValue: Record<string, unknown>) => void;
+  value: JSONEditorValue;
+  onChange: (updatedValue: JSONEditorValue) => void;
   disableCollectionNameChange?: boolean;
   hasJSONChanges?: boolean;
   setHasJSONChanges: (hasJSONChanges: boolean) => void;
 }
+
 
 const JSONEditor: React.FC<JSONEditorProps> = ({
   value,
@@ -37,13 +49,17 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
   )[0];
 
   useEffect(() => {
-    // If "renders" is a stringified object, convert it back to an object before displaying in JSON Editor
     let updatedValue = { ...value };
-    if (typeof value.renders === 'string') {
+
+    // If "renders.dashboard" is a stringified object, parse it
+    if (value.renders?.dashboard && typeof value.renders.dashboard === 'string') {
       try {
-        updatedValue.renders = JSON.parse(value.renders);
+        updatedValue.renders = {
+          ...value.renders,
+          dashboard: JSON.parse(value.renders.dashboard),
+        };
       } catch (err) {
-        console.warn("Could not parse 'renders' as JSON, leaving it as-is.");
+        console.warn("Could not parse 'renders.dashboard' as JSON, leaving it as-is.");
       }
     }
 
@@ -58,7 +74,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
 
   const applyChanges = () => {
     try {
-      let parsedValue = JSON.parse(editorValue) as Record<string, unknown>;
+      let parsedValue = JSON.parse(editorValue) as JSONEditorValue;
       setJsonError(null);
 
       if (disableCollectionNameChange && initialCollectionValue !== undefined) {
@@ -70,16 +86,16 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         }
       }
 
-      // If "renders" is an object, convert it to a pretty JSON string before saving
-      if (parsedValue.renders && typeof parsedValue.renders === 'object') {
-        parsedValue.renders = JSON.stringify(parsedValue.renders, null, 2);
+      // If "renders.dashboard" is an object, convert it to a pretty JSON string before saving
+      if (
+        parsedValue.renders?.dashboard &&
+        typeof parsedValue.renders.dashboard === 'object'
+      ) {
+        parsedValue.renders.dashboard = JSON.stringify(parsedValue.renders.dashboard, null, 2);
       }
 
       // Create a deep copy of the JSON schema
-      const modifiedSchema = structuredClone(jsonSchema) as Record<
-        string,
-        unknown
-      >;
+      const modifiedSchema = structuredClone(jsonSchema) as Record<string, unknown>;
 
       // Ensure strict mode affects additional properties
       if (strictSchema) {
@@ -88,12 +104,13 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         (modifiedSchema as any).additionalProperties = true;
       }
 
-      // Override "renders" property to allow both string & object
+      // Override "renders.dashboard" property to allow both string & object
       if (
         modifiedSchema.properties &&
-        (modifiedSchema.properties as any).renders
+        (modifiedSchema.properties as any).renders.dashboard &&
+        (modifiedSchema.properties as any).renders.dashboard.properties
       ) {
-        (modifiedSchema.properties as any).renders = {
+        (modifiedSchema.properties as any).renders.dashboard.properties.dashboard = {
           oneOf: [
             { type: 'string' },
             { type: 'object', additionalProperties: true },
@@ -119,6 +136,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       setSchemaErrors([]);
       onChange(parsedValue);
     } catch (err) {
+      console.error('error', err)
       setJsonError('Invalid JSON format.');
       setSchemaErrors([]);
     }

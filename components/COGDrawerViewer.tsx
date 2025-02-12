@@ -17,6 +17,7 @@ interface COGDrawerViewerProps {
   onClose: () => void;
   onAcceptRenderOptions: (options: string) => void;
   formContext?: any;
+  renders?: string | null;
 }
 
 const COGDrawerViewer: React.FC<COGDrawerViewerProps> = ({
@@ -24,16 +25,23 @@ const COGDrawerViewer: React.FC<COGDrawerViewerProps> = ({
   drawerOpen,
   onClose,
   onAcceptRenderOptions,
-  formContext,
+  renders,
 }) => {
   const cogViewer = useCOGViewer();
 
   useEffect(() => {
     if (drawerOpen && url) {
       cogViewer.setCogUrl(url);
-      cogViewer.fetchMetadata(url);
+      
+      // Ensure we pass the latest renders object
+      if (renders) {
+        cogViewer.fetchMetadata(url, renders); 
+      } else {
+        cogViewer.fetchMetadata(url, null);
+      }
     }
-  }, [drawerOpen, url]);
+  }, [drawerOpen, url, renders]);
+  
 
   const handleAccept = () => {
     if (!onAcceptRenderOptions) {
@@ -88,7 +96,6 @@ const COGDrawerViewer: React.FC<COGDrawerViewerProps> = ({
       }
     >
       {cogViewer.loading && <Spin tip="Loading COG..." />}
-
       <COGViewerContent {...cogViewer} />
     </Drawer>
   );

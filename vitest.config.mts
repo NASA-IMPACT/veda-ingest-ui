@@ -22,7 +22,7 @@ export default defineConfig({
         'mocks/**',
         'node_modules/**',
         'utils/amplify-server-util.ts',
-      ], // ✅ Exclude test/mocks directories
+      ],
     },
   },
 });

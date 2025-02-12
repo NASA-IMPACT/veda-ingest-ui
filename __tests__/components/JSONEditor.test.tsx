@@ -97,11 +97,13 @@ describe('JSONEditor', () => {
     cleanup();
   });
 
-  it("converts 'renders' from a stringified object to an object before displaying", async () => {
+  it("converts 'renders.dashboard' from a stringified object to an object before displaying", async () => {
     const testProps = {
       ...defaultProps,
       value: {
-        renders: JSON.stringify({ key: 'value' }),
+        renders: {
+          dashboard: JSON.stringify({ key: 'value' }),
+        }
       },
     };
 
@@ -109,17 +111,17 @@ describe('JSONEditor', () => {
     const textarea = screen.getByTestId('json-editor');
 
     expect(textarea).toHaveValue(
-      JSON.stringify({ renders: { key: 'value' } }, null, 2)
+      JSON.stringify({ renders: { dashboard: { key: 'value' }} }, null, 2)
     );
   });
 
-  it("converts 'renders' from an object to a pretty JSON string before saving", async () => {
+  it("converts 'renders.dashboard' from an object to a pretty JSON string before saving", async () => {
     render(<JSONEditor {...defaultProps} />);
 
     const textarea = screen.getByTestId('json-editor');
     const applyButton = screen.getByRole('button', { name: /apply changes/i });
 
-    const newFormData = { ...mockFormData, renders: { key: 'value' } };
+    const newFormData = { ...mockFormData, renders: { dashboard: { key: 'value' } } };
     await userEvent.clear(textarea);
     textarea.focus();
     await userEvent.paste(JSON.stringify(newFormData));
@@ -131,7 +133,7 @@ describe('JSONEditor', () => {
     await userEvent.click(applyButton);
 
     // Actual `renders` received
-    const firstCallRenders = mockOnChange.mock.calls[0][0].renders;
+    const firstCallRenders = mockOnChange.mock.calls[0][0].renders.dashboard;
 
     // Verify `renders` is pretty-printed (auto-generated snapshot)
     expect(firstCallRenders).toMatchInlineSnapshot(`

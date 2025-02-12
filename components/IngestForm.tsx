@@ -10,9 +10,10 @@ import { JSONSchema7 } from 'json-schema';
 import ObjectFieldTemplate from '@/utils/ObjectFieldTemplate';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
 import { UiSchema } from '@rjsf/utils';
-import { customValidate } from '@/utils/formValidation';
+import { customValidate } from '@/utils/CustomValidation';
 import { handleSubmit } from '@/utils/FormHandlers';
 import JSONEditor from '@/components/JSONEditor';
+import { JSONEditorValue } from '@/components/JSONEditor';
 
 const { TabPane } = Tabs;
 const Form = withTheme(AntDTheme);
@@ -80,7 +81,6 @@ function IngestForm({
           )
         ).toISOString();
 
-        console.log('startOfDay', startOfDay);
         return {
           ...prevFormData,
           temporal_extent: {
@@ -99,7 +99,7 @@ function IngestForm({
     }
   };
 
-  const handleJsonEditorChange = (updatedData: Record<string, unknown>) => {
+  const handleJsonEditorChange = (updatedData: JSONEditorValue) => {
     setFormData(updatedData);
     setForceRenderKey((prev) => prev + 1); // Forces RJSF to re-render and re-validate
     setActiveTab('form');
@@ -108,6 +108,7 @@ function IngestForm({
 
   const updateFormData = (updatedData: SetStateAction<object | undefined>) => {
     setFormData((updatedData ?? {}) as Record<string, unknown>);
+    setForceRenderKey((prev) => prev + 1); // Forces RJSF to re-render and re-validate
   };
 
   return (
