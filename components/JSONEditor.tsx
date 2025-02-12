@@ -17,7 +17,6 @@ export interface JSONEditorValue {
   [key: string]: unknown; // Allows additional dynamic properties
 }
 
-
 interface JSONEditorProps {
   value: JSONEditorValue;
   onChange: (updatedValue: JSONEditorValue) => void;
@@ -25,7 +24,6 @@ interface JSONEditorProps {
   hasJSONChanges?: boolean;
   setHasJSONChanges: (hasJSONChanges: boolean) => void;
 }
-
 
 const JSONEditor: React.FC<JSONEditorProps> = ({
   value,
@@ -52,14 +50,19 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
     let updatedValue = { ...value };
 
     // If "renders.dashboard" is a stringified object, parse it
-    if (value.renders?.dashboard && typeof value.renders.dashboard === 'string') {
+    if (
+      value.renders?.dashboard &&
+      typeof value.renders.dashboard === 'string'
+    ) {
       try {
         updatedValue.renders = {
           ...value.renders,
           dashboard: JSON.parse(value.renders.dashboard),
         };
       } catch (err) {
-        console.warn("Could not parse 'renders.dashboard' as JSON, leaving it as-is.");
+        console.warn(
+          "Could not parse 'renders.dashboard' as JSON, leaving it as-is."
+        );
       }
     }
 
@@ -91,11 +94,18 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         parsedValue.renders?.dashboard &&
         typeof parsedValue.renders.dashboard === 'object'
       ) {
-        parsedValue.renders.dashboard = JSON.stringify(parsedValue.renders.dashboard, null, 2);
+        parsedValue.renders.dashboard = JSON.stringify(
+          parsedValue.renders.dashboard,
+          null,
+          2
+        );
       }
 
       // Create a deep copy of the JSON schema
-      const modifiedSchema = structuredClone(jsonSchema) as Record<string, unknown>;
+      const modifiedSchema = structuredClone(jsonSchema) as Record<
+        string,
+        unknown
+      >;
 
       // Ensure strict mode affects additional properties
       if (strictSchema) {
@@ -110,7 +120,9 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         (modifiedSchema.properties as any).renders.dashboard &&
         (modifiedSchema.properties as any).renders.dashboard.properties
       ) {
-        (modifiedSchema.properties as any).renders.dashboard.properties.dashboard = {
+        (
+          modifiedSchema.properties as any
+        ).renders.dashboard.properties.dashboard = {
           oneOf: [
             { type: 'string' },
             { type: 'object', additionalProperties: true },
@@ -136,7 +148,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       setSchemaErrors([]);
       onChange(parsedValue);
     } catch (err) {
-      console.error('error', err)
+      console.error('error', err);
       setJsonError('Invalid JSON format.');
       setSchemaErrors([]);
     }

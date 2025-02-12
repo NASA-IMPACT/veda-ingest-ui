@@ -103,7 +103,7 @@ describe('JSONEditor', () => {
       value: {
         renders: {
           dashboard: JSON.stringify({ key: 'value' }),
-        }
+        },
       },
     };
 
@@ -111,7 +111,7 @@ describe('JSONEditor', () => {
     const textarea = screen.getByTestId('json-editor');
 
     expect(textarea).toHaveValue(
-      JSON.stringify({ renders: { dashboard: { key: 'value' }} }, null, 2)
+      JSON.stringify({ renders: { dashboard: { key: 'value' } } }, null, 2)
     );
   });
 
@@ -121,7 +121,10 @@ describe('JSONEditor', () => {
     const textarea = screen.getByTestId('json-editor');
     const applyButton = screen.getByRole('button', { name: /apply changes/i });
 
-    const newFormData = { ...mockFormData, renders: { dashboard: { key: 'value' } } };
+    const newFormData = {
+      ...mockFormData,
+      renders: { dashboard: { key: 'value' } },
+    };
     await userEvent.clear(textarea);
     textarea.focus();
     await userEvent.paste(JSON.stringify(newFormData));

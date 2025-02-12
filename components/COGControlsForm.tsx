@@ -70,16 +70,25 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
       selectedResampling,
       noDataValue,
     });
-  }, [selectedBands, rescale, selectedColormap, colorFormula, selectedResampling, noDataValue]);
+  }, [
+    selectedBands,
+    rescale,
+    selectedColormap,
+    colorFormula,
+    selectedResampling,
+    noDataValue,
+  ]);
 
   const getColorMaps = async () => {
     try {
-      const response = await fetch('https://staging.openveda.cloud/api/raster/colorMaps');
+      const response = await fetch(
+        'https://staging.openveda.cloud/api/raster/colorMaps'
+      );
       const data = await response.json();
-      setColorMapsList(["Internal", ...data.colorMaps]); 
+      setColorMapsList(['Internal', ...data.colorMaps]);
     } catch (error) {
-      console.error("Failed to fetch color maps:", error);
-      setColorMapsList(["Internal"]);
+      console.error('Failed to fetch color maps:', error);
+      setColorMapsList(['Internal']);
     }
   };
 
@@ -89,8 +98,8 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
 
   return (
     <Form layout="vertical" form={form}>
-       {/* Rescale Inputs */}
-       <Form.Item label="Rescale">
+      {/* Rescale Inputs */}
+      <Form.Item label="Rescale">
         <Row gutter={16}>
           {rescale.map((values, index) => (
             <Col key={`rescale-${index}`} span={6}>
@@ -124,7 +133,7 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
       </Form.Item>
       <Row gutter={16}>
         <Col span={12}>
-          <Form.Item label="Colormap" name="selectedColormap" >
+          <Form.Item label="Colormap" name="selectedColormap">
             <Select onChange={onColormapChange} data-testid="colormap">
               {colorMapsList.map((colorMap) => (
                 <Option key={colorMap} value={colorMap}>
@@ -136,7 +145,10 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
         </Col>
         <Col span={12}>
           <Form.Item label="Color Formula" name="colorFormula">
-            <Input id="colorFormula" onChange={(e) => onColorFormulaChange(e.target.value || null)} />
+            <Input
+              id="colorFormula"
+              onChange={(e) => onColorFormulaChange(e.target.value || null)}
+            />
           </Form.Item>
         </Col>
       </Row>
@@ -159,14 +171,23 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
         </Col>
         <Col span={12}>
           <Form.Item label="Nodata Value" name="noDataValue">
-            <InputNumber onChange={(value) => onNoDataValueChange(value !== null ? String(value) : null)} />
+            <InputNumber
+              onChange={(value) =>
+                onNoDataValueChange(value !== null ? String(value) : null)
+              }
+            />
           </Form.Item>
         </Col>
       </Row>
 
       <Row gutter={16} justify="center">
         <Col span={12}>
-          <Button type="primary" onClick={onUpdateTileLayer} disabled={!hasChanges || loading} block>
+          <Button
+            type="primary"
+            onClick={onUpdateTileLayer}
+            disabled={!hasChanges || loading}
+            block
+          >
             Update Tile Layer
           </Button>
         </Col>
@@ -180,6 +201,5 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
     </Form>
   );
 };
-
 
 export default COGControlsForm;
