@@ -123,7 +123,7 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
           </Col>
         </Row>
       ) : (
-        /* RGB Band Selectors */
+        /* RGB Band Selectors for MultiBand COGs */
         <Row gutter={16}>
           {['R', 'G', 'B'].map((channel, index) => (
             <Col key={channel} span={8}>
