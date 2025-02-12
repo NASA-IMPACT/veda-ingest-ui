@@ -2,8 +2,21 @@ import { useState, useRef, useEffect } from 'react';
 import { message } from 'antd';
 const baseUrl = 'https://staging.openveda.cloud';
 
+type RendersType = {
+  bidx?: number[];
+  rescale?: [number, number][];
+  colormap_name?: string;
+  color_formula?: string;
+  resampling?: string;
+  nodata?: string;
+  assets?: string[];
+  title?: string;
+};
+
+
 export const useCOGViewer = () => {
   const [cogUrl, setCogUrl] = useState<string | null>(null);
+  const [renders, setRenders] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<any | null>(null);
   const [selectedBands, setSelectedBands] = useState<number[]>([]);
   const [rescale, setRescale] = useState<[number | null, number | null][]>([]);
@@ -29,26 +42,57 @@ export const useCOGViewer = () => {
     }
   }, []);
 
-  const fetchMetadata = async (url: string) => {
+  const fetchMetadata = async (url: string, renders?: any) => {
     if (!url) {
       message.error('COG URL is required');
       return;
     }
     setLoading(true);
+  
     try {
       const response = await fetch(
         `${baseUrl}/api/raster/cog/info?url=${encodeURIComponent(url)}`
       );
       if (!response.ok) throw new Error('Failed to fetch metadata');
-      const data = await response.json();
-      setMetadata(data);
-
-      const bandCount = data.band_descriptions.length;
-      const bands = Array.from({ length: bandCount }, (_, i) => i + 1);
-      setSelectedBands(bandCount === 1 ? [1] : bands.slice(0, 3));
-      setRescale(bands.map(() => [null, null]));
-
-      fetchTileUrl(url, bands.slice(0, 3), [], 'Internal');
+      const COGdata = await response.json();
+  
+      let mergedMetadata = { ...COGdata };
+        
+      let parsedRenders: RendersType = {};
+  
+      if (renders) {
+        try {
+          parsedRenders = JSON.parse(renders) as RendersType; // Explicitly cast to our defined type
+          mergedMetadata = { ...COGdata, ...parsedRenders };
+        } catch (error) {
+          console.error('Error parsing renders:', error);
+        }
+      }
+  
+      setMetadata(mergedMetadata);
+  
+      // Determine the bands from renders or fallback to defaults
+      const bandCount = mergedMetadata.band_descriptions?.length || 1;
+      const defaultBands = Array.from({ length: bandCount }, (_, i) => i + 1);
+      const selectedBands = parsedRenders.bidx || (bandCount === 1 ? [1] : defaultBands.slice(0, 3));
+      setSelectedBands(selectedBands);
+  
+      const defaultRescale: [number | null, number | null][] = defaultBands.map(
+        () => [null, null] as [number | null, number | null]
+      );
+  
+      const rescaleValues = parsedRenders.rescale || defaultRescale;
+      setRescale(rescaleValues);
+  
+      // Extract other parameters from renders or set defaults
+      const colormap = parsedRenders.colormap_name || 'Internal';
+      const colorFormula = parsedRenders.color_formula || null;
+      const resampling = parsedRenders.resampling || null;
+      const noData = parsedRenders.nodata || null;
+  
+      // Call fetchTileUrl with merged parameters
+      fetchTileUrl(url, selectedBands, rescaleValues, colormap, colorFormula, resampling, noData);
+  
       message.success('COG metadata loaded successfully!');
     } catch (error) {
       console.error('Error fetching metadata:', error);
@@ -57,6 +101,7 @@ export const useCOGViewer = () => {
       setLoading(false);
     }
   };
+  
 
   const fetchTileUrl = async (
     url: string,
@@ -138,5 +183,7 @@ export const useCOGViewer = () => {
     setHasChanges,
     fetchTileUrl,
     mapRef,
+    renders,
+    setRenders,
   };
 };

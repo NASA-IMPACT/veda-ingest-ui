@@ -36,7 +36,6 @@ function IngestEditForm({
   const [disabled, setDisabled] = useState(true);
 
   const onFormDataSubmit = (formData?: Record<string, unknown>) => {
-    console.log('updating data: ', formData);
 
     if (!formData) {
       console.error('No form data provided.');

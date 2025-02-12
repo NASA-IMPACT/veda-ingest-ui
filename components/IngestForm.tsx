@@ -13,6 +13,7 @@ import { UiSchema } from '@rjsf/utils';
 import { customValidate } from '@/utils/FormValidation';
 import { handleSubmit } from '@/utils/FormHandlers';
 import JSONEditor from '@/components/JSONEditor';
+import { JSONEditorValue } from '@/components/JSONEditor';
 
 const { TabPane } = Tabs;
 const Form = withTheme(AntDTheme);
@@ -98,7 +99,7 @@ function IngestForm({
     }
   };
 
-  const handleJsonEditorChange = (updatedData: Record<string, unknown>) => {
+  const handleJsonEditorChange = (updatedData: JSONEditorValue) => {
     setFormData(updatedData);
     setForceRenderKey((prev) => prev + 1); // Forces RJSF to re-render and re-validate
     setActiveTab('form');
@@ -107,6 +108,7 @@ function IngestForm({
 
   const updateFormData = (updatedData: SetStateAction<object | undefined>) => {
     setFormData((updatedData ?? {}) as Record<string, unknown>);
+    setForceRenderKey((prev) => prev + 1); // Forces RJSF to re-render and re-validate
   };
 
   return (

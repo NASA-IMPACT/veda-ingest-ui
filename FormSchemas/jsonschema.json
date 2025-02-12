@@ -107,12 +107,10 @@
       "properties": {
         "startdate": {
           "type": ["string", "null"],
-          "format": "date-time",
           "title": "Start Date"
         },
         "enddate": {
           "type": ["string", "null"],
-          "format": "date-time",
           "title": "End Date"
         }
       }

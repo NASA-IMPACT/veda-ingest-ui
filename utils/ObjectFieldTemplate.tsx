@@ -129,14 +129,19 @@ export default function ObjectFieldTemplate<
 
   const [drawerOpen, setdrawerOpen] = useState(false);
   const [drawerUrl, setDrawerUrl] = useState<string | null>(null);
+  const [renders, setRenders] = useState<string | null>(null);
 
   const handleOpenDrawer = () => {
     const sampleUrl = typedFormData?.sample_files?.[0];
+    const rendersDashboardEntry = typedFormData?.renders.dashboard;
     if (sampleUrl) {
       setDrawerUrl(sampleUrl);
       setdrawerOpen(true);
     } else {
       console.error('A sample URL is required to open the viewer.');
+    }
+    if (rendersDashboardEntry) {
+      setRenders(rendersDashboardEntry);
     }
   };
 
@@ -151,9 +156,9 @@ export default function ObjectFieldTemplate<
     }
 
     const updatedFormData = { ...typedFormData };
-    updatedFormData.renders = updatedFormData.renders || {};
+    updatedFormData.renders.dashboard = updatedFormData.renders.dashboard || {};
 
-    updatedFormData.renders = renderOptions;
+    updatedFormData.renders.dashboard = renderOptions;
 
     formContext.updateFormData(updatedFormData);
   };
@@ -282,9 +287,10 @@ export default function ObjectFieldTemplate<
             <COGDrawerViewer
               drawerOpen={drawerOpen}
               url={drawerUrl || ''}
+              renders={renders}
               onClose={handleCloseDrawer}
               onAcceptRenderOptions={handleAcceptRenderOptions}
-              formContext={formContext} // Pass it explicitly
+              formContext={formContext}
             />
           </>
         );
