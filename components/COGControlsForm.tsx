@@ -59,110 +59,40 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
   loading,
 }) => {
   const [colorMapsList, setColorMapsList] = useState<string[]>([]);
+  const [form] = Form.useForm();
 
-
-  const bandOptions =
-    metadata?.band_descriptions?.map((desc: any, index: number) => ({
-      value: index + 1,
-      label: `${desc[0]} - ${desc[1]}`,
-    })) || [];
-
-  const singleBand = metadata?.band_descriptions?.length === 1;
+  useEffect(() => {
+    form.setFieldsValue({
+      selectedBands,
+      rescale,
+      selectedColormap,
+      colorFormula,
+      selectedResampling,
+      noDataValue,
+    });
+  }, [selectedBands, rescale, selectedColormap, colorFormula, selectedResampling, noDataValue]);
 
   const getColorMaps = async () => {
     try {
       const response = await fetch('https://staging.openveda.cloud/api/raster/colorMaps');
       const data = await response.json();
-      setColorMapsList(["Internal", ...data.colorMaps]); // Add "Internal" even if fetch is successful
+      setColorMapsList(["Internal", ...data.colorMaps]); 
     } catch (error) {
       console.error("Failed to fetch color maps:", error);
-      setColorMapsList(["Internal"]); // If fetch fails, only "Internal" is available
+      setColorMapsList(["Internal"]);
     }
   };
-  
+
   useEffect(() => {
     getColorMaps();
   }, []);
 
   return (
-    <Form layout="vertical">
-      {/* Single Band Heading */}
-      {singleBand ? (
-        <Row>
-          <Col span={24}>
-            <Title level={5}>
-              Band: {metadata.band_descriptions[0][1]} (Index: 1)
-            </Title>
-          </Col>
-        </Row>
-      ) : (
-        /* RGB Band Selectors */
-        <Row gutter={16}>
-          {['R', 'G', 'B'].map((channel, index) => (
-            <Col key={channel} span={8}>
-              <Form.Item
-                label={`Band (${channel})`}
-                htmlFor={`band-${channel}`}
-              >
-                <Select
-                  id={`band-${channel}`}
-                  data-testid={`band-${channel}`}
-                  value={selectedBands[index]}
-                  onChange={(value) =>
-                    onBandChange(value, channel as 'R' | 'G' | 'B')
-                  }
-                  options={bandOptions}
-                />
-              </Form.Item>
-            </Col>
-          ))}
-        </Row>
-      )}
-
-      {/* Rescale Inputs */}
-      <Form.Item label="Rescale">
-        <Row gutter={16}>
-          {rescale.map((values, index) => (
-            <Col key={`rescale-${index}`} span={6}>
-              <Card size="small" title={`Band ${index + 1}`}>
-                <InputNumber
-                  value={values[0]}
-                  onChange={(value) =>
-                    onRescaleChange(index, [
-                      value !== null ? value : null,
-                      values[1],
-                    ])
-                  }
-                  placeholder="Min"
-                  style={{ width: '45%', marginRight: '10%' }}
-                />
-                <InputNumber
-                  value={values[1]}
-                  onChange={(value) =>
-                    onRescaleChange(index, [
-                      values[0],
-                      value !== null ? value : null,
-                    ])
-                  }
-                  placeholder="Max"
-                  style={{ width: '45%' }}
-                />
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </Form.Item>
-
-      {/* Other Inputs */}
+    <Form layout="vertical" form={form}>
       <Row gutter={16}>
         <Col span={12}>
-          <Form.Item label="Colormap" htmlFor="colormap">
-            <Select
-              id="colormap"
-              data-testid="colormap"
-              value={selectedColormap}
-              onChange={onColormapChange}
-            >
+          <Form.Item label="Colormap" name="selectedColormap" >
+            <Select onChange={onColormapChange} data-testid="colormap">
               {colorMapsList.map((colorMap) => (
                 <Option key={colorMap} value={colorMap}>
                   {colorMap}
@@ -172,29 +102,16 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
           </Form.Item>
         </Col>
         <Col span={12}>
-          <Form.Item label="Color Formula" htmlFor="colorFormula">
-            <Input
-              id="colorFormula"
-              value={colorFormula || ''}
-              onChange={(e) => {
-                const newValue = e.target.value;
-                onColorFormulaChange(newValue || null); // Pass `null` if the input is empty
-              }}
-              style={{ width: '100%' }}
-            />
+          <Form.Item label="Color Formula" name="colorFormula">
+            <Input id="colorFormula" onChange={(e) => onColorFormulaChange(e.target.value || null)} />
           </Form.Item>
         </Col>
       </Row>
 
       <Row gutter={16}>
         <Col span={12}>
-          <Form.Item label="Resampling" htmlFor="resampling">
-            <Select
-              id="resampling"
-              data-testid="resampling"
-              value={selectedResampling}
-              onChange={onResamplingChange}
-            >
+          <Form.Item label="Resampling" name="selectedResampling">
+            <Select data-testid="resampling" onChange={onResamplingChange}>
               <Option value="nearest">Nearest</Option>
               <Option value="bilinear">Bilinear</Option>
               <Option value="cubic">Cubic</Option>
@@ -208,28 +125,15 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
           </Form.Item>
         </Col>
         <Col span={12}>
-          <Form.Item label="Nodata Value" htmlFor="nodata">
-            <InputNumber
-              id="nodata"
-              value={noDataValue !== null ? Number(noDataValue) : undefined}
-              onChange={(value) =>
-                onNoDataValueChange(value !== null ? String(value) : null)
-              }
-              style={{ width: '100%' }}
-            />
+          <Form.Item label="Nodata Value" name="noDataValue">
+            <InputNumber onChange={(value) => onNoDataValueChange(value !== null ? String(value) : null)} />
           </Form.Item>
         </Col>
       </Row>
 
-      {/* Buttons */}
       <Row gutter={16} justify="center">
         <Col span={12}>
-          <Button
-            type="primary"
-            onClick={onUpdateTileLayer}
-            disabled={!hasChanges || loading}
-            block
-          >
+          <Button type="primary" onClick={onUpdateTileLayer} disabled={!hasChanges || loading} block>
             Update Tile Layer
           </Button>
         </Col>
@@ -243,5 +147,6 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
     </Form>
   );
 };
+
 
 export default COGControlsForm;
