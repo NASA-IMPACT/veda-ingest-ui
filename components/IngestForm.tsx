@@ -10,7 +10,7 @@ import { JSONSchema7 } from 'json-schema';
 import ObjectFieldTemplate from '@/utils/ObjectFieldTemplate';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
 import { UiSchema } from '@rjsf/utils';
-import { customValidate } from '@/utils/FormValidation';
+import { customValidate } from '@/utils/CustomValidation';
 import { handleSubmit } from '@/utils/FormHandlers';
 import JSONEditor from '@/components/JSONEditor';
 import { JSONEditorValue } from '@/components/JSONEditor';

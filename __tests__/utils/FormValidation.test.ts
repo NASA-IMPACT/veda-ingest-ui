@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { customValidate } from '@/utils/FormValidation';
+import { customValidate } from '@/utils/CustomValidation';
 
 describe('customValidate', () => {
   let mockErrors: any;
