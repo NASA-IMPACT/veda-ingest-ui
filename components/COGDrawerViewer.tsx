@@ -35,7 +35,6 @@ const COGDrawerViewer: React.FC<COGDrawerViewerProps> = ({
       
       // Ensure we pass the latest renders object
       if (renders) {
-        console.log('i have renders', typeof renders, renders)
         cogViewer.fetchMetadata(url, renders); 
       } else {
         cogViewer.fetchMetadata(url, null);
