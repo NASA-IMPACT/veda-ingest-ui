@@ -94,7 +94,7 @@ const COGDrawerViewer: React.FC<COGDrawerViewerProps> = ({
         </div>
       }
     >
-      {cogViewer.loading && <Spin tip="Loading COG..." />}
+      {cogViewer.loading && <Spin />}
       <COGViewerContent {...cogViewer} />
     </Drawer>
   );

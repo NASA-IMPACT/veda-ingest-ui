@@ -163,10 +163,10 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
               justifyContent: 'center',
             }}
           >
-            <Spin size="large" tip="Loading..." />
+            <Spin size="large" />
           </div>
         )}
-        <DynamicMap tileUrl={tileUrl} mapRef={mapRef} />;
+        <DynamicMap tileUrl={tileUrl} mapRef={mapRef} />
       </div>
 
       {/* Rendering Options Modal */}
