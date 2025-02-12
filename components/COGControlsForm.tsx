@@ -79,6 +79,21 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
     noDataValue,
   ]);
 
+  const bandOptions =
+    metadata?.band_descriptions?.map((desc: any, index: number) => ({
+      value: index + 1,
+      label: `${desc[0]} - ${desc[1]}`,
+    })) || [];
+
+  // Ensure selectedBands has three values
+  const filledSelectedBands = [
+    selectedBands[0] || bandOptions[0]?.value || 1,
+    selectedBands[1] || bandOptions[1]?.value || 1,
+    selectedBands[2] || bandOptions[2]?.value || 1,
+  ];
+
+  const singleBand = metadata?.band_descriptions?.length === 1;
+
   const getColorMaps = async () => {
     try {
       const response = await fetch(
@@ -98,6 +113,38 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
 
   return (
     <Form layout="vertical" form={form}>
+      {/* Single Band Heading */}
+      {singleBand ? (
+        <Row>
+          <Col span={24}>
+            <Title level={5}>
+              Band: {metadata.band_descriptions[0][1]} (Index: 1)
+            </Title>
+          </Col>
+        </Row>
+      ) : (
+        /* RGB Band Selectors for MultiBand COGs */
+        <Row gutter={16}>
+          {['R', 'G', 'B'].map((channel, index) => (
+            <Col key={channel} span={8}>
+              <Form.Item
+                label={`Band (${channel})`}
+                htmlFor={`band-${channel}`}
+              >
+                <Select
+                  id={`band-${channel}`}
+                  data-testid={`band-${channel}`}
+                  value={filledSelectedBands[index]}
+                  onChange={(value) =>
+                    onBandChange(value, channel as 'R' | 'G' | 'B')
+                  }
+                  options={bandOptions}
+                />
+              </Form.Item>
+            </Col>
+          ))}
+        </Row>
+      )}
       {/* Rescale Inputs */}
       <Form.Item label="Rescale">
         <Row gutter={16}>

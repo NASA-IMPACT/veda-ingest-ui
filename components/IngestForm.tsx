@@ -112,36 +112,47 @@ function IngestForm({
   };
 
   return (
-    <Tabs activeKey={activeTab} onChange={setActiveTab}>
-      <TabPane tab="Form" key="form">
-        <Form
-          key={forceRenderKey} // Forces re-render when data updates
-          schema={jsonSchema as JSONSchema7}
-          uiSchema={uiSchema}
-          validator={validator}
-          customValidate={customValidate}
-          templates={{
-            ObjectFieldTemplate: ObjectFieldTemplate,
-          }}
-          formData={formData}
-          onChange={onFormDataChanged}
-          onSubmit={(data) => handleSubmit(data, onSubmit)}
-          formContext={{ updateFormData }}
-        >
-          {children}
-        </Form>
-      </TabPane>
-
-      <TabPane tab="Manual JSON Edit" key="json">
-        <JSONEditor
-          value={formData || {}}
-          onChange={handleJsonEditorChange}
-          disableCollectionNameChange={disableCollectionNameChange}
-          hasJSONChanges={hasJSONChanges}
-          setHasJSONChanges={setHasJSONChanges}
-        />
-      </TabPane>
-    </Tabs>
+    <Tabs
+      activeKey={activeTab}
+      onChange={setActiveTab}
+      items={[
+        {
+          key: 'form',
+          label: 'Form',
+          children: (
+            <Form
+              key={forceRenderKey} // Forces re-render when data updates
+              schema={jsonSchema as JSONSchema7}
+              uiSchema={uiSchema}
+              validator={validator}
+              customValidate={customValidate}
+              templates={{
+                ObjectFieldTemplate: ObjectFieldTemplate,
+              }}
+              formData={formData}
+              onChange={onFormDataChanged}
+              onSubmit={(data) => handleSubmit(data, onSubmit)}
+              formContext={{ updateFormData }}
+            >
+              {children}
+            </Form>
+          ),
+        },
+        {
+          key: 'json',
+          label: 'Manual JSON Edit',
+          children: (
+            <JSONEditor
+              value={formData || {}}
+              onChange={handleJsonEditorChange}
+              disableCollectionNameChange={disableCollectionNameChange}
+              hasJSONChanges={hasJSONChanges}
+              setHasJSONChanges={setHasJSONChanges}
+            />
+          ),
+        },
+      ]}
+    />
   );
 }
 
