@@ -58,7 +58,8 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
   onViewRenderingOptions,
   loading,
 }) => {
-  const [colorMapsList, setColorMapsList] = useState([]);
+  const [colorMapsList, setColorMapsList] = useState<string[]>([]);
+
 
   const bandOptions =
     metadata?.band_descriptions?.map((desc: any, index: number) => ({
@@ -69,12 +70,16 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
   const singleBand = metadata?.band_descriptions?.length === 1;
 
   const getColorMaps = async () => {
-    const response = await fetch(
-      'https://staging.openveda.cloud/api/raster/colorMaps'
-    );
-    const data = await response.json();
-    setColorMapsList(data.colorMaps);
+    try {
+      const response = await fetch('https://staging.openveda.cloud/api/raster/colorMaps');
+      const data = await response.json();
+      setColorMapsList(["Internal", ...data.colorMaps]); // Add "Internal" even if fetch is successful
+    } catch (error) {
+      console.error("Failed to fetch color maps:", error);
+      setColorMapsList(["Internal"]); // If fetch fails, only "Internal" is available
+    }
   };
+  
   useEffect(() => {
     getColorMaps();
   }, []);
