@@ -13,7 +13,6 @@ type RendersType = {
   title?: string;
 };
 
-
 export const useCOGViewer = () => {
   const [cogUrl, setCogUrl] = useState<string | null>(null);
   const [renders, setRenders] = useState<string | null>(null);
@@ -50,19 +49,17 @@ export const useCOGViewer = () => {
     setLoading(true);
   
     try {
-      const response = await fetch(
-        `${baseUrl}/api/raster/cog/info?url=${encodeURIComponent(url)}`
-      );
+      const response = await fetch(`${baseUrl}/api/raster/cog/info?url=${encodeURIComponent(url)}`);
       if (!response.ok) throw new Error('Failed to fetch metadata');
       const COGdata = await response.json();
   
       let mergedMetadata = { ...COGdata };
-        
       let parsedRenders: RendersType = {};
   
       if (renders) {
         try {
-          parsedRenders = JSON.parse(renders) as RendersType; // Explicitly cast to our defined type
+          // Parse only if `renders` is a string
+          parsedRenders = typeof renders === 'string' ? JSON.parse(renders) : renders;
           mergedMetadata = { ...COGdata, ...parsedRenders };
         } catch (error) {
           console.error('Error parsing renders:', error);
@@ -71,27 +68,23 @@ export const useCOGViewer = () => {
   
       setMetadata(mergedMetadata);
   
-      // Determine the bands from renders or fallback to defaults
-      const bandCount = mergedMetadata.band_descriptions?.length || 1;
-      const defaultBands = Array.from({ length: bandCount }, (_, i) => i + 1);
-      const selectedBands = parsedRenders.bidx || (bandCount === 1 ? [1] : defaultBands.slice(0, 3));
-      setSelectedBands(selectedBands);
+      // Ensure values from renders are used if available
+      setSelectedBands(parsedRenders.bidx || [1]); // Default to band 1 if not provided
+      setRescale(parsedRenders.rescale || [[null, null]]);
+      setSelectedColormap(parsedRenders.colormap_name || 'Internal');
+      setColorFormula(parsedRenders.color_formula || null);
+      setSelectedResampling(parsedRenders.resampling || null);
+      setNoDataValue(parsedRenders.nodata || null);
   
-      const defaultRescale: [number | null, number | null][] = defaultBands.map(
-        () => [null, null] as [number | null, number | null]
+      fetchTileUrl(
+        url,
+        parsedRenders.bidx || [1],
+        parsedRenders.rescale || [[null, null]],
+        parsedRenders.colormap_name || 'Internal',
+        parsedRenders.color_formula || null,
+        parsedRenders.resampling || null,
+        parsedRenders.nodata || null
       );
-  
-      const rescaleValues = parsedRenders.rescale || defaultRescale;
-      setRescale(rescaleValues);
-  
-      // Extract other parameters from renders or set defaults
-      const colormap = parsedRenders.colormap_name || 'Internal';
-      const colorFormula = parsedRenders.color_formula || null;
-      const resampling = parsedRenders.resampling || null;
-      const noData = parsedRenders.nodata || null;
-  
-      // Call fetchTileUrl with merged parameters
-      fetchTileUrl(url, selectedBands, rescaleValues, colormap, colorFormula, resampling, noData);
   
       message.success('COG metadata loaded successfully!');
     } catch (error) {

@@ -12,7 +12,6 @@ interface COGViewerContentProps {
   metadata: any | null;
   tileUrl: string | null;
   loading: boolean;
-  initialRenderOptions?: any;
   isModalVisible: boolean;
   setIsModalVisible: (visible: boolean) => void;
   selectedBands: number[];
@@ -46,7 +45,6 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
   metadata,
   tileUrl,
   loading,
-  initialRenderOptions,
   isModalVisible,
   setIsModalVisible,
   selectedBands,
@@ -67,17 +65,28 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
   cogUrl,
   mapRef,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Automatically adjust map size when container resizes
   useEffect(() => {
-    if (initialRenderOptions) {
-      setSelectedBands(initialRenderOptions.bidx);
-      setRescale(initialRenderOptions.rescale);
-      setSelectedColormap(initialRenderOptions.colormap_name);
-      setColorFormula(initialRenderOptions.color_formula);
-      setSelectedResampling(initialRenderOptions.resampling);
-      setNoDataValue(initialRenderOptions.nodata);
-      setHasChanges(false);
+    if (
+      typeof window !== 'undefined' &&
+      mapRef.current &&
+      containerRef.current
+    ) {
+      const resizeObserver = new ResizeObserver(() => {
+        if (mapRef.current) {
+          mapRef.current.invalidateSize();
+        }
+      });
+
+      resizeObserver.observe(containerRef.current);
+
+      return () => {
+        resizeObserver.disconnect();
+      };
     }
-  }, [initialRenderOptions]);
+  }, []);
 
   return (
     <>
@@ -135,7 +144,32 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
           loading={loading}
         />
       )}
-      <DynamicMap tileUrl={tileUrl} mapRef={mapRef} />
+      <div
+        ref={containerRef}
+        style={{ height: metadata ? '70vh' : '80vh', position: 'relative' }}
+      >
+        {loading && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: 'rgba(255, 255, 255, 0.7)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Spin size="large" tip="Loading..." />
+          </div>
+        )}
+        <DynamicMap tileUrl={tileUrl} mapRef={mapRef} />;
+      </div>
+
+      {/* Rendering Options Modal */}
       <RenderingOptionsModal
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
