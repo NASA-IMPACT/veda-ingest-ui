@@ -78,9 +78,16 @@ const EditIngest = function EditIngest() {
       const { fileSha, filePath, content } = await response.json();
 
       // Ensure renders is stored as a pretty string if it's an object
-      if (content.renders &&content.renders?.dashboard &&
-        typeof content.renders.dashboard === 'object') {
-        content.renders.dashboard = JSON.stringify(content.renders.dashboard, null, 2);
+      if (
+        content.renders &&
+        content.renders?.dashboard &&
+        typeof content.renders.dashboard === 'object'
+      ) {
+        content.renders.dashboard = JSON.stringify(
+          content.renders.dashboard,
+          null,
+          2
+        );
       }
 
       setFilePath(filePath);

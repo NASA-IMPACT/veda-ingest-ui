@@ -6,7 +6,7 @@ describe('customValidate', () => {
 
   beforeEach(() => {
     mockErrors = {
-      renders: { dashboard:{ addError: vi.fn()} },
+      renders: { dashboard: { addError: vi.fn() } },
       temporal_extent: {
         startdate: { addError: vi.fn() },
         enddate: { addError: vi.fn() },
@@ -17,7 +17,7 @@ describe('customValidate', () => {
   });
 
   it("should add an error if 'renders dashboard' is not valid JSON", () => {
-    const formData = { renders: {dashboard: '{ invalid json'} };
+    const formData = { renders: { dashboard: '{ invalid json' } };
 
     customValidate(formData, mockErrors);
 
@@ -27,7 +27,7 @@ describe('customValidate', () => {
   });
 
   it("should add an error if 'renders dashboard' is a string but not a valid object", () => {
-    const formData = { renders: {dashboard: JSON.stringify('string')} };
+    const formData = { renders: { dashboard: JSON.stringify('string') } };
 
     customValidate(formData, mockErrors);
 
@@ -37,7 +37,7 @@ describe('customValidate', () => {
   });
 
   it("should add an error if 'renders dashboard' is a number instead of an object", () => {
-    const formData = { renders: {dashboard: JSON.stringify(12345)} };
+    const formData = { renders: { dashboard: JSON.stringify(12345) } };
 
     customValidate(formData, mockErrors);
 
@@ -47,7 +47,9 @@ describe('customValidate', () => {
   });
 
   it("should not add an error if 'renders dashboard' is a valid JSON object", () => {
-    const formData = { renders: {dashboard: JSON.stringify({ theme: 'dark' })}};
+    const formData = {
+      renders: { dashboard: JSON.stringify({ theme: 'dark' }) },
+    };
 
     customValidate(formData, mockErrors);
 

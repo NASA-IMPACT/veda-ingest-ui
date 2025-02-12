@@ -9,7 +9,9 @@ export const CleanAndPrettifyJSON = (data: any): string => {
     try {
       cleanedData.renders.dashboard = JSON.parse(cleanedData.renders.dashboard);
     } catch (error) {
-      console.warn("Invalid JSON in 'renders dashboard' field. Keeping as string.");
+      console.warn(
+        "Invalid JSON in 'renders dashboard' field. Keeping as string."
+      );
     }
   }
 

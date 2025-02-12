@@ -47,27 +47,30 @@ export const useCOGViewer = () => {
       return;
     }
     setLoading(true);
-  
+
     try {
-      const response = await fetch(`${baseUrl}/api/raster/cog/info?url=${encodeURIComponent(url)}`);
+      const response = await fetch(
+        `${baseUrl}/api/raster/cog/info?url=${encodeURIComponent(url)}`
+      );
       if (!response.ok) throw new Error('Failed to fetch metadata');
       const COGdata = await response.json();
-  
+
       let mergedMetadata = { ...COGdata };
       let parsedRenders: RendersType = {};
-  
+
       if (renders) {
         try {
           // Parse only if `renders` is a string
-          parsedRenders = typeof renders === 'string' ? JSON.parse(renders) : renders;
+          parsedRenders =
+            typeof renders === 'string' ? JSON.parse(renders) : renders;
           mergedMetadata = { ...COGdata, ...parsedRenders };
         } catch (error) {
           console.error('Error parsing renders:', error);
         }
       }
-  
+
       setMetadata(mergedMetadata);
-  
+
       // Ensure values from renders are used if available
       setSelectedBands(parsedRenders.bidx || [1]); // Default to band 1 if not provided
       setRescale(parsedRenders.rescale || [[null, null]]);
@@ -75,7 +78,7 @@ export const useCOGViewer = () => {
       setColorFormula(parsedRenders.color_formula || null);
       setSelectedResampling(parsedRenders.resampling || null);
       setNoDataValue(parsedRenders.nodata || null);
-  
+
       fetchTileUrl(
         url,
         parsedRenders.bidx || [1],
@@ -85,7 +88,7 @@ export const useCOGViewer = () => {
         parsedRenders.resampling || null,
         parsedRenders.nodata || null
       );
-  
+
       message.success('COG metadata loaded successfully!');
     } catch (error) {
       console.error('Error fetching metadata:', error);
@@ -94,7 +97,6 @@ export const useCOGViewer = () => {
       setLoading(false);
     }
   };
-  
 
   const fetchTileUrl = async (
     url: string,

@@ -4,7 +4,6 @@ import { IChangeEvent } from '@rjsf/core';
 import { RJSFSchema } from '@rjsf/utils';
 
 describe('handleSubmit', () => {
-
   it('should allow startdate and enddate with YYYY-MM-DDT00:00:00.000Z format', () => {
     const formData = {
       temporal_extent: {
