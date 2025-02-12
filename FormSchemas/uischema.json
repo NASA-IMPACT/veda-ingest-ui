@@ -168,7 +168,7 @@
         "rows": 12
       }
     },
-    "classNames": "renders"
+    "ui:classNames": "renders"
   },
   "temporal_extent": {
     "startdate": {
