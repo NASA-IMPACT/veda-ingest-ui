@@ -72,7 +72,15 @@ export const useCOGViewer = () => {
       setMetadata(mergedMetadata);
 
       // Ensure values from renders are used if available
-      setSelectedBands(parsedRenders.bidx || [1]); // Default to band 1 if not provided
+      // Default to band 1 if not provided
+      const availableBands = metadata?.band_descriptions?.length || 1;
+      const defaultBands = Array.from(
+        { length: Math.min(3, availableBands) },
+        (_, i) => i + 1
+      );
+
+      // Use `bidx` if present in `renders`, otherwise default to the first three bands
+      setSelectedBands(parsedRenders.bidx?.slice(0, 3) || defaultBands);
       setRescale(parsedRenders.rescale || [[null, null]]);
       setSelectedColormap(parsedRenders.colormap_name || 'Internal');
       setColorFormula(parsedRenders.color_formula || null);
