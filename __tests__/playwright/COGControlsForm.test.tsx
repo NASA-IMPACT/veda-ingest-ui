@@ -104,7 +104,7 @@ test.describe('COGControlsForm', () => {
     // Open the dropdown and select "Band 2"
     await colormapDropdown.click();
     const colormapOption = page.locator('.ant-select-item', {
-      hasText: 'CFastie',
+      hasText: 'cfastie',
     });
     await colormapOption.click();
 

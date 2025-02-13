@@ -181,7 +181,11 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
       <Row gutter={16}>
         <Col span={12}>
           <Form.Item label="Colormap" name="selectedColormap">
-            <Select onChange={onColormapChange} data-testid="colormap">
+            <Select
+              showSearch
+              onChange={onColormapChange}
+              data-testid="colormap"
+            >
               {colorMapsList.map((colorMap) => (
                 <Option key={colorMap} value={colorMap}>
                   {colorMap}
@@ -203,7 +207,11 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
       <Row gutter={16}>
         <Col span={12}>
           <Form.Item label="Resampling" name="selectedResampling">
-            <Select data-testid="resampling" onChange={onResamplingChange}>
+            <Select
+              showSearch
+              data-testid="resampling"
+              onChange={onResamplingChange}
+            >
               <Option value="nearest">Nearest</Option>
               <Option value="bilinear">Bilinear</Option>
               <Option value="cubic">Cubic</Option>
