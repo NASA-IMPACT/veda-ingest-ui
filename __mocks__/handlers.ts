@@ -58,4 +58,32 @@ export const handlers = [
       center: [0, 0, 2],
     });
   }),
+
+  http.get('/api/raster/colorMaps', ({ request }) => {
+    return HttpResponse.json({
+      colorMaps: ['accent', 'autumn', 'binary', 'bwr', 'cfastie'],
+      links: [
+        {
+          href: 'https://staging.openveda.cloud/api/raster/colorMaps',
+          rel: 'self',
+          type: 'application/json',
+          title: 'List of available colormaps',
+        },
+        {
+          href: 'https://staging.openveda.cloud/api/raster/colorMaps/{colorMapId}',
+          rel: 'data',
+          type: 'application/json',
+          templated: true,
+          title: 'Retrieve colorMap metadata',
+        },
+        {
+          href: 'https://staging.openveda.cloud/api/raster/colorMaps/{colorMapId}?format=png',
+          rel: 'data',
+          type: 'image/png',
+          templated: true,
+          title: 'Retrieve colorMap as image',
+        },
+      ],
+    });
+  }),
 ];
