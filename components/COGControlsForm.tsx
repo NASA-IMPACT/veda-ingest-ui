@@ -198,6 +198,7 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
           <Form.Item label="Color Formula" name="colorFormula">
             <Input
               id="colorFormula"
+              data-testid="colorFormula"
               onChange={(e) => onColorFormulaChange(e.target.value || null)}
             />
           </Form.Item>
@@ -227,6 +228,7 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
         <Col span={12}>
           <Form.Item label="Nodata Value" name="noDataValue">
             <InputNumber
+              data-testid="nodata"
               onChange={(value) =>
                 onNoDataValueChange(value !== null ? String(value) : null)
               }

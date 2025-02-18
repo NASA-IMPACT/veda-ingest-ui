@@ -10,6 +10,7 @@
     "format": "prettier --write .",
     "prepare": "husky",
     "test": "vitest",
+    "test:e2e": "yarn playwright test",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit"
   },
