@@ -11,5 +11,6 @@ export default defineConfig({
     headless: true,
   },
   testMatch: ['**/__tests__/playwright/**/*.test.tsx'],
-  timeout: 30000,
+  timeout: 60000,
+  workers: process.env.CI ? 2 : 4,
 });

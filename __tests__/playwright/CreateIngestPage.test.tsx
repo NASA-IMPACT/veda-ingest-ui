@@ -117,21 +117,17 @@ test.describe('CreateIngest Page', () => {
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
         const postData = request.postDataJSON(); // Capture full request body
-        console.log('Intercepted POST data:', postData);
 
         // Validate the nested JSON field if it's present in the request
         if (postData.renders.dashboard) {
           const actualNestedJson = JSON.parse(postData.renders.dashboard); // Convert received string to JSON
-          console.log(actualNestedJson);
           expect(actualNestedJson).toEqual(requiredConfig.renders.dashboard);
-          console.log('dashboard config passed');
         }
 
         // Extract only the expected fields from postData (ignoring others)
         const { nestedJsonField, ...filteredPostData } = postData; // Exclude nestedJsonField from object comparison
         const { renders, ...filteredRequiredConfig } = requiredConfig;
 
-        console.log('filteredPostData', filteredPostData);
         // Validate all other expected fields (except the nested one)
         expect(filteredPostData).toEqual(
           expect.objectContaining(filteredRequiredConfig)
