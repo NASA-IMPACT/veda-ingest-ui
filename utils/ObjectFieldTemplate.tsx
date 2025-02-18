@@ -133,7 +133,7 @@ export default function ObjectFieldTemplate<
 
   const handleOpenDrawer = () => {
     const sampleUrl = typedFormData?.sample_files?.[0];
-    const rendersDashboardEntry = typedFormData?.renders.dashboard;
+    const rendersDashboardEntry = typedFormData?.renders?.dashboard;
     if (sampleUrl) {
       setDrawerUrl(sampleUrl);
       setdrawerOpen(true);
@@ -156,8 +156,9 @@ export default function ObjectFieldTemplate<
     }
 
     const updatedFormData = { ...typedFormData };
-    updatedFormData.renders.dashboard = updatedFormData.renders.dashboard || {};
 
+    // Ensure `renders` exists before accessing `dashboard`
+    updatedFormData.renders = updatedFormData.renders || {};
     updatedFormData.renders.dashboard = renderOptions;
 
     formContext.updateFormData(updatedFormData);
