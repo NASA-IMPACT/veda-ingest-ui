@@ -9,7 +9,9 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3000',
     headless: true,
+    trace: 'retain-on-failure',
   },
+  retries: 1,
   testMatch: ['**/__tests__/playwright/**/*.test.tsx'],
   timeout: 60000,
   workers: process.env.CI ? 2 : 4,
