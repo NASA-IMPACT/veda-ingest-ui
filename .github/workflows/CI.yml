@@ -64,13 +64,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: playwright-report
-          path: ./playwright-report
-
-      - name: List downloaded files
-        run: ls -R ./playwright-report
-
-      - name: Extract Report if Compressed
-        run: unzip ./playwright-report/*.zip -d ./playwright-report || true
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v2
