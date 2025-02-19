@@ -4,16 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-# Give the workflow permission to deploy the Pages site
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
 
 jobs:
   test:
@@ -40,7 +30,7 @@ jobs:
         run: yarn test
 
       - name: Install Playwright Browsers
-        run: yarn playwright install --with-deps
+        run: yarn playwright install --with-deps chromium
 
       - name: Run Playwright E2E Tests
         run: yarn test:e2e
@@ -52,15 +42,3 @@ jobs:
           name: playwright-report
           path: playwright-report
           retention-days: 30
-    # Deploy the Pages site
-  deploy-report:
-      needs: test
-      runs-on: ubuntu-latest
-      permissions:
-        pages: write
-        id-token: write
-      steps:
-        - name: Deploy to GitHub Pages
-          uses: actions/deploy-pages@v2
-          with:
-            artifact_name: playwright-report
