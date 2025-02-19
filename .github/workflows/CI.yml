@@ -54,18 +54,13 @@ jobs:
           retention-days: 30
     # Deploy the Pages site
   deploy-report:
-    needs: test
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    steps:
-      - name: Download Playwright Report
-        uses: actions/download-artifact@v4
-        with:
-          name: playwright-report
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v2
-        with:
-          artifact_name: playwright-report
+      needs: test
+      runs-on: ubuntu-latest
+      permissions:
+        pages: write
+        id-token: write
+      steps:
+        - name: Deploy to GitHub Pages
+          uses: actions/deploy-pages@v2
+          with:
+            artifact_name: playwright-report
