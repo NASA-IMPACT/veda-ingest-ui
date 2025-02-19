@@ -18,7 +18,7 @@ jobs:
           node-version: 22
           cache: yarn
       - run: yarn install
-      
+
       - name: Install Playwright Browsers
         run: yarn playwright install --with-deps chromium
 
@@ -32,3 +32,13 @@ jobs:
           name: playwright-report
           path: playwright-report
           retention-days: 30
+
+      - name: Publish HTML report to GH Page
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: playwright-report/
+          keep_files: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
