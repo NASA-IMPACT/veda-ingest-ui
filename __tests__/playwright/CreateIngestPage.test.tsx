@@ -192,7 +192,7 @@ test.describe('CreateIngest Page', () => {
     });
 
     const completedFormScreenshot = await page.screenshot({ fullPage: true });
-    testInfo.attach('frm with values pasted in JSON editor', {
+    testInfo.attach('form with values pasted in JSON editor', {
       body: completedFormScreenshot,
       contentType: 'image/png',
     });
