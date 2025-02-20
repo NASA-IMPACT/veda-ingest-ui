@@ -2,7 +2,11 @@ import { expect, test } from '@/__tests__/playwright/setup-msw';
 import { HttpResponse } from 'msw';
 
 test.describe('COG Viewer Page', () => {
-  test('COG Viewer loads single band COG ', async ({ page, http, worker }) => {
+  test('COG Viewer loads single band COG ', async ({
+    page,
+    http,
+    worker,
+  }, testInfo) => {
     await worker.use(
       http.get('/api/raster/cog/info', ({ request }) => {
         return HttpResponse.json({
@@ -10,15 +14,32 @@ test.describe('COG Viewer Page', () => {
         });
       })
     );
-    // Navigate to the page with COGControlsForm
-    await page.goto('/cog-viewer');
+    //
+    await test.step('Navigate to the page with COG Viewer Page', async () => {
+      await page.goto('/cog-viewer');
+    });
 
-    await page.getByPlaceholder('Enter COG URL').fill('s3://test.com');
-    await page.getByRole('button', { name: /Load/i }).click();
-    await expect(page.getByText('Band: Band 1 (Index: 1)')).toBeVisible();
-    await expect(page.getByLabel('Band (R)')).toBeHidden();
-    await expect(page.getByLabel('Band (G)')).toBeHidden();
-    await expect(page.getByLabel('Band (B)')).toBeHidden();
+    await test.step('Load COG ViewerPage with mock response from /raster/cog/info endpoint', async () => {
+      await page.getByPlaceholder(/Enter COG URL/i).fill('s3://test.com');
+      await page.getByRole('button', { name: /load/i }).click();
+    });
+    await test.step('Validate Band Name Header is visible for single band COG', async () => {
+      await expect(page.getByText('Band: Band 1 (Index: 1)')).toBeVisible();
+    });
+
+    await test.step('RGB Band Dropdowns are hidden for single band COG', async () => {
+      await expect(page.getByLabel('Band (R)')).toBeHidden();
+      await expect(page.getByLabel('Band (G)')).toBeHidden();
+      await expect(page.getByLabel('Band (B)')).toBeHidden();
+    });
+    const singleBandCOGControlsScreenshot = await page.screenshot();
+    testInfo.attach(
+      'Default state of COG Viewer Form Controls for single band COG',
+      {
+        body: singleBandCOGControlsScreenshot,
+        contentType: 'image/png',
+      }
+    );
   });
 
   test('COG Viewer loads multi band COG ', async ({ page, http, worker }) => {

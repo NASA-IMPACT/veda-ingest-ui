@@ -2,6 +2,11 @@
 
 This application is to allow users to create PRs in [veda-data](https://github.com/NASA-IMPACT/veda-data) to ingest data.
 
+## Feature Tour
+
+The latest Playwright test report is published after each merge to `main`. This provides screenshots and descriptions of features in the veda-ingest-ui.
+https://nasa-impact.github.io/veda-ingest-ui/
+
 It leverages the [Next.js](https://nextjs.org/) and the [react-jsonschema-form](https://github.com/rjsf-team/react-jsonschema-form) to create a React form component based on the JSON Schema for the data ingestion.
 
 The styling of the form uses the [ant design](https://ant.design/) React Framework for components.
