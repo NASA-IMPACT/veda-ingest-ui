@@ -1,4 +1,5 @@
 'use client';
+import '@ant-design/v5-patch-for-react-19';
 
 import { Space } from 'antd';
 import { Amplify } from 'aws-amplify';

@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+'use client'; // Ensure this component is client-side only
+
+import '@ant-design/v5-patch-for-react-19';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import isObject from 'lodash/isObject';
 import isNumber from 'lodash/isNumber';
@@ -24,11 +27,10 @@ import {
   ConfigConsumerProps,
 } from 'antd/lib/config-provider/context';
 import Button from 'antd/lib/button';
-import message from 'antd/lib/message';
 import { ImportOutlined } from '@ant-design/icons';
-import '@ant-design/v5-patch-for-react-19';
 
 import COGDrawerViewer from '@/components/COGDrawerViewer';
+import { Alert, Tooltip } from 'antd';
 
 const DESCRIPTION_COL_STYLE = {
   paddingBottom: '8px',
@@ -54,6 +56,13 @@ export default function ObjectFieldTemplate<
     title,
     uiSchema,
   } = props;
+
+  const typedFormData = formData as Record<string, any>;
+  const [errorMessage, setErrorMessage] = useState('');
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerUrl, setDrawerUrl] = useState<string | null>(null);
+  const [renders, setRenders] = useState<string | null>(null);
+  const [, forceUpdate] = useState(0);
 
   const uiOptions = getUiOptions<T, S, F>(uiSchema);
   const TitleFieldTemplate = getTemplate<'TitleFieldTemplate', T, S, F>(
@@ -125,28 +134,28 @@ export default function ObjectFieldTemplate<
     return defaultColSpan;
   };
 
-  const typedFormData = formData as Record<string, any>;
-
-  const [drawerOpen, setdrawerOpen] = useState(false);
-  const [drawerUrl, setDrawerUrl] = useState<string | null>(null);
-  const [renders, setRenders] = useState<string | null>(null);
-
   const handleOpenDrawer = () => {
     const sampleUrl = typedFormData?.sample_files?.[0];
     const rendersDashboardEntry = typedFormData?.renders?.dashboard;
-    if (sampleUrl) {
-      setDrawerUrl(sampleUrl);
-      setdrawerOpen(true);
-    } else {
-      console.error('A sample URL is required to open the viewer.');
+
+    if (!sampleUrl) {
+      setErrorMessage('Sample File URL is required');
+      forceUpdate((prev) => prev + 1); // Force re-render
+      return;
     }
+
+    setErrorMessage('');
+    setDrawerUrl(sampleUrl);
+    setDrawerOpen(true);
+
     if (rendersDashboardEntry) {
       setRenders(rendersDashboardEntry);
     }
+    forceUpdate((prev) => prev + 1);
   };
 
   const handleCloseDrawer = () => {
-    setdrawerOpen(false);
+    setDrawerOpen(false);
   };
 
   const handleAcceptRenderOptions = (renderOptions: string) => {
@@ -221,6 +230,18 @@ export default function ObjectFieldTemplate<
                                     gap: '10px',
                                   }}
                                 >
+                                  {/* 🚀 Make sure the alert shows up */}
+                                  {errorMessage && (
+                                    <div key={errorMessage}>
+                                      {' '}
+                                      {/* 🔥 KEY ensures DOM updates */}
+                                      <Alert
+                                        message={errorMessage}
+                                        type="error"
+                                        showIcon
+                                      />
+                                    </div>
+                                  )}
                                   <Button
                                     type="primary"
                                     onClick={handleOpenDrawer}
