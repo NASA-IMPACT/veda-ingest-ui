@@ -36,11 +36,11 @@
       "title": "STAC Version",
       "default": "1.0.0"
     },
-    "is_periodic": {
+    "dashboard:is_periodic": {
       "type": "boolean",
       "title": "Is Periodic?"
     },
-    "time_density": {
+    "dashboard:time_density": {
       "type": "string",
       "title": "Time Density"
     },

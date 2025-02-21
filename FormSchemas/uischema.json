@@ -4,8 +4,8 @@
       "collection": 4,
       "title": 6,
       "license": 2,
-      "is_periodic": 3,
-      "time_density": 3,
+      "dashboard:is_periodic": 3,
+      "dashboard:time_density": 3,
       "data_type": 3,
       "stac_version": 3
     },
