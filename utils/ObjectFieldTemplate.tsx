@@ -1,7 +1,7 @@
 'use client'; // Ensure this component is client-side only
 
 import '@ant-design/v5-patch-for-react-19';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames';
 import isObject from 'lodash/isObject';
 import isNumber from 'lodash/isNumber';
