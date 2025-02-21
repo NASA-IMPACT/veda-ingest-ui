@@ -331,4 +331,52 @@ test.describe('COG Viewer Drawer', () => {
       );
     });
   });
+
+  test('COG Viewer does not open if sample files input is empty', async ({
+    page,
+  }, testInfo) => {
+    await test.step('navigate to create ingest page', async () => {
+      await page.goto('/create-ingest');
+    });
+
+    await test.step('do not enter URL of Sample File but enter valid json in renders object', async () => {
+      await page.getByLabel('dashboard').fill(
+        JSON.stringify(
+          {
+            resampling: 'nearest',
+            bidx: [1],
+            colormap_name: 'rdbu',
+            assets: ['cog_default'],
+            rescale: [[-1, 1]],
+            color_formula: 'test123',
+            nodata: 255,
+            title: 'VEDA Dashboard Render Parameters',
+          },
+          null,
+          2
+        )
+      );
+    });
+    await test.step('click button to open COG Viewer Drawer', async () => {
+      await page
+        .getByRole('button', {
+          name: /Generate Renders Object from Sample File/i,
+        })
+        .click();
+    });
+    await expect(
+      page.getByText(/Sample File URL is required/i),
+      'verify error message appears'
+    ).toBeVisible();
+    await expect(
+      page.locator('.ant-drawer').filter({ hasText: /COG Rendering Options/i }),
+      'COG Viewer Drawer remains hidden'
+    ).toBeHidden();
+
+    const errorScreenshot = await page.screenshot();
+    testInfo.attach('error message if no sample file url present', {
+      body: errorScreenshot,
+      contentType: 'image/png',
+    });
+  });
 });
