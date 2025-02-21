@@ -85,9 +85,11 @@ yarn dev
 
 This will start the app and make it available at <http://localhost:3000/>.
 
+To bypass the cognito login, set the `NEXT_PUBLIC_DISABLE_AUTH` environment variable to true. This variable is als leveraged for Playwright testing.
+
 ## Configuring the Validation Form
 
-The fields in the Validation Form are configured by a combination of the json schema in the [jsonschema.json file](src/data/jsonschema.json) and the UI Schema in the [uischema.json file](src/data/uischema.json). To modify fields in the form, a developer must update the json schema to include the proper JSON schema data fields and then modify the ui Schema to have any new or renamed fields in the desired location.
+The fields in the Validation Form are configured by a combination of the json schema in the [jsonschema.json file](FormSchemas/jsonschema.json) and the UI Schema in the [uischema.json file](FormSchemas/uischema.json). To modify fields in the form, a developer must update the json schema to include the proper JSON schema data fields and then modify the ui Schema to have any new or renamed fields in the desired location.
 
 The Form uses a 24 column grid format and the layout of each row is dictated by the "ui:grid" array in that json. Each row is defined as an object with each field allowed up to 24 columns wide. For example:
 
