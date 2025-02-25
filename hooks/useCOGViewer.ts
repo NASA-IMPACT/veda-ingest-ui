@@ -52,7 +52,24 @@ export const useCOGViewer = () => {
       const response = await fetch(
         `${baseUrl}/api/raster/cog/info?url=${encodeURIComponent(url)}`
       );
-      if (!response.ok) throw new Error('Failed to fetch metadata');
+      if (!response.ok) {
+        const errorMessage = await response.json().catch(() => null);
+
+        if (response.status === 500 && errorMessage?.detail) {
+          const match = errorMessage.detail.match(
+            /^(.*?): No such file or directory$/
+          );
+          if (match) {
+            throw new Error(`Failed to load ${match[1]}. Check URL entry.`);
+          }
+          throw new Error(`Server Error: ${errorMessage.detail}`);
+        }
+
+        throw new Error(
+          `Failed to fetch metadata (Status: ${response.status})`
+        );
+      }
+
       const COGdata = await response.json();
 
       let mergedMetadata = { ...COGdata };
@@ -99,8 +116,11 @@ export const useCOGViewer = () => {
 
       message.success('COG metadata loaded successfully!');
     } catch (error) {
-      console.error('Error fetching metadata:', error);
-      message.error('Failed to load COG metadata.');
+      if (error instanceof Error) {
+        message.error(error.message);
+      } else {
+        message.error('Failed to load COG metadata.');
+      }
     } finally {
       setLoading(false);
     }
