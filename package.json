@@ -31,6 +31,7 @@
     "ajv-formats": "^3.0.1",
     "antd": "^5.22.3",
     "aws-amplify": "^6.10.2",
+    "aws-sdk": "^2.1692.0",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
     "json-schema": "^0.4.0",

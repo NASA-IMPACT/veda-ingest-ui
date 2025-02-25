@@ -31,6 +31,11 @@ const items: MenuProps['items'] = [
     key: '/cog-viewer',
     icon: <GlobalOutlined />,
   },
+  {
+    label: <Link href="/upload">Thumbnail Uploader</Link>,
+    key: '/upload',
+    icon: <GlobalOutlined />,
+  },
 ];
 
 const MenuBar = () => {
