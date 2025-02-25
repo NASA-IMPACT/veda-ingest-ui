@@ -1,5 +1,5 @@
 import { expect, test } from '@/__tests__/playwright/setup-msw';
-import { validateFormFields } from './utils/ValidateFormFields';
+import { HttpResponse } from 'msw';
 
 const modifiedConfig = {
   collection: 'seeded-ingest-1',
@@ -56,7 +56,7 @@ const modifiedConfig = {
   },
 };
 
-test.describe('EditIngest Page', () => {
+test.describe('Edit Ingest Page', () => {
   test('Edit Ingest does not allow renaming collection', async ({
     page,
   }, testInfo) => {
@@ -174,6 +174,108 @@ test.describe('EditIngest Page', () => {
 
     await test.step('submit form and validate that PUT body values match pasted config values', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
+    });
+  });
+
+  test('Edit Ingest displays list of open PRs starting with "Ingest Request for"', async ({
+    page,
+  }, testInfo) => {
+    await test.step('Navigate to Edit Ingest Page', async () => {
+      await page.goto('/edit-ingest');
+    });
+
+    await test.step('verify list of of pending requests loads', async () => {
+      await expect(
+        page.getByRole('button', {
+          name: /Ingest Request for seeded ingest #1/i,
+        })
+      ).toBeVisible();
+      await expect(
+        page.getByRole('button', {
+          name: /Ingest Request for seeded ingest #2/i,
+        })
+      ).toBeVisible();
+    });
+
+    const listIngestRequestsScreenshot = await page.screenshot({
+      fullPage: true,
+    });
+    testInfo.attach('filtered list of open PRs', {
+      body: listIngestRequestsScreenshot,
+      contentType: 'image/png',
+    });
+  });
+
+  test('Error Handling - Edit Ingest gracefully handles failed /list-requests call', async ({
+    page,
+    http,
+    worker,
+  }, testInfo) => {
+    await worker.use(
+      http.get('/api/list-ingests', ({ request }) => {
+        return HttpResponse.json(
+          { error: 'something went wrong' },
+          { status: 400 }
+        );
+      })
+    );
+
+    await test.step('Navigate to Edit Ingest Page', async () => {
+      await page.goto('/edit-ingest');
+    });
+
+    await test.step('verify error modal loads', async () => {
+      await expect(
+        page.getByRole('dialog', { name: /Something went wrong/i })
+      ).toBeVisible();
+    });
+
+    const unknownErrorScreenshot = await page.screenshot({ fullPage: true });
+    testInfo.attach('api error listing pending PRs', {
+      body: unknownErrorScreenshot,
+      contentType: 'image/png',
+    });
+  });
+
+  test('Error Handling - Edit Ingest gracefully handles failed /retrieve-ingest call', async ({
+    page,
+    http,
+    worker,
+  }, testInfo) => {
+    await worker.use(
+      http.get('/api/retrieve-ingest', ({ request }) => {
+        return HttpResponse.json(
+          { error: 'something went wrong' },
+          { status: 400 }
+        );
+      })
+    );
+
+    await test.step('Navigate to Edit Ingest Page', async () => {
+      await page.goto('/edit-ingest');
+    });
+
+    await test.step('wait for list of of pending requests to load and pick #1', async () => {
+      await page
+        .getByRole('button', { name: /Ingest Request for seeded ingest #1/i })
+        .click();
+    });
+
+    await test.step('verify error modal loads', async () => {
+      await expect(
+        page.getByRole('dialog', { name: /Something went wrong/i })
+      ).toBeVisible();
+      await expect(
+        page
+          .getByRole('dialog', { name: /Something went wrong/i })
+          .getByText('updating Ingest request for seeded ingest #1')
+      ).toBeVisible();
+    });
+
+    const loadingErrorScreenshot = await page.screenshot({ fullPage: true });
+    testInfo.attach('api error loading requests', {
+      body: loadingErrorScreenshot,
+      contentType: 'image/png',
     });
   });
 });

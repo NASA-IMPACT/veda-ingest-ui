@@ -47,7 +47,10 @@ export default function ErrorModal({
         title="Something Went Wrong"
         cancelButtonProps={{ style: { display: 'none' } }}
       >
-        <strong>Something went wrong with updating {collectionName}.</strong>
+        <strong>
+          Something went wrong
+          {collectionName ? ` with updating ${collectionName}` : ''}.
+        </strong>
         <p>Please try again.</p>
       </StyledModal>
     );

@@ -35,6 +35,12 @@ export const handlers = [
     return HttpResponse.json({ message: 'Data updated successfully' });
   }),
 
+  http.post('/api/create-ingest', async ({ request }) => {
+    return HttpResponse.json({
+      githubURL: 'https://github.com/nasa-veda/veda-data/pull/12345',
+    });
+  }),
+
   http.get('/api/raster/cog/info', ({ request }) => {
     return HttpResponse.json({
       band_descriptions: [
