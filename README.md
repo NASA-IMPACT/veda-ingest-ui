@@ -121,3 +121,24 @@ the new first row has 4 fields with a combined width of 24. Nested objects in th
     ]
   },
 ```
+
+## Cognito Configuration
+
+To set up a Cognito App Client for login, visit the AWS Cognito dashboard:
+
+1. Select your desired User Pool
+2. Copy the `User pool ID` from the top of the Overview page for that User Pool and save it as the `NEXT_PUBLIC_USER_POOL_ID` env variable
+3. From the left sidebar, select "App clients".
+4. Create a new app client with the `Single-page application (SPA)` Application type.
+5. For allowed callback URLs, enter `http://localhost`
+6. copy the `Client ID` and save it as `NEXT_PUBLIC_USER_POOL_CLIENT_ID` env variable.
+
+## Github Destination Repo Configuration
+
+To allow the veda-ingest-ui to open PRs in a repo, a Github app must be installed on the destination repo and several environment variables are needed from that Github app installation. Follow the [Installing your own GitHub App](https://docs.github.com/en/apps/using-github-apps/installing-your-own-github-app) guide from github to get started:
+
+1. Uncheck the "Active" checkbox under webhook. `No webhook is required.`
+2. Ensure the app has `Read and Write` permissions to `Contents` and `Pull Requests`.
+3. Create and save a Private Key to place in your env variables.
+4. Copy the `App ID` and `Client ID` from the new github app's overview.
+5. Copy the Installation ID from the repo's list of Installed GitHub Apps. The Installation ID is found in the URL for that application. For example, `https://github.com/settings/installations/[Installation ID]`.
