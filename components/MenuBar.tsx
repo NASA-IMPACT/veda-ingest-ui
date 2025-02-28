@@ -8,6 +8,7 @@ import {
   PlusCircleOutlined,
   EditOutlined,
   GlobalOutlined,
+  CloudUploadOutlined,
 } from '@ant-design/icons';
 
 const items: MenuProps['items'] = [
@@ -34,7 +35,7 @@ const items: MenuProps['items'] = [
   {
     label: <Link href="/upload">Thumbnail Uploader</Link>,
     key: '/upload',
-    icon: <GlobalOutlined />,
+    icon: <CloudUploadOutlined />,
   },
 ];
 

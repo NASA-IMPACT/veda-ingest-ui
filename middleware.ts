@@ -36,5 +36,10 @@ export async function middleware(request: NextRequest) {
 // This config will match all routes accept /login, /api, _next/static, /_next/image
 // favicon.ico
 export const config = {
-  matcher: ['/api/list-ingests', '/api/retrieve-ingest', '/api/create-ingest'],
+  matcher: [
+    '/api/list-ingests',
+    '/api/retrieve-ingest',
+    '/api/create-ingest',
+    '/api/uload-url',
+  ],
 };
