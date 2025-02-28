@@ -312,7 +312,10 @@ function UploadPage() {
             </List>
             <Button
               type="primary"
-              onClick={() => setUploadedFile(null)}
+              onClick={() => {
+                setUploadedFile(null);
+                setImageValidation(null);
+              }}
               style={{ marginTop: 10 }}
             >
               Upload Another Thumbnail
