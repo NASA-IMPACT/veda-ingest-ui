@@ -27,14 +27,29 @@ import {
   ConfigConsumerProps,
 } from 'antd/lib/config-provider/context';
 import Button from 'antd/lib/button';
-import { ImportOutlined } from '@ant-design/icons';
+import { CloudUploadOutlined, ImportOutlined } from '@ant-design/icons';
 
 import COGDrawerViewer from '@/components/COGDrawerViewer';
-import { Alert, Tooltip } from 'antd';
+import { Alert, Drawer } from 'antd';
+import ThumbnailUploader from '@/components/ThumbnailUploader';
 
 const DESCRIPTION_COL_STYLE = {
   paddingBottom: '8px',
 };
+
+interface KnownFields {
+  assets?: {
+    thumbnail?: {
+      href?: string;
+    };
+  };
+  renders?: {
+    dashboard?: string;
+  };
+}
+
+// Merge known fields with generic form data
+type FormDataType = KnownFields & Record<string, any>;
 
 export default function ObjectFieldTemplate<
   T = any,
@@ -57,12 +72,15 @@ export default function ObjectFieldTemplate<
     uiSchema,
   } = props;
 
-  const typedFormData = formData as Record<string, any>;
+  const typedFormData = formData as FormDataType;
+
   const [errorMessage, setErrorMessage] = useState('');
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [cogDrawerOpen, setCOGDrawerOpen] = useState(false);
   const [drawerUrl, setDrawerUrl] = useState<string | null>(null);
   const [renders, setRenders] = useState<string | null>(null);
   const [, forceUpdate] = useState(0);
+  const [thumbnailDrawerOpen, setThumbnailDrawerOpen] = useState(false);
+  const [uploadedFileUri, setUploadedFileUri] = useState<string | null>(null);
 
   const uiOptions = getUiOptions<T, S, F>(uiSchema);
   const TitleFieldTemplate = getTemplate<'TitleFieldTemplate', T, S, F>(
@@ -134,9 +152,10 @@ export default function ObjectFieldTemplate<
     return defaultColSpan;
   };
 
-  const handleOpenDrawer = () => {
-    const sampleUrl = typedFormData?.sample_files?.[0];
-    const rendersDashboardEntry = typedFormData?.renders?.dashboard;
+  const handleOpenCOGDrawer = () => {
+    const sampleUrl: string | undefined = typedFormData?.sample_files?.[0];
+    const rendersDashboardEntry: string | undefined =
+      typedFormData?.renders?.dashboard;
 
     if (!sampleUrl) {
       setErrorMessage('Sample File URL is required');
@@ -146,7 +165,7 @@ export default function ObjectFieldTemplate<
 
     setErrorMessage('');
     setDrawerUrl(sampleUrl);
-    setDrawerOpen(true);
+    setCOGDrawerOpen(true);
 
     if (rendersDashboardEntry) {
       setRenders(rendersDashboardEntry);
@@ -154,8 +173,35 @@ export default function ObjectFieldTemplate<
     forceUpdate((prev) => prev + 1);
   };
 
-  const handleCloseDrawer = () => {
-    setDrawerOpen(false);
+  const handleOpenUploadDrawer = () => {
+    setThumbnailDrawerOpen(true);
+    forceUpdate((prev) => prev + 1);
+  };
+
+  const handleCloseCOGDrawer = () => {
+    setCOGDrawerOpen(false);
+  };
+
+  const handleUploadSuccess = (s3Uri: string) => {
+    if (!formContext || typeof formContext.updateFormData !== 'function') {
+      console.error('❌ formContext or updateFormData is not available.');
+      return;
+    }
+
+    formContext.updateFormData((prevData: any) => {
+      const updatedFormData = {
+        ...prevData,
+        assets: {
+          ...prevData.assets,
+          thumbnail: {
+            ...prevData.assets?.thumbnail,
+            href: s3Uri, // only update href without overwriting other fields
+          },
+        },
+      };
+
+      return updatedFormData;
+    });
   };
 
   const handleAcceptRenderOptions = (renderOptions: string) => {
@@ -219,6 +265,10 @@ export default function ObjectFieldTemplate<
                         );
                         if (element) {
                           const isRendersField = element.name === 'renders';
+                          const isAssetsThumbnailHrefField =
+                            element.name === 'href' &&
+                            element.content?.props?.idSchema?.$id ===
+                              'root_assets_thumbnail_href';
                           return (
                             <Col key={element.name} span={ui_row[row_item]}>
                               {isRendersField ? (
@@ -230,11 +280,9 @@ export default function ObjectFieldTemplate<
                                     gap: '10px',
                                   }}
                                 >
-                                  {/* 🚀 Make sure the alert shows up */}
                                   {errorMessage && (
                                     <div key={errorMessage}>
                                       {' '}
-                                      {/* 🔥 KEY ensures DOM updates */}
                                       <Alert
                                         message={errorMessage}
                                         type="error"
@@ -244,12 +292,30 @@ export default function ObjectFieldTemplate<
                                   )}
                                   <Button
                                     type="primary"
-                                    onClick={handleOpenDrawer}
+                                    onClick={handleOpenCOGDrawer}
                                     icon={<ImportOutlined />}
                                   >
                                     Generate Renders Object From Sample File
                                   </Button>
                                   {element.content}
+                                </div>
+                              ) : isAssetsThumbnailHrefField ? (
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                  }}
+                                >
+                                  {element.content}
+                                  <Button
+                                    type="primary"
+                                    onClick={handleOpenUploadDrawer}
+                                    icon={<CloudUploadOutlined />}
+                                    style={{ marginTop: '14px' }}
+                                  >
+                                    Upload Thumbnail
+                                  </Button>
                                 </div>
                               ) : (
                                 element.content
@@ -275,7 +341,7 @@ export default function ObjectFieldTemplate<
                               {element.content}
                               <Button
                                 type="primary"
-                                onClick={handleOpenDrawer}
+                                onClick={handleOpenCOGDrawer}
                                 style={{ marginLeft: '10px' }}
                               >
                                 Open Viewer
@@ -307,13 +373,25 @@ export default function ObjectFieldTemplate<
 
             {/* COGDrawerViewer Component */}
             <COGDrawerViewer
-              drawerOpen={drawerOpen}
+              drawerOpen={cogDrawerOpen}
               url={drawerUrl || ''}
               renders={renders}
-              onClose={handleCloseDrawer}
+              onClose={handleCloseCOGDrawer}
               onAcceptRenderOptions={handleAcceptRenderOptions}
               formContext={formContext}
             />
+            <Drawer
+              title="Upload Thumbnail To S3"
+              placement="right"
+              onClose={() => setThumbnailDrawerOpen(false)}
+              open={thumbnailDrawerOpen}
+              width={'80%'}
+            >
+              <ThumbnailUploader
+                insideDrawer
+                onUploadSuccess={(s3Uri) => handleUploadSuccess(s3Uri)}
+              />
+            </Drawer>
           </>
         );
       }}
