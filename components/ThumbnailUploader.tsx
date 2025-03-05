@@ -395,11 +395,12 @@ function ThumbnailUploader({
               {/*  Change the button based on insideDrawer */}
               <Button
                 type="primary"
-                onClick={() =>
-                  insideDrawer
-                    ? onUploadSuccess?.(getS3Uri(uploadedFile.url))
-                    : setUploadedFile(null)
-                }
+                onClick={() => {
+                  if (insideDrawer) {
+                    onUploadSuccess?.(getS3Uri(uploadedFile.url));
+                  }
+                  setUploadedFile(null);
+                }}
                 style={{ marginTop: 10 }}
               >
                 {insideDrawer ? 'Continue' : 'Upload Another Thumbnail'}
