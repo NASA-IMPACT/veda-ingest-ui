@@ -15,10 +15,9 @@ import {
   Modal,
 } from 'antd';
 import {
-  UploadOutlined,
+  CloudUploadOutlined,
   ExclamationCircleOutlined,
   CopyOutlined,
-  CheckOutlined,
 } from '@ant-design/icons';
 
 const { Title, Paragraph, Link } = Typography;
@@ -113,6 +112,9 @@ function ThumbnailUploader({
     const isValid = await validateImage(file);
     if (!isValid) return;
 
+    // Show loading message while getting the presigned URL
+    const loadingMessage = message.loading('Authenticating Upload', 0);
+
     setUploadingFile({ file, progress: 0 });
 
     try {
@@ -123,12 +125,16 @@ function ThumbnailUploader({
       });
 
       if (!res.ok) throw new Error('Failed to get presigned URL');
+
       const {
         uploadUrl,
         fileUrl,
         fileExists,
       }: { uploadUrl: string; fileUrl: string; fileExists: boolean } =
         await res.json();
+
+      // Remove loading message
+      loadingMessage();
 
       if (fileExists) {
         return confirm({
@@ -137,11 +143,8 @@ function ThumbnailUploader({
           content: `A file with the name "${file.name}" already exists. Do you want to overwrite it?`,
           okText: 'Overwrite',
           cancelText: 'Cancel',
-          onOk: async () => {
-            await uploadFileToS3(file, uploadUrl, onProgress);
-            message.success('File uploaded successfully!');
-            setUploadedFile({ url: fileUrl, name: file.name });
-            setImageValidation(null);
+          async onOk() {
+            await proceedWithUpload(file, uploadUrl, fileUrl, onProgress);
           },
           onCancel: () => {
             setImageValidation(null);
@@ -150,15 +153,34 @@ function ThumbnailUploader({
         });
       }
 
+      await proceedWithUpload(file, uploadUrl, fileUrl, onProgress);
+    } catch (error) {
+      console.error('Upload failed:', error);
+      message.error('Upload failed, please try again.');
+      setUploadingFile(null);
+    }
+  };
+
+  const proceedWithUpload = async (
+    file: File,
+    uploadUrl: string,
+    fileUrl: string,
+    onProgress: (progress: { percent: number }) => void
+  ) => {
+    const closeUploadingMessage = message.loading('Uploading file...', 0);
+
+    try {
       await uploadFileToS3(file, uploadUrl, (progress) => {
         setUploadingFile((prev) => (prev ? { ...prev, progress } : null));
         if (onProgress) onProgress({ percent: progress });
       });
 
+      closeUploadingMessage();
       message.success('Thumbnail uploaded successfully!');
       setUploadingFile(null);
       setUploadedFile({ name: file.name, url: fileUrl });
     } catch (error) {
+      closeUploadingMessage();
       console.error('Upload failed:', error);
       message.error('Upload failed, please try again.');
       setUploadingFile(null);
@@ -170,23 +192,32 @@ function ThumbnailUploader({
     uploadUrl: string,
     onProgress: (progress: number) => void
   ) => {
-    return new Promise<void>(async (resolve, reject) => {
-      try {
-        const response = await fetch(uploadUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': file.type },
-          body: file,
-        });
+    return new Promise<void>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', uploadUrl, true);
+      xhr.setRequestHeader('Content-Type', file.type);
 
-        if (response.ok) {
+      // Progress event listener
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = (event.loaded / event.total) * 100;
+          onProgress(percentComplete);
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
           resolve();
         } else {
-          const errorText = await response.text();
-          reject(new Error(`Upload failed: ${response.status} - ${errorText}`));
+          reject(
+            new Error(`Upload failed: ${xhr.status} - ${xhr.responseText}`)
+          );
         }
-      } catch (error) {
-        reject(error);
-      }
+      };
+
+      xhr.onerror = () =>
+        reject(new Error('Network error during file upload.'));
+      xhr.send(file);
     });
   };
 
@@ -247,7 +278,7 @@ function ThumbnailUploader({
                 showUploadList={false}
               >
                 <p className="ant-upload-drag-icon">
-                  <UploadOutlined />
+                  <CloudUploadOutlined />
                 </p>
                 <p className="ant-upload-text">
                   Click or drag a thumbnail to upload
