@@ -59,6 +59,7 @@ const MenuBar = () => {
       defaultSelectedKeys={['1']}
       items={items}
       selectedKeys={[activeLink]}
+      style={{ minWidth: 'max-content' }}
     ></Menu>
   );
 };
