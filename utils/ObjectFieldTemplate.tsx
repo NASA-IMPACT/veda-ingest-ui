@@ -30,8 +30,8 @@ import Button from 'antd/lib/button';
 import { CloudUploadOutlined, ImportOutlined } from '@ant-design/icons';
 
 import COGDrawerViewer from '@/components/COGDrawerViewer';
+import ThumbnailUploaderDrawer from '@/components/ThumbnailUploaderDrawer';
 import { Alert, Drawer } from 'antd';
-import ThumbnailUploader from '@/components/ThumbnailUploader';
 
 const DESCRIPTION_COL_STYLE = {
   paddingBottom: '8px',
@@ -370,8 +370,6 @@ export default function ObjectFieldTemplate<
                 </Col>
               )}
             </fieldset>
-
-            {/* COGDrawerViewer Component */}
             <COGDrawerViewer
               drawerOpen={cogDrawerOpen}
               url={drawerUrl || ''}
@@ -380,18 +378,11 @@ export default function ObjectFieldTemplate<
               onAcceptRenderOptions={handleAcceptRenderOptions}
               formContext={formContext}
             />
-            <Drawer
-              title="Upload Thumbnail To S3"
-              placement="right"
-              onClose={() => setThumbnailDrawerOpen(false)}
+            <ThumbnailUploaderDrawer
               open={thumbnailDrawerOpen}
-              width={'80%'}
-            >
-              <ThumbnailUploader
-                insideDrawer
-                onUploadSuccess={(s3Uri) => handleUploadSuccess(s3Uri)}
-              />
-            </Drawer>
+              onClose={() => setThumbnailDrawerOpen(false)}
+              onUploadSuccess={handleUploadSuccess}
+            />
           </>
         );
       }}
