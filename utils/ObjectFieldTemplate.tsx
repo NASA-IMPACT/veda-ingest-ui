@@ -121,37 +121,6 @@ export default function ObjectFieldTemplate<
   const findUiSchemaWidget = (element: ObjectFieldTemplatePropertyType) =>
     getUiOptions(findUiSchema(element)).widget;
 
-  const calculateColSpan = (element: ObjectFieldTemplatePropertyType) => {
-    const type = findSchemaType(element);
-    const field = findUiSchemaField(element);
-    const widget = findUiSchemaWidget(element);
-
-    const defaultColSpan =
-      properties.length < 2 || // Single or no field in object.
-      type === 'object' ||
-      type === 'array' ||
-      widget === 'textarea'
-        ? 24
-        : 12;
-
-    if (isObject(colSpan)) {
-      const colSpanObj: GenericObjectType = colSpan;
-      if (isString(widget)) {
-        return colSpanObj[widget];
-      }
-      if (isString(field)) {
-        return colSpanObj[field];
-      }
-      if (isString(type)) {
-        return colSpanObj[type];
-      }
-    }
-    if (isNumber(colSpan)) {
-      return colSpan;
-    }
-    return defaultColSpan;
-  };
-
   const handleOpenCOGDrawer = () => {
     const sampleUrl: string | undefined = typedFormData?.sample_files?.[0];
     const rendersDashboardEntry: string | undefined =
