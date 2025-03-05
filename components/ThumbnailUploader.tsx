@@ -137,24 +137,27 @@ function ThumbnailUploader({
       loadingMessage();
 
       if (fileExists) {
-        return confirm({
+        confirm({
           title: 'File Already Exists',
           icon: <ExclamationCircleOutlined />,
           content: `A file with the name "${file.name}" already exists. Do you want to overwrite it?`,
           okText: 'Overwrite',
           cancelText: 'Cancel',
-          async onOk() {
-            await proceedWithUpload(file, uploadUrl, fileUrl, onProgress);
+          onOk() {
+            proceedWithUpload(file, uploadUrl, fileUrl, onProgress);
           },
           onCancel: () => {
             setImageValidation(null);
             setUploadedFile(null);
           },
         });
+        return; // Prevents duplicate execution
       }
 
       await proceedWithUpload(file, uploadUrl, fileUrl, onProgress);
     } catch (error) {
+      // Remove loading message
+      loadingMessage();
       console.error('Upload failed:', error);
       message.error('Upload failed, please try again.');
       setUploadingFile(null);
