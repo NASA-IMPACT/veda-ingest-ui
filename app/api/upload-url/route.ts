@@ -6,6 +6,8 @@ import { parseUrl } from '@smithy/url-parser';
 import { formatUrl } from '@aws-sdk/util-format-url';
 import { Hash } from '@smithy/hash-node';
 
+const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png'];
+
 const s3 = new S3Client({
   region: process.env.AWS_REGION!,
   credentials: {
@@ -31,6 +33,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!ALLOWED_FILE_TYPES.includes(filetype)) {
+      return NextResponse.json(
+        { error: 'Invalid file type. Only JPG and PNG are allowed.' },
+        { status: 400 }
+      );
+    }
+
     const bucketName = process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME!;
     const key = filename;
 
@@ -40,7 +49,14 @@ export async function POST(req: NextRequest) {
       await s3.send(new HeadObjectCommand({ Bucket: bucketName, Key: key }));
       fileExists = true;
     } catch (error: any) {
-      if (error.name !== 'NotFound') {
+      console.error('S3 HeadObject Error:', error);
+      // Handle "Access Denied" (403) as if the file doesn't exist
+      if (
+        error.name === 'NotFound' ||
+        error.$metadata?.httpStatusCode === 403
+      ) {
+        fileExists = false;
+      } else {
         console.error('Error checking file existence:', error);
         return NextResponse.json(
           { error: 'Failed to check file existence' },

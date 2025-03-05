@@ -24,6 +24,7 @@ const { Title, Paragraph, Link } = Typography;
 const { confirm } = Modal;
 
 const bucketName = process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME!;
+const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png'];
 
 interface UploadingFile {
   file: File;
@@ -105,7 +106,12 @@ function ThumbnailUploader({
 
   const handleUpload = async ({ file, onProgress }: any) => {
     if (!(file instanceof File)) {
-      message.error('Invalid file type');
+      message.error('No valid file selected. Please try again.');
+      return;
+    }
+
+    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+      message.error('Invalid file format. Please upload a JPG or PNG image.');
       return;
     }
 
@@ -124,7 +130,10 @@ function ThumbnailUploader({
         body: JSON.stringify({ filename: file.name, filetype: file.type }),
       });
 
-      if (!res.ok) throw new Error('Failed to get presigned URL');
+      if (!res.ok) {
+        const errorBody = await res.json();
+        throw new Error(errorBody.error || 'Failed to get presigned URL');
+      }
 
       const {
         uploadUrl,
@@ -161,6 +170,7 @@ function ThumbnailUploader({
       console.error('Upload failed:', error);
       message.error('Upload failed, please try again.');
       setUploadingFile(null);
+      clearErrorsWithAnimation();
     }
   };
 
