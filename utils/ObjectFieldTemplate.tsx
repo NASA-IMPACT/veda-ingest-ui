@@ -118,9 +118,6 @@ export default function ObjectFieldTemplate<
   const findUiSchemaField = (element: ObjectFieldTemplatePropertyType) =>
     getUiOptions(findUiSchema(element)).field;
 
-  const findUiSchemaWidget = (element: ObjectFieldTemplatePropertyType) =>
-    getUiOptions(findUiSchema(element)).widget;
-
   const handleOpenCOGDrawer = () => {
     const sampleUrl: string | undefined = typedFormData?.sample_files?.[0];
     const rendersDashboardEntry: string | undefined =
