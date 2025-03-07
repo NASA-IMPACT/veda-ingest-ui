@@ -1,29 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { S3Client, HeadObjectCommand } from '@aws-sdk/client-s3';
-import { S3RequestPresigner } from '@aws-sdk/s3-request-presigner';
-import { HttpRequest } from '@smithy/protocol-http';
-import { parseUrl } from '@smithy/url-parser';
-import { formatUrl } from '@aws-sdk/util-format-url';
-import { Hash } from '@smithy/hash-node';
+import { checkFileExists, generateSignedUrl } from '@/utils/s3';
 
 const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png'];
 
-const s3 = new S3Client({
-  region: process.env.AWS_REGION!,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
-
-const presigner = new S3RequestPresigner({
-  credentials: s3.config.credentials,
-  region: process.env.AWS_REGION!,
-  sha256: Hash.bind(null, 'sha256'),
-});
-
 export async function POST(req: NextRequest) {
   try {
+    const bucketName = process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME!;
+
     const { filename, filetype } = await req.json();
 
     if (!filename || !filetype) {
@@ -40,54 +23,37 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const bucketName = process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME!;
-    const key = filename;
-
-    // 🔍 Check if the file already exists in S3
-    let fileExists = false;
+    let fileExists;
     try {
-      await s3.send(new HeadObjectCommand({ Bucket: bucketName, Key: key }));
-      fileExists = true;
-    } catch (error: any) {
-      console.error('S3 HeadObject Error:', error);
-      // Handle "Access Denied" (403) as if the file doesn't exist
-      if (
-        error.name === 'NotFound' ||
-        error.$metadata?.httpStatusCode === 403
-      ) {
-        fileExists = false;
-      } else {
-        console.error('Error checking file existence:', error);
-        return NextResponse.json(
-          { error: 'Failed to check file existence' },
-          { status: 500 }
-        );
-      }
+      fileExists = await checkFileExists(filename);
+    } catch (error) {
+      console.error('Error checking file existence:', error);
+      return NextResponse.json(
+        { error: 'Failed to check file existence' },
+        { status: 500 }
+      );
     }
 
-    const url = parseUrl(
-      `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`
-    );
-
-    const signedUrlObject = await presigner.presign(
-      new HttpRequest({
-        ...url,
-        method: 'PUT',
-        headers: { 'Content-Type': filetype },
-      })
-    );
-
-    const signedUrl = formatUrl(signedUrlObject);
+    let signedUrl;
+    try {
+      signedUrl = await generateSignedUrl(filename, filetype);
+    } catch (error) {
+      console.error('Error generating signed URL:', error);
+      return NextResponse.json(
+        { error: 'Failed to generate upload URL' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       uploadUrl: signedUrl,
-      fileUrl: `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
+      fileUrl: `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${filename}`,
       fileExists,
     });
   } catch (error) {
-    console.error('Error generating presigned URL:', error);
+    console.error('Unexpected error:', error);
     return NextResponse.json(
-      { error: 'Failed to generate upload URL' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
