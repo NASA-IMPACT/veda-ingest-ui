@@ -3,9 +3,7 @@
 import '@ant-design/v5-patch-for-react-19';
 import React, { useState } from 'react';
 import classNames from 'classnames';
-import isObject from 'lodash/isObject';
-import isNumber from 'lodash/isNumber';
-import isString from 'lodash/isString';
+
 import {
   FormContextType,
   GenericObjectType,
@@ -13,7 +11,6 @@ import {
   ObjectFieldTemplatePropertyType,
   RJSFSchema,
   StrictRJSFSchema,
-  UiSchema,
   canExpand,
   descriptionId,
   getTemplate,
@@ -31,7 +28,7 @@ import { CloudUploadOutlined, ImportOutlined } from '@ant-design/icons';
 
 import COGDrawerViewer from '@/components/COGDrawerViewer';
 import ThumbnailUploaderDrawer from '@/components/ThumbnailUploaderDrawer';
-import { Alert, Drawer } from 'antd';
+import { Alert } from 'antd';
 
 const DESCRIPTION_COL_STYLE = {
   paddingBottom: '8px',
@@ -80,7 +77,6 @@ export default function ObjectFieldTemplate<
   const [renders, setRenders] = useState<string | null>(null);
   const [, forceUpdate] = useState(0);
   const [thumbnailDrawerOpen, setThumbnailDrawerOpen] = useState(false);
-  const [uploadedFileUri, setUploadedFileUri] = useState<string | null>(null);
 
   const uiOptions = getUiOptions<T, S, F>(uiSchema);
   const TitleFieldTemplate = getTemplate<'TitleFieldTemplate', T, S, F>(
@@ -99,24 +95,8 @@ export default function ObjectFieldTemplate<
     ButtonTemplates: { AddButton },
   } = registry.templates;
 
-  const {
-    colSpan = 24,
-    labelAlign = 'left',
-    rowGutter = 12,
-  } = formContext as GenericObjectType;
-
-  const findSchema = (element: ObjectFieldTemplatePropertyType): S =>
-    element.content.props.schema;
-
-  const findSchemaType = (element: ObjectFieldTemplatePropertyType) =>
-    findSchema(element).type;
-
-  const findUiSchema = (
-    element: ObjectFieldTemplatePropertyType
-  ): UiSchema<T, S, F> | undefined => element.content.props.uiSchema;
-
-  const findUiSchemaField = (element: ObjectFieldTemplatePropertyType) =>
-    getUiOptions(findUiSchema(element)).field;
+  const { labelAlign = 'left', rowGutter = 12 } =
+    formContext as GenericObjectType;
 
   const handleOpenCOGDrawer = () => {
     const sampleUrl: string | undefined = typedFormData?.sample_files?.[0];

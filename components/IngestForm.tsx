@@ -17,7 +17,6 @@ import { handleSubmit } from '@/utils/FormHandlers';
 import JSONEditor from '@/components/JSONEditor';
 import { JSONEditorValue } from '@/components/JSONEditor';
 
-const { TabPane } = Tabs;
 const Form = withTheme(AntDTheme);
 
 interface TemporalExtent {
