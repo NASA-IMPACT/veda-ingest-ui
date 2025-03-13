@@ -34,20 +34,6 @@ const DESCRIPTION_COL_STYLE = {
   paddingBottom: '8px',
 };
 
-interface KnownFields {
-  assets?: {
-    thumbnail?: {
-      href?: string;
-    };
-  };
-  renders?: {
-    dashboard?: string;
-  };
-}
-
-// Merge known fields with generic form data
-type FormDataType = KnownFields & Record<string, any>;
-
 export default function ObjectFieldTemplate<
   T = any,
   S extends StrictRJSFSchema = RJSFSchema,
@@ -68,8 +54,6 @@ export default function ObjectFieldTemplate<
     title,
     uiSchema,
   } = props;
-
-  const typedFormData = formData as FormDataType;
 
   const [errorMessage, setErrorMessage] = useState('');
   const [cogDrawerOpen, setCOGDrawerOpen] = useState(false);
@@ -99,13 +83,19 @@ export default function ObjectFieldTemplate<
     formContext as GenericObjectType;
 
   const handleOpenCOGDrawer = () => {
-    const sampleUrl: string | undefined = typedFormData?.sample_files?.[0];
+    if (!formContext || typeof formContext.updateFormData !== 'function') {
+      console.error('formContext or updateFormData is not available.');
+      return;
+    }
+    // Use full form data from formContext
+    const fullFormData = formContext.formData || {};
+    const sampleUrl: string | undefined = fullFormData?.sample_files?.[0]; // Use full form data
     const rendersDashboardEntry: string | undefined =
-      typedFormData?.renders?.dashboard;
+      fullFormData?.renders?.dashboard;
 
     if (!sampleUrl) {
       setErrorMessage('Sample File URL is required');
-      forceUpdate((prev) => prev + 1); // Force re-render
+      forceUpdate((prev) => prev + 1);
       return;
     }
 
@@ -130,7 +120,7 @@ export default function ObjectFieldTemplate<
 
   const handleUploadSuccess = (s3Uri: string) => {
     if (!formContext || typeof formContext.updateFormData !== 'function') {
-      console.error('❌ formContext or updateFormData is not available.');
+      console.error('formContext or updateFormData is not available.');
       return;
     }
 
@@ -148,22 +138,31 @@ export default function ObjectFieldTemplate<
 
       return updatedFormData;
     });
+    setThumbnailDrawerOpen(false);
   };
 
   const handleAcceptRenderOptions = (renderOptions: string) => {
     if (!formContext || typeof formContext.updateFormData !== 'function') {
-      console.error('❌ formContext or updateFormData is not available.');
+      console.error('formContext or updateFormData is not available.');
       return;
     }
 
-    const updatedFormData = { ...typedFormData };
+    formContext.updateFormData((prevData: any) => {
+      const updatedFormData = {
+        ...prevData,
+        renders: {
+          ...prevData.renders,
+          dashboard: renderOptions, // only update renderOptions without overwriting other fields
+        },
+      };
 
-    // Ensure `renders` exists before accessing `dashboard`
-    updatedFormData.renders = updatedFormData.renders || {};
-    updatedFormData.renders.dashboard = renderOptions;
-
-    formContext.updateFormData(updatedFormData);
+      return updatedFormData;
+    });
   };
+
+  const isDashboardField = (element: ObjectFieldTemplatePropertyType) =>
+    element.name === 'dashboard' &&
+    element.content?.props?.idSchema?.$id.includes('renders');
 
   return (
     <ConfigConsumer>
@@ -210,42 +209,13 @@ export default function ObjectFieldTemplate<
                           (p) => p.name === row_item
                         );
                         if (element) {
-                          const isRendersField = element.name === 'renders';
                           const isAssetsThumbnailHrefField =
                             element.name === 'href' &&
                             element.content?.props?.idSchema?.$id ===
                               'root_assets_thumbnail_href';
                           return (
                             <Col key={element.name} span={ui_row[row_item]}>
-                              {isRendersField ? (
-                                <div
-                                  style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'stretch',
-                                    gap: '10px',
-                                  }}
-                                >
-                                  {errorMessage && (
-                                    <div key={errorMessage}>
-                                      {' '}
-                                      <Alert
-                                        message={errorMessage}
-                                        type="error"
-                                        showIcon
-                                      />
-                                    </div>
-                                  )}
-                                  <Button
-                                    type="primary"
-                                    onClick={handleOpenCOGDrawer}
-                                    icon={<ImportOutlined />}
-                                  >
-                                    Generate Renders Object From Sample File
-                                  </Button>
-                                  {element.content}
-                                </div>
-                              ) : isAssetsThumbnailHrefField ? (
+                              {isAssetsThumbnailHrefField ? (
                                 <div
                                   style={{
                                     display: 'flex',
@@ -274,30 +244,43 @@ export default function ObjectFieldTemplate<
                     )
                   : properties
                       .filter((e) => !e.hidden)
-                      .map((element: ObjectFieldTemplatePropertyType) => (
-                        <Col key={element.name} span={24}>
-                          {element.name === 'renders' ? (
-                            <div
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '10px',
-                              }}
-                            >
-                              {element.content}
-                              <Button
-                                type="primary"
-                                onClick={handleOpenCOGDrawer}
-                                style={{ marginLeft: '10px' }}
+                      .map((element: ObjectFieldTemplatePropertyType) => {
+                        return (
+                          <Col key={element.name} span={24}>
+                            {isDashboardField(element) ? (
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'stretch',
+                                  flexDirection: 'column',
+                                }}
                               >
-                                Open Viewer
-                              </Button>
-                            </div>
-                          ) : (
-                            element.content
-                          )}
-                        </Col>
-                      ))}
+                                {element.content}
+                                {errorMessage && (
+                                  <div key={errorMessage}>
+                                    {' '}
+                                    <Alert
+                                      message={errorMessage}
+                                      type="error"
+                                      showIcon
+                                      style={{ marginBottom: '10px' }}
+                                    />
+                                  </div>
+                                )}
+                                <Button
+                                  type="primary"
+                                  onClick={handleOpenCOGDrawer}
+                                  icon={<ImportOutlined />}
+                                >
+                                  Generate Renders Object From Sample File
+                                </Button>
+                              </div>
+                            ) : (
+                              element.content
+                            )}
+                          </Col>
+                        );
+                      })}
               </Row>
 
               {canExpand(schema, uiSchema, formData) && (

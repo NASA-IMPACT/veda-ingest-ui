@@ -133,7 +133,7 @@ function IngestForm({
               formData={formData}
               onChange={onFormDataChanged}
               onSubmit={(data) => handleSubmit(data, onSubmit)}
-              formContext={{ updateFormData }}
+              formContext={{ formData, updateFormData: setFormData }}
             >
               {children}
             </Form>

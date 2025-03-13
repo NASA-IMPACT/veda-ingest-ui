@@ -400,6 +400,7 @@ function ThumbnailUploader({
                     onUploadSuccess?.(getS3Uri(uploadedFile.url));
                   }
                   setUploadedFile(null);
+                  setImageValidation(null);
                 }}
                 style={{ marginTop: 10 }}
               >
