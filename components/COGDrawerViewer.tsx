@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Drawer, Button, message, Spin } from 'antd';
+import { Drawer, Button } from 'antd';
 import { useCOGViewer } from '@/hooks/useCOGViewer';
 import dynamic from 'next/dynamic';
 

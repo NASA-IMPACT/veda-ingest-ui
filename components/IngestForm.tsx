@@ -17,7 +17,6 @@ import { handleSubmit } from '@/utils/FormHandlers';
 import JSONEditor from '@/components/JSONEditor';
 import { JSONEditorValue } from '@/components/JSONEditor';
 
-const { TabPane } = Tabs;
 const Form = withTheme(AntDTheme);
 
 interface TemporalExtent {
@@ -134,7 +133,7 @@ function IngestForm({
               formData={formData}
               onChange={onFormDataChanged}
               onSubmit={(data) => handleSubmit(data, onSubmit)}
-              formContext={{ updateFormData }}
+              formContext={{ formData, updateFormData: setFormData }}
             >
               {children}
             </Form>
