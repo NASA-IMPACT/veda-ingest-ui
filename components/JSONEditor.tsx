@@ -138,8 +138,10 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       const isValid = validateSchema(parsedValue);
       if (!isValid) {
         setSchemaErrors(
-          validateSchema.errors?.map(
-            (err) => `${err.instancePath} ${err.message}`
+          validateSchema.errors?.map((err) =>
+            err.message === 'must NOT have additional properties'
+              ? `${err.params.additionalProperty} is not defined in schema`
+              : `${err.instancePath} ${err.message}`
           ) || []
         );
         return;
