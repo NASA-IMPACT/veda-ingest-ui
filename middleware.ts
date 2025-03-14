@@ -25,7 +25,7 @@ export async function middleware(request: NextRequest) {
   });
 
   // If user is authenticated then the route request will continue on
-  if (authenticated) {
+  if (process.env.NEXT_PUBLIC_DISABLE_AUTH || authenticated) {
     return response;
   }
 
