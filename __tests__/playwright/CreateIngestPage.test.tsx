@@ -277,7 +277,7 @@ test.describe('Create Ingest Page', () => {
       await expect(
         page
           .getByRole('listitem')
-          .filter({ hasText: 'must NOT have additional properties' }),
+          .filter({ hasText: 'validJSON is not defined in schema' }),
         'additional property in JSON should create error'
       ).toBeVisible();
     });
