@@ -6,7 +6,6 @@ import {
   Button,
   List,
   message,
-  Progress,
   Upload,
   Image,
   Statistic,

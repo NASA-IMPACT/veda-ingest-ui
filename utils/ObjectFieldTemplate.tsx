@@ -62,6 +62,9 @@ export default function ObjectFieldTemplate<
   const [, forceUpdate] = useState(0);
   const [thumbnailDrawerOpen, setThumbnailDrawerOpen] = useState(false);
 
+  const enableThumbnailUpload =
+    process.env.NEXT_PUBLIC_ENABLE_THUMBNAIL_UPLOAD === 'true';
+
   const uiOptions = getUiOptions<T, S, F>(uiSchema);
   const TitleFieldTemplate = getTemplate<'TitleFieldTemplate', T, S, F>(
     'TitleFieldTemplate',
@@ -215,7 +218,8 @@ export default function ObjectFieldTemplate<
                               'root_assets_thumbnail_href';
                           return (
                             <Col key={element.name} span={ui_row[row_item]}>
-                              {isAssetsThumbnailHrefField ? (
+                              {isAssetsThumbnailHrefField &&
+                              enableThumbnailUpload ? (
                                 <div
                                   style={{
                                     display: 'flex',
@@ -307,11 +311,13 @@ export default function ObjectFieldTemplate<
               onAcceptRenderOptions={handleAcceptRenderOptions}
               formContext={formContext}
             />
-            <ThumbnailUploaderDrawer
-              open={thumbnailDrawerOpen}
-              onClose={() => setThumbnailDrawerOpen(false)}
-              onUploadSuccess={handleUploadSuccess}
-            />
+            {enableThumbnailUpload && (
+              <ThumbnailUploaderDrawer
+                open={thumbnailDrawerOpen}
+                onClose={() => setThumbnailDrawerOpen(false)}
+                onUploadSuccess={handleUploadSuccess}
+              />
+            )}
           </>
         );
       }}
