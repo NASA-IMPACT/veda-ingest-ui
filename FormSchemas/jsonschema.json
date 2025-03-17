@@ -11,7 +11,8 @@
     "sample_files",
     "data_type",
     "providers",
-    "item_assets"
+    "item_assets",
+    "renders"
   ],
   "properties": {
     "collection": {
@@ -249,6 +250,7 @@
     "renders": {
       "title": "Renders",
       "type": "object",
+      "required": ["dashboard"],
       "properties": {
         "dashboard": {
           "type": "string",
