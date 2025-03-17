@@ -74,6 +74,11 @@ const mockFormData = {
   collection: 'test-collection',
   title: 'test',
   description: 'test',
+  renders: {
+    dashboard: {
+      json: true,
+    },
+  },
 };
 
 describe('JSONEditor', () => {

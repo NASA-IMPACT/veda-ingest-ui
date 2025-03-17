@@ -54,5 +54,10 @@ export const retrieveIngestResponse = {
     title: 'test',
     license: 'test',
     description: 'seeded ingest description #1',
+    renders: {
+      dashboard: {
+        json: true,
+      },
+    },
   },
 };
