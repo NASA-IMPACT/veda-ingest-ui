@@ -23,6 +23,8 @@ interface JSONEditorProps {
   disableCollectionNameChange?: boolean;
   hasJSONChanges?: boolean;
   setHasJSONChanges: (hasJSONChanges: boolean) => void;
+  additionalProperties: string[] | null;
+  setAdditionalProperties: (additionalProperties: string[] | null) => void;
 }
 
 const JSONEditor: React.FC<JSONEditorProps> = ({
@@ -31,6 +33,8 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
   hasJSONChanges,
   setHasJSONChanges,
   disableCollectionNameChange = false,
+  additionalProperties,
+  setAdditionalProperties,
 }) => {
   const [editorValue, setEditorValue] = useState<string>(
     JSON.stringify(value, null, 2)
@@ -136,6 +140,17 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       const validateSchema = ajv.compile(modifiedSchema);
 
       const isValid = validateSchema(parsedValue);
+      // Extract additional properties manually when strictSchema is false
+      if (!strictSchema && typeof parsedValue === 'object') {
+        const schemaProperties = Object.keys(modifiedSchema.properties || {});
+        const userProperties = Object.keys(parsedValue);
+        const extraProps = userProperties.filter(
+          (prop) => !schemaProperties.includes(prop)
+        );
+
+        setAdditionalProperties(extraProps.length > 0 ? extraProps : null);
+      }
+
       if (!isValid) {
         setSchemaErrors(
           validateSchema.errors?.map((err) =>

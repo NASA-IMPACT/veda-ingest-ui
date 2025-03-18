@@ -218,7 +218,19 @@ test.describe('Create Ingest Page', () => {
         body: JSONScreenshot,
         contentType: 'image/png',
       });
+
       await page.getByRole('button', { name: /apply changes/i }).click();
+    });
+
+    await expect(
+      page.getByTestId('extra-properties-card').getByText('extraField'),
+      'verify that extra properties are displayed on the form tab'
+    ).toBeVisible();
+
+    const extraPropertiesScreenshot = await page.screenshot({ fullPage: true });
+    testInfo.attach('extra properties listed on form tab', {
+      body: extraPropertiesScreenshot,
+      contentType: 'image/png',
     });
 
     await test.step('submit form and validate that POST body values match pasted config values including extra field', async () => {
