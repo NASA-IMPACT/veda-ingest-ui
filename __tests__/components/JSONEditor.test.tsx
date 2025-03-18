@@ -267,7 +267,7 @@ describe('JSONEditor', () => {
     await userEvent.click(applyButton);
 
     await waitFor(() =>
-      expect(screen.getByText('Schema Validation Errors:')).toBeInTheDocument()
+      expect(screen.getByText('Schema Validation Errors')).toBeInTheDocument()
     );
 
     expect(mockOnChange).not.toHaveBeenCalled();
@@ -285,7 +285,7 @@ describe('JSONEditor', () => {
     await userEvent.click(applyButton);
 
     await waitFor(() =>
-      expect(screen.getByText('Schema Validation Errors:')).toBeInTheDocument()
+      expect(screen.getByText('Schema Validation Errors')).toBeInTheDocument()
     );
   });
 
