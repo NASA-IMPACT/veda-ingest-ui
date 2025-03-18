@@ -8,6 +8,7 @@ import {
   PlusCircleOutlined,
   EditOutlined,
   GlobalOutlined,
+  CloudUploadOutlined,
 } from '@ant-design/icons';
 
 const items: MenuProps['items'] = [
@@ -31,7 +32,24 @@ const items: MenuProps['items'] = [
     key: '/cog-viewer',
     icon: <GlobalOutlined />,
   },
+  {
+    label: <Link href="/upload">Thumbnail Uploader</Link>,
+    key: '/upload',
+    icon: <CloudUploadOutlined />,
+  },
 ];
+
+// Filter out "Thumbnail Uploader" if the env variable is set
+const filteredItems =
+  process.env.NEXT_PUBLIC_ENABLE_THUMBNAIL_UPLOAD !== 'true'
+    ? items.filter(
+        (item): item is Required<MenuProps>['items'][number] =>
+          item?.key !== '/upload'
+      )
+    : items;
+
+console.log(process.env.NEXT_PUBLIC_ENABLE_THUMBNAIL_UPLOAD);
+console.log(filteredItems);
 
 const MenuBar = () => {
   const pathname = usePathname();
@@ -51,8 +69,9 @@ const MenuBar = () => {
       theme="dark"
       mode="inline"
       defaultSelectedKeys={['1']}
-      items={items}
+      items={filteredItems}
       selectedKeys={[activeLink]}
+      style={{ minWidth: 'max-content' }}
     ></Menu>
   );
 };
