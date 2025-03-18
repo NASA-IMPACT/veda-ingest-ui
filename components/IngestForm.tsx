@@ -3,7 +3,8 @@
 import '@ant-design/v5-patch-for-react-19';
 
 import { SetStateAction, useEffect, useState } from 'react';
-import { Tabs } from 'antd';
+import { Card, Tabs } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
 import validator from '@rjsf/validator-ajv8';
@@ -52,6 +53,9 @@ function IngestForm({
   const [activeTab, setActiveTab] = useState<string>('form');
   const [forceRenderKey, setForceRenderKey] = useState<number>(0); // Force refresh RJSF to clear validation errors
   const [hasJSONChanges, setHasJSONChanges] = useState<boolean>(false);
+  const [additionalProperties, setAdditionalProperties] = useState<
+    string[] | null
+  >(null);
 
   useEffect(() => {
     if (defaultTemporalExtent) {
@@ -121,22 +125,65 @@ function IngestForm({
           key: 'form',
           label: 'Form',
           children: (
-            <Form
-              key={forceRenderKey} // Forces re-render when data updates
-              schema={jsonSchema as JSONSchema7}
-              uiSchema={uiSchema}
-              validator={validator}
-              customValidate={customValidate}
-              templates={{
-                ObjectFieldTemplate: ObjectFieldTemplate,
-              }}
-              formData={formData}
-              onChange={onFormDataChanged}
-              onSubmit={(data) => handleSubmit(data, onSubmit)}
-              formContext={{ formData, updateFormData: setFormData }}
-            >
-              {children}
-            </Form>
+            <>
+              <Form
+                key={forceRenderKey} // Forces re-render when data updates
+                schema={jsonSchema as JSONSchema7}
+                uiSchema={uiSchema}
+                validator={validator}
+                customValidate={customValidate}
+                templates={{
+                  ObjectFieldTemplate: ObjectFieldTemplate,
+                }}
+                formData={formData}
+                onChange={onFormDataChanged}
+                onSubmit={(data) => handleSubmit(data, onSubmit)}
+                formContext={{ formData, updateFormData: setFormData }}
+              >
+                {children}
+              </Form>
+              {additionalProperties && additionalProperties.length > 0 && (
+                <Card
+                  data-testid="extra-properties-card"
+                  title={
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        color: '#faad14',
+                      }}
+                    >
+                      <ExclamationCircleOutlined />
+                      <span>Extra Properties set via JSON Editor</span>
+                    </div>
+                  }
+                  style={{
+                    width: '100%',
+                    marginTop: '10px',
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                  }}
+                >
+                  <ul
+                    style={{
+                      display: 'grid',
+                      gridTemplateRows: 'repeat(3, auto)', // 3 rows before wrapping to new column
+                      gridAutoFlow: 'column',
+                      gap: '10px',
+                      padding: 0,
+                      listStyleType: 'none',
+                    }}
+                  >
+                    {additionalProperties.map((prop) => (
+                      <li key={prop} style={{ paddingLeft: '10px' }}>
+                        {prop}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              )}
+            </>
           ),
         },
         {
@@ -149,6 +196,8 @@ function IngestForm({
               disableCollectionNameChange={disableCollectionNameChange}
               hasJSONChanges={hasJSONChanges}
               setHasJSONChanges={setHasJSONChanges}
+              additionalProperties={additionalProperties}
+              setAdditionalProperties={setAdditionalProperties}
             />
           ),
         },

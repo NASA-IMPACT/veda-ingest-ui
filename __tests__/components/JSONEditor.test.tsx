@@ -74,22 +74,30 @@ const mockFormData = {
   collection: 'test-collection',
   title: 'test',
   description: 'test',
+  renders: {
+    dashboard: {
+      json: true,
+    },
+  },
 };
 
 describe('JSONEditor', () => {
   let mockOnChange: Mock;
   let mockSetHasJSONChanges: Mock;
+  let mockSetAdditionalProperties: Mock;
   let defaultProps: any;
 
   beforeEach(() => {
     mockOnChange = vi.fn();
     mockSetHasJSONChanges = vi.fn();
+    mockSetAdditionalProperties = vi.fn();
     defaultProps = {
       value: mockFormData,
       onChange: mockOnChange,
       disableCollectionNameChange: false,
       hasJSONChanges: true,
       setHasJSONChanges: mockSetHasJSONChanges,
+      setAdditionalProperties: mockSetAdditionalProperties,
     };
   });
 

@@ -54,6 +54,11 @@ const modifiedConfig = {
       roles: ['thumbnail'],
     },
   },
+  renders: {
+    dashboard: {
+      json: true,
+    },
+  },
 };
 
 test.describe('Edit Ingest Page', () => {
@@ -122,10 +127,23 @@ test.describe('Edit Ingest Page', () => {
           'formData'
         );
 
+        // make sure the dashboard object is a prettified string before asserting
+        const expectedModifiedConfig = {
+          ...modifiedConfig,
+          renders: {
+            ...modifiedConfig.renders,
+            dashboard: JSON.stringify(
+              modifiedConfig.renders.dashboard,
+              null,
+              2
+            ),
+          },
+        };
+
         expect(
           postData.formData,
           'validate formData matches modified json'
-        ).toEqual(expect.objectContaining(modifiedConfig));
+        ).toMatchObject(expectedModifiedConfig);
 
         // Block the request
         await route.abort();
