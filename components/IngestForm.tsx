@@ -146,6 +146,7 @@ function IngestForm({
                 </Form>
                 {additionalProperties && additionalProperties.length > 0 && (
                   <Card
+                    data-testid="extra-properties-card"
                     title={
                       <div
                         style={{
