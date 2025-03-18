@@ -17,6 +17,7 @@ import { customValidate } from '@/utils/CustomValidation';
 import { handleSubmit } from '@/utils/FormHandlers';
 import JSONEditor from '@/components/JSONEditor';
 import { JSONEditorValue } from '@/components/JSONEditor';
+import AdditionalPropertyCard from '@/components/AdditionalPropertyCard';
 
 const Form = withTheme(AntDTheme);
 
@@ -143,45 +144,10 @@ function IngestForm({
                 {children}
               </Form>
               {additionalProperties && additionalProperties.length > 0 && (
-                <Card
-                  data-testid="extra-properties-card"
-                  title={
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        color: '#faad14',
-                      }}
-                    >
-                      <ExclamationCircleOutlined />
-                      <span>Extra Properties set via JSON Editor</span>
-                    </div>
-                  }
-                  style={{
-                    width: '100%',
-                    marginTop: '10px',
-                    maxHeight: '300px',
-                    overflowY: 'auto',
-                  }}
-                >
-                  <ul
-                    style={{
-                      display: 'grid',
-                      gridTemplateRows: 'repeat(3, auto)', // 3 rows before wrapping to new column
-                      gridAutoFlow: 'column',
-                      gap: '10px',
-                      padding: 0,
-                      listStyleType: 'none',
-                    }}
-                  >
-                    {additionalProperties.map((prop) => (
-                      <li key={prop} style={{ paddingLeft: '10px' }}>
-                        {prop}
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
+                <AdditionalPropertyCard
+                  additionalProperties={additionalProperties}
+                  style="warning"
+                />
               )}
             </>
           ),

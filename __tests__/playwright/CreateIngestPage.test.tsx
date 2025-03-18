@@ -262,7 +262,7 @@ test.describe('Create Ingest Page', () => {
     await test.step('paste a JSON not matching required schema in the editor and check for error message', async () => {
       await page.getByTestId('json-editor').fill('{"validJSON": true}');
       await page.getByRole('button', { name: /apply changes/i }).click();
-      await expect(page.getByText('Schema Validation Errors:')).toBeVisible();
+      await expect(page.getByText('Schema Validation Errors')).toBeVisible();
       const requiredProperties = [
         'collection',
         'title',

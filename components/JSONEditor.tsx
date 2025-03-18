@@ -3,6 +3,7 @@ import { Input, Button, Typography, Checkbox, Flex, message } from 'antd';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
+import AdditionalPropertyCard from '@/components/AdditionalPropertyCard';
 
 const { TextArea } = Input;
 const { Text } = Typography;
@@ -204,16 +205,10 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
 
       {jsonError && <Text type="danger">{jsonError}</Text>}
       {schemaErrors.length > 0 && (
-        <div style={{ marginTop: '10px' }}>
-          <Text type="danger">Schema Validation Errors:</Text>
-          <ul>
-            {schemaErrors.map((error, index) => (
-              <li key={index}>
-                <Text type="danger">{error}</Text>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <AdditionalPropertyCard
+          additionalProperties={schemaErrors}
+          style="error"
+        />
       )}
     </Flex>
   );
