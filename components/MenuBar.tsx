@@ -48,9 +48,6 @@ const filteredItems =
       )
     : items;
 
-console.log(process.env.NEXT_PUBLIC_ENABLE_THUMBNAIL_UPLOAD);
-console.log(filteredItems);
-
 const MenuBar = () => {
   const pathname = usePathname();
 
