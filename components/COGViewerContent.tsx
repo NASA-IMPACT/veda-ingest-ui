@@ -178,8 +178,7 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
           rescale,
           colormap_name: selectedColormap.toLowerCase(),
           color_formula: colorFormula || undefined,
-          resampling:
-            selectedResampling !== 'nearest' ? selectedResampling : undefined,
+          resampling: selectedResampling,
           nodata: noDataValue || undefined,
         }}
       />
