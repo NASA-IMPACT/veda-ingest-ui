@@ -9,6 +9,7 @@ import { Hash } from '@smithy/hash-node';
 const bucketName = process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME!;
 const region = process.env.AWS_REGION || 'us-west-2';
 const RoleArn = process.env.AWS_ASSUME_ROLE_ARN;
+const ExternalId = process.env.INGEST_UI_EXTERNAL_ID;
 const timestamp = Date.now();
 
 async function assumeRole() {
@@ -18,6 +19,7 @@ async function assumeRole() {
     RoleArn,
     RoleSessionName: `veda-ingest-ui-${timestamp}`,
     DurationSeconds: 900,
+    ExternalId,
   };
 
   const command = new AssumeRoleCommand(roleParams);
