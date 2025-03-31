@@ -42,7 +42,7 @@ test.describe('COG Viewer Page', () => {
     );
   });
 
-  test('COG Viewer loads multi band COG ', async ({ page, http, worker }) => {
+  test('COG Viewer loads multi band COG ', async ({ page }) => {
     await page.goto('/cog-viewer');
 
     await page.getByPlaceholder('Enter COG URL').fill('s3://test.com');
@@ -72,7 +72,9 @@ test.describe('COG Viewer Page', () => {
     await expect(
       page.getByRole('dialog', { name: /COG Rendering Options/i })
     ).toBeVisible();
-    await expect(page.locator('.ant-modal-body')).toHaveText(
+    await expect(
+      page.getByText('COG Rendering Options{ "bidx').getByRole('textbox')
+    ).toHaveText(
       JSON.stringify(
         {
           bidx: [1],

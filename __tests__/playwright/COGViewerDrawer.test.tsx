@@ -91,7 +91,9 @@ test.describe('COG Viewer Drawer', () => {
       await expect(
         page.getByRole('dialog', { name: /COG Rendering Options/i })
       ).toBeVisible();
-      await expect(page.locator('.ant-modal-body')).toHaveText(
+      await expect(
+        page.getByText('COG Rendering Options{ "bidx').getByRole('textbox')
+      ).toHaveText(
         JSON.stringify(
           {
             bidx: [1],
@@ -162,7 +164,9 @@ test.describe('COG Viewer Drawer', () => {
       await expect(
         page.getByRole('dialog', { name: /COG Rendering Options/i })
       ).toBeVisible();
-      await expect(page.locator('.ant-modal-body')).toHaveText(
+      await expect(
+        page.getByText('COG Rendering Options{ "bidx').getByRole('textbox')
+      ).toHaveText(
         JSON.stringify(
           {
             bidx: [1],
@@ -218,7 +222,9 @@ test.describe('COG Viewer Drawer', () => {
       await expect(
         page.getByRole('dialog', { name: /COG Rendering Options/i })
       ).toBeVisible();
-      await expect(page.locator('.ant-modal-body')).toHaveText(
+      await expect(
+        page.getByText('COG Rendering Options{ "bidx').getByRole('textbox')
+      ).toHaveText(
         JSON.stringify(
           {
             bidx: [1],
@@ -289,7 +295,9 @@ test.describe('COG Viewer Drawer', () => {
       await expect(
         page.getByRole('dialog', { name: /COG Rendering Options/i })
       ).toBeVisible();
-      await expect(page.locator('.ant-modal-body')).toHaveText(
+      await expect(
+        page.getByText('COG Rendering Options{ "bidx').getByRole('textbox')
+      ).toHaveText(
         JSON.stringify(
           {
             bidx: [1],
