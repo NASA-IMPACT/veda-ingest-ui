@@ -9,7 +9,7 @@ frontend:
         - yarn install
     build:
       commands:
-        - env | grep -e OWNER -e REPO -e APP_ID -e INSTALLATION_ID -e GITHUB_PRIVATE_KEY >> .env.production
+        - env | grep -e OWNER -e REPO -e APP_ID -e INSTALLATION_ID -e GITHUB_PRIVATE_KEY -e ASSUME_ROLE_ARN -e -e INGEST_UI_EXTERNAL_ID >> .env.production
         - env | grep -e NEXT_PUBLIC_ >> .env.production
         - yarn build
   artifacts:
