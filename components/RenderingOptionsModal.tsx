@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
 import { Button, message, Modal } from 'antd';
+import dynamic from 'next/dynamic';
+
+const CodeEditor = dynamic(
+  async () => {
+    const { default: CodeEditor } = await import(
+      '@uiw/react-textarea-code-editor'
+    );
+    return CodeEditor;
+  },
+  { ssr: false }
+);
 
 interface RenderingOptionsModalProps {
   visible: boolean;
@@ -77,11 +88,20 @@ const RenderingOptionsModal: React.FC<RenderingOptionsModalProps> = ({
         </>
       }
     >
-      <pre
-        style={{ background: '#f8f9fa', padding: '10px', borderRadius: '5px' }}
-      >
-        {formattedOptions}
-      </pre>
+      <CodeEditor
+        value={formattedOptions}
+        language="json"
+        padding={15}
+        style={{
+          fontSize: 14,
+          backgroundColor: '#00152a',
+          fontFamily:
+            'ui-monospace,SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace',
+          boxShadow: '0px 3px 15px rgba(0, 0, 0, 0.2)',
+          borderRadius: '6px',
+        }}
+        readOnly
+      />
     </Modal>
   );
 };

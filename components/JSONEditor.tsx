@@ -1,11 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Input, Button, Typography, Checkbox, Flex, message } from 'antd';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
 import AdditionalPropertyCard from '@/components/AdditionalPropertyCard';
+import dynamic from 'next/dynamic';
 
-const { TextArea } = Input;
+const CodeEditor = dynamic(
+  async () => {
+    const { default: CodeEditor } = await import(
+      '@uiw/react-textarea-code-editor'
+    );
+    return CodeEditor;
+  },
+  { ssr: false }
+);
+
 const { Text } = Typography;
 
 interface Renders {
@@ -43,6 +53,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [schemaErrors, setSchemaErrors] = useState<string[]>([]);
   const [strictSchema, setStrictSchema] = useState<boolean>(true);
+  const editorRef = useRef<any>(null);
 
   // Store initial collection value (only if disableCollectionNameChange is true)
   const initialCollectionValue = useState<string | undefined>(
@@ -74,8 +85,8 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
     setEditorValue(JSON.stringify(updatedValue, null, 2));
   }, [value]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setEditorValue(e.target.value);
+  const handleInputChange = (value: string) => {
+    setEditorValue(value);
     setHasJSONChanges(true);
     setJsonError(null);
   };
@@ -187,12 +198,22 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         Enforce strict schema (Disallow extra fields)
       </Checkbox>
 
-      <TextArea
+      <CodeEditor
+        ref={editorRef}
         data-testid="json-editor"
-        rows={15}
         value={editorValue}
-        onChange={handleInputChange}
-        style={{ fontFamily: 'monospace' }}
+        language="json"
+        placeholder="Please enter JSON code."
+        onChange={(evn) => handleInputChange(evn.target.value)}
+        padding={15}
+        style={{
+          fontSize: 14,
+          backgroundColor: '#00152a',
+          fontFamily:
+            'ui-monospace,SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace',
+          boxShadow: '0px 3px 15px rgba(0, 0, 0, 0.2)',
+          borderRadius: '6px',
+        }}
       />
       <Button
         onClick={applyChanges}

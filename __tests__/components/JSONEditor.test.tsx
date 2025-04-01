@@ -5,6 +5,8 @@ import {
   fireEvent,
   waitFor,
   cleanup,
+  findByRole,
+  findByTestId,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import JSONEditor from '@/components/JSONEditor';
@@ -116,7 +118,7 @@ describe('JSONEditor', () => {
     };
 
     render(<JSONEditor {...testProps} />);
-    const textarea = screen.getByTestId('json-editor');
+    const textarea = await findByTestId(document.body, 'json-editor');
 
     expect(textarea).toHaveValue(
       JSON.stringify({ renders: { dashboard: { key: 'value' } } }, null, 2)
@@ -126,7 +128,7 @@ describe('JSONEditor', () => {
   it("converts 'renders.dashboard' from an object to a pretty JSON string before saving", async () => {
     render(<JSONEditor {...defaultProps} />);
 
-    const textarea = screen.getByTestId('json-editor');
+    const textarea = await findByTestId(document.body, 'json-editor');
     const applyButton = screen.getByRole('button', { name: /apply changes/i });
 
     const newFormData = {
@@ -163,14 +165,14 @@ describe('JSONEditor', () => {
     };
 
     render(<JSONEditor {...testProps} />);
-    const textarea = screen.getByTestId('json-editor');
+    const textarea = await findByTestId(document.body, 'json-editor');
 
     expect(textarea).toHaveValue(JSON.stringify({ renders: 'value' }, null, 2));
   });
 
   it("allows 'collection' name change if disableCollectionNameChange false", async () => {
     render(<JSONEditor {...defaultProps} />);
-    const textarea = screen.getByTestId('json-editor');
+    const textarea = await findByTestId(document.body, 'json-editor');
     const applyButton = screen.getByRole('button', { name: /apply changes/i });
 
     const newFormData = { ...mockFormData, collection: 'new name' };
@@ -198,7 +200,7 @@ describe('JSONEditor', () => {
     };
 
     render(<JSONEditor {...testProps} />);
-    const textarea = screen.getByTestId('json-editor');
+    const textarea = await findByTestId(document.body, 'json-editor');
     const applyButton = screen.getByRole('button', { name: /apply changes/i });
 
     expect(screen.getByTestId('collectionName')).toHaveTextContent(
@@ -229,7 +231,7 @@ describe('JSONEditor', () => {
     const checkbox = screen.getByRole('checkbox', {
       name: /enforce strict schema/i,
     });
-    const textarea = screen.getByTestId('json-editor');
+    const textarea = await findByTestId(document.body, 'json-editor');
     const applyButton = screen.getByRole('button', { name: /apply changes/i });
 
     await userEvent.click(checkbox);
@@ -251,7 +253,7 @@ describe('JSONEditor', () => {
 
   it('does not allow extra fields when strict schema is checked', async () => {
     render(<JSONEditor {...defaultProps} />);
-    const textarea = screen.getByTestId('json-editor');
+    const textarea = await findByTestId(document.body, 'json-editor');
     const applyButton = screen.getByRole('button', { name: /apply changes/i });
 
     const checkbox = screen.getByRole('checkbox', {
@@ -275,7 +277,7 @@ describe('JSONEditor', () => {
 
   it('displays schema validation errors', async () => {
     render(<JSONEditor {...defaultProps} />);
-    const textarea = screen.getByTestId('json-editor');
+    const textarea = await findByTestId(document.body, 'json-editor');
     const applyButton = screen.getByRole('button', { name: /apply changes/i });
 
     fireEvent.change(textarea, {
@@ -291,7 +293,7 @@ describe('JSONEditor', () => {
 
   it('displays error if not valid json', async () => {
     render(<JSONEditor {...defaultProps} />);
-    const textarea = screen.getByTestId('json-editor');
+    const textarea = await findByTestId(document.body, 'json-editor');
     const applyButton = screen.getByRole('button', { name: /apply changes/i });
 
     fireEvent.change(textarea, {
