@@ -15,6 +15,8 @@ const timestamp = Date.now();
 async function assumeRole() {
   const sts = new STSClient({ region });
 
+  console.log({ RoleArn, ExternalId }); // Log environment variables
+
   const roleParams = {
     RoleArn,
     RoleSessionName: `veda-ingest-ui-${timestamp}`,
