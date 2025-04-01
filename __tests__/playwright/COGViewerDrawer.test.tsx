@@ -12,22 +12,25 @@ test.describe('COG Viewer Drawer', () => {
     await test.step('enter URL of Sample File and valid json in renders object', async () => {
       await page.getByLabel('Sample Files-1').fill('s3://test.com');
 
-      await page.getByLabel('dashboard').fill(
-        JSON.stringify(
-          {
-            resampling: 'nearest',
-            bidx: [1],
-            colormap_name: 'rdbu',
-            assets: ['cog_default'],
-            rescale: [[-1, 1]],
-            color_formula: 'test123',
-            nodata: 255,
-            title: 'VEDA Dashboard Render Parameters',
-          },
-          null,
-          2
-        )
-      );
+      await page
+        .locator('#root_renders')
+        .getByRole('textbox')
+        .fill(
+          JSON.stringify(
+            {
+              resampling: 'nearest',
+              bidx: [1],
+              colormap_name: 'rdbu',
+              assets: ['cog_default'],
+              rescale: [[-1, 1]],
+              color_formula: 'test123',
+              nodata: 255,
+              title: 'VEDA Dashboard Render Parameters',
+            },
+            null,
+            2
+          )
+        );
     });
 
     const initialRendersScreenshot = await page.screenshot({ fullPage: true });
@@ -189,7 +192,10 @@ test.describe('COG Viewer Drawer', () => {
     await test.step('enter URL of Sample File and invalid json in renders object', async () => {
       await page.getByLabel('Sample Files-1').fill('s3://test.com');
 
-      await page.getByLabel('dashboard').fill('"test": true');
+      await page
+        .locator('#root_renders')
+        .getByRole('textbox')
+        .fill('"test": true');
     });
 
     await test.step('click button to open COG Viewer Drawer', async () => {
@@ -248,22 +254,25 @@ test.describe('COG Viewer Drawer', () => {
     await test.step('enter URL of Sample File and valid json in renders object', async () => {
       await page.getByLabel('Sample Files-1').fill('s3://test.com');
 
-      await page.getByLabel('dashboard').fill(
-        JSON.stringify(
-          {
-            resampling: 'nearest',
-            bidx: [1],
-            colormap_name: 'rdbu',
-            assets: ['cog_default'],
-            rescale: [[-1, 1]],
-            color_formula: 'test123',
-            nodata: 255,
-            title: 'VEDA Dashboard Render Parameters',
-          },
-          null,
-          2
-        )
-      );
+      await page
+        .locator('#root_renders')
+        .getByRole('textbox')
+        .fill(
+          JSON.stringify(
+            {
+              resampling: 'nearest',
+              bidx: [1],
+              colormap_name: 'rdbu',
+              assets: ['cog_default'],
+              rescale: [[-1, 1]],
+              color_formula: 'test123',
+              nodata: 255,
+              title: 'VEDA Dashboard Render Parameters',
+            },
+            null,
+            2
+          )
+        );
     });
 
     await test.step('click button to open COG Viewer Drawer', async () => {
@@ -326,7 +335,9 @@ test.describe('COG Viewer Drawer', () => {
     });
 
     await test.step('validate that renders object has updated with new values', async () => {
-      await expect(page.getByLabel('Dashboard')).toHaveText(
+      await expect(
+        page.locator('#root_renders').getByRole('textbox')
+      ).toHaveText(
         JSON.stringify(
           {
             bidx: [1],
@@ -351,22 +362,25 @@ test.describe('COG Viewer Drawer', () => {
     });
 
     await test.step('do not enter URL of Sample File but enter valid json in renders object', async () => {
-      await page.getByLabel('dashboard').fill(
-        JSON.stringify(
-          {
-            resampling: 'nearest',
-            bidx: [1],
-            colormap_name: 'rdbu',
-            assets: ['cog_default'],
-            rescale: [[-1, 1]],
-            color_formula: 'test123',
-            nodata: 255,
-            title: 'VEDA Dashboard Render Parameters',
-          },
-          null,
-          2
-        )
-      );
+      await page
+        .locator('#root_renders')
+        .getByRole('textbox')
+        .fill(
+          JSON.stringify(
+            {
+              resampling: 'nearest',
+              bidx: [1],
+              colormap_name: 'rdbu',
+              assets: ['cog_default'],
+              rescale: [[-1, 1]],
+              color_formula: 'test123',
+              nodata: 255,
+              title: 'VEDA Dashboard Render Parameters',
+            },
+            null,
+            2
+          )
+        );
     });
     await test.step('click button to open COG Viewer Drawer', async () => {
       await page

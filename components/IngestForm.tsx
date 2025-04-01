@@ -18,6 +18,7 @@ import { handleSubmit } from '@/utils/FormHandlers';
 import JSONEditor from '@/components/JSONEditor';
 import { JSONEditorValue } from '@/components/JSONEditor';
 import AdditionalPropertyCard from '@/components/AdditionalPropertyCard';
+import CodeEditorWidget from './CodeEditorWidget';
 
 const Form = withTheme(AntDTheme);
 
@@ -117,6 +118,10 @@ function IngestForm({
     setForceRenderKey((prev) => prev + 1); // Forces RJSF to re-render and re-validate
   };
 
+  const widgets = {
+    'renders.dashboard': CodeEditorWidget, // Map the nested field
+  };
+
   return (
     <Tabs
       activeKey={activeTab}
@@ -140,6 +145,7 @@ function IngestForm({
                 onChange={onFormDataChanged}
                 onSubmit={(data) => handleSubmit(data, onSubmit)}
                 formContext={{ formData, updateFormData: setFormData }}
+                widgets={widgets}
               >
                 {children}
               </Form>

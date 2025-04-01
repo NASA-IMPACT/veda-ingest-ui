@@ -57,7 +57,7 @@ export async function validateFormFields(page: Page, expectedValues: any) {
   await expect(page.getByLabel('Sample Files-1')).toHaveValue(
     expectedValues.sample_files[0]
   );
-  await expect(page.getByLabel('dashboard')).toHaveValue(
+  await expect(page.locator('#root_renders').getByRole('textbox')).toHaveValue(
     JSON.stringify(expectedValues.renders.dashboard, null, 2)
   );
 }
