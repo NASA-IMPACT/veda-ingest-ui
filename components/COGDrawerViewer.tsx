@@ -60,10 +60,9 @@ const COGDrawerViewer: React.FC<COGDrawerViewerProps> = ({
           ? cogViewer.selectedColormap
           : undefined,
       color_formula: cogViewer.colorFormula || undefined,
-      resampling:
-        cogViewer.selectedResampling !== 'nearest'
-          ? cogViewer.selectedResampling
-          : undefined,
+      ...(cogViewer.selectedResampling != null && {
+        resampling: cogViewer.selectedResampling,
+      }),
       nodata: cogViewer.noDataValue || undefined,
       assets: ['cog_default'], // Ensure assets are included
     };

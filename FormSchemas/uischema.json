@@ -163,7 +163,7 @@
   },
   "renders": {
     "dashboard": {
-      "ui:widget": "textarea",
+      "ui:widget": "renders.dashboard",
       "ui:options": {
         "rows": 12
       }

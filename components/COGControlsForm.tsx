@@ -210,6 +210,7 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
           <Form.Item label="Resampling" name="selectedResampling">
             <Select
               showSearch
+              allowClear
               data-testid="resampling"
               onChange={onResamplingChange}
             >
