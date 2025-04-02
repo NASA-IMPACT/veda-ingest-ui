@@ -208,6 +208,10 @@ function ThumbnailUploader({
       const xhr = new XMLHttpRequest();
       xhr.open('PUT', uploadUrl, true);
       xhr.setRequestHeader('Content-Type', file.type);
+      xhr.setRequestHeader(
+        'x-amz-server-side-encryption-customer-algorithm',
+        'AES256'
+      );
 
       // Progress event listener
       xhr.upload.onprogress = (event) => {
