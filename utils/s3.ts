@@ -67,10 +67,10 @@ export async function checkFileExists(filename: string): Promise<boolean> {
     await s3.send(new HeadObjectCommand({ Bucket: bucketName, Key: filename }));
     return true;
   } catch (error: any) {
-    console.error(error);
     if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 403) {
       return false;
     }
+    console.error(error);
     throw new Error('Failed to check file existence');
   }
 }
@@ -88,7 +88,9 @@ export async function generateSignedUrl(
     new HttpRequest({
       ...url,
       method: 'PUT',
-      headers: { 'Content-Type': filetype },
+      headers: {
+        'Content-Type': filetype,
+      },
     })
   );
 
