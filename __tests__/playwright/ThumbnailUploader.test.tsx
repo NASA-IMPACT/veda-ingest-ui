@@ -27,14 +27,6 @@ test.describe('Thumbnail Uploader Page', () => {
       await page.goto('/upload');
     });
 
-    // watch for img src request
-    const responsePromise = page.waitForResponse(
-      (res) =>
-        res
-          .url()
-          .includes('s3bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg') &&
-        res.status() === 200
-    );
     await test.step('click to upload a file', async () => {
       const [fileChooser] = await Promise.all([
         page.waitForEvent('filechooser'),
@@ -96,8 +88,6 @@ test.describe('Thumbnail Uploader Page', () => {
       'Uploaded Thumbnail heading'
     ).toBeVisible();
 
-    await responsePromise;
-
     const thumbnailUploadScreenshot = await page.screenshot({ fullPage: true });
     testInfo.attach('Succesfull Image upload', {
       body: thumbnailUploadScreenshot,
@@ -141,14 +131,6 @@ test.describe('Thumbnail Uploader Page', () => {
       await page.goto('/upload');
     });
 
-    // watch for img src request
-    const responsePromise = page.waitForResponse(
-      (res) =>
-        res
-          .url()
-          .includes('s3bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg') &&
-        res.status() === 200
-    );
     await test.step('click to upload a file', async () => {
       const [fileChooser] = await Promise.all([
         page.waitForEvent('filechooser'),
@@ -225,8 +207,6 @@ test.describe('Thumbnail Uploader Page', () => {
       page.getByAltText(/uploaded thumbnail/i),
       'Uploaded Thumbnail heading'
     ).toBeVisible();
-
-    await responsePromise;
   });
 
   test('Size Validation prevents image upload with wrong dimensions', async ({

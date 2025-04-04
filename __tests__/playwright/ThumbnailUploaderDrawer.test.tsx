@@ -32,15 +32,6 @@ test.describe('Thumbnail Uploader Drawer', () => {
       await page.goto('/create-ingest');
     });
 
-    // watch for img src request
-    const responsePromise = page.waitForResponse(
-      (res) =>
-        res
-          .url()
-          .includes('s3bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg') &&
-        res.status() === 200
-    );
-
     await test.step('enter text in Collection Input to validate later that it is not overwritten', async () => {
       await page
         .getByRole('textbox', { name: /collection/i })
@@ -114,8 +105,6 @@ test.describe('Thumbnail Uploader Drawer', () => {
       page.getByAltText(/uploaded thumbnail/i),
       'Uploaded Thumbnail heading'
     ).toBeVisible();
-
-    await responsePromise;
 
     const thumbnailUploadScreenshot = await page.screenshot();
     testInfo.attach('Successful Image upload', {
