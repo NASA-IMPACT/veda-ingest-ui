@@ -13,7 +13,7 @@ test.describe('Thumbnail Uploader Drawer', () => {
     );
 
     await page.route(
-      'https://s3bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg',
+      'https://bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIARVKJBJKAQFGENG5C%2F20250404%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250404T172309Z&X-Amz-Expires=900&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDbCay0UenLbnMIC%2FNEBrzwxs9OxA%2FpiInjFciy4QbeCwIgXp6TynvBQ8%2BUYk4DTvMDM9BZ7rfOmKt9eVCtglRatyAqqQIIGxACGgwxMTQ1MDY2ODA5NjEiDCOsgOx%2BRrGpNQnmWSqGAprgmAbuZhPuNq%2B9syAbMquhq0NKrkxLh0KacxVX3dAX%2FP1gTsCWyQKj1YFTw6owUw0OVMUpFCRjYQDF0GxpwkDqAVYoRzHX%2BLjgtEyvf1BrpDlORgXlN4GwTaohj15%2B8mrtLY3vfW6UEDWDb74rZrv%2FfScK6vofbCd%2BDUg1GtSoGWBpfMVlbYUxOFR5UWnUGyCdNpe7kjJMynMpC%2FlfFlqbI8qdV0LFECOX7S4e52aJVutlcHqVrPwAL7eNYRBk9dYLQH3Mz8nOSHGplOHQuaIZe4YRS0goOrg2WEU8kOXizeVueH9RSB91fwSkeGtHsV8t2fhBsGES4rhaEyFUvgUzD3DHO94w%2FarAvwY6nQG8InOBWfZXbitDPLbnkerLLWfRynjhGZCPaP5VI5D4yRjZcxEaBqvOyRtlLQSG5udSRf7ipKl%2Fgl0AoQPX5wen3A7bHMdpOAzpkn5YIIvYlLIG5SiZDsYopVPtFERiq1mX1xuPmHW58LX%2FPuWsFgKqaSZnTtwsu9cst3PBaHrF9Kdoz%2BoO%2BM%2FFJXvKttr3sJ8Wkexl6bbNRVtSITym&X-Amz-Signature=42e140a71802dcc427a4b76dc217b849066753dfb415d29e29f47a5d36f9008a&X-Amz-SignedHeaders=host',
       async (route) => {
         console.log(`Image request intercepted: ${route.request().url()}`);
 
@@ -31,6 +31,13 @@ test.describe('Thumbnail Uploader Drawer', () => {
     await test.step('Navigate to the Ingest Creation Page', async () => {
       await page.goto('/create-ingest');
     });
+
+    // watch for img src request
+    const responsePromise = page.waitForResponse(
+      (res) =>
+        res.url().includes('s3.us-west-2.amazonaws.com/thumbnail.jpg') &&
+        res.status() === 200
+    );
 
     await test.step('enter text in Collection Input to validate later that it is not overwritten', async () => {
       await page
@@ -106,7 +113,7 @@ test.describe('Thumbnail Uploader Drawer', () => {
       'Uploaded Thumbnail heading'
     ).toBeVisible();
 
-    const thumbnailUploadScreenshot = await page.screenshot();
+    const thumbnailUploadScreenshot = await page.screenshot({ fullPage: true });
     testInfo.attach('Successful Image upload', {
       body: thumbnailUploadScreenshot,
       contentType: 'image/png',
