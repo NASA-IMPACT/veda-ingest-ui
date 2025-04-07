@@ -34,7 +34,7 @@ interface UploadedFile {
   name: string;
   url: string;
   signedUrl?: string;
-  signedUrlError?: string; // To track errors fetching the signed URL
+  signedUrlError?: string;
 }
 
 interface ImageValidationResult {

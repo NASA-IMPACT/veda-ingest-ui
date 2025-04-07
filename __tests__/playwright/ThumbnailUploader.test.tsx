@@ -114,7 +114,6 @@ test.describe('Thumbnail Uploader Page', () => {
     await page.route(mockSignedURL, async (route) => {
       console.log(`Image request intercepted: ${route.request().url()}`);
 
-      // Respond with a small 1x1 transparent PNG
       const imageBuffer = Buffer.from(imageBase64, 'base64');
 
       await route.fulfill({
