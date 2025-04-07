@@ -23,7 +23,6 @@ async function assumeRole() {
   };
 
   const command = new AssumeRoleCommand(roleParams);
-  console.log({ command });
   const response = await sts.send(command);
 
   if (
@@ -95,4 +94,27 @@ export async function generateSignedUrl(
   );
 
   return formatUrl(signedUrlObject);
+}
+
+export async function getSignedUrlForGetObject(
+  key: string
+): Promise<string | undefined> {
+  try {
+    const presigner = await createPresigner();
+    const url = parseUrl(
+      `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`
+    );
+
+    const signedUrlObject = await presigner.presign(
+      new HttpRequest({
+        ...url,
+        method: 'GET',
+      })
+    );
+
+    return formatUrl(signedUrlObject);
+  } catch (error) {
+    console.error('Error generating signed URL for GET object:', error);
+    return undefined;
+  }
 }

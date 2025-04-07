@@ -33,6 +33,8 @@ interface UploadingFile {
 interface UploadedFile {
   name: string;
   url: string;
+  signedUrl?: string;
+  signedUrlError?: string;
 }
 
 interface ImageValidationResult {
@@ -117,9 +119,7 @@ function ThumbnailUploader({
     const isValid = await validateImage(file);
     if (!isValid) return;
 
-    // Show loading message while getting the presigned URL
     const loadingMessage = message.loading('Authenticating Upload', 0);
-
     setUploadingFile({ file, progress: 0 });
 
     try {
@@ -141,7 +141,6 @@ function ThumbnailUploader({
       }: { uploadUrl: string; fileUrl: string; fileExists: boolean } =
         await res.json();
 
-      // Remove loading message
       loadingMessage();
 
       if (fileExists) {
@@ -159,12 +158,11 @@ function ThumbnailUploader({
             setUploadedFile(null);
           },
         });
-        return; // Prevents duplicate execution
+        return;
       }
 
       await proceedWithUpload(file, uploadUrl, fileUrl, onProgress);
     } catch (error) {
-      // Remove loading message
       loadingMessage();
       console.error('Upload failed:', error);
       message.error('Upload failed, please try again.');
@@ -191,6 +189,7 @@ function ThumbnailUploader({
       message.success('Thumbnail uploaded successfully!');
       setUploadingFile(null);
       setUploadedFile({ name: file.name, url: fileUrl });
+      fetchSignedUrl(fileUrl);
     } catch (error) {
       closeUploadingMessage();
       console.error('Upload failed:', error);
@@ -209,7 +208,6 @@ function ThumbnailUploader({
       xhr.open('PUT', uploadUrl, true);
       xhr.setRequestHeader('Content-Type', file.type);
 
-      // Progress event listener
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
           const percentComplete = (event.loaded / event.total) * 100;
@@ -233,12 +231,42 @@ function ThumbnailUploader({
     });
   };
 
+  const fetchSignedUrl = async (fileUrl: string) => {
+    try {
+      const res = await fetch('/api/get-signed-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: fileUrl }),
+      });
+
+      if (!res.ok) {
+        const errorBody = await res.json();
+        console.error(
+          'Failed to get signed URL:',
+          errorBody.error || res.statusText
+        );
+        setUploadedFile((prev) =>
+          prev ? { ...prev, signedUrlError: 'Failed to load thumbnail.' } : null
+        );
+        return;
+      }
+
+      const { signedUrl } = await res.json();
+      setUploadedFile((prev) => (prev ? { ...prev, signedUrl } : null));
+    } catch (error) {
+      console.error('Error fetching signed URL:', error);
+      setUploadedFile((prev) =>
+        prev ? { ...prev, signedUrlError: 'Error fetching thumbnail.' } : null
+      );
+    }
+  };
+
   const clearErrorsWithAnimation = () => {
     setIsRemovingErrors(true);
     setTimeout(() => {
-      setImageValidation(null); // Remove validation errors AFTER fade-out
+      setImageValidation(null);
       setIsRemovingErrors(false);
-    }, 200); // Matches animation duration (0.2s)
+    }, 200);
   };
 
   const getS3Uri = (url: string): string => {
@@ -372,7 +400,7 @@ function ThumbnailUploader({
             >
               <h3>Thumbnail Uploaded</h3>
               <Image
-                src={uploadedFile.url}
+                src={uploadedFile.signedUrl}
                 alt="Uploaded thumbnail"
                 style={{
                   maxWidth: '100%',
@@ -391,7 +419,6 @@ function ThumbnailUploader({
                   </Button>
                 </List.Item>
               </List>
-              {/*  Change the button based on insideDrawer */}
               <Button
                 type="primary"
                 onClick={() => {
