@@ -3,8 +3,7 @@
 import '@ant-design/v5-patch-for-react-19';
 
 import { SetStateAction, useEffect, useState } from 'react';
-import { Card, Tabs } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { Tabs } from 'antd';
 import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
 import validator from '@rjsf/validator-ajv8';
@@ -119,7 +118,7 @@ function IngestForm({
   };
 
   const widgets = {
-    'renders.dashboard': CodeEditorWidget, // Map the nested field
+    'renders.dashboard': CodeEditorWidget,
   };
 
   return (

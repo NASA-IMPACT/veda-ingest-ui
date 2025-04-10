@@ -112,3 +112,27 @@ label[title='cog_default'],
   font-size: 14px;
   font-weight: 500;
 }
+
+.lightJSONEditor .language-json.code-highlight .token.property {
+  color: purple !important;
+}
+
+.lightJSONEditor .language-json.code-highlight .token.string {
+  color: #1677ff !important; /* String values */
+}
+
+.lightJSONEditor .language-json.code-highlight .token.number {
+  color: #52c41a !important; /* Number values */
+}
+
+.lightJSONEditor .language-json.code-highlight .token.boolean {
+  color: #d14f00 !important; /* Boolean values */
+}
+
+.lightJSONEditor .language-json.code-highlight .token.null {
+  color: #800080 !important; /* Null values */
+}
+
+.lightJSONEditor .language-json.code-highlight .token.punctuation {
+  color: #7a7a7a !important; /* Punctuation */
+}

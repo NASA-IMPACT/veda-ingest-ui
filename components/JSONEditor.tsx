@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Input, Button, Typography, Checkbox, Flex, message } from 'antd';
+import { Button, Typography, Checkbox, Flex, message } from 'antd';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import jsonSchema from '@/FormSchemas/jsonschema.json';

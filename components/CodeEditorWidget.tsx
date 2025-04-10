@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import debounce from 'lodash/debounce';
 import CodeEditor from '@uiw/react-textarea-code-editor';
-import './codeEditorTheme.css';
 
 interface CodeEditorWidgetProps {
   value: string;
@@ -45,6 +44,7 @@ const CodeEditorWidget: React.FC<CodeEditorWidgetProps> = ({
         boxShadow: '0px 3px 15px rgba(0, 0, 0, 0.2)',
         borderRadius: '6px',
       }}
+      className="lightJSONEditor"
     />
   );
 };
