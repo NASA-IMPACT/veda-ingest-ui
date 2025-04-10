@@ -24,6 +24,7 @@ const { confirm } = Modal;
 
 const bucketName = process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME!;
 const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png'];
+const CLOUDFRONT_URL = 'https://thumbnails.openveda.cloud/';
 
 interface UploadingFile {
   file: File;
@@ -33,8 +34,6 @@ interface UploadingFile {
 interface UploadedFile {
   name: string;
   url: string;
-  signedUrl?: string;
-  signedUrlError?: string;
 }
 
 interface ImageValidationResult {
@@ -189,7 +188,6 @@ function ThumbnailUploader({
       message.success('Thumbnail uploaded successfully!');
       setUploadingFile(null);
       setUploadedFile({ name: file.name, url: fileUrl });
-      fetchSignedUrl(fileUrl);
     } catch (error) {
       closeUploadingMessage();
       console.error('Upload failed:', error);
@@ -229,36 +227,6 @@ function ThumbnailUploader({
         reject(new Error('Network error during file upload.'));
       xhr.send(file);
     });
-  };
-
-  const fetchSignedUrl = async (fileUrl: string) => {
-    try {
-      const res = await fetch('/api/get-signed-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: fileUrl }),
-      });
-
-      if (!res.ok) {
-        const errorBody = await res.json();
-        console.error(
-          'Failed to get signed URL:',
-          errorBody.error || res.statusText
-        );
-        setUploadedFile((prev) =>
-          prev ? { ...prev, signedUrlError: 'Failed to load thumbnail.' } : null
-        );
-        return;
-      }
-
-      const { signedUrl } = await res.json();
-      setUploadedFile((prev) => (prev ? { ...prev, signedUrl } : null));
-    } catch (error) {
-      console.error('Error fetching signed URL:', error);
-      setUploadedFile((prev) =>
-        prev ? { ...prev, signedUrlError: 'Error fetching thumbnail.' } : null
-      );
-    }
   };
 
   const clearErrorsWithAnimation = () => {
@@ -400,7 +368,7 @@ function ThumbnailUploader({
             >
               <h3>Thumbnail Uploaded</h3>
               <Image
-                src={uploadedFile.signedUrl}
+                src={`${CLOUDFRONT_URL}${uploadedFile.name}`}
                 alt="Uploaded thumbnail"
                 style={{
                   maxWidth: '100%',
