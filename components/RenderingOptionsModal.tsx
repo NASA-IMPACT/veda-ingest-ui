@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
 import { Button, message, Modal } from 'antd';
 import dynamic from 'next/dynamic';
+import '@uiw/react-textarea-code-editor/dist.css';
 
 const CodeEditor = dynamic(
-  async () => {
-    const { default: CodeEditor } = await import(
-      '@uiw/react-textarea-code-editor'
-    );
-    return CodeEditor;
-  },
+  () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
   { ssr: false }
 );
 
