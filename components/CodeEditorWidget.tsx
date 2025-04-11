@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import debounce from 'lodash/debounce';
-import CodeEditor from '@uiw/react-textarea-code-editor';
+import dynamic from 'next/dynamic';
+import '@uiw/react-textarea-code-editor/dist.css';
+
+const CodeEditor = dynamic(
+  () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
+  { ssr: false }
+);
 
 interface CodeEditorWidgetProps {
   value: string;

@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect, useRef } from 'react';
 import { Button, Typography, Checkbox, Flex, message } from 'antd';
 import Ajv from 'ajv';
@@ -5,14 +7,10 @@ import addFormats from 'ajv-formats';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
 import AdditionalPropertyCard from '@/components/AdditionalPropertyCard';
 import dynamic from 'next/dynamic';
+import '@uiw/react-textarea-code-editor/dist.css';
 
 const CodeEditor = dynamic(
-  async () => {
-    const { default: CodeEditor } = await import(
-      '@uiw/react-textarea-code-editor'
-    );
-    return CodeEditor;
-  },
+  () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
   { ssr: false }
 );
 
