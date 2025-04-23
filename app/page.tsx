@@ -2,42 +2,27 @@
 import '@ant-design/v5-patch-for-react-19';
 
 import { Space } from 'antd';
-import { Amplify } from 'aws-amplify';
-import { withAuthenticator, ThemeProvider } from '@aws-amplify/ui-react';
-import { config } from '@/utils/aws-exports';
 
-import { SignInHeader } from '@/components/SignInHeader';
 import AppLayout from '@/components/Layout';
-import { withConditionalAuthenticator } from '@/utils/withConditionalAuthenticator';
-
-Amplify.configure({ ...config }, { ssr: true });
+import { withConditionalAuth } from '@/utils/withConditionalAuth';
 
 const Home = function Home() {
   return (
-    <ThemeProvider>
-      <AppLayout>
-        <section
-          style={{
-            textAlign: 'center',
-            marginTop: 48,
-            marginBottom: 40,
-            padding: 100,
-          }}
-        >
-          <Space align="start">
-            This application allows users to initiate the data ingest process.
-          </Space>
-        </section>
-      </AppLayout>
-    </ThemeProvider>
+    <AppLayout>
+      <section
+        style={{
+          textAlign: 'center',
+          marginTop: 48,
+          marginBottom: 40,
+          padding: 100,
+        }}
+      >
+        <Space align="start">
+          This application allows users to initiate the data ingest process.
+        </Space>
+      </section>
+    </AppLayout>
   );
 };
 
-export default withConditionalAuthenticator(Home, {
-  hideSignUp: true,
-  components: {
-    SignIn: {
-      Header: SignInHeader,
-    },
-  },
-});
+export default withConditionalAuth(Home);

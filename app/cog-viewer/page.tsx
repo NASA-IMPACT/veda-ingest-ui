@@ -4,7 +4,7 @@ import AppLayout from '@/components/Layout';
 import { Amplify } from 'aws-amplify';
 import { config } from '@/utils/aws-exports';
 import { SignInHeader } from '@/components/SignInHeader';
-import { withConditionalAuthenticator } from '@/utils/withConditionalAuthenticator';
+import { withConditionalAuth } from '@/utils/withConditionalAuth';
 import { Input, message } from 'antd';
 
 import { useCOGViewer } from '@/hooks/useCOGViewer';
@@ -60,7 +60,7 @@ const Renders = function Renders() {
   );
 };
 
-export default withConditionalAuthenticator(Renders, {
+export default withConditionalAuth(Renders, {
   hideSignUp: true,
   components: {
     SignIn: {

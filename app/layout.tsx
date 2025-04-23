@@ -2,8 +2,8 @@ import '@ant-design/v5-patch-for-react-19';
 import './globals.css';
 import React from 'react';
 import { Inter } from 'next/font/google';
-import { AntdRegistry } from '@ant-design/nextjs-registry';
 import 'leaflet/dist/leaflet.css';
+import ClientSessionProvider from '@/components/ClientSessionProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -11,15 +11,15 @@ export const metadata = {
   title: 'VEDA Ingest UI',
 };
 
-export default function RootLayout({
-  children,
-}: {
+interface RootLayoutProps {
   children: React.ReactNode;
-}) {
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AntdRegistry>{children}</AntdRegistry>
+        <ClientSessionProvider>{children}</ClientSessionProvider>
       </body>
     </html>
   );
