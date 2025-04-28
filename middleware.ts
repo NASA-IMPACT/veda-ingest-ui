@@ -1,40 +1,29 @@
-import { runWithAmplifyServerContext } from '@/utils/amplify-server-util';
-import { AmplifyServer } from 'aws-amplify/adapter-core';
-
-// The fetchAuthSession is pulled as the server version from aws-amplify/auth/server
-import { fetchAuthSession } from 'aws-amplify/auth/server';
+import { getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
 
+const secret = process.env.NEXTAUTH_SECRET;
+
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next();
+  const pathname = request.nextUrl.pathname;
 
-  // The runWithAmplifyServerContext will run the operation below
-  // in an isolated matter.
-  const authenticated = await runWithAmplifyServerContext({
-    nextServerContext: { request, response },
-    operation: async (contextSpec: AmplifyServer.ContextSpec) => {
-      try {
-        // The fetch will grab the session cookies
-        const session = await fetchAuthSession(contextSpec, {});
-        return session.tokens !== undefined;
-      } catch (error) {
-        console.log(error);
-        return false;
-      }
-    },
-  });
-
-  // If user is authenticated then the route request will continue on
-  if (process.env.NEXT_PUBLIC_DISABLE_AUTH || authenticated) {
-    return response;
+  // Allow public routes and NextAuth routes
+  if (
+    pathname.startsWith('/api/auth') ||
+    process.env.NEXT_PUBLIC_DISABLE_AUTH
+  ) {
+    return NextResponse.next();
   }
 
-  // user is not authenticated
+  const token = await getToken({ req: request, secret });
+
+  if (token) {
+    return NextResponse.next();
+  }
+
+  // If no token, redirect to sign-in page or return an unauthorized response
   return NextResponse.json({ message: 'Not Authenticated' }, { status: 401 });
 }
 
-// This config will match all routes accept /login, /api, _next/static, /_next/image
-// favicon.ico
 export const config = {
   matcher: [
     '/api/list-ingests',

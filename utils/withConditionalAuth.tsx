@@ -1,6 +1,6 @@
-// utils/withConditionalAuth.tsx
 'use client';
 
+import { Spin } from 'antd';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
@@ -24,7 +24,7 @@ export function withConditionalAuth<P extends object>(
       return <WrappedComponent {...props} />;
     }
 
-    return <div>Checking authentication...</div>;
+    return <Spin fullscreen />;
   };
 
   return ConditionalAuth;

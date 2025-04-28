@@ -142,3 +142,24 @@ To allow the veda-ingest-ui to open PRs in a repo, a Github app must be installe
 3. Create and save a Private Key to place in your env variables.
 4. Copy the `App ID` and `Client ID` from the new github app's overview.
 5. Copy the Installation ID from the repo's list of Installed GitHub Apps. The Installation ID is found in the URL for that application. For example, `https://github.com/settings/installations/[Installation ID]`.
+
+## Environment Variables
+
+| Environment Variable             | Frontend?         | Backend? | Purpose                                                                                                                   |
+| :------------------------------- | :---------------- | :------- | :------------------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_DISABLE_AUTH`       | Yes               | No       | Disable authentication for testing.                                                                                       |
+| `NEXT_PUBLIC_KEYCLOAK_ISSUER`    | Yes (Potentially) | No       | Keycloak realm URL (for direct frontend calls, if any).                                                                   |
+| `NEXTAUTH_SECRET`                | No                | Yes      | Secret for encrypting NextAuth.js data.                                                                                   |
+| `KEYCLOAK_ID`                    | No                | Yes      | Keycloak Client ID for your application.                                                                                  |
+| `KEYCLOAK_SECRET`                | No                | Yes      | Keycloak Client Secret for your application.                                                                              |
+| `KEYCLOAK_ISSUER`                | No                | Yes      | URL to your Keycloak realm's OIDC discovery endpoint or realm URL.                                                        |
+| `GITHUB_PRIVATE_KEY`             | No                | Yes      | Private Key for Pull Request destination repo                                                                             |
+| `OWNER`                          | No                | Yes      | Owner of Github destination repo                                                                                          |
+| `REPO`                           | No                | Yes      | Github destination repo                                                                                                   |
+| `TARGET_BRANCH`                  | No                | Yes      | Target branch for pull request                                                                                            |
+| `APP_ID`                         | No                | Yes      | Github App ID found on the Github settings page for the app.                                                              |
+| `INSTALLATION_ID`                | No                | Yes      | Github App's Installation ID found at `https://github.com/organizations/<Organization-name>/settings/installations/<ID>`. |
+| `AWS_REGION`                     | No                | Yes      | AWS Region used for S3 uploads                                                                                            |
+| `NEXT_PUBLIC_AWS_S3_BUCKET_NAME` | Yes               | Yes      | S3 bucket used for S3 uploads. Bucket name is displayed on the front end.                                                 |
+| `ASSUME_ROLE_ARN`                | No                | Yes      | Role in destination account assumed for S3 uploads.                                                                       |
+| `INGEST_UI_EXTERNAL_ID`          | No                | Yes      | Random string used by VEDA Ingest UI and destination account for added security of assume role for S3 uploads.            |
