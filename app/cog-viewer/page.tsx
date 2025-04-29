@@ -3,7 +3,6 @@
 import AppLayout from '@/components/Layout';
 import { Amplify } from 'aws-amplify';
 import { config } from '@/utils/aws-exports';
-import { SignInHeader } from '@/components/SignInHeader';
 import { withConditionalAuth } from '@/utils/withConditionalAuth';
 import { Input, message } from 'antd';
 
@@ -60,11 +59,4 @@ const Renders = function Renders() {
   );
 };
 
-export default withConditionalAuth(Renders, {
-  hideSignUp: true,
-  components: {
-    SignIn: {
-      Header: SignInHeader,
-    },
-  },
-});
+export default withConditionalAuth(Renders);

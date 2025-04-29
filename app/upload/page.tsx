@@ -3,7 +3,6 @@
 import AppLayout from '@/components/Layout';
 import { Amplify } from 'aws-amplify';
 import { config } from '@/utils/aws-exports';
-import { SignInHeader } from '@/components/SignInHeader';
 import { withConditionalAuth } from '@/utils/withConditionalAuth';
 import ThumbnailUploader from '@/components/ThumbnailUploader';
 
@@ -17,11 +16,4 @@ function UploadPage() {
   );
 }
 
-export default withConditionalAuth(UploadPage, {
-  hideSignUp: true,
-  components: {
-    SignIn: {
-      Header: SignInHeader,
-    },
-  },
-});
+export default withConditionalAuth(UploadPage);

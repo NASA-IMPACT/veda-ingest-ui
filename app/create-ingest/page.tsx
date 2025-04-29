@@ -3,7 +3,6 @@ import { useState } from 'react';
 import AppLayout from '@/components/Layout';
 import { Amplify } from 'aws-amplify';
 import { config } from '@/utils/aws-exports';
-import { SignInHeader } from '@/components/SignInHeader';
 
 Amplify.configure({ ...config }, { ssr: true });
 
@@ -49,11 +48,4 @@ const CreateIngest = function CreateIngest() {
   );
 };
 
-export default withConditionalAuth(CreateIngest, {
-  hideSignUp: true,
-  components: {
-    SignIn: {
-      Header: SignInHeader,
-    },
-  },
-});
+export default withConditionalAuth(CreateIngest);
