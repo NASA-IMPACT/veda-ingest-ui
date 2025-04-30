@@ -3,11 +3,6 @@ import userEvent from '@testing-library/user-event';
 import CreateIngest from '@/app/create-ingest/page';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-// Mock `withAuthenticator` to bypass Amplify authentication
-vi.mock('@aws-amplify/ui-react', () => ({
-  withAuthenticator: (Component: any) => Component,
-}));
-
 // Mock `IngestCreationForm`
 vi.mock('@/components/IngestCreationForm', () => ({
   default: ({

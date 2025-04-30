@@ -1,43 +1,42 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
 
-import { Space } from 'antd';
-import { Amplify } from 'aws-amplify';
-import { withAuthenticator, ThemeProvider } from '@aws-amplify/ui-react';
-import { config } from '@/utils/aws-exports';
-
-import { SignInHeader } from '@/components/SignInHeader';
+import { Space, Button } from 'antd';
 import AppLayout from '@/components/Layout';
-import { withConditionalAuthenticator } from '@/utils/withConditionalAuthenticator';
-
-Amplify.configure({ ...config }, { ssr: true });
+import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const Home = function Home() {
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  if (!session) {
+    // Redirect to the login page if not authenticated
+    router.push('/login');
+    return null; // Or a loading state
+  }
+
   return (
-    <ThemeProvider>
-      <AppLayout>
-        <section
-          style={{
-            textAlign: 'center',
-            marginTop: 48,
-            marginBottom: 40,
-            padding: 100,
-          }}
-        >
-          <Space align="start">
+    <AppLayout>
+      <section
+        style={{
+          textAlign: 'center',
+          marginTop: 48,
+          marginBottom: 40,
+          padding: 100,
+        }}
+      >
+        <Space direction="vertical" align="center">
+          <div>
             This application allows users to initiate the data ingest process.
-          </Space>
-        </section>
-      </AppLayout>
-    </ThemeProvider>
+          </div>
+          <Button onClick={() => signOut({ callbackUrl: '/' })}>
+            Sign Out
+          </Button>
+        </Space>
+      </section>
+    </AppLayout>
   );
 };
 
-export default withConditionalAuthenticator(Home, {
-  hideSignUp: true,
-  components: {
-    SignIn: {
-      Header: SignInHeader,
-    },
-  },
-});
+export default Home;

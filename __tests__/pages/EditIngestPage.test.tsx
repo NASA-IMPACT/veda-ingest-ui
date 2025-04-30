@@ -10,7 +10,6 @@ import {
   afterAll,
   vi,
 } from 'vitest';
-import { Amplify } from 'aws-amplify';
 import { config } from '@/utils/aws-exports';
 import { setupServer } from 'msw/node';
 import { handlers } from '@/__mocks__/handlers';
@@ -25,11 +24,6 @@ global.window.getComputedStyle = vi.fn().mockImplementation(() => ({
 
 describe('Edit Ingest Page', () => {
   const server = setupServer(...handlers);
-
-  beforeAll(() => {
-    Amplify.configure({ ...config }, { ssr: true });
-    server.listen();
-  });
 
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());

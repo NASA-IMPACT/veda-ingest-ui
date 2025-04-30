@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import AppLayout from '@/components/Layout';
-import { Amplify } from 'aws-amplify';
-import { config } from '@/utils/aws-exports';
 import IngestEditForm from '@/components/IngestEditForm';
 import { SignInHeader } from '@/components/SignInHeader';
 import { Button, List, Spin } from 'antd';
@@ -12,13 +10,10 @@ import { Status } from '@/types/global';
 import { Endpoints } from '@octokit/types';
 import ErrorModal from '@/components/ErrorModal';
 import SuccessModal from '@/components/SuccessModal';
-import { withConditionalAuthenticator } from '@/utils/withConditionalAuthenticator';
 
 // Type definitions
 type PullRequest =
   Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][number];
-
-Amplify.configure({ ...config }, { ssr: true });
 
 const EditIngest = function EditIngest() {
   const [data, setData] = useState<PullRequest[]>([]);
@@ -161,11 +156,4 @@ const EditIngest = function EditIngest() {
   );
 };
 
-export default withConditionalAuthenticator(EditIngest, {
-  hideSignUp: true,
-  components: {
-    SignIn: {
-      Header: SignInHeader,
-    },
-  },
-});
+export default EditIngest;

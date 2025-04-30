@@ -3,21 +3,6 @@ import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
 import React from 'react';
 
-// Mock Amplify configuration
-vi.mock('aws-amplify', () => ({
-  Amplify: {
-    configure: vi.fn(),
-  },
-}));
-
-// Mock components from AWS Amplify UI React
-vi.mock('@aws-amplify/ui-react', () => ({
-  withAuthenticator: (Component: React.ComponentType) => Component, // HOC typing
-  ThemeProvider: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ), // ThemeProvider typing
-}));
-
 // Mock AppLayout
 vi.mock('@/components/Layout', () => ({
   __esModule: true,

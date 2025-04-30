@@ -1,10 +1,7 @@
 'use client';
 
 import AppLayout from '@/components/Layout';
-import { Amplify } from 'aws-amplify';
-import { config } from '@/utils/aws-exports';
 import { SignInHeader } from '@/components/SignInHeader';
-import { withConditionalAuthenticator } from '@/utils/withConditionalAuthenticator';
 import { Input, message } from 'antd';
 
 import { useCOGViewer } from '@/hooks/useCOGViewer';
@@ -19,8 +16,6 @@ const COGViewerContent = dynamic(
     ssr: false,
   }
 );
-
-Amplify.configure({ ...config }, { ssr: true });
 
 const Renders = function Renders() {
   const cogViewer = useCOGViewer();
@@ -60,11 +55,4 @@ const Renders = function Renders() {
   );
 };
 
-export default withConditionalAuthenticator(Renders, {
-  hideSignUp: true,
-  components: {
-    SignIn: {
-      Header: SignInHeader,
-    },
-  },
-});
+export default Renders;
