@@ -1,12 +1,9 @@
+'use client';
+
 import React from 'react';
 import { Button, Tooltip } from 'antd';
-
-import { signOut } from 'aws-amplify/auth';
 import { LogoutOutlined } from '@ant-design/icons';
-
-async function handleSignOut() {
-  await signOut();
-}
+import { signOut } from 'next-auth/react';
 
 const collapsedStyle = {
   marginTop: '16px',
@@ -28,7 +25,7 @@ const LogoutButton = ({ collapsed }: { collapsed: boolean }) => {
       <Button
         variant="solid"
         color="danger"
-        onClick={handleSignOut}
+        onClick={() => signOut({ callbackUrl: '/' })}
         icon={<LogoutOutlined />}
         block
         style={collapsed ? collapsedStyle : expandedStyle}
