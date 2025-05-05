@@ -10,12 +10,33 @@ import {
   afterAll,
   vi,
 } from 'vitest';
-import { config } from '@/utils/aws-exports';
 import { setupServer } from 'msw/node';
 import { handlers } from '@/__mocks__/handlers';
 import { http, HttpResponse } from 'msw';
+import { SessionProvider } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 import EditIngest from '@/app/edit-ingest/page';
+
+const mockSessionData = {
+  user: {
+    name: 'Mock Test User',
+    email: 'test@example.com',
+    image: null,
+  },
+  expires: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+};
+
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+  })),
+}));
 
 global.window.getComputedStyle = vi.fn().mockImplementation(() => ({
   getPropertyValue: vi.fn(),
@@ -25,6 +46,7 @@ global.window.getComputedStyle = vi.fn().mockImplementation(() => ({
 describe('Edit Ingest Page', () => {
   const server = setupServer(...handlers);
 
+  beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
   afterEach(() => server.resetHandlers());
   afterAll(() => server.close());
 
@@ -41,11 +63,15 @@ describe('Edit Ingest Page', () => {
       .spyOn(console, 'error')
       .mockImplementation(() => {});
 
-    render(<EditIngest />);
+    render(
+      <SessionProvider session={mockSessionData}>
+        <EditIngest />
+      </SessionProvider>
+    );
 
     // Simulate interaction to trigger the error
     const pendingPullRequest = await screen.findByRole('button', {
-      name: /seeded ingest #1/i,
+      name: /Ingest Request for seeded ingest #1/i,
     });
     await userEvent.click(pendingPullRequest);
 
@@ -60,11 +86,15 @@ describe('Edit Ingest Page', () => {
   });
 
   it('displays the SuccessModal on successful edit', async () => {
-    render(<EditIngest />);
+    render(
+      <SessionProvider session={mockSessionData}>
+        <EditIngest />
+      </SessionProvider>
+    );
 
     // Simulate interaction to open the form
     const pendingPullRequest = await screen.findByRole('button', {
-      name: /seeded ingest #1/i,
+      name: /Ingest Request for seeded ingest #1/i,
     });
     await userEvent.click(pendingPullRequest);
 
@@ -81,7 +111,7 @@ describe('Edit Ingest Page', () => {
 
     // Submit the form
     const submitButton = await screen.findByRole('button', { name: /submit/i });
-    userEvent.click(submitButton);
+    await userEvent.click(submitButton);
 
     // // Verify SuccessModal appears
     await waitFor(() => {

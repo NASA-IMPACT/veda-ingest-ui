@@ -274,6 +274,7 @@ test.describe('COG Viewer Drawer', () => {
           )
         );
     });
+    await page.waitForTimeout(500);
 
     await test.step('click button to open COG Viewer Drawer', async () => {
       await page

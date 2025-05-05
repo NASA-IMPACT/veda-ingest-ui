@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import AppLayout from '@/components/Layout';
 import IngestEditForm from '@/components/IngestEditForm';
-import { SignInHeader } from '@/components/SignInHeader';
 import { Button, List, Spin } from 'antd';
 
 import { Status } from '@/types/global';
