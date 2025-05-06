@@ -25,7 +25,7 @@ export async function middleware(request: NextRequest) {
   });
 
   // If user is authenticated then the route request will continue on
-  if (process.env.NEXT_PUBLIC_DISABLE_AUTH || authenticated) {
+  if (process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true' || authenticated) {
     return response;
   }
 
@@ -40,6 +40,6 @@ export const config = {
     '/api/list-ingests',
     '/api/retrieve-ingest',
     '/api/create-ingest',
-    '/api/uload-url',
+    '/api/upload-url',
   ],
 };
