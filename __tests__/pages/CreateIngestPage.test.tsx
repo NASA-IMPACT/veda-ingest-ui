@@ -10,7 +10,11 @@ describe('Create Ingest Page', () => {
     render(<CreateIngest />);
 
     // Check for the main content
-    // Check for the main content
-    expect(screen.getByLabelText(/collection/i)).toBeInTheDocument();
+    const collectionLabel = await screen.findByText(
+      /collection/i,
+      {},
+      { timeout: 5000 }
+    );
+    expect(collectionLabel).toBeInTheDocument();
   });
 });

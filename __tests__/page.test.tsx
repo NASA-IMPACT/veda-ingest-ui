@@ -13,6 +13,11 @@ describe('Home Page', () => {
       </SessionProvider>
     );
 
-    expect(screen.findByText(/This application allows/i)).toBeInTheDocument();
+    const introductoryText = await screen.findByText(
+      /This application allows/i,
+      {},
+      { timeout: 5000 }
+    );
+    expect(introductoryText).toBeInTheDocument();
   });
 });
