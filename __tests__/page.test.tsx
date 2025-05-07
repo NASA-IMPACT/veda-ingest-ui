@@ -6,13 +6,13 @@ import { SessionProvider } from 'next-auth/react';
 import Home from '@/app/page';
 
 describe('Home Page', () => {
-  it('renders the page without crashing', () => {
+  it('renders the page without crashing', async () => {
     render(
       <SessionProvider session={null}>
         <Home />
       </SessionProvider>
     );
 
-    expect(screen.getByText(/This application allows/i)).toBeInTheDocument();
+    expect(screen.findByText(/This application allows/i)).toBeInTheDocument();
   });
 });
