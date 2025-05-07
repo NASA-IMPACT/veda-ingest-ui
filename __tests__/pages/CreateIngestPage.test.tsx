@@ -6,10 +6,10 @@ import CreateIngest from '@/app/create-ingest/page';
 vi.mock('leaflet');
 
 describe('Create Ingest Page', () => {
-
-  it('renders the page without crashing', () => {
+  it('renders the page without crashing', async () => {
     render(<CreateIngest />);
 
+    // Check for the main content
     // Check for the main content
     expect(screen.getByLabelText(/collection/i)).toBeInTheDocument();
   });
