@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import AppLayout from '@/components/Layout';
-import { SignInHeader } from '@/components/SignInHeader';
 import { Spin } from 'antd';
 import IngestCreationForm from '@/components/IngestCreationForm';
 import ErrorModal from '@/components/ErrorModal';

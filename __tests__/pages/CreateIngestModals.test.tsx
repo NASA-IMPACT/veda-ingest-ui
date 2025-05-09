@@ -1,6 +1,6 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateIngest from '@/app/create-ingest/page';
+import CreateIngestClient from '@/app/create-ingest/_components/CreateIngestClient';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // Mock `IngestCreationForm`
@@ -56,13 +56,13 @@ vi.mock('@/components/SuccessModal', () => ({
   ),
 }));
 
-describe('CreateIngest Page', () => {
+describe('CreateIngestClient modals', () => {
   afterEach(() => {
     cleanup();
   });
 
   it('displays the SuccessModal on a successful API call', async () => {
-    render(<CreateIngest />);
+    render(<CreateIngestClient />);
 
     const formContainer = screen.getByTestId('ingest-creation-form');
     const successButton = within(formContainer).getByRole('button', {
@@ -79,7 +79,7 @@ describe('CreateIngest Page', () => {
   });
 
   it('displays the ErrorModal on a failed API call', async () => {
-    render(<CreateIngest />);
+    render(<CreateIngestClient />);
 
     const formContainer = screen.getByTestId('ingest-creation-form');
     const errorButton = within(formContainer).getByRole('button', {

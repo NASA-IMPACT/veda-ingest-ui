@@ -7,14 +7,8 @@ import React from 'react';
 vi.mock('@/components/Layout', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
+    <div data-testid="app-layout">{children}</div>
   ),
-}));
-
-// Mock SignInHeader
-vi.mock('@/components/SignInHeader', () => ({
-  __esModule: true,
-  SignInHeader: () => <div>Mock SignInHeader</div>, // Named export
 }));
 
 Object.defineProperty(window, 'matchMedia', {
