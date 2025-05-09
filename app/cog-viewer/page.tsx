@@ -1,58 +1,19 @@
-'use client';
+import { auth } from '@/app/api/auth/[...nextauth]/route';
+import { redirect } from 'next/navigation';
+import CogViewerClient from './_components/CogViewerClient';
 
-import AppLayout from '@/components/Layout';
-import { SignInHeader } from '@/components/SignInHeader';
-import { Input, message } from 'antd';
+const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
-import { useCOGViewer } from '@/hooks/useCOGViewer';
-
-import dynamic from 'next/dynamic';
-import 'leaflet/dist/leaflet.css';
-
-// Dynamically load the COGViewerContent component to prevent SSR issues
-const COGViewerContent = dynamic(
-  () => import('@/components/COGViewerContent'),
-  {
-    ssr: false,
+export default async function CogViewerPage() {
+  if (DISABLE_AUTH) {
+    return <CogViewerClient />;
   }
-);
 
-const Renders = function Renders() {
-  const cogViewer = useCOGViewer();
+  const session = await auth();
 
-  return (
-    <AppLayout>
-      <div
-        style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}
-      >
-        <div
-          style={{
-            padding: '10px',
-            backgroundColor: '#f8f9fa',
-            borderBottom: '1px solid #ddd',
-          }}
-        >
-          <Input.Search
-            placeholder="Enter COG URL"
-            enterButton="Load"
-            onSearch={(url) => {
-              const trimmedUrl = url.trim();
-              if (!trimmedUrl) {
-                message.error('Please enter a valid URL.');
-                return;
-              }
-              cogViewer.setCogUrl(trimmedUrl);
-              cogViewer.fetchMetadata(trimmedUrl);
-            }}
-            loading={cogViewer.loading}
-            style={{ width: '100%' }}
-          />
-        </div>
+  if (!session) {
+    redirect('/login');
+  }
 
-        <COGViewerContent {...cogViewer} />
-      </div>
-    </AppLayout>
-  );
-};
-
-export default Renders;
+  return <CogViewerClient />;
+}

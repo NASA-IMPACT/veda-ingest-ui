@@ -1,47 +1,20 @@
-'use client';
-import { useState } from 'react';
-import AppLayout from '@/components/Layout';
-import { SignInHeader } from '@/components/SignInHeader';
+// app/create-ingest/page.tsx (Server Component)
+import { auth } from '@/app/api/auth/[...nextauth]/route';
+import { redirect } from 'next/navigation';
+import CreateIngestClient from './_components/CreateIngestClient'; // Your original CreateIngest component
 
-import { Spin } from 'antd';
+const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
-import IngestCreationForm from '@/components/IngestCreationForm';
-import ErrorModal from '@/components/ErrorModal';
-import SuccessModal from '@/components/SuccessModal';
-import { Status } from '@/types/global';
+export default async function CreateIngestPage() {
+  if (DISABLE_AUTH) {
+    return <CreateIngestClient />;
+  }
 
-const CreateIngest = function CreateIngest() {
-  const [status, setStatus] = useState<Status>('idle');
-  const [collectionName, setCollectionName] = useState('');
-  const [apiErrorMessage, setApiErrorMessage] = useState('');
-  const [pullRequestUrl, setPullRequestUrl] = useState('');
+  const session = await auth();
 
-  return (
-    <AppLayout>
-      <IngestCreationForm
-        setStatus={setStatus}
-        setCollectionName={setCollectionName}
-        setApiErrorMessage={setApiErrorMessage}
-        setPullRequestUrl={setPullRequestUrl}
-      />
+  if (!session) {
+    redirect('/login');
+  }
 
-      {status === 'loadingGithub' && <Spin fullscreen />}
-      {status === 'error' && (
-        <ErrorModal
-          collectionName={collectionName}
-          apiErrorMessage={apiErrorMessage}
-        />
-      )}
-      {status === 'success' && (
-        <SuccessModal
-          type="create"
-          setStatus={setStatus}
-          collectionName={collectionName}
-          pullRequestUrl={pullRequestUrl}
-        />
-      )}
-    </AppLayout>
-  );
-};
-
-export default CreateIngest;
+  return <CreateIngestClient />;
+}
