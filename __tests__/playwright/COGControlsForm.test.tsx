@@ -21,6 +21,7 @@ test.describe('COGControlsForm Layout 🎨', () => {
     });
 
     await test.step('Load COG ViewerPage with mock response from /raster/cog/info endpoint', async () => {
+      await expect(page.getByText('OpenStreetMap contributors')).toBeVisible();
       await page.getByPlaceholder(/Enter COG URL/i).fill('s3://test.com');
       await page.getByRole('button', { name: /load/i }).click();
     });
@@ -69,6 +70,7 @@ test.describe('COGControlsForm Layout 🎨', () => {
     });
 
     await test.step('Load COG ViewerPage with mock response from /raster/cog/info endpoint', async () => {
+      await expect(page.getByText('OpenStreetMap contributors')).toBeVisible();
       await page.getByPlaceholder(/Enter COG URL/i).fill('s3://test.com');
       await page.getByRole('button', { name: /load/i }).click();
     });
@@ -113,6 +115,9 @@ test.describe('COGControlsForm inputs update tile parameters ⚙️', () => {
       });
 
       await test.step('Load COG ViewerPage with mock response from /raster/cog/info endpoint', async () => {
+        await expect(
+          page.getByText('OpenStreetMap contributors')
+        ).toBeVisible();
         await page.getByPlaceholder(/Enter COG URL/i).fill('s3://test.com');
         await page.getByRole('button', { name: /load/i }).click();
       });
@@ -157,6 +162,7 @@ test.describe('COGControlsForm inputs update tile parameters ⚙️', () => {
     });
 
     await test.step('Load COG ViewerPage with mock response from /raster/cog/info endpoint', async () => {
+      await expect(page.getByText('OpenStreetMap contributors')).toBeVisible();
       await page.getByPlaceholder(/Enter COG URL/i).fill('s3://test.com');
       await page.getByRole('button', { name: /load/i }).click();
     });
@@ -204,6 +210,7 @@ test.describe('COGControlsForm inputs update tile parameters ⚙️', () => {
     });
 
     await test.step('Load COG ViewerPage with mock response from /raster/cog/info endpoint', async () => {
+      await expect(page.getByText('OpenStreetMap contributors')).toBeVisible();
       await page.getByPlaceholder(/Enter COG URL/i).fill('s3://test.com');
       await page.getByRole('button', { name: /load/i }).click();
     });
@@ -244,6 +251,7 @@ test.describe('COGControlsForm inputs update tile parameters ⚙️', () => {
     });
 
     await test.step('Load COG ViewerPage with mock response from /raster/cog/info endpoint', async () => {
+      await expect(page.getByText('OpenStreetMap contributors')).toBeVisible();
       await page.getByPlaceholder(/Enter COG URL/i).fill('s3://test.com');
       await page.getByRole('button', { name: /load/i }).click();
     });
@@ -289,6 +297,7 @@ test.describe('COGControlsForm inputs update tile parameters ⚙️', () => {
     });
 
     await test.step('Load COG ViewerPage with mock response from /raster/cog/info endpoint', async () => {
+      await expect(page.getByText('OpenStreetMap contributors')).toBeVisible();
       await page.getByPlaceholder(/Enter COG URL/i).fill('s3://test.com');
       await page.getByRole('button', { name: /load/i }).click();
     });

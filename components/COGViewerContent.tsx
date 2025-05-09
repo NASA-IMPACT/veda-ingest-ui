@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Spin } from 'antd';
+import { Map as LeafletMap } from 'leaflet';
 
 import COGControlsForm from './COGControlsForm';
 import RenderingOptionsModal from './RenderingOptionsModal';
@@ -38,7 +39,7 @@ interface COGViewerContentProps {
     noData?: string | null
   ) => void;
   cogUrl: string | null;
-  mapRef: React.MutableRefObject<any>;
+  mapRef: React.MutableRefObject<LeafletMap | null>;
 }
 
 const COGViewerContent: React.FC<COGViewerContentProps> = ({
@@ -69,24 +70,30 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
 
   // Automatically adjust map size when container resizes
   useEffect(() => {
-    if (
-      typeof window !== 'undefined' &&
-      mapRef.current &&
-      containerRef.current
-    ) {
-      const resizeObserver = new ResizeObserver(() => {
-        if (mapRef.current) {
-          mapRef.current.invalidateSize();
-        }
-      });
-
-      resizeObserver.observe(containerRef.current);
-
-      return () => {
-        resizeObserver.disconnect();
-      };
+    if (!containerRef.current) {
+      console.warn('Map container ref not available for ResizeObserver');
+      return;
     }
-  }, []);
+
+    const mapContainerElement = containerRef.current; // Store ref value
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (
+        mapRef.current &&
+        typeof mapRef.current.invalidateSize === 'function'
+      ) {
+        mapRef.current.invalidateSize();
+      } else {
+      }
+    });
+
+    resizeObserver.observe(mapContainerElement);
+
+    return () => {
+      resizeObserver.unobserve(mapContainerElement);
+      resizeObserver.disconnect();
+    };
+  }, [mapRef]);
 
   return (
     <>
@@ -129,24 +136,32 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
             setNoDataValue(value);
             setHasChanges(true);
           }}
-          onUpdateTileLayer={() =>
-            fetchTileUrl(
-              cogUrl!,
-              selectedBands,
-              rescale,
-              selectedColormap,
-              colorFormula,
-              selectedResampling,
-              noDataValue
-            )
-          }
+          onUpdateTileLayer={() => {
+            if (cogUrl) {
+              fetchTileUrl(
+                cogUrl,
+                selectedBands,
+                rescale,
+                selectedColormap,
+                colorFormula,
+                selectedResampling,
+                noDataValue
+              );
+            } else {
+              console.error('Cannot update tile layer: COG URL is null.');
+            }
+          }}
           onViewRenderingOptions={() => setIsModalVisible(true)}
           loading={loading}
         />
       )}
       <div
         ref={containerRef}
-        style={{ height: metadata ? '70vh' : '80vh', position: 'relative' }}
+        style={{
+          height: metadata ? '70vh' : '80vh',
+          position: 'relative',
+          border: '1px solid #d9d9d9',
+        }} // Added border for visibility
       >
         {loading && (
           <div
@@ -178,7 +193,7 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
           rescale,
           colormap_name: selectedColormap.toLowerCase(),
           color_formula: colorFormula || undefined,
-          resampling: selectedResampling,
+          resampling: selectedResampling || undefined,
           nodata: noDataValue || undefined,
         }}
       />

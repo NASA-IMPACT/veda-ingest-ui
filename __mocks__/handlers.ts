@@ -1,8 +1,41 @@
-import fs from 'node:fs';
-import path from 'path';
 import { http, HttpResponse } from 'msw';
+
+// Import mock data if they are in separate files
 import { githubResponse } from './githubResponse';
 import { retrieveIngestResponse } from './retrieveIngestResponse';
+
+// --- Placeholder Tile Logic ---
+const MOCK_TILE_BASE64 =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+function base64ToArrayBuffer(base64DataUri: string) {
+  if (!base64DataUri || !base64DataUri.includes(',')) {
+    console.error('Invalid Base64 Data URI provided for tile mock');
+    return new ArrayBuffer(0);
+  }
+  const base64 = base64DataUri.split(',')[1];
+  try {
+    const binaryString = atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+  } catch (e) {
+    console.error('Error decoding Base64 string for tile mock:', e);
+    return new ArrayBuffer(0);
+  }
+}
+const mockTileBuffer = base64ToArrayBuffer(MOCK_TILE_BASE64);
+
+const mockSession = {
+  user: {
+    name: 'Mock User',
+    email: 'test.user@example.com',
+    image: null,
+  },
+  expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+};
 
 interface EditIngestRequestBody {
   formData: {
@@ -34,7 +67,7 @@ export const handlers = [
       return new HttpResponse('Missing description', { status: 400 });
     }
 
-    return HttpResponse.json({ message: 'Data updated successfully' });
+    return HttpResponse.json({ message: 'Data updated successfully' }); // Changed response to match PUT semantics
   }),
 
   http.post('/api/create-ingest', async ({ request }) => {
@@ -98,16 +131,54 @@ export const handlers = [
   http.post('/api/upload-url', async ({ request }) => {
     return HttpResponse.json({
       uploadUrl:
-        'https://s3bucket.s3.us-west-2.amazonaws.com/thumnbnail.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4NPAGWTH4OAKYR4F%2F20250306%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250306T210052Z&X-Amz-Expires=900&X-Amz-Signature=50d8e81e05d3b7ec427b0d9add69c839f5379ce2a27f7f7b6832c1b15fd430c8&X-Amz-SignedHeaders=host',
+        'https://s3bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4NPAGWTH4OAKYR4F%2F20250306%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250306T210052Z&X-Amz-Expires=900&X-Amz-Signature=50d8e81e05d3b7ec427b0d9add69c839f5379ce2a27f7f7b6832c1b15fd430c8&X-Amz-SignedHeaders=host',
       fileUrl: 'https://s3bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg',
       fileExists: false,
     });
   }),
 
   http.put(
-    'https://s3bucket.s3.us-west-2.amazonaws.com/thumnbnail.jpg',
+    'https://s3bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg',
     async ({}) => {
-      return HttpResponse.json({ status: 200 });
+      return new HttpResponse(null, { status: 200 });
     }
   ),
+
+  http.get('/api/auth/session', ({ request }) => {
+    return HttpResponse.json(mockSession);
+  }),
+
+  http.get(
+    'https://example.com/api/raster/cog/tiles/WebMercatorQuad/:z/:x/:y.png',
+    ({ request, params }) => {
+      if (!mockTileBuffer || mockTileBuffer.byteLength === 0) {
+        console.error('[MSW] Mock tile buffer is invalid for example.com!');
+        return new HttpResponse('Error generating mock tile', { status: 500 });
+      }
+      return new HttpResponse(mockTileBuffer, {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/png',
+          'Content-Length': mockTileBuffer.byteLength.toString(),
+          'X-MSW-Mocked': 'true',
+        },
+      });
+    }
+  ),
+
+  http.get('https://*.tile.openstreetmap.org/:z/:x/:y.png', ({ request }) => {
+    if (!mockTileBuffer || mockTileBuffer.byteLength === 0) {
+      console.error('[MSW] Mock tile buffer is invalid for OSM!');
+      return new HttpResponse('Error generating mock tile', { status: 500 });
+    }
+
+    return new HttpResponse(mockTileBuffer, {
+      status: 200,
+      headers: {
+        'Content-Type': 'image/png',
+        'Content-Length': mockTileBuffer.byteLength.toString(),
+        'X-MSW-Mocked': 'true', // Optional custom header
+      },
+    });
+  }),
 ];
