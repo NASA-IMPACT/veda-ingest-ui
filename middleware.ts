@@ -9,6 +9,8 @@ export async function middleware(request: NextRequest) {
   }
 
   const session = await auth();
+  const pathname = request.nextUrl.pathname;
+
   const protectedRoutes = [
     '/create-ingest',
     '/api/list-ingests',
@@ -17,11 +19,31 @@ export async function middleware(request: NextRequest) {
     '/api/upload-url',
   ];
 
+  // Allow access all authenticated users
   if (
-    !session &&
-    protectedRoutes.some((path) => request.nextUrl.pathname.startsWith(path))
+    (pathname.startsWith('/create-ingest') ||
+      pathname.startsWith('/upload') ||
+      pathname.startsWith('/cog-viewer')) &&
+    session
   ) {
-    if (request.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
+  // Protect /edit-ingest based on the dataset:update scope
+  if (pathname.startsWith('/edit-ingest')) {
+    if (!session?.scopes?.includes('Editor')) {
+      if (pathname.startsWith('/api/')) {
+        return new NextResponse('Unauthorized', { status: 401 });
+      } else {
+        return NextResponse.redirect(new URL('/unauthorized', request.url)); // Redirect to an unauthorized page
+      }
+    }
+    return NextResponse.next();
+  }
+
+  // Authentication check for other protected routes
+  if (!session && protectedRoutes.some((path) => pathname.startsWith(path))) {
+    if (pathname.startsWith('/api/')) {
       // For API routes, return a 401 Unauthorized response
       return new NextResponse('Unauthorized', { status: 401 });
     } else {
