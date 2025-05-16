@@ -1,11 +1,11 @@
 import '@ant-design/v5-patch-for-react-19';
 import AppLayout from '@/components/Layout';
 import { redirect } from 'next/navigation';
-import { auth } from '@/auth';
+import { auth } from '@/lib/auth';
 
 const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
-export default async function Home() {
+async function Home() {
   if (DISABLE_AUTH) {
     return (
       <AppLayout>
@@ -24,8 +24,10 @@ export default async function Home() {
   }
 
   const session = await auth();
+  console.log('Session:', session);
 
   if (!session) {
+    console.log('Redirecting to /login');
     redirect('/login');
   }
 
@@ -44,3 +46,5 @@ export default async function Home() {
     </AppLayout>
   );
 }
+
+export default Home;
