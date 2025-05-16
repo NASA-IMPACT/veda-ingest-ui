@@ -1,5 +1,5 @@
 // app/create-ingest/page.tsx (Server Component)
-import { auth } from '@/app/api/auth/[...nextauth]/route';
+import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import CreateIngestClient from './_components/CreateIngestClient'; // Your original CreateIngest component
 
