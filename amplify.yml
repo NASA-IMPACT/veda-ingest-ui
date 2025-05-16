@@ -10,7 +10,7 @@ frontend:
         - yarn install
     build:
       commands:
-        - env | grep -e OWNER -e REPO -e APP_ID -e INSTALLATION_ID -e GITHUB_PRIVATE_KEY -e ASSUME_ROLE_ARN -e INGEST_UI_EXTERNAL_ID >> .env.production
+        - env | grep -e OWNER -e REPO -e APP_ID -e INSTALLATION_ID -e GITHUB_PRIVATE_KEY -e ASSUME_ROLE_ARN -e INGEST_UI_EXTERNAL_ID -e NEXT_PUBLIC_KEYCLOAK_ISSUER -e NEXTAUTH_SECRET -e KEYCLOAK_CLIENT_ID -e KEYCLOAK_CLIENT_SECRET >> .env.production
         - env | grep -e NEXT_PUBLIC_ >> .env.production
         - yarn build
   artifacts:
