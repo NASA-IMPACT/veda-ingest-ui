@@ -1,6 +1,6 @@
 'use server';
 
-import { signIn, signOut } from '@/app/api/auth/[...nextauth]/route';
+import { signIn, signOut } from '@/lib/auth';
 
 export async function keycloakSignIn(callbackUrl: string) {
   await signIn('keycloak', { callbackUrl: '/create-ingest' });
