@@ -2,7 +2,11 @@ import React, { ReactNode, useState } from 'react';
 import { Layout } from 'antd';
 
 import MenuBar from '@/components/MenuBar';
-import LogoutButton from '@/components/LogoutButton';
+import dynamic from 'next/dynamic';
+
+const LogoutButton = dynamic(() => import('@/components/LogoutButton'), {
+  ssr: false,
+});
 
 const { Content, Sider } = Layout;
 
