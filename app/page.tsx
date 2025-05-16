@@ -1,10 +1,10 @@
 'use client';
 
 import '@ant-design/v5-patch-for-react-19';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Space, Spin } from 'antd';
+import { Spin } from 'antd';
 
 import AppLayout from '@/components/Layout';
 
@@ -13,14 +13,18 @@ const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 const Home = function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
+    if (status !== 'loading') {
+      setIsInitialLoading(false);
+    }
     if (!DISABLE_AUTH && status === 'unauthenticated') {
       router.push('/login');
     }
-  }, [status]);
+  }, [status, router]);
 
-  if (!DISABLE_AUTH && (status === 'loading' || status === 'unauthenticated')) {
+  if (isInitialLoading) {
     return (
       <AppLayout>
         <div
@@ -42,9 +46,7 @@ const Home = function Home() {
           padding: 100,
         }}
       >
-        <Space align="start">
-          This application allows users to initiate the data ingest process.
-        </Space>
+        This application allows users to initiate the data ingest process.
       </section>
     </AppLayout>
   );
