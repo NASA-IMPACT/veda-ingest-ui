@@ -1,4 +1,3 @@
-// lib/auth.ts
 import NextAuth, { type NextAuthConfig } from 'next-auth';
 import KeycloakProvider from 'next-auth/providers/keycloak';
 import { JWT } from 'next-auth/jwt';
@@ -58,6 +57,14 @@ const authOptions: NextAuthConfig = {
     },
   },
 };
+
+console.log('✅ NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
+console.log('✅ NEXTAUTH_TRUST_HOST:', process.env.NEXTAUTH_TRUST_HOST);
+console.log('✅ KEYCLOAK_CLIENT_ID:', process.env.KEYCLOAK_CLIENT_ID);
+console.log(
+  '✅ NEXT_PUBLIC_KEYCLOAK_ISSUER:',
+  process.env.NEXT_PUBLIC_KEYCLOAK_ISSUER
+);
 
 const { handlers, auth, signIn, signOut } = NextAuth(authOptions);
 
