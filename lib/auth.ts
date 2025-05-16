@@ -17,6 +17,7 @@ if (process.env.NEXT_PUBLIC_DISABLE_AUTH !== 'true') {
 
 const authOptions: NextAuthConfig = {
   secret: process.env.NEXTAUTH_SECRET,
+  trustHost: true,
   providers,
   session: {
     strategy: 'jwt',
