@@ -1,39 +1,34 @@
-import React from 'react';
-import { render, screen, cleanup } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { SessionProvider } from 'next-auth/react';
+import { cleanup, render, screen } from '@testing-library/react';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  type Mock,
+} from 'vitest';
 
-const mockPush = vi.fn();
-const mockReplace = vi.fn();
-const mockPrefetch = vi.fn();
-const mockBack = vi.fn();
-const mockForward = vi.fn();
-
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: mockPush,
-    replace: mockReplace,
-    prefetch: mockPrefetch,
-    back: mockBack,
-    forward: mockForward,
-  }),
-  usePathname: vi.fn().mockReturnValue('/'),
-  useSearchParams: vi.fn().mockReturnValue(new URLSearchParams()),
+// Mock `auth` and `redirect`
+vi.mock('@/lib/auth', () => ({
+  auth: vi.fn(),
 }));
 
-describe('Home Page', () => {
+vi.mock('next/navigation', () => ({
+  redirect: vi.fn(),
+}));
+
+const renderHome = async () => {
+  const { default: Home } = await import('@/app/page'); // adjust path if needed
+  return await Home();
+};
+
+describe('Home component', () => {
   const originalEnv = { ...process.env };
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.resetModules();
-    process.env = { ...originalEnv };
-    delete process.env.NEXT_PUBLIC_DISABLE_AUTH; // Ensure a clean slate
-
-    mockPush.mockClear();
-    mockReplace.mockClear();
-    mockPrefetch.mockClear();
-    mockBack.mockClear();
-    mockForward.mockClear();
+    delete process.env.NEXT_PUBLIC_DISABLE_AUTH;
   });
 
   afterEach(() => {
@@ -41,69 +36,45 @@ describe('Home Page', () => {
     cleanup();
   });
 
-  describe('when NEXT_PUBLIC_DISABLE_AUTH is "true"', () => {
-    it('renders the main content regardless of session status', async () => {
-      process.env.NEXT_PUBLIC_DISABLE_AUTH = 'true';
-      const { default: Home } = await import('@/app/page');
+  it('renders without auth when NEXT_PUBLIC_DISABLE_AUTH is true', async () => {
+    process.env.NEXT_PUBLIC_DISABLE_AUTH = 'true';
 
-      render(
-        <SessionProvider session={null}>
-          <Home />
-        </SessionProvider>
-      );
-      const introductoryText = await screen.findByText(
-        /This application allows users to initiate the data ingest process\./i
-      );
-      expect(introductoryText).toBeInTheDocument();
-      expect(mockPush).not.toHaveBeenCalled();
-    }, 10000);
+    const jsx = await renderHome();
+    render(jsx);
+
+    const introductoryText = await screen.findByText(
+      /This application allows users to initiate the data ingest process\./i
+    );
+    expect(introductoryText).toBeInTheDocument();
+  }, 10000); // this test is slow
+
+  it('redirects to /login if auth is enabled and no session exists', async () => {
+    process.env.NEXT_PUBLIC_DISABLE_AUTH = 'false';
+
+    const { auth } = await import('@/lib/auth');
+    const { redirect } = await import('next/navigation');
+
+    (vi.mocked(auth, true) as unknown as Mock).mockResolvedValue(null);
+
+    await renderHome();
+
+    expect(redirect).toHaveBeenCalledWith('/login');
   });
 
-  describe('when NEXT_PUBLIC_DISABLE_AUTH is "false" (or not set)', () => {
-    it('shows spinner and calls router.push for an unauthenticated user', async () => {
-      process.env.NEXT_PUBLIC_DISABLE_AUTH = 'false';
-      const { default: Home } = await import('@/app/page');
+  it('renders content when auth is enabled and session exists', async () => {
+    process.env.NEXT_PUBLIC_DISABLE_AUTH = 'false';
 
-      const { container } = render(
-        <SessionProvider session={null}>
-          <Home />
-        </SessionProvider>
-      );
+    const { auth } = await import('@/lib/auth');
+    (vi.mocked(auth, true) as unknown as Mock).mockResolvedValue({
+      user: 'test-user',
+    });
 
-      const spinnerElement = container.querySelector(
-        '.ant-spin[aria-busy="true"]'
-      );
-      expect(spinnerElement).toBeInTheDocument();
+    const jsx = await renderHome();
+    render(jsx);
 
-      expect(
-        screen.queryByText(
-          /This application allows users to initiate the data ingest process\./i
-        )
-      ).not.toBeInTheDocument();
-
-      await vi.waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith('/login');
-      });
-    }, 7000);
-
-    it('renders main content for an authenticated user', async () => {
-      process.env.NEXT_PUBLIC_DISABLE_AUTH = 'false';
-      const { default: Home } = await import('@/app/page');
-
-      const mockUserSession = {
-        user: { name: 'Test User', email: 'test@example.com', id: '123' },
-        expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-      };
-      render(
-        <SessionProvider session={mockUserSession}>
-          <Home />
-        </SessionProvider>
-      );
-      const introductoryText = await screen.findByText(
-        /This application allows users to initiate the data ingest process\./i
-      );
-      expect(introductoryText).toBeInTheDocument();
-      expect(mockPush).not.toHaveBeenCalled();
-    }, 7000);
+    const introductoryText = await screen.findByText(
+      /This application allows users to initiate the data ingest process\./i
+    );
+    expect(introductoryText).toBeInTheDocument();
   });
 });

@@ -1,21 +1,20 @@
-// app/login/page.tsx
 'use client';
 
 import { Button } from 'antd';
 import { useRouter } from 'next/navigation';
 import { useEffect, useTransition } from 'react';
 import { keycloakSignIn } from '@/app/actions/auth';
-import { useSession } from 'next-auth/react'; // Import useSession
+import { useSession } from 'next-auth/react';
 
 export default function LoginPage() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const { data: session } = useSession(); // Get session on the client
+  const { data: session } = useSession();
 
   // Redirect if already logged in
   useEffect(() => {
     if (session) {
-      router.push('/'); // Or your desired post-login route
+      router.push('/');
     }
   }, [session, router]);
 
