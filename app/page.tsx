@@ -24,10 +24,8 @@ async function Home() {
   }
 
   const session = await auth();
-  console.log('Session:', session);
 
   if (!session) {
-    console.log('Redirecting to /login');
     redirect('/login');
   }
 
