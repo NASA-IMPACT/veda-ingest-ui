@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { MutableRefObject } from 'react';
 import { MapContainer, TileLayer } from 'react-leaflet';
+import { Map as LeafletMap } from 'leaflet';
 
 interface DynamicMapProps {
   tileUrl: string | null;
-  mapRef: React.MutableRefObject<any>;
+  mapRef: MutableRefObject<LeafletMap | null>;
 }
 
 const DynamicMap: React.FC<DynamicMapProps> = ({ tileUrl, mapRef }) => {
@@ -12,10 +13,7 @@ const DynamicMap: React.FC<DynamicMapProps> = ({ tileUrl, mapRef }) => {
       center={[0, 0]}
       zoom={2}
       style={{ height: '100%', width: '100%' }}
-      // @ts-expect-error leaflet something
-      whenReady={(map) => {
-        mapRef.current = map.target;
-      }}
+      ref={mapRef}
     >
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

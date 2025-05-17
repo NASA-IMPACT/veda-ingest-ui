@@ -1,20 +1,13 @@
-'use client';
 import '@ant-design/v5-patch-for-react-19';
-
-import { Space } from 'antd';
-import { Amplify } from 'aws-amplify';
-import { withAuthenticator, ThemeProvider } from '@aws-amplify/ui-react';
-import { config } from '@/utils/aws-exports';
-
-import { SignInHeader } from '@/components/SignInHeader';
 import AppLayout from '@/components/Layout';
-import { withConditionalAuthenticator } from '@/utils/withConditionalAuthenticator';
+import { redirect } from 'next/navigation';
+import { auth } from '@/lib/auth';
 
-Amplify.configure({ ...config }, { ssr: true });
+const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
-const Home = function Home() {
-  return (
-    <ThemeProvider>
+async function Home() {
+  if (DISABLE_AUTH) {
+    return (
       <AppLayout>
         <section
           style={{
@@ -24,20 +17,32 @@ const Home = function Home() {
             padding: 100,
           }}
         >
-          <Space align="start">
-            This application allows users to initiate the data ingest process.
-          </Space>
+          This application allows users to initiate the data ingest process.
         </section>
       </AppLayout>
-    </ThemeProvider>
-  );
-};
+    );
+  }
 
-export default withConditionalAuthenticator(Home, {
-  hideSignUp: true,
-  components: {
-    SignIn: {
-      Header: SignInHeader,
-    },
-  },
-});
+  const session = await auth();
+
+  if (!session) {
+    redirect('/login');
+  }
+
+  return (
+    <AppLayout>
+      <section
+        style={{
+          textAlign: 'center',
+          marginTop: 48,
+          marginBottom: 40,
+          padding: 100,
+        }}
+      >
+        This application allows users to initiate the data ingest process.
+      </section>
+    </AppLayout>
+  );
+}
+
+export default Home;
