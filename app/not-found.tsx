@@ -1,4 +1,3 @@
-// app/not-found.tsx (This is the convention for Next.js 13+ app directory)
 'use client';
 
 import { Result, Button } from 'antd';

@@ -161,7 +161,7 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
           height: metadata ? '70vh' : '80vh',
           position: 'relative',
           border: '1px solid #d9d9d9',
-        }} // Added border for visibility
+        }}
       >
         {loading && (
           <div

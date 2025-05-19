@@ -1,6 +1,5 @@
 import { http, HttpResponse } from 'msw';
 
-// Import mock data if they are in separate files
 import { githubResponse } from './githubResponse';
 import { retrieveIngestResponse } from './retrieveIngestResponse';
 
@@ -67,7 +66,7 @@ export const handlers = [
       return new HttpResponse('Missing description', { status: 400 });
     }
 
-    return HttpResponse.json({ message: 'Data updated successfully' }); // Changed response to match PUT semantics
+    return HttpResponse.json({ message: 'Data updated successfully' });
   }),
 
   http.post('/api/create-ingest', async ({ request }) => {
@@ -177,7 +176,7 @@ export const handlers = [
       headers: {
         'Content-Type': 'image/png',
         'Content-Length': mockTileBuffer.byteLength.toString(),
-        'X-MSW-Mocked': 'true', // Optional custom header
+        'X-MSW-Mocked': 'true',
       },
     });
   }),

@@ -9,7 +9,6 @@ import {
   type Mock,
 } from 'vitest';
 
-// Mock `auth` and `redirect`
 vi.mock('@/lib/auth', () => ({
   auth: vi.fn(),
 }));
@@ -19,7 +18,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 const renderHome = async () => {
-  const { default: Home } = await import('@/app/page'); // adjust path if needed
+  const { default: Home } = await import('@/app/page');
   return await Home();
 };
 

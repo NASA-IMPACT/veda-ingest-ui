@@ -29,13 +29,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Protect /edit-ingest based on the dataset:update scope
+  // Protect /edit-ingest based on the Editor scope
   if (pathname.startsWith('/edit-ingest')) {
     if (!session?.scopes?.includes('Editor')) {
       if (pathname.startsWith('/api/')) {
         return new NextResponse('Unauthorized', { status: 401 });
       } else {
-        return NextResponse.redirect(new URL('/unauthorized', request.url)); // Redirect to an unauthorized page
+        return NextResponse.redirect(new URL('/unauthorized', request.url));
       }
     }
     return NextResponse.next();

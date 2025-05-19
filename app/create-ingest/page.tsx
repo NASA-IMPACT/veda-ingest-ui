@@ -1,7 +1,6 @@
-// app/create-ingest/page.tsx (Server Component)
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import CreateIngestClient from './_components/CreateIngestClient'; // Your original CreateIngest component
+import CreateIngestClient from './_components/CreateIngestClient';
 
 const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
