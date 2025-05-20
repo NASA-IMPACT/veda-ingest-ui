@@ -177,7 +177,6 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
           });
           additionalPropertyCardRef.current?.focus();
         }, 0);
-
         return;
       }
 

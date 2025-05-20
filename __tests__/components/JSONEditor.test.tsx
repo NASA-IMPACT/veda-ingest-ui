@@ -1,4 +1,13 @@
-import { describe, it, expect, vi, beforeEach, Mock, afterEach } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  Mock,
+  afterEach,
+  beforeAll,
+} from 'vitest';
 import {
   render,
   screen,
@@ -16,6 +25,10 @@ import type { MessageType } from 'antd/es/message/interface';
 // Mock `message.error`
 vi.spyOn(message, 'error').mockImplementation(() => {
   return { destroy: vi.fn() } as unknown as MessageType;
+});
+
+beforeAll(() => {
+  HTMLElement.prototype.scrollIntoView = vi.fn();
 });
 
 const mockFormData = {
