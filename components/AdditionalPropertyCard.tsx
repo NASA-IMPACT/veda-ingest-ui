@@ -3,16 +3,19 @@ import {
   ExclamationCircleOutlined,
   CloseCircleOutlined,
 } from '@ant-design/icons';
+import React, { forwardRef } from 'react';
 
 const { useToken } = theme;
 
-function AdditionalPropertyCard({
-  additionalProperties,
-  style,
-}: {
+interface AdditionalPropertyCardProps {
   additionalProperties: string[] | null;
   style: 'warning' | 'error';
-}) {
+}
+
+const AdditionalPropertyCard = forwardRef<
+  HTMLDivElement,
+  AdditionalPropertyCardProps
+>(({ additionalProperties, style }, ref) => {
   const { token } = useToken();
 
   if (!additionalProperties) return null;
@@ -20,13 +23,13 @@ function AdditionalPropertyCard({
   const styleConfig = {
     warning: {
       title: 'Extra Properties set via JSON Editor',
-      icon: <ExclamationCircleOutlined />,
-      textColor: token.colorWarningText,
+      icon: <ExclamationCircleOutlined aria-hidden={true} />,
+      textColor: token.colorWarning,
     },
     error: {
       title: 'Schema Validation Errors',
-      icon: <CloseCircleOutlined />,
-      textColor: token.colorErrorText,
+      icon: <CloseCircleOutlined aria-hidden={true} />,
+      textColor: token.colorError,
     },
   };
 
@@ -34,7 +37,9 @@ function AdditionalPropertyCard({
 
   return (
     <Card
+      ref={ref}
       data-testid="extra-properties-card"
+      tabIndex={-1}
       title={
         <div
           style={{
@@ -45,7 +50,9 @@ function AdditionalPropertyCard({
           }}
         >
           {icon}
-          <span>{title}</span>
+          <span>
+            <h3>{title}</h3>
+          </span>
         </div>
       }
       style={{
@@ -58,26 +65,30 @@ function AdditionalPropertyCard({
         borderRadius: '8px',
       }}
     >
-      <ul
-        style={{
-          display: 'grid',
-          gridTemplateRows: 'repeat(3, auto)',
-          gridAutoFlow: 'column',
-          gap: '10px',
-          padding: 0,
-          listStyleType: 'none',
-        }}
-      >
-        {additionalProperties.map((prop) => (
-          <li key={prop} style={{ paddingLeft: '10px' }}>
-            <Typography.Text style={{ color: textColor, fontSize: '16px' }}>
-              {prop}
-            </Typography.Text>
-          </li>
-        ))}
-      </ul>
+      <div aria-live="polite">
+        <ul
+          style={{
+            display: 'grid',
+            gridTemplateRows: 'repeat(3, auto)',
+            gridAutoFlow: 'column',
+            gap: '10px',
+            padding: 0,
+            listStyleType: 'none',
+          }}
+        >
+          {additionalProperties.map((prop) => (
+            <li key={prop} style={{ paddingLeft: '10px' }}>
+              <Typography.Text style={{ color: textColor, fontSize: '16px' }}>
+                {prop}
+              </Typography.Text>
+            </li>
+          ))}
+        </ul>
+      </div>
     </Card>
   );
-}
+});
+
+AdditionalPropertyCard.displayName = 'AdditionalPropertyCard';
 
 export default AdditionalPropertyCard;
