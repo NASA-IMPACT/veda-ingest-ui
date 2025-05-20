@@ -52,7 +52,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
   const [schemaErrors, setSchemaErrors] = useState<string[]>([]);
   const [strictSchema, setStrictSchema] = useState<boolean>(true);
   const editorRef = useRef<any>(null);
-  const additionalPropertyCardRef = useRef<HTMLDivElement>(null); // Create a ref for AdditionalPropertyCard
+  const additionalPropertyCardRef = useRef<HTMLDivElement>(null);
 
   // Store initial collection value (only if disableCollectionNameChange is true)
   const initialCollectionValue = useState<string | undefined>(
