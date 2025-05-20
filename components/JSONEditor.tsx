@@ -52,6 +52,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
   const [schemaErrors, setSchemaErrors] = useState<string[]>([]);
   const [strictSchema, setStrictSchema] = useState<boolean>(true);
   const editorRef = useRef<any>(null);
+  const additionalPropertyCardRef = useRef<HTMLDivElement>(null); // Create a ref for AdditionalPropertyCard
 
   // Store initial collection value (only if disableCollectionNameChange is true)
   const initialCollectionValue = useState<string | undefined>(
@@ -162,13 +163,21 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       }
 
       if (!isValid) {
-        setSchemaErrors(
+        const errors =
           validateSchema.errors?.map((err) =>
             err.message === 'must NOT have additional properties'
               ? `${err.params.additionalProperty} is not defined in schema`
               : `${err.instancePath} ${err.message}`
-          ) || []
-        );
+          ) || [];
+        setSchemaErrors(errors);
+        setTimeout(() => {
+          additionalPropertyCardRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+          additionalPropertyCardRef.current?.focus();
+        }, 0);
+
         return;
       }
 
@@ -202,7 +211,9 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         value={editorValue}
         language="json"
         placeholder="Please enter JSON code."
-        onChange={(evn) => handleInputChange(evn.target.value)}
+        onChange={(evn: { target: { value: string } }) =>
+          handleInputChange(evn.target.value)
+        }
         padding={15}
         style={{
           fontSize: 14,
@@ -225,6 +236,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       {jsonError && <Text type="danger">{jsonError}</Text>}
       {schemaErrors.length > 0 && (
         <AdditionalPropertyCard
+          ref={additionalPropertyCardRef}
           additionalProperties={schemaErrors}
           style="error"
         />
