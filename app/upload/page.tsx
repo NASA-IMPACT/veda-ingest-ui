@@ -1,27 +1,19 @@
-'use client';
+import { auth } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import UploadClient from './_components/UploadClient';
 
-import AppLayout from '@/components/Layout';
-import { Amplify } from 'aws-amplify';
-import { config } from '@/utils/aws-exports';
-import { SignInHeader } from '@/components/SignInHeader';
-import { withConditionalAuthenticator } from '@/utils/withConditionalAuthenticator';
-import ThumbnailUploader from '@/components/ThumbnailUploader';
+const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
-Amplify.configure({ ...config }, { ssr: true });
+export default async function UploadPage() {
+  if (DISABLE_AUTH) {
+    return <UploadClient />;
+  }
 
-function UploadPage() {
-  return (
-    <AppLayout>
-      <ThumbnailUploader />
-    </AppLayout>
-  );
+  const session = await auth();
+
+  if (!session) {
+    redirect('/login');
+  }
+
+  return <UploadClient />;
 }
-
-export default withConditionalAuthenticator(UploadPage, {
-  hideSignUp: true,
-  components: {
-    SignIn: {
-      Header: SignInHeader,
-    },
-  },
-});
