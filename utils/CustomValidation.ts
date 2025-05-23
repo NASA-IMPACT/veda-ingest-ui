@@ -55,6 +55,24 @@ export const customValidate = (formData: any, errors: any) => {
         );
       }
     }
+
+    if (
+      typeof startdate === 'string' &&
+      startdate !== '' &&
+      rfc3339Regex.test(startdate) &&
+      typeof enddate === 'string' &&
+      enddate !== '' &&
+      rfc3339Regex.test(enddate)
+    ) {
+      const startDateObj = new Date(startdate);
+      const endDateObj = new Date(enddate);
+
+      if (startDateObj.getTime() >= endDateObj.getTime()) {
+        errors.temporal_extent?.enddate?.addError(
+          'End Date must be after Start Date.'
+        );
+      }
+    }
   }
 
   return errors;
