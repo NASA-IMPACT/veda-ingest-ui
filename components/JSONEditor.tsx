@@ -23,6 +23,10 @@ interface Renders {
 export interface JSONEditorValue {
   collection?: string;
   renders?: Renders;
+  temporal_extent?: {
+    startdate?: string;
+    enddate?: string;
+  };
   [key: string]: unknown; // Allows additional dynamic properties
 }
 
@@ -52,7 +56,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
   const [schemaErrors, setSchemaErrors] = useState<string[]>([]);
   const [strictSchema, setStrictSchema] = useState<boolean>(true);
   const editorRef = useRef<any>(null);
-  const additionalPropertyCardRef = useRef<HTMLDivElement>(null);
+  const additionalPropertyCardRef = useRef<HTMLDivElement>(null); // From accessibility branch
 
   // Store initial collection value (only if disableCollectionNameChange is true)
   const initialCollectionValue = useState<string | undefined>(
@@ -88,12 +92,14 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
     setEditorValue(value);
     setHasJSONChanges(true);
     setJsonError(null);
+    setSchemaErrors([]); // Clear schema errors on input change
   };
 
   const applyChanges = () => {
     try {
       let parsedValue = JSON.parse(editorValue) as JSONEditorValue;
       setJsonError(null);
+      setSchemaErrors([]); // Clear previous schema errors
 
       if (disableCollectionNameChange && initialCollectionValue !== undefined) {
         if (parsedValue.collection !== initialCollectionValue) {
@@ -151,6 +157,8 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       const validateSchema = ajv.compile(modifiedSchema);
 
       const isValid = validateSchema(parsedValue);
+      let currentSchemaErrors: string[] = []; // Unified error array
+
       // Extract additional properties manually when strictSchema is false
       if (!strictSchema && typeof parsedValue === 'object') {
         const schemaProperties = Object.keys(modifiedSchema.properties || {});
@@ -163,13 +171,36 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       }
 
       if (!isValid) {
-        const errors =
-          validateSchema.errors?.map((err) =>
-            err.message === 'must NOT have additional properties'
-              ? `${err.params.additionalProperty} is not defined in schema`
-              : `${err.instancePath} ${err.message}`
-          ) || [];
-        setSchemaErrors(errors);
+        currentSchemaErrors = [
+          ...currentSchemaErrors, // Preserve existing errors if any
+          ...(
+            validateSchema.errors?.map((err) =>
+              err.message === 'must NOT have additional properties'
+                ? `${err.params.additionalProperty} is not defined in schema`
+                : `${err.instancePath} ${err.message}`
+            ) || []
+          ),
+        ];
+      }
+
+      // Custom validation for temporal_extent dates
+      const startDate = parsedValue.temporal_extent?.startdate;
+      const endDate = parsedValue.temporal_extent?.enddate;
+
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          currentSchemaErrors.push('Invalid date format in temporal_extent. Please use a valid date string (e.g., YYYY-MM-DD).');
+        } else if (start.getTime() >= end.getTime()) {
+          currentSchemaErrors.push('End Date must be after Start Date in temporal_extent.');
+        }
+      }
+
+      if (currentSchemaErrors.length > 0) {
+        setSchemaErrors(currentSchemaErrors);
+        // Scroll and focus on the AdditionalPropertyCard when errors are present
         setTimeout(() => {
           additionalPropertyCardRef.current?.scrollIntoView({
             behavior: 'smooth',
@@ -235,7 +266,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       {jsonError && <Text type="danger">{jsonError}</Text>}
       {schemaErrors.length > 0 && (
         <AdditionalPropertyCard
-          ref={additionalPropertyCardRef}
+          ref={additionalPropertyCardRef} // Pass the ref here
           additionalProperties={schemaErrors}
           style="error"
         />

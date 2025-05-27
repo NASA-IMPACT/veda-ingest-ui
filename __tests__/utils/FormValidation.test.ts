@@ -122,4 +122,19 @@ describe('customValidate', () => {
     ).not.toHaveBeenCalled();
     expect(mockErrors.temporal_extent.enddate.addError).not.toHaveBeenCalled();
   });
+
+  it("should add an error if 'startdate is after 'enddate'", () => {
+    const formData = {
+      temporal_extent: {
+        startdate: '2025-01-01T00:00:00.001Z',
+        enddate: '2025-01-01T00:00:00.000Z',
+      },
+    };
+
+    customValidate(formData, mockErrors);
+
+    expect(mockErrors.temporal_extent.enddate.addError).toHaveBeenCalledWith(
+      'End Date must be after Start Date.'
+    );
+  });
 });
