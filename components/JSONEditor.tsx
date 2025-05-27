@@ -173,13 +173,11 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       if (!isValid) {
         currentSchemaErrors = [
           ...currentSchemaErrors, // Preserve existing errors if any
-          ...(
-            validateSchema.errors?.map((err) =>
-              err.message === 'must NOT have additional properties'
-                ? `${err.params.additionalProperty} is not defined in schema`
-                : `${err.instancePath} ${err.message}`
-            ) || []
-          ),
+          ...(validateSchema.errors?.map((err) =>
+            err.message === 'must NOT have additional properties'
+              ? `${err.params.additionalProperty} is not defined in schema`
+              : `${err.instancePath} ${err.message}`
+          ) || []),
         ];
       }
 
@@ -192,9 +190,13 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         const end = new Date(endDate);
 
         if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-          currentSchemaErrors.push('Invalid date format in temporal_extent. Please use a valid date string (e.g., YYYY-MM-DD).');
+          currentSchemaErrors.push(
+            'Invalid date format in temporal_extent. Please use a valid date string (e.g., YYYY-MM-DD).'
+          );
         } else if (start.getTime() >= end.getTime()) {
-          currentSchemaErrors.push('End Date must be after Start Date in temporal_extent.');
+          currentSchemaErrors.push(
+            'End Date must be after Start Date in temporal_extent.'
+          );
         }
       }
 
@@ -266,7 +268,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       {jsonError && <Text type="danger">{jsonError}</Text>}
       {schemaErrors.length > 0 && (
         <AdditionalPropertyCard
-          ref={additionalPropertyCardRef} // Pass the ref here
+          ref={additionalPropertyCardRef}
           additionalProperties={schemaErrors}
           style="error"
         />
