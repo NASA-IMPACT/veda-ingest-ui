@@ -23,6 +23,10 @@ interface Renders {
 export interface JSONEditorValue {
   collection?: string;
   renders?: Renders;
+  temporal_extent?: {
+    startdate?: string;
+    enddate?: string;
+  };
   [key: string]: unknown; // Allows additional dynamic properties
 }
 
@@ -87,12 +91,14 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
     setEditorValue(value);
     setHasJSONChanges(true);
     setJsonError(null);
+    setSchemaErrors([]);
   };
 
   const applyChanges = () => {
     try {
       let parsedValue = JSON.parse(editorValue) as JSONEditorValue;
       setJsonError(null);
+      setSchemaErrors([]);
 
       if (disableCollectionNameChange && initialCollectionValue !== undefined) {
         if (parsedValue.collection !== initialCollectionValue) {
@@ -150,6 +156,8 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       const validateSchema = ajv.compile(modifiedSchema);
 
       const isValid = validateSchema(parsedValue);
+      let currentSchemaErrors: string[] = [];
+
       // Extract additional properties manually when strictSchema is false
       if (!strictSchema && typeof parsedValue === 'object') {
         const schemaProperties = Object.keys(modifiedSchema.properties || {});
@@ -162,13 +170,33 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       }
 
       if (!isValid) {
-        setSchemaErrors(
+        currentSchemaErrors =
           validateSchema.errors?.map((err) =>
             err.message === 'must NOT have additional properties'
               ? `${err.params.additionalProperty} is not defined in schema`
               : `${err.instancePath} ${err.message}`
-          ) || []
-        );
+          ) || [];
+      }
+
+      // Custom validation for temporal_extent dates
+      const startDate = parsedValue.temporal_extent?.startdate;
+      const endDate = parsedValue.temporal_extent?.enddate;
+
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          currentSchemaErrors.push('Invalid date format in temporal_extent');
+        } else if (start.getTime() >= end.getTime()) {
+          currentSchemaErrors.push(
+            'End Date must be after Start Date in temporal_extent.'
+          );
+        }
+      }
+
+      if (currentSchemaErrors.length > 0) {
+        setSchemaErrors(currentSchemaErrors);
         return;
       }
 
