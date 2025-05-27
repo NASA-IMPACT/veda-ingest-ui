@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Button, Typography, Checkbox, Flex, message } from 'antd';
+import { useState, useEffect, useRef, useCallback } from 'react'; // Added useCallback
+import { Button, Typography, Checkbox, Flex, message, Modal } from 'antd';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import jsonSchema from '@/FormSchemas/jsonschema.json';
@@ -27,6 +27,8 @@ export interface JSONEditorValue {
     startdate?: string;
     enddate?: string;
   };
+  is_periodic?: unknown;
+  time_density?: unknown;
   [key: string]: unknown; // Allows additional dynamic properties
 }
 
@@ -55,8 +57,13 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [schemaErrors, setSchemaErrors] = useState<string[]>([]);
   const [strictSchema, setStrictSchema] = useState<boolean>(true);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [modalActionType, setModalActionType] = useState<
+    'accept' | 'unchanged' | null
+  >(null);
+
   const editorRef = useRef<any>(null);
-  const additionalPropertyCardRef = useRef<HTMLDivElement>(null); // From accessibility branch
+  const additionalPropertyCardRef = useRef<HTMLDivElement>(null);
 
   // Store initial collection value (only if disableCollectionNameChange is true)
   const initialCollectionValue = useState<string | undefined>(
@@ -64,6 +71,146 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       ? (value.collection as string | undefined)
       : undefined
   )[0];
+
+  const validateAndApply = useCallback(
+    (valueToValidate: JSONEditorValue) => {
+      let processedValue = structuredClone(valueToValidate);
+
+      if (
+        processedValue.renders?.dashboard &&
+        typeof processedValue.renders.dashboard === 'object'
+      ) {
+        try {
+          processedValue.renders.dashboard = JSON.stringify(
+            processedValue.renders.dashboard,
+            null,
+            2
+          );
+        } catch (e) {
+          console.error('Error stringifying renders.dashboard:', e);
+          // Handle error if stringification fails, e.g., circular references
+          // For now, let's just push an error and return
+          setSchemaErrors(['Invalid JSON object in renders.dashboard.']);
+          return;
+        }
+      }
+
+      // Create a deep copy of the JSON schema
+      const modifiedSchema = structuredClone(jsonSchema) as Record<
+        string,
+        unknown
+      >;
+
+      // Ensure strict mode affects additional properties
+      if (strictSchema) {
+        (modifiedSchema as any).additionalProperties = false;
+      } else {
+        (modifiedSchema as any).additionalProperties = true;
+      }
+
+      // Override "renders.dashboard" property to allow both string & object
+      // Note: The stringification above handles the "object" case for schema validation.
+      // This part ensures the schema itself accepts string or object for parsing.
+      if (
+        modifiedSchema.properties &&
+        (modifiedSchema.properties as any).renders?.dashboard &&
+        (modifiedSchema.properties as any).renders.dashboard.properties
+      ) {
+        (
+          modifiedSchema.properties as any
+        ).renders.dashboard.properties.dashboard = {
+          oneOf: [
+            { type: 'string' },
+            { type: 'object', additionalProperties: true },
+          ],
+        };
+      }
+
+      // Validate JSON using AJV
+      const ajv = new Ajv({ allErrors: true });
+      addFormats(ajv);
+      const validateSchema = ajv.compile(modifiedSchema);
+
+      const isValid = validateSchema(processedValue);
+      let currentSchemaErrors: string[] = [];
+
+      // Extract additional properties manually when strictSchema is false
+      if (!strictSchema && typeof processedValue === 'object') {
+        const schemaProperties = Object.keys(modifiedSchema.properties || {});
+        const userProperties = Object.keys(processedValue);
+        const extraProps = userProperties.filter(
+          (prop) => !schemaProperties.includes(prop)
+        );
+
+        setAdditionalProperties(extraProps.length > 0 ? extraProps : null);
+      }
+
+      if (!isValid) {
+        currentSchemaErrors = [
+          ...currentSchemaErrors,
+          ...(validateSchema.errors?.map((err) =>
+            err.message === 'must NOT have additional properties'
+              ? `${err.params.additionalProperty} is not defined in schema`
+              : `${err.instancePath} ${err.message}`
+          ) || []),
+        ];
+      }
+
+      // Custom validation for temporal_extent dates
+      const startDate = processedValue.temporal_extent?.startdate;
+      const endDate = processedValue.temporal_extent?.enddate;
+
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          currentSchemaErrors.push(
+            'Invalid date format in temporal_extent. Please use a valid date string (e.g.,YYYY-MM-DD).'
+          );
+        } else if (start.getTime() >= end.getTime()) {
+          currentSchemaErrors.push(
+            'End Date must be after Start Date in temporal_extent.'
+          );
+        }
+      }
+
+      if (currentSchemaErrors.length > 0) {
+        setSchemaErrors(currentSchemaErrors);
+        setTimeout(() => {
+          additionalPropertyCardRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          });
+          if (additionalPropertyCardRef.current) {
+            additionalPropertyCardRef.current.focus();
+          }
+        }, 0);
+        return;
+      }
+
+      setSchemaErrors([]);
+      onChange(processedValue); // Pass the processedValue to onChange
+      setHasJSONChanges(false);
+    },
+    [strictSchema, setAdditionalProperties, setSchemaErrors, onChange]
+  );
+
+  // Effect to re-run applyChanges after modal action if needed
+  useEffect(() => {
+    // This effect will run after handleModalAccept/handleModalLeaveUnchanged
+    // cause state updates and the component re-renders.
+    if (modalActionType) {
+      // Clear the action type to prevent infinite loops
+      setModalActionType(null);
+      try {
+        const valueFromEditor = JSON.parse(editorValue) as JSONEditorValue;
+        validateAndApply(valueFromEditor);
+      } catch (err) {
+        setJsonError('Invalid JSON format after modal action.');
+      }
+    }
+  }, [modalActionType, editorValue, validateAndApply]); // Added validateAndApply to dependencies
 
   useEffect(() => {
     let updatedValue = { ...value };
@@ -97,6 +244,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
 
   const applyChanges = () => {
     try {
+      setAdditionalProperties(null);
       let parsedValue = JSON.parse(editorValue) as JSONEditorValue;
       setJsonError(null);
       setSchemaErrors([]); // Clear previous schema errors
@@ -110,116 +258,74 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         }
       }
 
-      // If "renders.dashboard" is an object, convert it to a pretty JSON string before saving
-      if (
-        parsedValue.renders?.dashboard &&
-        typeof parsedValue.renders.dashboard === 'object'
-      ) {
-        parsedValue.renders.dashboard = JSON.stringify(
-          parsedValue.renders.dashboard,
-          null,
-          2
-        );
-      }
+      // Check for 'is_periodic' or 'time_density' at the top level
+      const hasDashboardRelatedKeys =
+        Object.prototype.hasOwnProperty.call(parsedValue, 'is_periodic') ||
+        Object.prototype.hasOwnProperty.call(parsedValue, 'time_density');
 
-      // Create a deep copy of the JSON schema
-      const modifiedSchema = structuredClone(jsonSchema) as Record<
-        string,
-        unknown
-      >;
-
-      // Ensure strict mode affects additional properties
-      if (strictSchema) {
-        (modifiedSchema as any).additionalProperties = false;
-      } else {
-        (modifiedSchema as any).additionalProperties = true;
-      }
-
-      // Override "renders.dashboard" property to allow both string & object
-      if (
-        modifiedSchema.properties &&
-        (modifiedSchema.properties as any).renders.dashboard &&
-        (modifiedSchema.properties as any).renders.dashboard.properties
-      ) {
-        (
-          modifiedSchema.properties as any
-        ).renders.dashboard.properties.dashboard = {
-          oneOf: [
-            { type: 'string' },
-            { type: 'object', additionalProperties: true },
-          ],
-        };
-      }
-
-      // Validate JSON using AJV
-      const ajv = new Ajv({ allErrors: true });
-      addFormats(ajv);
-      const validateSchema = ajv.compile(modifiedSchema);
-
-      const isValid = validateSchema(parsedValue);
-      let currentSchemaErrors: string[] = []; // Unified error array
-
-      // Extract additional properties manually when strictSchema is false
-      if (!strictSchema && typeof parsedValue === 'object') {
-        const schemaProperties = Object.keys(modifiedSchema.properties || {});
-        const userProperties = Object.keys(parsedValue);
-        const extraProps = userProperties.filter(
-          (prop) => !schemaProperties.includes(prop)
-        );
-
-        setAdditionalProperties(extraProps.length > 0 ? extraProps : null);
-      }
-
-      if (!isValid) {
-        currentSchemaErrors = [
-          ...currentSchemaErrors, // Preserve existing errors if any
-          ...(validateSchema.errors?.map((err) =>
-            err.message === 'must NOT have additional properties'
-              ? `${err.params.additionalProperty} is not defined in schema`
-              : `${err.instancePath} ${err.message}`
-          ) || []),
-        ];
-      }
-
-      // Custom validation for temporal_extent dates
-      const startDate = parsedValue.temporal_extent?.startdate;
-      const endDate = parsedValue.temporal_extent?.enddate;
-
-      if (startDate && endDate) {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-          currentSchemaErrors.push(
-            'Invalid date format in temporal_extent. Please use a valid date string (e.g., YYYY-MM-DD).'
-          );
-        } else if (start.getTime() >= end.getTime()) {
-          currentSchemaErrors.push(
-            'End Date must be after Start Date in temporal_extent.'
-          );
+      if (hasDashboardRelatedKeys) {
+        if (strictSchema) {
+          setIsModalVisible(true);
+          return;
         }
       }
 
-      if (currentSchemaErrors.length > 0) {
-        setSchemaErrors(currentSchemaErrors);
-        // Scroll and focus on the AdditionalPropertyCard when errors are present
-        setTimeout(() => {
-          additionalPropertyCardRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-          });
-          additionalPropertyCardRef.current?.focus();
-        }, 0);
-        return;
-      }
-
-      setSchemaErrors([]);
-      onChange(parsedValue);
+      validateAndApply(parsedValue);
     } catch (err) {
       console.error('error', err);
       setJsonError('Invalid JSON format.');
       setSchemaErrors([]);
     }
+  };
+
+  // --- Modal Handlers ---
+  const handleModalAccept = () => {
+    let currentEditorParsedValue: JSONEditorValue;
+    try {
+      currentEditorParsedValue = JSON.parse(editorValue) as JSONEditorValue;
+    } catch (err) {
+      setJsonError(
+        'Invalid JSON format. Please correct before applying changes.'
+      );
+      setIsModalVisible(false);
+      return;
+    }
+
+    if (
+      Object.prototype.hasOwnProperty.call(
+        currentEditorParsedValue,
+        'is_periodic'
+      )
+    ) {
+      currentEditorParsedValue['dashboard:is_periodic'] =
+        currentEditorParsedValue.is_periodic;
+      delete currentEditorParsedValue.is_periodic;
+    }
+    if (
+      Object.prototype.hasOwnProperty.call(
+        currentEditorParsedValue,
+        'time_density'
+      )
+    ) {
+      currentEditorParsedValue['dashboard:time_density'] =
+        currentEditorParsedValue.time_density;
+      delete currentEditorParsedValue.time_density;
+    }
+
+    setEditorValue(JSON.stringify(currentEditorParsedValue, null, 2));
+    setIsModalVisible(false);
+    setModalActionType('accept'); // Trigger the useEffect to re-run validation
+  };
+
+  const handleModalLeaveUnchanged = () => {
+    setIsModalVisible(false);
+    setStrictSchema(false);
+    setModalActionType('unchanged'); // Trigger the useEffect to re-run validation
+  };
+
+  const handleModalCancel = () => {
+    setIsModalVisible(false);
+    // User cancelled, so they might want to re-edit. No apply changes are triggered.
   };
 
   return (
@@ -273,6 +379,66 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
           style="error"
         />
       )}
+
+      <Modal
+        title="Suggestion for Dashboard-Related Keys"
+        open={isModalVisible}
+        onCancel={handleModalCancel}
+        footer={[
+          <Button key="leave-unchanged" onClick={handleModalLeaveUnchanged}>
+            Leave Unchanged
+          </Button>,
+          <Button
+            key="accept-prefix"
+            type="primary"
+            onClick={handleModalAccept}
+          >
+            Accept & Add Prefix
+          </Button>,
+        ]}
+      >
+        <Flex vertical gap="small">
+          {' '}
+          {/* Use Flex for better spacing */}
+          <Typography.Paragraph>
+            It looks like you&apos;ve included{' '}
+            <Typography.Text strong>&quot;is_periodic&quot;</Typography.Text> or{' '}
+            <Typography.Text strong>&quot;time_density&quot;</Typography.Text>{' '}
+            at the top level of your JSON. These keys are typically expected to
+            be prefixed with{' '}
+            <Typography.Text code>&quot;dashboard:&quot;</Typography.Text>{' '}
+            (e.g.,{' '}
+            <Typography.Text code>
+              &quot;dashboard:is_periodic&quot;
+            </Typography.Text>
+            ).
+          </Typography.Paragraph>
+          <Typography.Paragraph>
+            How would you like to proceed?
+          </Typography.Paragraph>
+          <Flex vertical gap="small">
+            {' '}
+            {/* Nest Flex for options */}
+            <Typography.Text>
+              <Typography.Text strong>
+                Option 1: Accept &amp; Add Prefix
+              </Typography.Text>
+              <br />
+              Automatically rename these keys (e.g., &quot;is_periodic&quot;
+              becomes &quot;dashboard:is_periodic&quot;).
+            </Typography.Text>
+            <Typography.Text>
+              <Typography.Text strong>
+                Option 2: Leave Unchanged
+              </Typography.Text>
+              <br />
+              Keep the keys as they are, and we&apos;ll automatically disable
+              the &quot;Enforce strict schema&quot; check to prevent validation
+              errors for these properties.
+            </Typography.Text>
+          </Flex>
+        </Flex>
+      </Modal>
     </Flex>
   );
 };
