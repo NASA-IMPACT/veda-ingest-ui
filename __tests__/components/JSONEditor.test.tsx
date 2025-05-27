@@ -306,4 +306,29 @@ describe('JSONEditor', () => {
       expect(screen.getByText('Invalid JSON format.')).toBeInTheDocument()
     );
   });
+
+  it('displays schema validation errors if Start Date is after End Date in temporal extent', async () => {
+    render(<JSONEditor {...defaultProps} />);
+    const textarea = await findByTestId(document.body, 'json-editor');
+    const applyButton = screen.getByRole('button', { name: /apply changes/i });
+
+    const newFormData = {
+      ...mockFormData,
+      temporal_extent: {
+        startdate: '2025-01-02T00:00:00.000Z',
+        enddate: '2025-01-01T23:59:59.000Z',
+      },
+    };
+    await userEvent.clear(textarea);
+    textarea.focus();
+    await userEvent.paste(JSON.stringify(newFormData));
+
+    await userEvent.click(applyButton);
+
+    await waitFor(() =>
+      expect(screen.getByText('Schema Validation Errors')).toBeInTheDocument()
+    );
+
+    expect(mockOnChange).not.toHaveBeenCalled();
+  });
 });
