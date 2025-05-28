@@ -494,7 +494,7 @@ describe('JSONEditor', () => {
         ).toBeInTheDocument();
         expect(
           screen.getByText(
-            'Invalid date format in temporal_extent. Please use a valid date string (e.g.,YYYY-MM-DD).'
+            'Invalid date format in temporal_extent. Please use a valid date string.'
           )
         ).toBeInTheDocument();
       });
