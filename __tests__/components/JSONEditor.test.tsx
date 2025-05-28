@@ -11,18 +11,92 @@ import {
 import {
   render,
   screen,
-  fireEvent,
   waitFor,
   cleanup,
-  findByRole,
-  findByTestId,
+  getByTestId,
+  queryByText,
+  waitForElementToBeRemoved,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import JSONEditor from '@/components/JSONEditor';
-import { message } from 'antd';
+import { message } from 'antd'; // No need to import Modal directly if it's fully mocked below
 import type { MessageType } from 'antd/es/message/interface';
 
-// Mock `message.error`
+// --- JSDOM Workaround for Ant Design (minimal) ---
+Object.defineProperty(window, 'getComputedStyle', {
+  value: (elt: Element, pseudoElt?: string) => {
+    return {
+      getPropertyValue: (prop: string) => {
+        if (prop === 'overflow') return 'auto';
+        if (prop === 'padding-right') return '0px';
+        return '';
+      },
+    };
+  },
+});
+
+// --- **CRITICAL FIX**: Refined Synchronous Mock for next/dynamic ---
+vi.mock('next/dynamic', async (importOriginal) => {
+  const actualDynamic = await importOriginal<typeof import('next/dynamic')>();
+  const actualCodeEditorModule = await vi.importActual<
+    typeof import('@uiw/react-textarea-code-editor')
+  >('@uiw/react-textarea-code-editor');
+
+  return {
+    __esModule: true,
+    default: (loader: () => Promise<any>, options: any) => {
+      // If the loader is for our specific CodeEditor, return its default export directly.
+      // This bypasses the asynchronous nature of dynamic() for this specific component in tests.
+      if (loader().then((mod) => mod === actualCodeEditorModule)) {
+        return actualCodeEditorModule.default; // Directly return the default export
+      }
+      // Fallback for other dynamic imports if any, although unlikely in this context.
+      return actualDynamic.default(loader, options);
+    },
+  };
+});
+
+// --- Mock Ant Design's Modal Component ---
+vi.mock('antd', async (importOriginal) => {
+  const antd = await importOriginal<typeof import('antd')>();
+  return {
+    ...antd,
+    Modal: ({ open, title, children, footer, onCancel }: any) => {
+      if (!open) return null;
+
+      return (
+        <div role="dialog" aria-modal="true" data-testid="mock-modal-overlay">
+          <div role="document" data-testid="mock-modal-content">
+            <h2 data-testid="mock-modal-title">{title}</h2>
+            <div>{children}</div>
+            {footer && (
+              <div data-testid="mock-modal-footer">
+                {footer.map((button: any, index: number) => (
+                  <button
+                    key={index}
+                    onClick={button.props.onClick}
+                    type="button"
+                  >
+                    {button.props.children}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button
+              aria-label="Close"
+              onClick={onCancel}
+              data-testid="mock-modal-close-button"
+            >
+              X
+            </button>
+          </div>
+        </div>
+      );
+    },
+  };
+});
+
+// Mock `message.error` should be defined after the antd mock if it's imported from antd itself
 vi.spyOn(message, 'error').mockImplementation(() => {
   return { destroy: vi.fn() } as unknown as MessageType;
 });
@@ -107,241 +181,612 @@ describe('JSONEditor', () => {
     mockSetHasJSONChanges = vi.fn();
     mockSetAdditionalProperties = vi.fn();
     defaultProps = {
-      value: mockFormData,
+      value: structuredClone(mockFormData),
       onChange: mockOnChange,
       disableCollectionNameChange: false,
       hasJSONChanges: true,
       setHasJSONChanges: mockSetHasJSONChanges,
+      additionalProperties: null,
       setAdditionalProperties: mockSetAdditionalProperties,
     };
   });
 
   afterEach(() => {
     cleanup();
+    vi.clearAllMocks();
   });
 
+  const renderEditor = async (props: any) => {
+    render(<JSONEditor {...props} />);
+    // With the synchronous mock, the textarea should be immediately available,
+    // but using findByTestId with await is still robust for initial renders.
+    const textarea = await screen.findByTestId('json-editor');
+    return textarea;
+  };
+
+  const pasteIntoEditor = async (textarea: HTMLElement, content: string) => {
+    await userEvent.clear(textarea);
+    textarea.focus();
+    await userEvent.paste(content);
+    await waitFor(() => expect(textarea).toHaveValue(content));
+  };
+
   it("converts 'renders.dashboard' from a stringified object to an object before displaying", async () => {
+    const stringifiedDashboard = JSON.stringify(
+      { key: 'value', nested: { a: 1 } },
+      null,
+      2
+    );
     const testProps = {
       ...defaultProps,
       value: {
+        ...defaultProps.value,
         renders: {
-          dashboard: JSON.stringify({ key: 'value' }),
+          dashboard: stringifiedDashboard,
         },
       },
     };
 
-    render(<JSONEditor {...testProps} />);
-    const textarea = await findByTestId(document.body, 'json-editor');
-
+    const textarea = await renderEditor(testProps);
     expect(textarea).toHaveValue(
-      JSON.stringify({ renders: { dashboard: { key: 'value' } } }, null, 2)
+      JSON.stringify(
+        {
+          ...defaultProps.value,
+          renders: { dashboard: { key: 'value', nested: { a: 1 } } },
+        },
+        null,
+        2
+      )
     );
   });
 
   it("converts 'renders.dashboard' from an object to a pretty JSON string before saving", async () => {
-    render(<JSONEditor {...defaultProps} />);
-
-    const textarea = await findByTestId(document.body, 'json-editor');
+    const textarea = await renderEditor(defaultProps);
     const applyButton = screen.getByRole('button', { name: /apply changes/i });
 
+    const newDashboardObject = { key: 'value', subkey: 123 };
     const newFormData = {
-      ...mockFormData,
-      renders: { dashboard: { key: 'value' } },
+      ...defaultProps.value,
+      renders: { dashboard: newDashboardObject },
     };
-    await userEvent.clear(textarea);
-    textarea.focus();
-    await userEvent.paste(JSON.stringify(newFormData));
 
-    await waitFor(() =>
-      expect(textarea).toHaveValue(JSON.stringify(newFormData))
-    );
-
+    await pasteIntoEditor(textarea, JSON.stringify(newFormData, null, 2));
     await userEvent.click(applyButton);
 
-    // Actual `renders` received
-    const firstCallRenders = mockOnChange.mock.calls[0][0].renders.dashboard;
-
-    // Verify `renders` is pretty-printed (auto-generated snapshot)
-    expect(firstCallRenders).toMatchInlineSnapshot(`
-      "{
-        "key": "value"
-      }"
-    `);
+    expect(mockOnChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        renders: { dashboard: JSON.stringify(newDashboardObject, null, 2) },
+      })
+    );
+    expect(mockSetHasJSONChanges).toHaveBeenCalledWith(false);
   });
 
-  it("ignores 'renders' conversion if not parsable JSON string", async () => {
+  it("ignores 'renders' conversion if not parsable JSON string and leaves it as-is in the editor", async () => {
+    const invalidDashboardString = 'this is not valid json';
     const testProps = {
       ...defaultProps,
       value: {
-        renders: 'value',
+        ...defaultProps.value,
+        renders: { dashboard: invalidDashboardString },
       },
     };
 
-    render(<JSONEditor {...testProps} />);
-    const textarea = await findByTestId(document.body, 'json-editor');
-
-    expect(textarea).toHaveValue(JSON.stringify({ renders: 'value' }, null, 2));
+    const textarea = await renderEditor(testProps);
+    expect(textarea).toHaveValue(
+      JSON.stringify(
+        {
+          ...defaultProps.value,
+          renders: { dashboard: invalidDashboardString },
+        },
+        null,
+        2
+      )
+    );
+    expect(screen.queryByText('Invalid JSON format.')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Schema Validation Errors')
+    ).not.toBeInTheDocument();
   });
 
-  it("allows 'collection' name change if disableCollectionNameChange false", async () => {
-    render(<JSONEditor {...defaultProps} />);
-    const textarea = await findByTestId(document.body, 'json-editor');
+  it("allows 'collection' name change if disableCollectionNameChange is false", async () => {
+    const textarea = await renderEditor(defaultProps);
     const applyButton = screen.getByRole('button', { name: /apply changes/i });
 
-    const newFormData = { ...mockFormData, collection: 'new name' };
-    await userEvent.clear(textarea);
-    textarea.focus();
-    await userEvent.paste(JSON.stringify(newFormData));
-
-    await waitFor(() =>
-      expect(textarea).toHaveValue(JSON.stringify(newFormData))
-    );
+    const newFormData = {
+      ...defaultProps.value,
+      collection: 'new-collection-name',
+    };
+    await pasteIntoEditor(textarea, JSON.stringify(newFormData, null, 2));
 
     await userEvent.click(applyButton);
 
     expect(mockOnChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        collection: 'new name',
+        collection: 'new-collection-name',
       })
     );
+    expect(mockSetHasJSONChanges).toHaveBeenCalledWith(false);
   });
 
-  it("does not allow 'collection' name change if disableCollectionNameChange true", async () => {
+  it("does not allow 'collection' name change if disableCollectionNameChange is true", async () => {
     const testProps = {
       ...defaultProps,
       disableCollectionNameChange: true,
     };
 
-    render(<JSONEditor {...testProps} />);
-    const textarea = await findByTestId(document.body, 'json-editor');
+    const textarea = await renderEditor(testProps);
     const applyButton = screen.getByRole('button', { name: /apply changes/i });
 
     expect(screen.getByTestId('collectionName')).toHaveTextContent(
-      'Editing test-collection'
+      `Editing ${defaultProps.value.collection}`
     );
 
-    const newFormData = { ...mockFormData, collection: 'new name' };
-    await userEvent.clear(textarea);
-    textarea.focus();
-    await userEvent.paste(JSON.stringify(newFormData));
-
-    await waitFor(() =>
-      expect(textarea).toHaveValue(JSON.stringify(newFormData))
-    );
+    const newFormData = {
+      ...defaultProps.value,
+      collection: 'a-different-collection',
+    };
+    await pasteIntoEditor(textarea, JSON.stringify(newFormData, null, 2));
 
     await userEvent.click(applyButton);
 
     expect(mockOnChange).not.toHaveBeenCalled();
     await waitFor(() => {
       expect(message.error).toHaveBeenCalledWith(
-        `Collection name cannot be changed! Expected: "test-collection"`
+        `Collection name cannot be changed! Expected: "${defaultProps.value.collection}"`
       );
     });
+    expect(mockSetHasJSONChanges).toHaveBeenCalledWith(true);
   });
 
-  it('allows extra fields when strict schema is unchecked', async () => {
-    render(<JSONEditor {...defaultProps} />);
-    const checkbox = screen.getByRole('checkbox', {
-      name: /enforce strict schema/i,
-    });
-    const textarea = await findByTestId(document.body, 'json-editor');
-    const applyButton = screen.getByRole('button', { name: /apply changes/i });
+  describe('Strict Schema Enforcement', () => {
+    it('allows extra fields when strict schema is unchecked', async () => {
+      const textarea = await renderEditor(defaultProps);
+      const checkbox = screen.getByRole('checkbox', {
+        name: /enforce strict schema \(disallow extra fields\)/i,
+      });
+      const applyButton = screen.getByRole('button', {
+        name: /apply changes/i,
+      });
 
-    await userEvent.click(checkbox);
-    expect(checkbox).not.toBeChecked();
+      await userEvent.click(checkbox);
+      expect(checkbox).not.toBeChecked();
 
-    const newFormData = { ...mockFormData, extraField: true };
-    await userEvent.clear(textarea);
-    textarea.focus();
-    await userEvent.paste(JSON.stringify(newFormData));
-
-    await userEvent.click(applyButton);
-
-    expect(mockOnChange).toHaveBeenCalledWith(
-      expect.objectContaining({
+      const newFormData = {
+        ...defaultProps.value,
         extraField: true,
-      })
-    );
-  });
+        anotherExtra: 'value',
+      };
+      await pasteIntoEditor(textarea, JSON.stringify(newFormData, null, 2));
 
-  it('does not allow extra fields when strict schema is checked', async () => {
-    render(<JSONEditor {...defaultProps} />);
-    const textarea = await findByTestId(document.body, 'json-editor');
-    const applyButton = screen.getByRole('button', { name: /apply changes/i });
+      await userEvent.click(applyButton);
 
-    const checkbox = screen.getByRole('checkbox', {
-      name: /enforce strict schema/i,
-    });
-    expect(checkbox).toBeChecked();
-
-    const newFormData = { ...mockFormData, extraField: true };
-    await userEvent.clear(textarea);
-    textarea.focus();
-    await userEvent.paste(JSON.stringify(newFormData));
-
-    await userEvent.click(applyButton);
-
-    await waitFor(() =>
-      expect(screen.getByText('Schema Validation Errors')).toBeInTheDocument()
-    );
-
-    expect(mockOnChange).not.toHaveBeenCalled();
-  });
-
-  it('displays schema validation errors', async () => {
-    render(<JSONEditor {...defaultProps} />);
-    const textarea = await findByTestId(document.body, 'json-editor');
-    const applyButton = screen.getByRole('button', { name: /apply changes/i });
-
-    fireEvent.change(textarea, {
-      target: { value: `{ "invalidField": "error" }` },
+      expect(mockOnChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          extraField: true,
+          anotherExtra: 'value',
+        })
+      );
+      expect(mockSetAdditionalProperties).toHaveBeenCalledWith([
+        'extraField',
+        'anotherExtra',
+      ]);
+      expect(mockSetHasJSONChanges).toHaveBeenCalledWith(false);
+      expect(
+        screen.queryByText('Schema Validation Errors')
+      ).not.toBeInTheDocument();
     });
 
-    await userEvent.click(applyButton);
+    it('does not allow extra fields when strict schema is checked and displays errors', async () => {
+      const textarea = await renderEditor(defaultProps);
+      const applyButton = screen.getByRole('button', {
+        name: /apply changes/i,
+      });
 
-    await waitFor(() =>
-      expect(screen.getByText('Schema Validation Errors')).toBeInTheDocument()
-    );
+      const checkbox = screen.getByRole('checkbox', {
+        name: /enforce strict schema \(disallow extra fields\)/i,
+      });
+      expect(checkbox).toBeChecked();
+
+      const newFormData = { ...defaultProps.value, extraField: true };
+      await pasteIntoEditor(textarea, JSON.stringify(newFormData, null, 2));
+
+      await userEvent.click(applyButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Schema Validation Errors')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('extraField is not defined in schema')
+        ).toBeInTheDocument();
+      });
+      expect(mockOnChange).not.toHaveBeenCalled();
+      expect(mockSetHasJSONChanges).toHaveBeenCalledWith(true);
+      expect(mockSetAdditionalProperties).toHaveBeenCalledWith(null);
+    });
   });
 
-  it('displays error if not valid json', async () => {
-    render(<JSONEditor {...defaultProps} />);
-    const textarea = await findByTestId(document.body, 'json-editor');
-    const applyButton = screen.getByRole('button', { name: /apply changes/i });
+  describe('JSON and Schema Validation', () => {
+    it('displays schema validation errors for predefined properties', async () => {
+      const textarea = await renderEditor(defaultProps);
+      const applyButton = screen.getByRole('button', {
+        name: /apply changes/i,
+      });
 
-    fireEvent.change(textarea, {
-      target: { value: `{ "invalidField: error" }` },
+      const invalidFormData = {
+        ...defaultProps.value,
+        stac_version: 123,
+      };
+      await pasteIntoEditor(textarea, JSON.stringify(invalidFormData, null, 2));
+
+      await userEvent.click(applyButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Schema Validation Errors')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText('/stac_version must be string')
+        ).toBeInTheDocument();
+      });
+      expect(mockOnChange).not.toHaveBeenCalled();
+      expect(mockSetHasJSONChanges).toHaveBeenCalledWith(true);
+      expect(mockSetAdditionalProperties).toHaveBeenCalledWith(null);
     });
 
-    await userEvent.click(applyButton);
+    it('displays error if not valid JSON format', async () => {
+      const textarea = await renderEditor(defaultProps);
+      const applyButton = screen.getByRole('button', {
+        name: /apply changes/i,
+      });
 
-    await waitFor(() =>
-      expect(screen.getByText('Invalid JSON format.')).toBeInTheDocument()
-    );
+      const invalidJson = `{ "invalidField": "error" `;
+      await pasteIntoEditor(textarea, invalidJson);
+
+      await userEvent.click(applyButton);
+
+      await waitFor(() =>
+        expect(screen.getByText('Invalid JSON format.')).toBeInTheDocument()
+      );
+      expect(mockOnChange).not.toHaveBeenCalled();
+      expect(mockSetHasJSONChanges).toHaveBeenCalledWith(true);
+      expect(mockSetAdditionalProperties).toHaveBeenCalledWith(null);
+    });
+
+    it('displays schema validation errors if Start Date is after End Date in temporal extent', async () => {
+      const textarea = await renderEditor(defaultProps);
+      const applyButton = screen.getByRole('button', {
+        name: /apply changes/i,
+      });
+
+      const newFormData = {
+        ...defaultProps.value,
+        temporal_extent: {
+          startdate: '2025-01-02T00:00:00.000Z',
+          enddate: '2025-01-01T23:59:59.000Z',
+        },
+      };
+      await pasteIntoEditor(textarea, JSON.stringify(newFormData, null, 2));
+
+      await userEvent.click(applyButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Schema Validation Errors')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'End Date must be after Start Date in temporal_extent.'
+          )
+        ).toBeInTheDocument();
+      });
+      expect(mockOnChange).not.toHaveBeenCalled();
+      expect(mockSetHasJSONChanges).toHaveBeenCalledWith(true);
+      expect(mockSetAdditionalProperties).toHaveBeenCalledWith(null);
+    });
+
+    it('displays schema validation errors for invalid date format in temporal extent', async () => {
+      const textarea = await renderEditor(defaultProps);
+      const applyButton = screen.getByRole('button', {
+        name: /apply changes/i,
+      });
+
+      const newFormData = {
+        ...defaultProps.value,
+        temporal_extent: {
+          startdate: 'not-a-date',
+          enddate: '2025-01-01T23:59:59.000Z',
+        },
+      };
+      await pasteIntoEditor(textarea, JSON.stringify(newFormData, null, 2));
+
+      await userEvent.click(applyButton);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Schema Validation Errors')
+        ).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Invalid date format in temporal_extent. Please use a valid date string (e.g.,YYYY-MM-DD).'
+          )
+        ).toBeInTheDocument();
+      });
+      expect(mockOnChange).not.toHaveBeenCalled();
+      expect(mockSetHasJSONChanges).toHaveBeenCalledWith(true);
+      expect(mockSetAdditionalProperties).toHaveBeenCalledWith(null);
+    });
   });
 
-  it('displays schema validation errors if Start Date is after End Date in temporal extent', async () => {
-    render(<JSONEditor {...defaultProps} />);
-    const textarea = await findByTestId(document.body, 'json-editor');
-    const applyButton = screen.getByRole('button', { name: /apply changes/i });
+  describe('Modal for Dashboard-Related Keys', () => {
+    afterEach(() => {
+      cleanup();
+    });
 
-    const newFormData = {
-      ...mockFormData,
-      temporal_extent: {
-        startdate: '2025-01-02T00:00:00.000Z',
-        enddate: '2025-01-01T23:59:59.000Z',
-      },
-    };
-    await userEvent.clear(textarea);
-    textarea.focus();
-    await userEvent.paste(JSON.stringify(newFormData));
+    it('shows modal when `is_periodic` is at top level and strict schema is checked', async () => {
+      const formDataWithIsPeriodic = {
+        ...defaultProps.value,
+        is_periodic: true,
+      };
+      const textarea = await renderEditor(defaultProps);
+      const applyButton = screen.getByRole('button', {
+        name: /apply changes/i,
+      });
 
-    await userEvent.click(applyButton);
+      await pasteIntoEditor(
+        textarea,
+        JSON.stringify(formDataWithIsPeriodic, null, 2)
+      );
+      await userEvent.click(applyButton);
 
-    await waitFor(() =>
-      expect(screen.getByText('Schema Validation Errors')).toBeInTheDocument()
-    );
+      await waitFor(() => {
+        expect(screen.getByTestId('mock-modal-title')).toHaveTextContent(
+          'Suggestion for Dashboard-Related Keys'
+        );
+        expect(
+          screen.getByText(/it looks like you've included/i)
+        ).toBeInTheDocument();
+      });
+      expect(mockOnChange).not.toHaveBeenCalled();
+    });
 
-    expect(mockOnChange).not.toHaveBeenCalled();
+    it('shows modal when `time_density` is at top level and strict schema is checked', async () => {
+      const formDataWithTimeDensity = {
+        ...defaultProps.value,
+        time_density: 'P1D',
+      };
+      const textarea = await renderEditor(defaultProps);
+      const applyButton = screen.getByRole('button', {
+        name: /apply changes/i,
+      });
+
+      await pasteIntoEditor(
+        textarea,
+        JSON.stringify(formDataWithTimeDensity, null, 2)
+      );
+      await userEvent.click(applyButton);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mock-modal-title')).toHaveTextContent(
+          'Suggestion for Dashboard-Related Keys'
+        );
+        expect(
+          screen.getByText(/it looks like you've included/i)
+        ).toBeInTheDocument();
+      });
+      expect(mockOnChange).not.toHaveBeenCalled();
+    });
+
+    it('does NOT show modal when `is_periodic` is at top level and strict schema is UNchecked', async () => {
+      const formDataWithIsPeriodic = {
+        ...defaultProps.value,
+        is_periodic: true,
+      };
+      const textarea = await renderEditor(defaultProps);
+      const checkbox = screen.getByRole('checkbox', {
+        name: /enforce strict schema \(disallow extra fields\)/i,
+      });
+      const applyButton = screen.getByRole('button', {
+        name: /apply changes/i,
+      });
+
+      await userEvent.click(checkbox);
+      expect(checkbox).not.toBeChecked();
+
+      await pasteIntoEditor(
+        textarea,
+        JSON.stringify(formDataWithIsPeriodic, null, 2)
+      );
+      await userEvent.click(applyButton);
+
+      expect(
+        screen.queryByTestId('mock-modal-overlay')
+      ).not.toBeInTheDocument();
+      expect(mockOnChange).toHaveBeenCalledWith(
+        expect.objectContaining({ is_periodic: true })
+      );
+      expect(mockSetHasJSONChanges).toHaveBeenCalledWith(false);
+      expect(mockSetAdditionalProperties).toHaveBeenCalledWith(['is_periodic']);
+    });
+
+    it('handles "Accept & Add Prefix" option correctly for `is_periodic`', async () => {
+      const formDataWithIsPeriodic = {
+        ...defaultProps.value,
+        is_periodic: true,
+      };
+      const textarea = await renderEditor(defaultProps);
+      const applyButton = screen.getByRole('button', {
+        name: /apply changes/i,
+      });
+
+      await pasteIntoEditor(
+        textarea,
+        JSON.stringify(formDataWithIsPeriodic, null, 2)
+      );
+      await userEvent.click(applyButton);
+
+      const modalOverlay = await screen.findByTestId('mock-modal-overlay');
+      expect(modalOverlay).toBeInTheDocument();
+      expect(screen.getByTestId('mock-modal-title')).toHaveTextContent(
+        'Suggestion for Dashboard-Related Keys'
+      );
+
+      const acceptButton = screen.getByRole('button', {
+        name: /accept & add prefix/i,
+      });
+      await userEvent.click(acceptButton);
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText('Suggestion for Dashboard-Related Keys')
+        ).not.toBeInTheDocument();
+      });
+
+      expect(textarea).toHaveValue(
+        JSON.stringify(
+          { ...defaultProps.value, 'dashboard:is_periodic': true },
+          null,
+          2
+        )
+      );
+
+      expect(mockOnChange).toHaveBeenCalledWith(
+        expect.objectContaining({ 'dashboard:is_periodic': true })
+      );
+      expect(mockOnChange).not.toHaveBeenCalledWith(
+        expect.objectContaining({ is_periodic: true })
+      );
+      expect(mockSetHasJSONChanges).toHaveBeenCalledWith(false);
+      expect(mockSetAdditionalProperties).toHaveBeenCalledWith(null);
+    });
+
+    it('handles "Accept & Add Prefix" option correctly for `time_density`', async () => {
+      const formDataWithTimeDensity = {
+        ...defaultProps.value,
+        time_density: 'P1D',
+      };
+      const textarea = await renderEditor(defaultProps);
+      const applyButton = screen.getByRole('button', {
+        name: /apply changes/i,
+      });
+
+      await pasteIntoEditor(
+        textarea,
+        JSON.stringify(formDataWithTimeDensity, null, 2)
+      );
+      await userEvent.click(applyButton);
+
+      const modalOverlay = await screen.findByTestId('mock-modal-overlay');
+      expect(modalOverlay).toBeInTheDocument();
+
+      const acceptButton = screen.getByRole('button', {
+        name: /accept & add prefix/i,
+      });
+      await userEvent.click(acceptButton);
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText('Suggestion for Dashboard-Related Keys')
+        ).not.toBeInTheDocument();
+      });
+
+      expect(textarea).toHaveValue(
+        JSON.stringify(
+          { ...defaultProps.value, 'dashboard:time_density': 'P1D' },
+          null,
+          2
+        )
+      );
+
+      expect(mockOnChange).toHaveBeenCalledWith(
+        expect.objectContaining({ 'dashboard:time_density': 'P1D' })
+      );
+      expect(mockOnChange).not.toHaveBeenCalledWith(
+        expect.objectContaining({ time_density: 'P1D' })
+      );
+      expect(mockSetHasJSONChanges).toHaveBeenCalledWith(false);
+      expect(mockSetAdditionalProperties).toHaveBeenCalledWith(null);
+    });
+
+    it('handles "Leave Unchanged" option correctly for `is_periodic` and unchecks strict schema', async () => {
+      const formDataWithIsPeriodic = {
+        ...defaultProps.value,
+        is_periodic: true,
+      };
+      const textarea = await renderEditor(defaultProps);
+      const applyButton = screen.getByRole('button', {
+        name: /apply changes/i,
+      });
+      const strictSchemaCheckbox = screen.getByRole('checkbox', {
+        name: /enforce strict schema \(disallow extra fields\)/i,
+      });
+
+      expect(strictSchemaCheckbox).toBeChecked();
+
+      await pasteIntoEditor(
+        textarea,
+        JSON.stringify(formDataWithIsPeriodic, null, 2)
+      );
+      await userEvent.click(applyButton);
+
+      const modalOverlay = await screen.findByTestId('mock-modal-overlay');
+      expect(modalOverlay).toBeInTheDocument();
+
+      const leaveUnchangedButton = screen.getByRole('button', {
+        name: /leave unchanged/i,
+      });
+      await userEvent.click(leaveUnchangedButton);
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText('Suggestion for Dashboard-Related Keys')
+        ).not.toBeInTheDocument();
+      });
+
+      expect(strictSchemaCheckbox).not.toBeChecked();
+
+      expect(mockOnChange).toHaveBeenCalledWith(
+        expect.objectContaining({ is_periodic: true })
+      );
+      expect(mockSetHasJSONChanges).toHaveBeenCalledWith(false);
+      expect(mockSetAdditionalProperties).toHaveBeenCalledWith(['is_periodic']);
+    });
+
+    it('handles "Cancel" option correctly and keeps the JSON unchanged (no apply)', async () => {
+      const formDataWithIsPeriodic = {
+        ...defaultProps.value,
+        is_periodic: true,
+      };
+      const textarea = await renderEditor(defaultProps);
+      const applyButton = screen.getByRole('button', {
+        name: /apply changes/i,
+      });
+
+      await pasteIntoEditor(
+        textarea,
+        JSON.stringify(formDataWithIsPeriodic, null, 2)
+      );
+      mockOnChange.mockClear();
+      mockSetHasJSONChanges.mockClear();
+      mockSetAdditionalProperties.mockClear();
+
+      await userEvent.click(applyButton);
+
+      const modalOverlay = await screen.findByTestId('mock-modal-overlay');
+      expect(modalOverlay).toBeInTheDocument();
+
+      const closeModalButton = screen.getByTestId('mock-modal-close-button');
+      await userEvent.click(closeModalButton);
+
+      await waitFor(() => {
+        expect(
+          screen.queryByText('Suggestion for Dashboard-Related Keys')
+        ).not.toBeInTheDocument();
+      });
+
+      expect(mockOnChange).not.toHaveBeenCalled();
+      expect(mockSetHasJSONChanges).not.toHaveBeenCalledWith(false);
+      expect(mockSetAdditionalProperties).toHaveBeenCalledWith(null);
+    });
   });
 });
