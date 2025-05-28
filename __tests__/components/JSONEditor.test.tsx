@@ -8,21 +8,13 @@ import {
   afterEach,
   beforeAll,
 } from 'vitest';
-import {
-  render,
-  screen,
-  waitFor,
-  cleanup,
-  getByTestId,
-  queryByText,
-  waitForElementToBeRemoved,
-} from '@testing-library/react';
+import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import JSONEditor from '@/components/JSONEditor';
-import { message } from 'antd'; // No need to import Modal directly if it's fully mocked below
+import { message } from 'antd';
 import type { MessageType } from 'antd/es/message/interface';
 
-// --- JSDOM Workaround for Ant Design (minimal) ---
+// --- JSDOM Workaround for Ant Design ---
 Object.defineProperty(window, 'getComputedStyle', {
   value: (elt: Element, pseudoElt?: string) => {
     return {
@@ -35,23 +27,19 @@ Object.defineProperty(window, 'getComputedStyle', {
   },
 });
 
-// --- **CRITICAL FIX**: Refined Synchronous Mock for next/dynamic ---
-vi.mock('next/dynamic', async (importOriginal) => {
-  const actualDynamic = await importOriginal<typeof import('next/dynamic')>();
+vi.mock('next/dynamic', async () => {
   const actualCodeEditorModule = await vi.importActual<
     typeof import('@uiw/react-textarea-code-editor')
   >('@uiw/react-textarea-code-editor');
 
   return {
     __esModule: true,
-    default: (loader: () => Promise<any>, options: any) => {
-      // If the loader is for our specific CodeEditor, return its default export directly.
-      // This bypasses the asynchronous nature of dynamic() for this specific component in tests.
-      if (loader().then((mod) => mod === actualCodeEditorModule)) {
-        return actualCodeEditorModule.default; // Directly return the default export
-      }
-      // Fallback for other dynamic imports if any, although unlikely in this context.
-      return actualDynamic.default(loader, options);
+    default: (loader: any, options: any) => {
+      const DynamicComponentMock = (props: any) => {
+        const CodeEditorComponent = actualCodeEditorModule.default;
+        return <CodeEditorComponent {...props} />;
+      };
+      return DynamicComponentMock;
     },
   };
 });
@@ -198,8 +186,6 @@ describe('JSONEditor', () => {
 
   const renderEditor = async (props: any) => {
     render(<JSONEditor {...props} />);
-    // With the synchronous mock, the textarea should be immediately available,
-    // but using findByTestId with await is still robust for initial renders.
     const textarea = await screen.findByTestId('json-editor');
     return textarea;
   };
