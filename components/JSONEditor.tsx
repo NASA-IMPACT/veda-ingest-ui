@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react'; // Added useCallback
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button, Typography, Checkbox, Flex, message, Modal } from 'antd';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
@@ -27,8 +27,8 @@ export interface JSONEditorValue {
     startdate?: string;
     enddate?: string;
   };
-  is_periodic?: unknown;
-  time_density?: unknown;
+  is_periodic?: boolean;
+  time_density?: string;
   [key: string]: unknown; // Allows additional dynamic properties
 }
 
@@ -88,8 +88,6 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
           );
         } catch (e) {
           console.error('Error stringifying renders.dashboard:', e);
-          // Handle error if stringification fails, e.g., circular references
-          // For now, let's just push an error and return
           setSchemaErrors(['Invalid JSON object in renders.dashboard.']);
           return;
         }
@@ -109,8 +107,6 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       }
 
       // Override "renders.dashboard" property to allow both string & object
-      // Note: The stringification above handles the "object" case for schema validation.
-      // This part ensures the schema itself accepts string or object for parsing.
       if (
         modifiedSchema.properties &&
         (modifiedSchema.properties as any).renders?.dashboard &&
@@ -166,7 +162,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
 
         if (isNaN(start.getTime()) || isNaN(end.getTime())) {
           currentSchemaErrors.push(
-            'Invalid date format in temporal_extent. Please use a valid date string (e.g.,YYYY-MM-DD).'
+            'Invalid date format in temporal_extent. Please use a valid date string.'
           );
         } else if (start.getTime() >= end.getTime()) {
           currentSchemaErrors.push(
@@ -190,7 +186,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       }
 
       setSchemaErrors([]);
-      onChange(processedValue); // Pass the processedValue to onChange
+      onChange(processedValue);
       setHasJSONChanges(false);
     },
     [strictSchema, setAdditionalProperties, setSchemaErrors, onChange]
@@ -210,7 +206,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         setJsonError('Invalid JSON format after modal action.');
       }
     }
-  }, [modalActionType, editorValue, validateAndApply]); // Added validateAndApply to dependencies
+  }, [modalActionType, editorValue, validateAndApply]);
 
   useEffect(() => {
     let updatedValue = { ...value };
