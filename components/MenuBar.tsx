@@ -16,7 +16,7 @@ import {
 
 const MenuBar = () => {
   const { data: session } = useSession();
-  const hasEditIngestPermission = session?.scopes?.includes('Editor');
+  const hasEditIngestPermission = session?.scopes?.includes('dataset:update');
   const pathname = usePathname();
   const [activeLink, setActiveLink] = useState(pathname);
 
