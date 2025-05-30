@@ -8,9 +8,6 @@ const modifiedConfig = {
   license: 'test license',
   discovery_items: [
     {
-      upload: false,
-      cogify: false,
-      dry_run: false,
       filename_regex: '(.*)Test_(.*).tif$',
       use_multithreading: false,
       discovery: 's3',

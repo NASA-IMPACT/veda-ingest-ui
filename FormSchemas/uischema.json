@@ -53,11 +53,6 @@
     "items": {
       "ui:grid": [
         {
-          "upload": 8,
-          "cogify": 8,
-          "dry_run": 8
-        },
-        {
           "discovery": 8,
           "prefix": 8,
           "bucket": 8

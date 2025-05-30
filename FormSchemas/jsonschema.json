@@ -122,21 +122,6 @@
       "items": {
         "type": "object",
         "properties": {
-          "upload": {
-            "type": "boolean",
-            "title": "Upload",
-            "default": false
-          },
-          "cogify": {
-            "type": "boolean",
-            "title": "Cogify",
-            "default": false
-          },
-          "dry_run": {
-            "type": "boolean",
-            "title": "Dry Run",
-            "default": false
-          },
           "discovery": {
             "type": "string",
             "enum": ["s3"],
