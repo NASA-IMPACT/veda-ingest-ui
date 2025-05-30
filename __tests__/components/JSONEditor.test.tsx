@@ -109,9 +109,6 @@ const mockFormData = {
   },
   discovery_items: [
     {
-      upload: false,
-      cogify: false,
-      dry_run: false,
       filename_regex: '[\\s\\S]*',
       use_multithreading: false,
       prefix: 'test',
