@@ -1,4 +1,4 @@
-'use client'; // Ensure this component is client-side only
+'use client';
 
 import '@ant-design/v5-patch-for-react-19';
 import React, { useState } from 'react';
@@ -29,6 +29,7 @@ import { CloudUploadOutlined, ImportOutlined } from '@ant-design/icons';
 import COGDrawerViewer from '@/components/COGDrawerViewer';
 import ThumbnailUploaderDrawer from '@/components/ThumbnailUploaderDrawer';
 import { Alert } from 'antd';
+import DiscoveryItemObjectFieldTemplate from './DiscoveryItemObjectFieldTemplate'; // Import the specific template
 
 const DESCRIPTION_COL_STYLE = {
   paddingBottom: '8px',
@@ -166,6 +167,13 @@ export default function ObjectFieldTemplate<
   const isDashboardField = (element: ObjectFieldTemplatePropertyType) =>
     element.name === 'dashboard' &&
     element.content?.props?.idSchema?.$id.includes('renders');
+  const isDiscoveryItem =
+    idSchema.$id.startsWith('root_discovery_items_') &&
+    schema.type === 'object';
+
+  if (isDiscoveryItem) {
+    return <DiscoveryItemObjectFieldTemplate {...props} />;
+  }
 
   return (
     <ConfigConsumer>

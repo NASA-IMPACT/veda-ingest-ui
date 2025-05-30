@@ -58,8 +58,10 @@
           "bucket": 8
         },
         {
-          "filename_regex": 12,
-          "datetime_range": 12
+          "filename_regex": 24
+        },
+        {
+          "datetime_range": 24
         },
         {
           "stac_extensions": 12,
