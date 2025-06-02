@@ -21,8 +21,8 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
         collapsible
         collapsed={collapsed}
         onCollapse={() => setCollapsed(!collapsed)}
-        width="auto"
-        style={{ minWidth: 'max-content' }}
+        width={200}
+        collapsedWidth={80}
       >
         <div
           style={{
