@@ -35,7 +35,7 @@ export async function validateFormFields(page: Page, expectedValues: any) {
   await expect(page.getByLabel('End Date').first()).toHaveValue(
     expectedValues.temporal_extent.enddate
   );
-  // Locate the fieldset that contains "Discovery Items-1"
+
   const DiscoveryField = page.locator('.form-group.field.field-string', {
     hasText: 'Discovery',
   });

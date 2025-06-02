@@ -1,6 +1,7 @@
 import { expect, test } from '@/__tests__/playwright/setup-msw';
 import { validateFormFields } from '../playwright/utils/ValidateFormFields';
 import { HttpResponse } from 'msw';
+import { forEach } from 'lodash';
 
 const requiredConfig = {
   collection: 'test-collection',
@@ -383,6 +384,68 @@ test.describe('Create Ingest Page', () => {
     const errorScreenshot = await page.screenshot();
     testInfo.attach('error modal for duplicate collection name', {
       body: errorScreenshot,
+      contentType: 'image/png',
+    });
+  });
+
+  test.only('Hide extended Discovery Items fields by default', async ({
+    page,
+  }, testInfo) => {
+    await test.step('Navigate to the Create Ingest page', async () => {
+      await page.goto('/create-ingest');
+    });
+
+    await expect(
+      page.getByRole('button', { name: /more options/i, expanded: false }),
+      'more options should not be expanded'
+    ).toBeVisible();
+
+    const DiscoveryFieldset = page.locator('#root_discovery_items');
+    const hiddenFields = [
+      'Datetime Range',
+      'Start Datetime',
+      'End Datetime',
+      'Id Regex',
+      'Id Template',
+      'Use Multithreading',
+    ];
+
+    for (const field of hiddenFields) {
+      await expect(
+        DiscoveryFieldset.getByLabel(field),
+        `${field} should be hidden`
+      ).toBeHidden();
+    }
+
+    const collapsedScreenshot = await DiscoveryFieldset.screenshot({
+      fullPage: true,
+    });
+    testInfo.attach('collapsed Discovery Items', {
+      body: collapsedScreenshot,
+      contentType: 'image/png',
+    });
+    await test.step('click more option button', async () => {
+      await page
+        .getByRole('button', { name: /more options/i, expanded: false })
+        .click();
+    });
+
+    await expect(
+      page.getByRole('button', { name: /more options/i, expanded: true }),
+      'more options should be expanded'
+    ).toBeVisible();
+
+    for (const field of hiddenFields) {
+      await expect(
+        DiscoveryFieldset.getByLabel(field),
+        `${field} should be visible`
+      ).toBeVisible();
+    }
+    const expandedScreenshot = await DiscoveryFieldset.screenshot({
+      fullPage: true,
+    });
+    testInfo.attach('Expanded Discovery Items', {
+      body: expandedScreenshot,
       contentType: 'image/png',
     });
   });
