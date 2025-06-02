@@ -17,13 +17,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        collapsible
-        collapsed={collapsed}
-        onCollapse={() => setCollapsed(!collapsed)}
-        width="auto"
-        style={{ minWidth: 'max-content' }}
-      >
+      <Sider width="auto" style={{ minWidth: 'max-content' }}>
         <div
           style={{
             display: 'flex',

@@ -1,7 +1,6 @@
 import { expect, test } from '@/__tests__/playwright/setup-msw';
 import { validateFormFields } from '../playwright/utils/ValidateFormFields';
 import { HttpResponse } from 'msw';
-import { forEach } from 'lodash';
 
 const requiredConfig = {
   collection: 'test-collection',
