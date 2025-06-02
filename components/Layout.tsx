@@ -21,8 +21,8 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
         collapsible
         collapsed={collapsed}
         onCollapse={() => setCollapsed(!collapsed)}
-        width={200} // Set your desired expanded width
-        collapsedWidth={80} // Ant Design's default collapsed width is often 80px
+        width={200}
+        collapsedWidth={80}
       >
         <div
           style={{
