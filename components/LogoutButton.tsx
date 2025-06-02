@@ -16,8 +16,8 @@ const collapsedStyle = {
 
 const expandedStyle = {
   marginTop: '16px',
-  width: 'calc(100% - 90px)',
-  marginInline: '45px',
+  width: 'calc(100% - 48px)',
+  marginInline: '24px',
   justifyContent: 'flex-start',
 };
 

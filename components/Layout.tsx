@@ -17,7 +17,13 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider width="auto" style={{ minWidth: 'max-content' }}>
+      <Sider
+        collapsible
+        collapsed={collapsed}
+        onCollapse={() => setCollapsed(!collapsed)}
+        width={200} // Set your desired expanded width
+        collapsedWidth={80} // Ant Design's default collapsed width is often 80px
+      >
         <div
           style={{
             display: 'flex',
