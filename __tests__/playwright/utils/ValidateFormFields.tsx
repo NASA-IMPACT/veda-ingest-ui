@@ -36,15 +36,17 @@ export async function validateFormFields(page: Page, expectedValues: any) {
     expectedValues.temporal_extent.enddate
   );
   // Locate the fieldset that contains "Discovery Items-1"
-  const fieldsetLocator = page.locator('fieldset', {
-    hasText: 'Discovery Items-1',
+  const DiscoveryField = page.locator('.form-group.field.field-string', {
+    hasText: 'Discovery',
   });
 
-  // Locate the span inside it with the text "s3"
-  const s3Locator = fieldsetLocator.locator('span.ant-select-selection-item', {
-    hasText: expectedValues.discovery_items[0].discovery,
-  });
-  await expect(s3Locator).toBeVisible();
+  await expect(
+    DiscoveryField.getByText(expectedValues.discovery_items[0].discovery, {
+      exact: true,
+    }),
+    'Discovery dropdown should have correct value'
+  ).toBeVisible();
+
   await expect(page.getByLabel('Prefix')).toHaveValue(
     expectedValues.discovery_items[0].prefix
   );
