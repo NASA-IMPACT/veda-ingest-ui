@@ -417,9 +417,7 @@ test.describe('Create Ingest Page', () => {
       ).toBeHidden();
     }
 
-    const collapsedScreenshot = await DiscoveryFieldset.screenshot({
-      fullPage: true,
-    });
+    const collapsedScreenshot = await DiscoveryFieldset.screenshot();
     testInfo.attach('collapsed Discovery Items', {
       body: collapsedScreenshot,
       contentType: 'image/png',
@@ -441,9 +439,7 @@ test.describe('Create Ingest Page', () => {
         `${field} should be visible`
       ).toBeVisible();
     }
-    const expandedScreenshot = await DiscoveryFieldset.screenshot({
-      fullPage: true,
-    });
+    const expandedScreenshot = await DiscoveryFieldset.screenshot();
     testInfo.attach('Expanded Discovery Items', {
       body: expandedScreenshot,
       contentType: 'image/png',
