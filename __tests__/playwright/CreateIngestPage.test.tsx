@@ -388,7 +388,7 @@ test.describe('Create Ingest Page', () => {
     });
   });
 
-  test.only('Hide extended Discovery Items fields by default', async ({
+  test('Hide extended Discovery Items fields by default', async ({
     page,
   }, testInfo) => {
     await test.step('Navigate to the Create Ingest page', async () => {
