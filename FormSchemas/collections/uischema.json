@@ -1,0 +1,31 @@
+{
+  "ui:grid": [
+    {
+      "id": 8,
+      "type": 4,
+      "stac_version": 4,
+      "license": 8
+    },
+    {
+      "description": 24
+    },
+    {
+      "extent": 24
+    },
+    {
+      "links": 24
+    },
+    {
+      "summaries": 24
+    }
+  ],
+
+  "ui:submitButtonOptions": {
+    "props": {
+      "color": "primary",
+      "variant": "solid",
+      "size": "large",
+      "block": "true"
+    }
+  }
+}

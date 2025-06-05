@@ -12,6 +12,7 @@ import {
   EditOutlined,
   GlobalOutlined,
   CloudUploadOutlined,
+  BlockOutlined,
 } from '@ant-design/icons';
 
 const MenuBar = () => {
@@ -27,43 +28,66 @@ const MenuBar = () => {
       icon: <HomeOutlined />,
     },
     {
-      label: <Link href="/create-ingest">Create Ingest</Link>,
-      key: '/create-ingest',
-      icon: <PlusCircleOutlined />,
+      label: <Link href="/collections">Collections</Link>,
+      key: 'g1',
+      type: 'group',
+      children: [
+        {
+          key: '/create-collection',
+          label: <Link href="/create-collection">Create Collection</Link>,
+          icon: <PlusCircleOutlined />,
+        },
+        ...(hasEditIngestPermission
+          ? [
+              {
+                key: '/edit-collection',
+                label: <Link href="/edit-collection">Edit Collection</Link>,
+                icon: <EditOutlined />,
+              },
+            ]
+          : []),
+      ],
     },
     {
-      label: <Link href="/cog-viewer">COG Viewer</Link>,
-      key: '/cog-viewer',
-      icon: <GlobalOutlined />,
+      label: <Link href="/datasets">Dataset Ingestion</Link>,
+      key: 'g2',
+      type: 'group',
+      children: [
+        {
+          key: '/create-ingest',
+          label: <Link href="/create-ingest">Create Ingest</Link>,
+          icon: <PlusCircleOutlined />,
+        },
+        // Conditionally add 'Edit Ingest'
+        ...(hasEditIngestPermission
+          ? [
+              {
+                key: '/edit-ingest',
+                label: <Link href="/edit-ingest">Edit Ingest</Link>,
+                icon: <EditOutlined />,
+              },
+            ]
+          : []),
+      ],
     },
     {
-      label: <Link href="/upload">Thumbnail Uploader</Link>,
-      key: '/upload',
-      icon: <CloudUploadOutlined />,
+      label: 'Tools',
+      key: 'g3',
+      type: 'group',
+      children: [
+        {
+          label: <Link href="/cog-viewer">COG Viewer</Link>,
+          key: '/cog-viewer',
+          icon: <GlobalOutlined />,
+        },
+        {
+          label: <Link href="/upload">Thumbnail Uploader</Link>,
+          key: '/upload',
+          icon: <CloudUploadOutlined />,
+        },
+      ],
     },
   ];
-
-  // Conditionally add Edit Ingest
-  const itemsWithEdit = hasEditIngestPermission
-    ? [
-        ...baseItems.slice(0, 2),
-        {
-          label: <Link href="/edit-ingest">Edit Ingest</Link>,
-          key: '/edit-ingest',
-          icon: <EditOutlined />,
-        },
-        ...baseItems.slice(2),
-      ]
-    : baseItems;
-
-  // Filter out "Thumbnail Uploader" based on env variable
-  const filteredItems =
-    process.env.NEXT_PUBLIC_ENABLE_THUMBNAIL_UPLOAD !== 'true'
-      ? itemsWithEdit.filter(
-          (item): item is Required<MenuProps>['items'][number] =>
-            item?.key !== '/upload'
-        )
-      : itemsWithEdit;
 
   useEffect(() => {
     if (location) {
@@ -78,7 +102,7 @@ const MenuBar = () => {
       theme="dark"
       mode="inline"
       defaultSelectedKeys={['/']}
-      items={filteredItems}
+      items={baseItems}
       selectedKeys={[activeLink]}
     ></Menu>
   );

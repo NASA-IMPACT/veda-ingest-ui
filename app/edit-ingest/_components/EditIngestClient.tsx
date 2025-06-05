@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import AppLayout from '@/components/Layout';
-import IngestEditForm from '@/components/IngestEditForm';
+import EditIngestForm from '@/components/EditIngestForm';
 import { Button, List, Spin } from 'antd';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -138,8 +138,9 @@ const EditIngestClient = function EditIngestClient() {
       )}
       {status === 'loadingIngest' && <Spin fullscreen />}
       {Object.keys(formData).length > 0 && (
-        <IngestEditForm
-          ref={ref}
+        <EditIngestForm
+          formType="dataset"
+          gitRef={ref}
           filePath={filePath}
           fileSha={fileSha}
           formData={formData}

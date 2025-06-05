@@ -10,7 +10,12 @@ interface Data {
   renders?: string;
 }
 
-const CreatePR = async (data: Data): Promise<string> => {
+type IngestionType = 'dataset' | 'collection';
+
+const CreatePR = async (
+  data: Data,
+  ingestionType: IngestionType
+): Promise<string> => {
   const targetBranch = process.env.TARGET_BRANCH || 'main';
   const owner = process.env.OWNER;
   const repo = process.env.REPO;
@@ -22,7 +27,16 @@ const CreatePR = async (data: Data): Promise<string> => {
   try {
     const collectionName = data.collection;
     const content = CleanAndPrettifyJSON(data);
-    const targetPath = 'ingestion-data/staging/dataset-config';
+    // Determine the target path based on the ingestionType.
+    let targetPath: string;
+    if (ingestionType === 'dataset') {
+      targetPath = 'ingestion-data/staging/dataset-config';
+    } else if (ingestionType === 'collection') {
+      targetPath = 'ingestion-data/staging/collections'; // Changed to 'collections' to match the request
+    } else {
+      // Fallback or error for unexpected ingestionType, though TypeScript should prevent this.
+      throw new Error(`Invalid ingestionType: ${ingestionType}`);
+    }
     const fileName = formatFilename(collectionName);
     const path = `${targetPath}/${fileName}.json`;
     const branchName = `feat/${fileName}`;

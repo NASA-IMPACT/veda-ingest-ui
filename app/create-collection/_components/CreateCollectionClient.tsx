@@ -16,7 +16,7 @@ const CreateIngestClient = function CreateIngestClient() {
   return (
     <AppLayout>
       <CreateIngestForm
-        formType="dataset"
+        formType="collection"
         setStatus={setStatus}
         setCollectionName={setCollectionName}
         setApiErrorMessage={setApiErrorMessage}

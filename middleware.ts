@@ -21,7 +21,9 @@ export async function middleware(request: NextRequest) {
 
   // Allow access all authenticated users
   if (
-    (pathname.startsWith('/create-ingest') ||
+    (pathname.startsWith('/collections') ||
+      pathname.startsWith('/create-ingest') ||
+      pathname.startsWith('/ingests') ||
       pathname.startsWith('/upload') ||
       pathname.startsWith('/cog-viewer')) &&
     session
@@ -57,6 +59,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/ingests',
     '/create-ingest',
     '/edit-ingest',
     '/upload',

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button, Typography, Checkbox, Flex, message, Modal } from 'antd';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import jsonSchema from '@/FormSchemas/jsonschema.json';
+import jsonSchema from '@/FormSchemas/datasets/datasetSchema.json';
 import AdditionalPropertyCard from '@/components/AdditionalPropertyCard';
 import dynamic from 'next/dynamic';
 import '@uiw/react-textarea-code-editor/dist.css';
