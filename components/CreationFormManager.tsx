@@ -5,7 +5,7 @@ import { Status } from '@/types/global';
 import DatasetIngestionForm from '@/components/DatasetIngestionForm';
 import CollectionIngestionForm from '@/components/CollectionIngestionForm';
 
-interface CreateIngestFormProps {
+interface CreationFormManagerProps {
   formType: 'dataset' | 'collection';
   setStatus: (status: Status) => void;
   setCollectionName: (collectionName: string) => void;
@@ -13,7 +13,7 @@ interface CreateIngestFormProps {
   setPullRequestUrl: (pullRequestUrl: string) => void;
 }
 
-const CreateIngestForm: React.FC<CreateIngestFormProps> = ({
+const CreationFormManager: React.FC<CreationFormManagerProps> = ({
   formType,
   setStatus,
   setCollectionName,
@@ -85,4 +85,4 @@ const CreateIngestForm: React.FC<CreateIngestFormProps> = ({
   );
 };
 
-export default CreateIngestForm;
+export default CreationFormManager;

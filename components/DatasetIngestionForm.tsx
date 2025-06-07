@@ -166,6 +166,7 @@ function DatasetIngestionForm({
           children: (
             <JSONEditor
               value={formData || {}}
+              jsonSchema={jsonSchema}
               onChange={handleJsonEditorChange}
               disableCollectionNameChange={disableCollectionNameChange}
               hasJSONChanges={hasJSONChanges}

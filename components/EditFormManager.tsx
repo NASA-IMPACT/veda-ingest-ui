@@ -6,7 +6,7 @@ import DatasetIngestionForm from '@/components/DatasetIngestionForm';
 import CollectionIngestionForm from '@/components/CollectionIngestionForm';
 import { Button } from 'antd';
 
-interface EditIngestFormProps {
+interface EditFormManagerProps {
   formType: 'dataset' | 'collection';
   gitRef: string;
   filePath: string;
@@ -18,7 +18,7 @@ interface EditIngestFormProps {
   handleCancel: () => void;
 }
 
-const EditIngestForm: React.FC<EditIngestFormProps> = ({
+const EditFormManager: React.FC<EditFormManagerProps> = ({
   formType,
   gitRef,
   filePath,
@@ -116,4 +116,4 @@ const EditIngestForm: React.FC<EditIngestFormProps> = ({
   );
 };
 
-export default EditIngestForm;
+export default EditFormManager;

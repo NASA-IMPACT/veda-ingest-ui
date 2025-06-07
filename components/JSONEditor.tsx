@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button, Typography, Checkbox, Flex, message, Modal } from 'antd';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import jsonSchema from '@/FormSchemas/datasets/datasetSchema.json';
 import AdditionalPropertyCard from '@/components/AdditionalPropertyCard';
 import dynamic from 'next/dynamic';
 import '@uiw/react-textarea-code-editor/dist.css';
@@ -34,6 +33,7 @@ export interface JSONEditorValue {
 
 interface JSONEditorProps {
   value: JSONEditorValue;
+  jsonSchema: Record<string, unknown>;
   onChange: (updatedValue: JSONEditorValue) => void;
   disableCollectionNameChange?: boolean;
   hasJSONChanges?: boolean;
@@ -44,6 +44,7 @@ interface JSONEditorProps {
 
 const JSONEditor: React.FC<JSONEditorProps> = ({
   value,
+  jsonSchema,
   onChange,
   hasJSONChanges,
   setHasJSONChanges,
@@ -189,7 +190,13 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       onChange(processedValue);
       setHasJSONChanges(false);
     },
-    [strictSchema, setAdditionalProperties, setSchemaErrors, onChange]
+    [
+      strictSchema,
+      setAdditionalProperties,
+      setSchemaErrors,
+      onChange,
+      jsonSchema,
+    ]
   );
 
   // Effect to re-run applyChanges after modal action if needed

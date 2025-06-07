@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import AppLayout from '@/components/Layout';
 import { Spin } from 'antd';
-import CreateIngestForm from '@/components/CreateIngestForm';
+import CreationFormManager from '@/components/CreationFormManager';
 import ErrorModal from '@/components/ErrorModal';
 import SuccessModal from '@/components/SuccessModal';
 import { Status } from '@/types/global';
@@ -15,7 +15,7 @@ const CreateIngestClient = function CreateIngestClient() {
 
   return (
     <AppLayout>
-      <CreateIngestForm
+      <CreationFormManager
         formType="dataset"
         setStatus={setStatus}
         setCollectionName={setCollectionName}
