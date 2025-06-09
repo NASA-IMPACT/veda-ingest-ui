@@ -17,8 +17,15 @@ import { JSONEditorValue } from '@/components/JSONEditor';
 import AdditionalPropertyCard from '@/components/AdditionalPropertyCard';
 import jsonSchema from '@/FormSchemas/collections/collectionSchema.json';
 import uiSchema from '@/FormSchemas/collections/uischema.json';
+import BboxField from '@/utils/BboxField';
+import IntervalField from '@/utils/IntervalField';
 
 const Form = withTheme(AntDTheme);
+
+const customFields = {
+  BboxField: BboxField,
+  interval: IntervalField,
+};
 
 interface FormProps {
   formData: Record<string, unknown> | undefined;
@@ -75,6 +82,7 @@ function DatasetIngestionForm({
                 templates={{
                   ObjectFieldTemplate: ObjectFieldTemplate,
                 }}
+                fields={customFields}
                 formData={formData}
                 onChange={onFormDataChanged}
                 onSubmit={(data) => handleSubmit(data, onSubmit)}

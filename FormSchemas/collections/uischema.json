@@ -19,7 +19,31 @@
       "summaries": 24
     }
   ],
-
+  "extent": {
+    "ui:grid": [
+      {
+        "spatial": 12,
+        "temporal": 12
+      }
+    ],
+    "spatial": {
+      "bbox": {
+        "items": {
+          "ui:field": "BboxField",
+          "ui:options": {
+            "label": false
+          }
+        }
+      }
+    },
+    "temporal": {
+      "interval": {
+        "items": {
+          "ui:field": "interval"
+        }
+      }
+    }
+  },
   "ui:submitButtonOptions": {
     "props": {
       "color": "primary",
