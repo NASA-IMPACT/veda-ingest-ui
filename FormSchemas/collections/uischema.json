@@ -1,13 +1,15 @@
 {
   "ui:grid": [
     {
-      "id": 8,
+      "id": 6,
+      "title": 6,
       "type": 4,
       "stac_version": 4,
-      "license": 8
+      "license": 4
     },
     {
-      "description": 24
+      "description": 12,
+      "keywords": 12
     },
     {
       "extent": 24
@@ -17,6 +19,12 @@
     },
     {
       "summaries": 24
+    },
+    {
+      "providers": 24
+    },
+    {
+      "assets": 24
     }
   ],
   "extent": {
@@ -43,6 +51,9 @@
         }
       }
     }
+  },
+  "assets": {
+    "ui:field": "asset"
   },
   "ui:submitButtonOptions": {
     "props": {

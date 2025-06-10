@@ -19,12 +19,14 @@ import jsonSchema from '@/FormSchemas/collections/collectionSchema.json';
 import uiSchema from '@/FormSchemas/collections/uischema.json';
 import BboxField from '@/utils/BboxField';
 import IntervalField from '@/utils/IntervalField';
+import AssetField from '@/utils/AssetsField';
 
 const Form = withTheme(AntDTheme);
 
 const customFields = {
   BboxField: BboxField,
   interval: IntervalField,
+  asset: AssetField,
 };
 
 interface FormProps {
