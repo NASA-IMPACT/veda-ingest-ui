@@ -55,6 +55,9 @@
   "assets": {
     "ui:field": "asset"
   },
+  "summaries": {
+    "ui:field": "summaries"
+  },
   "ui:submitButtonOptions": {
     "props": {
       "color": "primary",

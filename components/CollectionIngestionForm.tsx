@@ -20,6 +20,7 @@ import uiSchema from '@/FormSchemas/collections/uischema.json';
 import BboxField from '@/utils/BboxField';
 import IntervalField from '@/utils/IntervalField';
 import AssetField from '@/utils/AssetsField';
+import SummariesField from '@/utils/SummariesFields';
 
 const Form = withTheme(AntDTheme);
 
@@ -27,6 +28,7 @@ const customFields = {
   BboxField: BboxField,
   interval: IntervalField,
   asset: AssetField,
+  summaries: SummariesField,
 };
 
 interface FormProps {
@@ -65,6 +67,7 @@ function DatasetIngestionForm({
     setHasJSONChanges(false);
   };
 
+  console.log({ formData });
   return (
     <Tabs
       activeKey={activeTab}
