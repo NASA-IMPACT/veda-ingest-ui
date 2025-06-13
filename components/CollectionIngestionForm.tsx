@@ -2,8 +2,8 @@
 
 import '@ant-design/v5-patch-for-react-19';
 
-import { SetStateAction, useEffect, useState } from 'react';
-import { Tabs } from 'antd';
+import { useState, useMemo } from 'react';
+import { Button, Col, Row, Tabs } from 'antd';
 import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
 import validator from '@rjsf/validator-ajv8';
@@ -11,16 +11,17 @@ import { JSONSchema7 } from 'json-schema';
 
 import ObjectFieldTemplate from '@/utils/ObjectFieldTemplate';
 import { customValidate } from '@/utils/CustomValidation';
-import { handleSubmit } from '@/utils/FormHandlers';
 import JSONEditor from '@/components/JSONEditor';
 import { JSONEditorValue } from '@/components/JSONEditor';
 import AdditionalPropertyCard from '@/components/AdditionalPropertyCard';
-import jsonSchema from '@/FormSchemas/collections/collectionSchema.json';
-import uiSchema from '@/FormSchemas/collections/uischema.json';
 import BboxField from '@/utils/BboxField';
 import IntervalField from '@/utils/IntervalField';
 import AssetField from '@/utils/AssetsField';
-import SummariesField from '@/utils/SummariesFields';
+
+import SummariesManager from '@/components/SummariesManager';
+
+import fullJsonSchema from '@/FormSchemas/collections/collectionSchema.json';
+import uiSchema from '@/FormSchemas/collections/uischema.json';
 
 const Form = withTheme(AntDTheme);
 
@@ -28,7 +29,6 @@ const customFields = {
   BboxField: BboxField,
   interval: IntervalField,
   asset: AssetField,
-  summaries: SummariesField,
 };
 
 interface FormProps {
@@ -47,27 +47,59 @@ function DatasetIngestionForm({
   children,
 }: FormProps) {
   const [activeTab, setActiveTab] = useState<string>('form');
-  const [forceRenderKey, setForceRenderKey] = useState<number>(0); // Force refresh RJSF to clear validation errors
+  const [forceRenderKey, setForceRenderKey] = useState<number>(0);
   const [hasJSONChanges, setHasJSONChanges] = useState<boolean>(false);
   const [additionalProperties, setAdditionalProperties] = useState<
     string[] | null
   >(null);
 
-  const onFormDataChanged = (formState: { formData?: object }) => {
-    setFormData((formState.formData as Record<string, unknown>) ?? {});
-    if (setDisabled) {
-      setDisabled(false);
+  // Separate the summaries data from the rest of the form data
+  const { summaries: initialSummaries, ...rjsfFormData } = formData || {};
+
+  const [summariesData, setSummariesData] = useState(initialSummaries || {});
+
+  // This schema is passed to RJSF and has 'summaries' removed to prevent conflicts
+  const schemaForRJSF = useMemo(() => {
+    const newSchema = JSON.parse(JSON.stringify(fullJsonSchema));
+    if (newSchema.properties && newSchema.properties.summaries) {
+      delete newSchema.properties.summaries;
     }
+    return newSchema;
+  }, []);
+
+  const onRJSFDataChanged = (formState: { formData?: object }) => {
+    // This only updates the RJSF portion of the data
+    const updatedRjsfData =
+      (formState.formData as Record<string, unknown>) ?? {};
+    setFormData({ ...updatedRjsfData, summaries: summariesData }); // Keep summaries data in sync
+    if (setDisabled) setDisabled(false);
+  };
+
+  const handleSummariesChange = (newSummaries: Record<string, unknown>) => {
+    setSummariesData(newSummaries);
+    // Combine with the rest of the form data when summaries change
+    setFormData({ ...rjsfFormData, summaries: newSummaries });
+    if (setDisabled) setDisabled(false);
+  };
+
+  const handleSubmit = (rjsfData: { formData?: object }) => {
+    // On final submit, combine the data from RJSF with the data from our manager
+    const finalFormData = {
+      ...(rjsfData.formData || {}),
+      summaries: summariesData,
+    };
+    onSubmit(finalFormData);
   };
 
   const handleJsonEditorChange = (updatedData: JSONEditorValue) => {
     setFormData(updatedData);
-    setForceRenderKey((prev) => prev + 1); // Forces RJSF to re-render and re-validate
+    // When JSON is edited, also update the separated summaries state
+    setSummariesData(updatedData.summaries || {});
+    setForceRenderKey((prev) => prev + 1);
     setActiveTab('form');
     setHasJSONChanges(false);
   };
 
-  console.log({ formData });
   return (
     <Tabs
       activeKey={activeTab}
@@ -79,21 +111,30 @@ function DatasetIngestionForm({
           children: (
             <>
               <Form
-                key={forceRenderKey} // Forces re-render when data updates
-                schema={jsonSchema as JSONSchema7}
+                key={forceRenderKey}
+                schema={schemaForRJSF as JSONSchema7} // Use the schema WITHOUT summaries
                 uiSchema={uiSchema}
                 validator={validator}
                 customValidate={customValidate}
-                templates={{
-                  ObjectFieldTemplate: ObjectFieldTemplate,
-                }}
+                templates={{ ObjectFieldTemplate: ObjectFieldTemplate }}
                 fields={customFields}
-                formData={formData}
-                onChange={onFormDataChanged}
-                onSubmit={(data) => handleSubmit(data, onSubmit)}
+                formData={rjsfFormData} // Pass only the non-summaries data
+                onChange={onRJSFDataChanged}
+                onSubmit={handleSubmit}
                 formContext={{ formData, updateFormData: setFormData }}
               >
+                <SummariesManager
+                  initialData={summariesData}
+                  onChange={handleSummariesChange}
+                />
                 {children}
+                <Row justify="center" style={{ marginTop: '20px' }}>
+                  <Col span={24}>
+                    <Button type="primary" htmlType="submit" block>
+                      Submit
+                    </Button>
+                  </Col>
+                </Row>
               </Form>
               {additionalProperties && additionalProperties.length > 0 && (
                 <AdditionalPropertyCard
@@ -110,7 +151,7 @@ function DatasetIngestionForm({
           children: (
             <JSONEditor
               value={formData || {}}
-              jsonSchema={jsonSchema}
+              jsonSchema={fullJsonSchema}
               onChange={handleJsonEditorChange}
               hasJSONChanges={hasJSONChanges}
               setHasJSONChanges={setHasJSONChanges}

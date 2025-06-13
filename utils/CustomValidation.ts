@@ -3,23 +3,6 @@ import Ajv from 'ajv';
 export const rfc3339Regex =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 
-// Helper to determine if a summary object should be treated as a JSON Schema
-const isJsonSchemaType = (summaryData) => {
-  if (
-    summaryData &&
-    typeof summaryData === 'object' &&
-    !Array.isArray(summaryData)
-  ) {
-    // Check for keys that are highly indicative of a JSON Schema object
-    return (
-      summaryData.hasOwnProperty('$schema') ||
-      summaryData.hasOwnProperty('properties') ||
-      summaryData.hasOwnProperty('type')
-    );
-  }
-  return false;
-};
-
 // We create a new AJV instance here specifically to validate schemas
 const ajv = new Ajv();
 
@@ -47,7 +30,7 @@ export const customValidate = (formData, errors) => {
   // --- Your existing validation logic for 'temporal_extent' ---
   if (formData.temporal_extent) {
     const { startdate, enddate } = formData.temporal_extent;
-    // (Your existing date logic remains here...)
+    // ... your existing date logic ...
     if (startdate) {
       if (
         startdate !== null &&
@@ -95,39 +78,32 @@ export const customValidate = (formData, errors) => {
     }
   }
 
-  // --- NEW: Validation logic for 'summaries' ---
+  // --- NEW and IMPROVED Validation logic for 'summaries' ---
   if (formData.summaries) {
     Object.keys(formData.summaries).forEach((key) => {
       const summaryItem = formData.summaries[key];
 
-      // We only want to validate items that are supposed to be JSON Schemas.
-      // Your custom field renders a string editor for this, so we check if the raw data is a string.
+      // Validate 'JSON Schema' type
       if (typeof summaryItem === 'string') {
         try {
           const parsedSchema = JSON.parse(summaryItem);
-
-          // Now, validate if the parsed object is a valid schema itself.
           const isValidSchema = ajv.validateSchema(parsedSchema);
-
           if (!isValidSchema) {
-            // Add error to the specific summary item that is invalid
-            errors.summaries?.[key]?.addError(
-              'The text is not a valid JSON Schema object.'
+            // Because this is a custom field, we add the error to the parent `summaries` object.
+            errors.summaries.addError(
+              `Summary '${key}' is not a valid JSON Schema object.`
             );
           }
         } catch (e) {
-          // This catches errors from JSON.parse()
-          errors.summaries?.[key]?.addError(
-            'Invalid JSON format. Please check syntax.'
-          );
+          errors.summaries.addError(`Summary '${key}' contains invalid JSON.`);
         }
       }
-      // This handles the case where the data is already an object (not from a text field)
-      else if (isJsonSchemaType(summaryItem)) {
-        const isValidSchema = ajv.validateSchema(summaryItem);
-        if (!isValidSchema) {
-          errors.summaries?.[key]?.addError(
-            'The object is not a valid JSON Schema.'
+      // Validate 'Set of values' type
+      else if (Array.isArray(summaryItem)) {
+        // Your schema requires at least one item for this type.
+        if (summaryItem.length === 0) {
+          errors.summaries.addError(
+            `Summary '${key}' is a 'Set of values' and must contain at least one value.`
           );
         }
       }

@@ -32,8 +32,14 @@ export async function middleware(request: NextRequest) {
   }
 
   // Protect /edit-ingest based on the Editor scope
-  if (pathname.startsWith('/edit-ingest')) {
-    if (!session?.scopes?.includes('dataset:update')) {
+  if (
+    pathname.startsWith('/edit-ingest') ||
+    pathname.startsWith('/edit-collection')
+  ) {
+    if (
+      !session?.scopes?.includes('dataset:update') ||
+      !session?.scopes?.includes('Editor')
+    ) {
       if (pathname.startsWith('/api/')) {
         return new NextResponse('Unauthorized', { status: 401 });
       } else {
