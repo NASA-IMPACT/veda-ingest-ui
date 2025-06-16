@@ -123,14 +123,16 @@ function DatasetIngestionForm({
                 onSubmit={handleSubmit}
                 formContext={{ formData, updateFormData: setFormData }}
               >
-                <SummariesManager
-                  initialData={summariesData}
-                  onChange={handleSummariesChange}
-                />
+                <div style={{ marginTop: '-24px' }}>
+                  <SummariesManager
+                    initialData={summariesData}
+                    onChange={handleSummariesChange}
+                  />
+                </div>
                 {children}
-                <Row justify="center" style={{ marginTop: '20px' }}>
+                <Row justify="center" style={{ marginTop: '40px' }}>
                   <Col span={24}>
-                    <Button type="primary" htmlType="submit" block>
+                    <Button type="primary" htmlType="submit" size="large" block>
                       Submit
                     </Button>
                   </Col>

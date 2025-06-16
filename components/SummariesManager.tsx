@@ -11,9 +11,9 @@ import {
   Space,
   Tag,
   Typography,
+  Tooltip,
 } from 'antd';
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
-import { title } from 'process';
+import { PlusCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 
 // Placeholder for your CodeEditorWidget. You can replace this with your actual import.
 const CodeEditorWidget: React.FC<{
@@ -36,7 +36,6 @@ const CodeEditorWidget: React.FC<{
   );
 };
 
-// This is no longer an RJSF Field, but a standalone component for managing summaries.
 interface SummariesManagerProps {
   initialData?: { [key: string]: any };
   onChange: (data: { [key: string]: any }) => void;
@@ -198,48 +197,57 @@ const SummariesManager: React.FC<SummariesManagerProps> = ({
   };
 
   return (
-    <fieldset>
-      <Typography.Title level={5}>Summaries</Typography.Title>
+    <fieldset id="summaries_manager" style={{ marginTop: 0 }}>
+      <Typography.Title level={5} style={{ marginBottom: 16 }}>
+        Summaries
+      </Typography.Title>
 
-      {Object.keys(summaries || {}).map((key) => {
-        const summaryData = summaries[key];
-        const summaryType = getSummaryType(summaryData);
+      {Object.keys(summaries || {}).length > 0 ? (
+        Object.keys(summaries).map((key) => {
+          const summaryData = summaries[key];
+          const summaryType = getSummaryType(summaryData);
 
-        return (
-          <Card
-            key={key}
-            size="small"
-            title={key}
-            style={{ marginBottom: '16px' }}
-          >
-            <Row align="middle" gutter={8}>
-              <Col span={20}>
-                <div style={{ marginTop: '10px', paddingLeft: '5px' }}>
-                  {renderSummaryData(summaryType, summaryData)}
-                </div>
-              </Col>
-              <Col span={4}>
-                <Button
-                  danger
-                  icon={<DeleteOutlined />}
-                  onClick={handleRemoveSummary(key)}
-                  disabled={disabled || readonly}
-                />
-              </Col>
-            </Row>
-          </Card>
-        );
-      })}
+          return (
+            <Card key={key} size="small" style={{ marginBottom: '16px' }}>
+              <Row align="top" gutter={8}>
+                <Col flex="auto">
+                  <Typography.Text strong>{key}</Typography.Text>
+                  <div style={{ marginTop: '10px' }}>
+                    {renderSummaryData(summaryType, summaryData)}
+                  </div>
+                </Col>
+                <Col flex="none">
+                  <Tooltip title="Remove Summary">
+                    <Button
+                      danger
+                      type="text"
+                      icon={<DeleteOutlined />}
+                      onClick={handleRemoveSummary(key)}
+                      disabled={disabled || readonly}
+                    />
+                  </Tooltip>
+                </Col>
+              </Row>
+            </Card>
+          );
+        })
+      ) : (
+        <div /> // Placeholder for when the list is empty
+      )}
 
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        onClick={handleShowModal}
-        disabled={disabled || readonly}
-        style={{ width: '100%', marginTop: 12 }}
-      >
-        Add Summary
-      </Button>
+      <Row justify="end" style={{ marginTop: 0 }}>
+        <Col style={{ flex: '0 0 168px' }}>
+          <Tooltip title="Add Summary">
+            <Button
+              type="primary"
+              icon={<PlusCircleOutlined />}
+              onClick={handleShowModal}
+              disabled={disabled || readonly}
+              block
+            />
+          </Tooltip>
+        </Col>
+      </Row>
 
       <Modal
         title="Add New Summary"
@@ -302,7 +310,7 @@ const SummariesManager: React.FC<SummariesManagerProps> = ({
               <Button
                 type="dashed"
                 onClick={() => setModalSetValues([...modalSetValues, ''])}
-                icon={<PlusOutlined />}
+                icon={<PlusCircleOutlined />}
                 style={{ width: '100%' }}
               >
                 Add Value
