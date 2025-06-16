@@ -1,13 +1,17 @@
+import { CustomValidator } from '@rjsf/utils';
 import Ajv from 'ajv';
 
 export const rfc3339Regex =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 
-// We create a new AJV instance here specifically to validate schemas
 const ajv = new Ajv();
 
-export const customValidate = (formData, errors) => {
-  // --- Your existing validation logic for 'renders' ---
+export const customValidate: CustomValidator = (formData, errors) => {
+  // Ensure formData is not null or undefined before proceeding
+  if (!formData) {
+    return errors;
+  }
+
   try {
     if (formData.renders && formData.renders.dashboard) {
       const parsed = JSON.parse(formData.renders.dashboard);
@@ -16,7 +20,7 @@ export const customValidate = (formData, errors) => {
         parsed === null ||
         Array.isArray(parsed)
       ) {
-        errors.renders?.dashboard.addError(
+        errors.renders?.dashboard?.addError(
           'Input must be a valid JSON object.'
         );
       }
@@ -27,10 +31,8 @@ export const customValidate = (formData, errors) => {
     );
   }
 
-  // --- Your existing validation logic for 'temporal_extent' ---
   if (formData.temporal_extent) {
     const { startdate, enddate } = formData.temporal_extent;
-    // ... your existing date logic ...
     if (startdate) {
       if (
         startdate !== null &&
@@ -78,7 +80,6 @@ export const customValidate = (formData, errors) => {
     }
   }
 
-  // --- NEW and IMPROVED Validation logic for 'summaries' ---
   if (formData.summaries) {
     Object.keys(formData.summaries).forEach((key) => {
       const summaryItem = formData.summaries[key];
@@ -90,19 +91,19 @@ export const customValidate = (formData, errors) => {
           const isValidSchema = ajv.validateSchema(parsedSchema);
           if (!isValidSchema) {
             // Because this is a custom field, we add the error to the parent `summaries` object.
-            errors.summaries.addError(
+            errors.summaries?.addError(
               `Summary '${key}' is not a valid JSON Schema object.`
             );
           }
         } catch (e) {
-          errors.summaries.addError(`Summary '${key}' contains invalid JSON.`);
+          errors.summaries?.addError(`Summary '${key}' contains invalid JSON.`);
         }
       }
       // Validate 'Set of values' type
       else if (Array.isArray(summaryItem)) {
-        // Your schema requires at least one item for this type.
+        //  schema requires at least one item for this type.
         if (summaryItem.length === 0) {
-          errors.summaries.addError(
+          errors.summaries?.addError(
             `Summary '${key}' is a 'Set of values' and must contain at least one value.`
           );
         }

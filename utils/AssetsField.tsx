@@ -1,19 +1,22 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { FieldProps, RJSFSchema } from '@rjsf/utils';
-import { Input, Button, Row, Col, Card, Tooltip } from 'antd'; // Import Tooltip
-import { PlusCircleOutlined, DeleteOutlined } from '@ant-design/icons'; // Import PlusCircleOutlined
+import { FieldProps, RJSFSchema, IdSchema } from '@rjsf/utils';
+import { Input, Button, Row, Col, Card, Tooltip } from 'antd';
+import { PlusCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const AssetsField: React.FC<FieldProps> = (props) => {
   const {
-    formData, // This is the object containing all assets: { key1: {href:...}, key2: {href:...}}
+    formData,
     onChange,
-    schema, // Schema for the 'assets' object
-    uiSchema, // UI Schema for the 'assets' object
+    schema,
+    uiSchema,
     idSchema,
     registry,
     disabled,
     readonly,
     formContext,
+    title,
+    required,
+    description,
   } = props;
 
   const { SchemaField } = registry.fields;
@@ -31,8 +34,7 @@ const AssetsField: React.FC<FieldProps> = (props) => {
   const generateUniqueKey = useCallback(() => {
     let newKeyBase = 'new_asset';
     let counter = 1;
-    let newKey = `${newKeyBase}`;
-    // Ensure the generated key is unique within the current formData
+    let newKey = newKeyBase;
     while (formData && formData.hasOwnProperty(newKey)) {
       newKey = `${newKeyBase}_${counter++}`;
     }
@@ -43,16 +45,25 @@ const AssetsField: React.FC<FieldProps> = (props) => {
     const newKey = generateUniqueKey();
     const newFormData = { ...formData };
 
-    // Use the default value from the schema if available, otherwise provide a sensible default
-    const newAssetValue = schema.additionalProperties?.default || {
+    let newAssetValue = {
       href: '',
       title: '',
       description: '',
       type: '',
       roles: [],
     };
-    newFormData[newKey] = newAssetValue;
+    if (
+      schema.additionalProperties &&
+      typeof schema.additionalProperties === 'object' &&
+      'default' in schema.additionalProperties
+    ) {
+      newAssetValue = {
+        ...newAssetValue,
+        ...(schema.additionalProperties.default as object),
+      };
+    }
 
+    newFormData[newKey] = newAssetValue;
     onChange(newFormData);
   }, [formData, onChange, generateUniqueKey, schema]);
 
@@ -75,13 +86,9 @@ const AssetsField: React.FC<FieldProps> = (props) => {
       }
       if (oldKey === newKey) return;
 
-      // Recreate the object to preserve key order if possible, though not guaranteed
       const newFormData = Object.keys(formData).reduce((acc, currentKey) => {
-        if (currentKey === oldKey) {
-          acc[newKey] = formData[oldKey];
-        } else {
-          acc[currentKey] = formData[currentKey];
-        }
+        const targetKey = currentKey === oldKey ? newKey : currentKey;
+        acc[targetKey] = formData[currentKey];
         return acc;
       }, {} as any);
 
@@ -90,35 +97,34 @@ const AssetsField: React.FC<FieldProps> = (props) => {
     [formData, onChange]
   );
 
-  // Get the schema for the asset details (from additionalProperties)
-  const assetDetailsSchema = (schema.additionalProperties as RJSFSchema) || {
-    type: 'object',
-  };
+  const assetDetailsSchema: RJSFSchema =
+    typeof schema.additionalProperties === 'object'
+      ? (schema.additionalProperties as RJSFSchema)
+      : {};
 
   return (
     <div id={idSchema.$id}>
       <TitleFieldTemplate
         id={idSchema.$id + '__title'}
-        title={props.title ?? schema.title}
-        required={props.required}
+        title={title ?? schema.title ?? ''}
+        required={required}
         schema={schema}
         uiSchema={uiSchema}
         registry={registry}
       />
       <DescriptionFieldTemplate
         id={idSchema.$id + '__description'}
-        description={props.description ?? schema.description}
+        description={description ?? schema.description}
         schema={schema}
         uiSchema={uiSchema}
         registry={registry}
       />
 
-      {/* Map over our locally ordered list of keys */}
       {orderedAssetKeys.map((key: string, index: number) => {
-        const assetIdSchema = {
-          ...idSchema,
-          [key]: { $id: `${idSchema.$id}_${key}` },
-        }[key];
+        const assetIdSchema: IdSchema = {
+          ...(idSchema as any)[key],
+          $id: `${idSchema.$id}_${key}`,
+        };
         const assetFormData = formData?.[key] ?? {};
 
         return (
@@ -146,6 +152,7 @@ const AssetsField: React.FC<FieldProps> = (props) => {
             </Row>
             <div style={{ marginTop: '16px' }}>
               <SchemaField
+                {...props}
                 schema={assetDetailsSchema}
                 uiSchema={uiSchema?.[key] || {}}
                 idSchema={assetIdSchema}
@@ -153,18 +160,13 @@ const AssetsField: React.FC<FieldProps> = (props) => {
                 onChange={(newAssetValue) => {
                   onChange({ ...formData, [key]: newAssetValue });
                 }}
-                registry={registry}
-                disabled={disabled}
-                readonly={readonly}
                 name={key}
-                formContext={formContext}
               />
             </div>
           </Card>
         );
       })}
 
-      {/* Button is now on its own row at the bottom, right-aligned */}
       <Row justify="end" style={{ marginTop: '16px' }}>
         <Col style={{ flex: '0 0 168px' }}>
           <Tooltip title="Add Asset">
@@ -173,7 +175,7 @@ const AssetsField: React.FC<FieldProps> = (props) => {
               icon={<PlusCircleOutlined />}
               onClick={handleAddAsset}
               disabled={disabled || readonly}
-              block // This makes the button fill the Col's width
+              block
             />
           </Tooltip>
         </Col>
