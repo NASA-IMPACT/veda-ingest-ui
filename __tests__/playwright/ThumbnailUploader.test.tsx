@@ -73,8 +73,10 @@ test.describe('Thumbnail Uploader Page', () => {
       await expect(sizeStatistic.locator('..')).toContainText('412KB');
     });
     await expect(
-      page.getByText('S3 URI: s3://s3bucket/thumbnail.jpg'),
-      'S3 URI is shown'
+      page.getByText(
+        'URL: https://s3bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg'
+      ),
+      'URL is shown'
     ).toBeVisible();
 
     await expect(
@@ -189,8 +191,10 @@ test.describe('Thumbnail Uploader Page', () => {
       await expect(sizeStatistic.locator('..')).toContainText('412KB');
     });
     await expect(
-      page.getByText('S3 URI: s3://s3bucket/thumbnail.jpg'),
-      'S3 URI is shown'
+      page.getByText(
+        'URL: https://s3bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg'
+      ),
+      'URL is shown'
     ).toBeVisible();
 
     await expect(
@@ -270,8 +274,10 @@ test.describe('Thumbnail Uploader Page', () => {
       await expect(sizeStatistic.locator('..')).toContainText('209KB');
     });
     await expect(
-      page.getByText('S3 URI: s3://s3bucket/thumbnail.jpg'),
-      'S3 URI is shown'
+      page.getByText(
+        'URL: https://s3bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg'
+      ),
+      'URL is shown'
     ).toBeHidden();
 
     await expect(
