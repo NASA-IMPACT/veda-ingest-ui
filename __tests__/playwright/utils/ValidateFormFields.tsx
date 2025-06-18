@@ -1,6 +1,9 @@
 import { Page, expect } from '@playwright/test';
 
-export async function validateFormFields(page: Page, expectedValues: any) {
+export async function validateIngestFormFields(
+  page: Page,
+  expectedValues: any
+) {
   // Simple field assertions
   await expect(page.getByText('Invalid JSON format.')).toBeHidden();
   await expect(page.getByLabel('Collection')).toHaveValue(
@@ -61,5 +64,27 @@ export async function validateFormFields(page: Page, expectedValues: any) {
   );
   await expect(page.locator('#root_renders').getByRole('textbox')).toHaveValue(
     JSON.stringify(expectedValues.renders.dashboard, null, 2)
+  );
+}
+
+export async function validateCollectionFormFields(
+  page: Page,
+  expectedValues: any
+) {
+  // Simple field assertions
+  await expect(page.getByText('Invalid JSON format.')).toBeHidden();
+  await expect(page.getByLabel('Identifier')).toHaveValue(expectedValues.id);
+  await expect(page.getByLabel('Title').first()).toHaveValue(
+    expectedValues.title
+  );
+  await expect(page.getByLabel('License')).toHaveValue(expectedValues.license);
+  await expect(page.getByLabel('Type of STAC entity')).toHaveValue(
+    expectedValues.type
+  );
+  await expect(page.getByLabel('STAC Version')).toHaveValue(
+    expectedValues.stac_version
+  );
+  await expect(page.getByLabel('Description').first()).toHaveValue(
+    expectedValues.description
   );
 }

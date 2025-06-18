@@ -14,27 +14,7 @@ import {
   Tooltip,
 } from 'antd';
 import { PlusCircleOutlined, DeleteOutlined } from '@ant-design/icons';
-
-// Placeholder for your CodeEditorWidget. You can replace this with your actual import.
-const CodeEditorWidget: React.FC<{
-  value: string;
-  onChange: (value: string) => void;
-}> = ({ value, onChange }) => {
-  return (
-    <Input.TextArea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      rows={8}
-      style={{
-        fontSize: 14,
-        backgroundColor: '#f5f5f5',
-        fontFamily:
-          'ui-monospace,SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace',
-        borderRadius: '6px',
-      }}
-    />
-  );
-};
+import CodeEditorWidget from './CodeEditorWidget';
 
 interface SummariesManagerProps {
   initialData?: { [key: string]: any };
@@ -244,6 +224,7 @@ const SummariesManager: React.FC<SummariesManagerProps> = ({
               onClick={handleShowModal}
               disabled={disabled || readonly}
               block
+              aria-label="add summary"
             />
           </Tooltip>
         </Col>

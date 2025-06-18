@@ -1,33 +1,50 @@
 import { expect, test } from '@/__tests__/playwright/setup-msw';
-import { validateIngestFormFields } from '../playwright/utils/ValidateFormFields';
+import { validateCollectionFormFields } from '../playwright/utils/ValidateFormFields';
 import { HttpResponse } from 'msw';
 
-const requiredConfig = {
-  collection: 'test-collection',
-  title: 'test title',
-  description: 'test description',
-  license: 'test license',
-  discovery_items: [
+const requiredCollectionConfig = {
+  id: 'PLAYWRIGHT_1234',
+  title: 'test collection title',
+  stac_version: '1.0.0',
+  type: 'Collection',
+  description: 'test collection description',
+  license: 'test-license',
+  extent: {
+    spatial: {
+      bbox: [[-180, -90, 180, 90]],
+    },
+    temporal: {
+      interval: [['1998-01-01T00:00:00+00:00', null]],
+    },
+  },
+  links: [
     {
-      filename_regex: '(.*)Test_(.*).tif$',
-      use_multithreading: false,
-      discovery: 's3',
-      prefix: 'Test/',
-      bucket: 'veda-test',
+      rel: 'items',
+      type: 'application/geo+json',
+      href: 'https://openveda.cloud/api/stac/collections/TEST/items',
+    },
+    {
+      rel: 'parent',
+      type: 'application/json',
+      href: 'https://openveda.cloud/api/stac/',
+    },
+    {
+      rel: 'root',
+      type: 'application/json',
+      href: 'https://openveda.cloud/api/stac/',
+    },
+    {
+      rel: 'self',
+      type: 'application/json',
+      href: 'https://openveda.cloud/api/stac/collections/test',
+    },
+    {
+      rel: 'http://www.opengis.net/def/rel/ogc/1.0/queryables',
+      type: 'application/schema+json',
+      title: 'Queryables',
+      href: 'https://openveda.cloud/api/stac/collections/test/queryables',
     },
   ],
-  spatial_extent: {
-    xmin: -123.4,
-    ymin: 98.6,
-    xmax: -98.6,
-    ymax: 180,
-  },
-  temporal_extent: {
-    startdate: '1901-01-01T00:00:00Z',
-    enddate: '2025-01-01T23:59:59Z',
-  },
-  sample_files: ['s3://test/test/test_1950-01-01.tif'],
-  data_type: 'cog',
   providers: [
     {
       name: 'NASA VEDA',
@@ -35,24 +52,6 @@ const requiredConfig = {
       url: 'https://www.earthdata.nasa.gov/dashboard/',
     },
   ],
-  item_assets: {
-    cog_default: {
-      type: 'image/tiff; application=geotiff; profile=cloud-optimized',
-      roles: ['data', 'layer'],
-      title: 'Default COG Layer',
-      description: 'Cloud optimized default layer to display on map',
-    },
-  },
-  renders: {
-    dashboard: {
-      resampling: 'nearest',
-      bidx: [1],
-      colormap_name: 'rdbu',
-      assets: ['cog_default'],
-      rescale: [[-1, 1]],
-      title: 'VEDA Dashboard Render Parameters',
-    },
-  },
   assets: {
     thumbnail: {
       title: 'thumbnail title',
@@ -62,14 +61,17 @@ const requiredConfig = {
       roles: ['thumbnail'],
     },
   },
+  summaries: {
+    'eo:bands': ['B1', 'B2'],
+  },
 };
 
-test.describe('Create Ingest Page', () => {
-  test('Create Ingest request displays github link to PR', async ({
+test.describe('Create Collection Page', () => {
+  test('Create Collection request displays github link to PR', async ({
     page,
   }, testInfo) => {
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Collection page', async () => {
+      await page.goto('/create-collection');
     });
 
     await test.step('switch to manual json edit tab', async () => {
@@ -79,7 +81,7 @@ test.describe('Create Ingest Page', () => {
     await test.step('paste a JSON with config options matching schema minimum', async () => {
       await page
         .getByTestId('json-editor')
-        .fill(JSON.stringify(requiredConfig));
+        .fill(JSON.stringify(requiredCollectionConfig));
       await page.getByRole('button', { name: /apply changes/i }).click();
     });
 
@@ -97,7 +99,9 @@ test.describe('Create Ingest Page', () => {
     const href = await githubLink.getAttribute('href');
 
     // Assert that the href attribute is correct
-    expect(href).toBe('https://github.com/nasa-veda/veda-data/pull/12345');
+    expect(href, 'href from github should be correct').toBe(
+      'https://github.com/nasa-veda/veda-data/pull/12345'
+    );
 
     const successScreenshot = await page.screenshot();
     testInfo.attach('success modal with github link', {
@@ -106,37 +110,27 @@ test.describe('Create Ingest Page', () => {
     });
   });
 
-  test('Create Ingest request submitted with pasted JSON', async ({
+  test('Create Collection request submitted with pasted JSON', async ({
     page,
   }, testInfo) => {
-    // Intercept and block the request
+    // Intercept the POST request to validate its payload
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON(); // Capture full request body
+        const postData = request.postDataJSON();
 
-        // Validate the nested JSON field if it's present in the request
-        if (postData.renders.dashboard) {
-          const actualNestedJson = JSON.parse(postData.renders.dashboard); // Convert received string to JSON
-          expect(actualNestedJson).toEqual(requiredConfig.renders.dashboard);
-        }
-
-        // Extract only the expected fields from postData (ignoring others)
-        const { nestedJsonField, ...filteredPostData } = postData; // Exclude nestedJsonField from object comparison
-        const { renders, ...filteredRequiredConfig } = requiredConfig;
-
-        // Validate all other expected fields (except the nested one)
-        expect(filteredPostData).toEqual(
-          expect.objectContaining(filteredRequiredConfig)
+        // Validate that the submitted data matches the required config
+        expect(postData).toEqual(
+          expect.objectContaining(requiredCollectionConfig)
         );
 
-        // Block the request
         await route.continue();
       } else {
         await route.continue();
       }
     });
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+
+    await test.step('Navigate to the Create Collection page', async () => {
+      await page.goto('/create-collection');
     });
 
     await test.step('switch to manual json edit tab', async () => {
@@ -148,10 +142,10 @@ test.describe('Create Ingest Page', () => {
       'Apply Changes should be disabled if no changes are made'
     ).toBeDisabled();
 
-    await test.step('paste a JSON with config options matching schema minimum', async () => {
+    await test.step('paste a JSON with valid collection config', async () => {
       await page
         .getByTestId('json-editor')
-        .fill(JSON.stringify(requiredConfig));
+        .fill(JSON.stringify(requiredCollectionConfig));
       const JSONScreenshot = await page.screenshot();
       testInfo.attach('pasted JSON in editor', {
         body: JSONScreenshot,
@@ -161,7 +155,7 @@ test.describe('Create Ingest Page', () => {
     });
 
     await test.step('validate that form tab displays with pasted json values now populated in form', async () => {
-      await validateIngestFormFields(page, requiredConfig);
+      await validateCollectionFormFields(page, requiredCollectionConfig);
     });
 
     const completedFormScreenshot = await page.screenshot({ fullPage: true });
@@ -175,32 +169,30 @@ test.describe('Create Ingest Page', () => {
     });
   });
 
-  test('Create Ingest allows extra fields with toggle enabled', async ({
+  test('Create Collection allows extra fields with toggle enabled', async ({
     page,
   }, testInfo) => {
-    // Intercept and block the request
+    // Intercept the request to validate the payload
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON(); // Capture full request body
-
-        // Validate all other expected fields (except the nested one)
+        const postData = request.postDataJSON();
+        // Assert that the extra field is included in the payload
         expect(postData).toEqual(expect.objectContaining({ extraField: true }));
-
-        // Block the request
-        await route.abort();
+        await route.abort(); // Abort to prevent actual submission
       } else {
         await route.continue();
       }
     });
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+
+    await test.step('Navigate to the Create Collection page', async () => {
+      await page.goto('/create-collection');
     });
 
     await test.step('switch to manual json edit tab', async () => {
       await page.getByRole('tab', { name: /manual json edit/i }).click();
     });
 
-    await test.step('uncheck the Enforce Strict Schema  checkbox', async () => {
+    await test.step('uncheck the Enforce Strict Schema checkbox', async () => {
       await page
         .getByRole('checkbox', { name: /enforce strict schema/i })
         .uncheck();
@@ -209,13 +201,14 @@ test.describe('Create Ingest Page', () => {
     await test.step('paste in a valid config with an additional field', async () => {
       await page
         .getByTestId('json-editor')
-        .fill(JSON.stringify({ ...requiredConfig, extraField: true }));
+        .fill(
+          JSON.stringify({ ...requiredCollectionConfig, extraField: true })
+        );
       const JSONScreenshot = await page.screenshot();
-      testInfo.attach('pasted JSON in editor', {
+      testInfo.attach('pasted JSON in editor with extra field', {
         body: JSONScreenshot,
         contentType: 'image/png',
       });
-
       await page.getByRole('button', { name: /apply changes/i }).click();
     });
 
@@ -224,34 +217,32 @@ test.describe('Create Ingest Page', () => {
       'verify that extra properties are displayed on the form tab'
     ).toBeVisible();
 
-    const extraPropertiesScreenshot = await page.screenshot({ fullPage: true });
+    const extraPropertiesScreenshot = await page.screenshot({
+      fullPage: true,
+    });
     testInfo.attach('extra properties listed on form tab', {
       body: extraPropertiesScreenshot,
       contentType: 'image/png',
     });
 
-    await test.step('submit form and validate that POST body values match pasted config values including extra field', async () => {
+    await test.step('submit form and validate that POST body includes the extra field', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
   });
 
-  test('Create Ingest handles errors with pasted JSON', async ({
+  test('Create Collection handles errors with pasted JSON', async ({
     page,
   }, testInfo) => {
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Collection page', async () => {
+      await page.goto('/create-collection');
     });
 
     await test.step('switch to manual json edit tab', async () => {
       await page.getByRole('tab', { name: /manual json edit/i }).click();
     });
-    await expect(
-      page.getByRole('button', { name: /apply changes/i }),
-      'Apply Changes should be disabled if no changes are made'
-    ).toBeDisabled();
 
     await test.step('paste a non-JSON string in the editor and check for error message', async () => {
-      await page.getByTestId('json-editor').fill('s3://test.com');
+      await page.getByTestId('json-editor').fill('this is not json');
       await page.getByRole('button', { name: /apply changes/i }).click();
       await expect(page.getByText('Invalid JSON format.')).toBeVisible();
     });
@@ -260,18 +251,16 @@ test.describe('Create Ingest Page', () => {
       await page.getByTestId('json-editor').fill('{"validJSON": true}');
       await page.getByRole('button', { name: /apply changes/i }).click();
       await expect(page.getByText('Schema Validation Errors')).toBeVisible();
+
+      // Check for expected schema validation errors
       const requiredProperties = [
-        'collection',
-        'title',
+        'stac_version',
+        'type',
+        'id',
         'description',
         'license',
-        'discovery_items',
-        'spatial_extent',
-        'temporal_extent',
-        'sample_files',
-        'data_type',
-        'providers',
-        'item_assets',
+        'extent',
+        'links',
       ];
 
       for (const property of requiredProperties) {
@@ -292,20 +281,18 @@ test.describe('Create Ingest Page', () => {
     });
 
     const errorMessagesScreenshot = await page.screenshot();
-    testInfo.attach(
-      'Default state of COG Viewer Form Controls for single band COG',
-      {
-        body: errorMessagesScreenshot,
-        contentType: 'image/png',
-      }
-    );
+    testInfo.attach('Error messages for invalid and non-schema JSON', {
+      body: errorMessagesScreenshot,
+      contentType: 'image/png',
+    });
   });
 
-  test('Error Handling - Duplicate collection name displays error modal', async ({
+  test('Error Handling - Duplicate id displays error modal', async ({
     page,
     http,
     worker,
   }, testInfo) => {
+    // Mock the API response for a duplicate collection
     await worker.use(
       http.post('/api/create-ingest', ({ request }) => {
         return HttpResponse.json(
@@ -315,18 +302,18 @@ test.describe('Create Ingest Page', () => {
       })
     );
 
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Collection page', async () => {
+      await page.goto('/create-collection');
     });
 
     await test.step('switch to manual json edit tab', async () => {
       await page.getByRole('tab', { name: /manual json edit/i }).click();
     });
 
-    await test.step('paste a JSON with config options matching schema minimum', async () => {
+    await test.step('paste a valid JSON config', async () => {
       await page
         .getByTestId('json-editor')
-        .fill(JSON.stringify(requiredConfig));
+        .fill(JSON.stringify(requiredCollectionConfig));
       await page.getByRole('button', { name: /apply changes/i }).click();
     });
 
@@ -349,6 +336,7 @@ test.describe('Create Ingest Page', () => {
     http,
     worker,
   }, testInfo) => {
+    // Mock the API response for a GitHub auth failure
     await worker.use(
       http.post('/api/create-ingest', ({ request }) => {
         return HttpResponse.json(
@@ -358,18 +346,18 @@ test.describe('Create Ingest Page', () => {
       })
     );
 
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Collection page', async () => {
+      await page.goto('/create-collection');
     });
 
     await test.step('switch to manual json edit tab', async () => {
       await page.getByRole('tab', { name: /manual json edit/i }).click();
     });
 
-    await test.step('paste a JSON with config options matching schema minimum', async () => {
+    await test.step('paste a valid JSON config', async () => {
       await page
         .getByTestId('json-editor')
-        .fill(JSON.stringify(requiredConfig));
+        .fill(JSON.stringify(requiredCollectionConfig));
       await page.getByRole('button', { name: /apply changes/i }).click();
     });
 
@@ -381,66 +369,8 @@ test.describe('Create Ingest Page', () => {
     ).toBeVisible();
 
     const errorScreenshot = await page.screenshot();
-    testInfo.attach('error modal for duplicate collection name', {
+    testInfo.attach('error modal for failed GitHub authentication', {
       body: errorScreenshot,
-      contentType: 'image/png',
-    });
-  });
-
-  test('Hide extended Discovery Items fields by default', async ({
-    page,
-  }, testInfo) => {
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
-    });
-
-    await expect(
-      page.getByRole('button', { name: /more options/i, expanded: false }),
-      'more options should not be expanded'
-    ).toBeVisible();
-
-    const DiscoveryFieldset = page.locator('#root_discovery_items');
-    const hiddenFields = [
-      'Datetime Range',
-      'Start Datetime',
-      'End Datetime',
-      'Id Regex',
-      'Id Template',
-      'Use Multithreading',
-    ];
-
-    for (const field of hiddenFields) {
-      await expect(
-        DiscoveryFieldset.getByLabel(field),
-        `${field} should be hidden`
-      ).toBeHidden();
-    }
-
-    const collapsedScreenshot = await DiscoveryFieldset.screenshot();
-    testInfo.attach('collapsed Discovery Items', {
-      body: collapsedScreenshot,
-      contentType: 'image/png',
-    });
-    await test.step('click more option button', async () => {
-      await page
-        .getByRole('button', { name: /more options/i, expanded: false })
-        .click();
-    });
-
-    await expect(
-      page.getByRole('button', { name: /more options/i, expanded: true }),
-      'more options should be expanded'
-    ).toBeVisible();
-
-    for (const field of hiddenFields) {
-      await expect(
-        DiscoveryFieldset.getByLabel(field),
-        `${field} should be visible`
-      ).toBeVisible();
-    }
-    const expandedScreenshot = await DiscoveryFieldset.screenshot();
-    testInfo.attach('Expanded Discovery Items', {
-      body: expandedScreenshot,
       contentType: 'image/png',
     });
   });
