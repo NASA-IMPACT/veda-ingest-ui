@@ -16,7 +16,7 @@ import SuccessModal from '@/components/SuccessModal';
 type PullRequest =
   Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][number];
 
-const EditIngestClient = function EditIngestClient() {
+const EditCollectiontClient = function EditCollectiontClient() {
   const { data: session, status: sessionStatus } = useSession();
   const router = useRouter();
   const [data, setData] = useState<PullRequest[]>([]);
@@ -30,7 +30,7 @@ const EditIngestClient = function EditIngestClient() {
 
   const fetchPRs = async () => {
     setStatus('loadingPRs');
-    const url = 'api/list-ingests?ingestionType=dataset';
+    const url = 'api/list-ingests?ingestionType=collection';
     const requestOptions = {
       method: 'GET',
     };
@@ -139,7 +139,7 @@ const EditIngestClient = function EditIngestClient() {
       {status === 'loadingIngest' && <Spin fullscreen />}
       {Object.keys(formData).length > 0 && (
         <EditFormManager
-          formType="dataset"
+          formType="collection"
           gitRef={ref}
           filePath={filePath}
           fileSha={fileSha}
@@ -168,4 +168,4 @@ const EditIngestClient = function EditIngestClient() {
   );
 };
 
-export default EditIngestClient;
+export default EditCollectiontClient;

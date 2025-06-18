@@ -31,11 +31,20 @@ const customFields = {
   asset: AssetField,
 };
 
+const lockedFormFields = {
+  id: {
+    'ui:readonly': true,
+  },
+};
+
+const lockedUiSchema = { ...uiSchema, ...lockedFormFields };
+
 interface FormProps {
   formData: Record<string, unknown> | undefined;
   setFormData: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
   onSubmit: (formData: Record<string, unknown> | undefined) => void;
   setDisabled?: (disabled: boolean) => void;
+  isEditMode?: boolean;
   children?: React.ReactNode;
 }
 
@@ -44,6 +53,7 @@ function DatasetIngestionForm({
   setFormData,
   onSubmit,
   setDisabled,
+  isEditMode,
   children,
 }: FormProps) {
   const [activeTab, setActiveTab] = useState<string>('form');
@@ -113,7 +123,7 @@ function DatasetIngestionForm({
               <Form
                 key={forceRenderKey}
                 schema={schemaForRJSF as JSONSchema7} // Use the schema WITHOUT summaries
-                uiSchema={uiSchema}
+                uiSchema={isEditMode ? lockedUiSchema : uiSchema}
                 validator={validator}
                 customValidate={customValidate}
                 templates={{ ObjectFieldTemplate: ObjectFieldTemplate }}
