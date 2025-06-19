@@ -6,11 +6,17 @@ import { CleanAndPrettifyJSON } from '@/utils/CleanAndPrettifyJson';
 
 interface Data {
   collection: string;
+  id?: string;
   [key: string]: unknown;
   renders?: string;
 }
 
-const CreatePR = async (data: Data): Promise<string> => {
+type IngestionType = 'dataset' | 'collection';
+
+const CreatePR = async (
+  data: Data,
+  ingestionType: IngestionType
+): Promise<string> => {
   const targetBranch = process.env.TARGET_BRANCH || 'main';
   const owner = process.env.OWNER;
   const repo = process.env.REPO;
@@ -20,10 +26,27 @@ const CreatePR = async (data: Data): Promise<string> => {
   }
 
   try {
-    const collectionName = data.collection;
     const content = CleanAndPrettifyJSON(data);
-    const targetPath = 'ingestion-data/staging/dataset-config';
-    const fileName = formatFilename(collectionName);
+
+    let fileNameSource: string;
+    let targetPath: string;
+
+    if (ingestionType === 'dataset') {
+      targetPath = 'ingestion-data/staging/dataset-config';
+      fileNameSource = data.collection;
+    } else if (ingestionType === 'collection') {
+      targetPath = 'ingestion-data/staging/collections';
+      // For collections, use the 'id' field for the filename.
+      // Throw an error if the 'id' is missing.
+      if (!data.id) {
+        throw new Error("Missing 'id' field for collection ingestion.");
+      }
+      fileNameSource = data.id;
+    } else {
+      throw new Error(`Invalid ingestionType: ${ingestionType}`);
+    }
+
+    const fileName = formatFilename(fileNameSource);
     const path = `${targetPath}/${fileName}.json`;
     const branchName = `feat/${fileName}`;
 
@@ -83,7 +106,7 @@ const CreatePR = async (data: Data): Promise<string> => {
       repo,
       head: branchName,
       base: targetBranch,
-      title: `Ingest Request for ${collectionName}`,
+      title: `Ingest Request for ${fileNameSource}`,
     });
 
     return pr.data.html_url;

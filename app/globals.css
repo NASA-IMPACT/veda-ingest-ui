@@ -61,7 +61,9 @@ main > div {
   box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.2);
 }
 
-fieldset[id^='root_'] {
+fieldset[id^='root_'],
+fieldset[id='summaries_manager'],
+div[id='root_assets'] {
   padding: 6px 6px;
   border-radius: 6px;
   border: none;
@@ -75,7 +77,13 @@ label[title='STAC Extensions'],
 label[title='Providers'],
 label[title='Sample Files'],
 label[title='Assets'],
-label[title='Renders'] {
+label[title='Renders'],
+label[title='Keywords'],
+label[title='providers'],
+label[title='Asset links'],
+label[title='Extents'],
+label[title='Spatial extent object'],
+label[title='Temporal extent object'] {
   font-size: 16px;
   font-weight: 600;
 }

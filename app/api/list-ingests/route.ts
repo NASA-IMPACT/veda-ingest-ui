@@ -1,17 +1,22 @@
 import ListPRs from '@/utils/githubUtils/ListPRs';
 import { NextRequest, NextResponse } from 'next/server';
 
+type IngestionType = 'collection' | 'dataset';
+
 export async function GET(request: NextRequest) {
   try {
-    const githubResponse = await ListPRs();
+    const searchParams = request.nextUrl.searchParams;
+    const ingestionType = searchParams.get('ingestionType') as IngestionType;
+
+    const githubResponse = await ListPRs(ingestionType);
     return NextResponse.json({ githubResponse });
   } catch (error) {
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     } else {
-      console.log(error);
+      console.error('An unexpected error occurred:', error);
       return NextResponse.json(
-        { error: 'Internal Server Error' },
+        { error: 'An unexpected error occurred on the server.' },
         { status: 500 }
       );
     }

@@ -21,7 +21,9 @@ export async function middleware(request: NextRequest) {
 
   // Allow access all authenticated users
   if (
-    (pathname.startsWith('/create-ingest') ||
+    (pathname.startsWith('/collections') ||
+      pathname.startsWith('/create-ingest') ||
+      pathname.startsWith('/ingests') ||
       pathname.startsWith('/upload') ||
       pathname.startsWith('/cog-viewer')) &&
     session
@@ -30,8 +32,14 @@ export async function middleware(request: NextRequest) {
   }
 
   // Protect /edit-ingest based on the Editor scope
-  if (pathname.startsWith('/edit-ingest')) {
-    if (!session?.scopes?.includes('dataset:update')) {
+  if (
+    pathname.startsWith('/edit-ingest') ||
+    pathname.startsWith('/edit-collection')
+  ) {
+    if (
+      !session?.scopes?.includes('dataset:update') ||
+      !session?.scopes?.includes('Editor')
+    ) {
       if (pathname.startsWith('/api/')) {
         return new NextResponse('Unauthorized', { status: 401 });
       } else {
@@ -57,6 +65,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/ingests',
     '/create-ingest',
     '/edit-ingest',
     '/upload',

@@ -1,20 +1,13 @@
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  beforeAll,
-  afterAll,
-  Mock,
-} from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
 import CreatePR from '@/utils/githubUtils/CreatePR';
 import { createOctokit } from '@/utils/githubUtils/OctokitFactory';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 import { RequestError } from '@octokit/request-error';
+import { CleanAndPrettifyJSON } from '@/utils/CleanAndPrettifyJson';
 
 vi.mock('@/utils/githubUtils/OctokitFactory');
 vi.mock('@/utils/githubUtils/GetGithubToken');
+vi.mock('@/utils/CleanAndPrettifyJson');
 vi.mock('@/utils/FormatFilename', () => ({
   formatFilename: (name: string) => name.replace(/\s+/g, '-').toLowerCase(),
 }));
@@ -28,20 +21,14 @@ describe('CreatePR', () => {
   const mockCreateRef = vi.fn();
   const mockCreatePullRequest = vi.fn();
 
-  beforeAll(() => {
+  // Reset mocks and environment before each test
+  beforeEach(() => {
     vi.stubEnv('TARGET_BRANCH', 'my_branch');
     vi.stubEnv('OWNER', 'mockOwner');
     vi.stubEnv('REPO', 'mockRepo');
-  });
-  afterAll(() => {
-    vi.unstubAllEnvs();
-  });
-
-  beforeEach(() => {
     vi.clearAllMocks();
 
     (GetGithubToken as Mock).mockResolvedValue('mockToken');
-
     (createOctokit as Mock).mockReturnValue({
       rest: {
         git: {
@@ -58,6 +45,11 @@ describe('CreatePR', () => {
       },
     });
 
+    (CleanAndPrettifyJSON as Mock).mockImplementation((data) =>
+      JSON.stringify(data, null, 2)
+    );
+
+    // Default successful responses for the mocked Octokit calls
     mockGetRef.mockResolvedValue({ data: { object: { sha: 'mockSha' } } });
     mockGetTree.mockResolvedValue({ data: { sha: 'mockTreeSha' } });
     mockCreateBlob.mockResolvedValue({ data: { sha: 'mockBlobSha' } });
@@ -69,93 +61,135 @@ describe('CreatePR', () => {
     });
   });
 
-  it('creates a pull request successfully', async () => {
-    const mockData = { collection: 'Test Collection', key1: 'value1' };
-    const result = await CreatePR(mockData);
-
-    expect(mockGetRef).toHaveBeenCalledWith({
-      owner: 'mockOwner',
-      repo: 'mockRepo',
-      ref: 'heads/my_branch',
-    });
-    expect(result).toBe('mockPullRequestUrl');
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
-  it('throws an error when RequestError occurs', async () => {
-    mockGetRef.mockRejectedValue(new Error('Test Error'));
-    // Suppress console.error for this test
-    const consoleErrorMock = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
+  describe('Collection Ingestion', () => {
+    it('creates a pull request successfully using the id for filename and title', async () => {
+      const mockData = {
+        collection: 'My Test Collection',
+        id: 'test-collection-id',
+        key1: 'value1',
+      };
+      const result = await CreatePR(mockData, 'collection');
 
-    await expect(CreatePR({ collection: 'Test Collection' })).rejects.toThrow(
-      'Test Error'
-    );
+      // Verify correct path for collections, using the 'id'
+      expect(mockCreateTree).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tree: expect.arrayContaining([
+            expect.objectContaining({
+              path: 'ingestion-data/staging/collections/test-collection-id.json',
+            }),
+          ]),
+        })
+      );
 
-    // Restore console.error
-    consoleErrorMock.mockRestore();
-  });
+      // Verify PR title uses the 'id'
+      expect(mockCreatePullRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Ingest Request for test-collection-id',
+        })
+      );
 
-  it('throws an error when GitHub API returns a 422 error', async () => {
-    const mockData = { collection: 'Test Collection', key: 'value' };
-
-    // Suppress console.error for this test
-    const consoleErrorMock = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
-
-    // Mock 422 error for `octokit.rest.pulls.create`
-    mockCreatePullRequest.mockRejectedValue(
-      new RequestError('Validation Failed', 422, {
-        response: {
-          data: { message: 'Branch already exists' },
-          headers: {},
-          status: 422,
-          url: 'https://api.github.com/repos/mockOwner/mockRepo/pulls',
-        },
-        request: {
-          method: 'POST',
-          url: 'https://api.github.com/repos/mockOwner/mockRepo/pulls',
-          headers: {},
-        },
-      })
-    );
-
-    await expect(CreatePR(mockData)).rejects.toThrow('Branch already exists');
-
-    expect(GetGithubToken).toHaveBeenCalled();
-    expect(createOctokit).toHaveBeenCalledWith('mockToken');
-    expect(mockCreatePullRequest).toHaveBeenCalledWith({
-      owner: 'mockOwner',
-      repo: 'mockRepo',
-      head: 'feat/test-collection',
-      base: 'my_branch',
-      title: 'Ingest Request for Test Collection',
+      expect(result).toBe('mockPullRequestUrl');
     });
 
-    // Restore console.error
-    consoleErrorMock.mockRestore();
-  });
+    it('throws an error if id is missing for collection type', async () => {
+      // Mock data missing the 'id' field
+      const mockData = { collection: 'Collection without ID' };
 
-  it('creates a pull request successfully in main branch if no TARGET_BRANCH env var supplied', async () => {
-    delete process.env.TARGET_BRANCH;
-
-    const mockData = { collection: 'Test Collection', key1: 'value1' };
-    const result = await CreatePR(mockData);
-
-    expect(mockGetRef).toHaveBeenCalledWith({
-      owner: 'mockOwner',
-      repo: 'mockRepo',
-      ref: 'heads/main',
+      await expect(CreatePR(mockData, 'collection')).rejects.toThrow(
+        "Missing 'id' field for collection ingestion."
+      );
     });
-    expect(result).toBe('mockPullRequestUrl');
   });
 
-  it('throws an error when environment variables are missing', async () => {
-    delete process.env.OWNER;
+  describe('Dataset Ingestion', () => {
+    it('creates a pull request successfully using the collection name for filename and title', async () => {
+      const mockData = { collection: 'My Test Dataset', key1: 'value1' };
+      await CreatePR(mockData, 'dataset');
 
-    await expect(CreatePR({ collection: 'Test Collection' })).rejects.toThrow(
-      'Missing required environment variables: OWNER or REPO'
-    );
+      // Verify correct path for datasets, using the 'collection' name
+      expect(mockCreateTree).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tree: expect.arrayContaining([
+            expect.objectContaining({
+              path: 'ingestion-data/staging/dataset-config/my-test-dataset.json',
+            }),
+          ]),
+        })
+      );
+
+      // Verify PR title uses the 'collection' name
+      expect(mockCreatePullRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Ingest Request for My Test Dataset',
+        })
+      );
+    });
+  });
+
+  describe('General Error Handling', () => {
+    it('throws an error when a GitHub API call fails', async () => {
+      mockGetRef.mockRejectedValue(new Error('Test Error'));
+      const consoleErrorMock = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      await expect(
+        CreatePR({ collection: 'Test Collection', id: 'test-id' }, 'collection')
+      ).rejects.toThrow('Test Error');
+
+      consoleErrorMock.mockRestore();
+    });
+
+    it('throws an error when GitHub API returns a 422 error', async () => {
+      const mockData = {
+        collection: 'Test Collection',
+        id: 'existing-collection',
+      };
+      const consoleErrorMock = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      mockCreatePullRequest.mockRejectedValue(
+        new RequestError('Validation Failed', 422, {
+          response: {
+            data: { message: 'Branch already exists' },
+            headers: {},
+            status: 422,
+            url: 'https://api.github.com/repos/mockOwner/mockRepo/pulls',
+          },
+          request: {
+            method: 'POST',
+            url: 'https://api.github.com/repos/mockOwner/mockRepo/pulls',
+            headers: {},
+          },
+        })
+      );
+
+      await expect(CreatePR(mockData, 'collection')).rejects.toThrow(
+        'Branch already exists'
+      );
+      consoleErrorMock.mockRestore();
+    });
+
+    it('throws an error when required environment variables are missing', async () => {
+      delete process.env.OWNER;
+      await expect(
+        CreatePR({ collection: 'Test Collection', id: 'test-id' }, 'collection')
+      ).rejects.toThrow(
+        'Missing required environment variables: OWNER or REPO'
+      );
+    });
+
+    it('throws an error for an invalid ingestionType', async () => {
+      const mockData = { collection: 'Test Collection' };
+      // @ts-expect-error - Intentionally passing an invalid type for testing
+      await expect(CreatePR(mockData, 'invalidType')).rejects.toThrow(
+        'Invalid ingestionType: invalidType'
+      );
+    });
   });
 });

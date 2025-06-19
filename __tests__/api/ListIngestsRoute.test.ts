@@ -1,105 +1,127 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach, Mock } from 'vitest';
 import { GET } from '@/app/api/list-ingests/route';
 import ListPRs from '@/utils/githubUtils/ListPRs';
 import { NextRequest } from 'next/server';
-import { Endpoints } from '@octokit/types';
 
-type PullRequest =
-  Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][number];
+vi.mock('@/utils/githubUtils/ListPRs', () => ({
+  default: vi.fn(),
+}));
 
-// pick values from pull requests that we care about in front end
-type SimplifiedPullRequest = Pick<PullRequest, 'id' | 'title'> & {
-  head: Pick<PullRequest['head'], 'ref'>;
-};
+const ListPRsMock = ListPRs as Mock;
 
-// Mock implementation
-vi.mock('@/utils/githubUtils/ListPRs', () => {
-  const mockPRs: SimplifiedPullRequest[] = [
-    {
-      id: 1,
-      title: 'Ingest Request for Dataset A',
-      head: {
-        ref: 'feature/ingest-dataset-a',
-      },
-    },
-    {
-      id: 2,
-      title: 'Ingest Request for Dataset B',
-      head: {
-        ref: 'feature/ingest-dataset-b',
-      },
-    },
-  ];
-
-  return {
-    default: vi.fn().mockResolvedValue(mockPRs),
-  };
-});
-
-describe('GET /api/list-ingests', () => {
-  it('returns a list of pull requests on success', async () => {
-    const mockRequest = {} as NextRequest;
-    const response = await GET(mockRequest);
-
-    // Parse the response
-    const jsonResponse = await response.json();
-
-    // Assertions
-    expect(ListPRs).toHaveBeenCalled(); // Verify ListPRs was called
-    expect(jsonResponse).toEqual({
-      githubResponse: [
-        {
-          id: 1,
-          title: 'Ingest Request for Dataset A',
-          head: {
-            ref: 'feature/ingest-dataset-a',
-          },
-        },
-        {
-          id: 2,
-          title: 'Ingest Request for Dataset B',
-          head: {
-            ref: 'feature/ingest-dataset-b',
-          },
-        },
-      ],
-    });
-    expect(response.status).toBe(200);
+describe('GET /api/list-requests', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('returns a 400 error on a handled exception', async () => {
-    // Mock an error
-    vi.mocked(ListPRs).mockImplementationOnce(() => {
-      throw new Error('Mocked error message');
+  describe('with ingestionType="dataset"', () => {
+    it('returns a list of pull requests on success', async () => {
+      const mockPRs = [{ id: 1, title: 'Dataset PR' }];
+      ListPRsMock.mockResolvedValue(mockPRs);
+
+      const mockRequest = new NextRequest(
+        'http://localhost/api/list-requests?ingestionType=dataset'
+      );
+      const response = await GET(mockRequest);
+      const jsonResponse = await response.json();
+
+      expect(ListPRsMock).toHaveBeenCalledWith('dataset');
+      expect(jsonResponse).toEqual({ githubResponse: mockPRs });
+      expect(response.status).toBe(200);
     });
 
-    const mockRequest = {} as NextRequest;
-    const response = await GET(mockRequest);
+    it('returns a 400 error on a handled exception', async () => {
+      ListPRsMock.mockRejectedValue(new Error('Dataset-specific error'));
 
-    // Parse the response
-    const jsonResponse = await response.json();
+      const mockRequest = new NextRequest(
+        'http://localhost/api/list-requests?ingestionType=dataset'
+      );
+      const response = await GET(mockRequest);
+      const jsonResponse = await response.json();
 
-    // Assertions
-    expect(ListPRs).toHaveBeenCalled();
-    expect(jsonResponse).toEqual({ error: 'Mocked error message' });
-    expect(response.status).toBe(400);
+      expect(ListPRsMock).toHaveBeenCalledWith('dataset');
+      expect(jsonResponse).toEqual({ error: 'Dataset-specific error' });
+      expect(response.status).toBe(400);
+    });
+
+    it('returns a 500 error on an unhandled exception', async () => {
+      ListPRsMock.mockRejectedValue('Some unhandled string error');
+      const consoleErrorMock = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      const mockRequest = new NextRequest(
+        'http://localhost/api/list-requests?ingestionType=dataset'
+      );
+      const response = await GET(mockRequest);
+      const jsonResponse = await response.json();
+
+      expect(ListPRsMock).toHaveBeenCalledWith('dataset');
+      expect(jsonResponse).toEqual({
+        error: 'An unexpected error occurred on the server.',
+      });
+      expect(response.status).toBe(500);
+      consoleErrorMock.mockRestore();
+    });
   });
 
-  it('returns a 500 error on an unhandled exception', async () => {
-    // Mock an unhandled exception
-    vi.mocked(ListPRs).mockImplementationOnce(() => {
-      throw 'Unhandled error';
+  describe('with ingestionType="collection"', () => {
+    it('returns a list of pull requests on success', async () => {
+      const mockPRs = [{ id: 2, title: 'Collection PR' }];
+      ListPRsMock.mockResolvedValue(mockPRs);
+
+      const mockRequest = new NextRequest(
+        'http://localhost/api/list-requests?ingestionType=collection'
+      );
+      const response = await GET(mockRequest);
+      const jsonResponse = await response.json();
+
+      expect(ListPRsMock).toHaveBeenCalledWith('collection');
+      expect(jsonResponse).toEqual({ githubResponse: mockPRs });
+      expect(response.status).toBe(200);
     });
 
-    const mockRequest = {} as NextRequest;
-    const response = await GET(mockRequest);
+    it('returns a 400 error on a handled exception', async () => {
+      ListPRsMock.mockRejectedValue(new Error('Collection-specific error'));
 
-    // Parse the response
-    const jsonResponse = await response.json();
+      const mockRequest = new NextRequest(
+        'http://localhost/api/list-requests?ingestionType=collection'
+      );
+      const response = await GET(mockRequest);
+      const jsonResponse = await response.json();
 
-    // Assertions
-    expect(ListPRs).toHaveBeenCalled();
-    expect(jsonResponse).toEqual({ error: 'Internal Server Error' });
-    expect(response.status).toBe(500);
+      expect(ListPRsMock).toHaveBeenCalledWith('collection');
+      expect(jsonResponse).toEqual({ error: 'Collection-specific error' });
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe('Parameter Handling', () => {
+    const errorMessage =
+      'ingestionType parameter is required and must be either "collection" or "dataset".';
+
+    it('returns a 400 error if ingestionType is missing', async () => {
+      ListPRsMock.mockRejectedValue(new Error(errorMessage));
+
+      const mockRequest = new NextRequest('http://localhost/api/list-requests');
+      const response = await GET(mockRequest);
+      const jsonResponse = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(jsonResponse.error).toBe(errorMessage);
+    });
+
+    it('returns a 400 error if ingestionType is invalid', async () => {
+      ListPRsMock.mockRejectedValue(new Error(errorMessage));
+
+      const mockRequest = new NextRequest(
+        'http://localhost/api/list-requests?ingestionType=invalid'
+      );
+      const response = await GET(mockRequest);
+      const jsonResponse = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(jsonResponse.error).toBe(errorMessage);
+    });
   });
 });
