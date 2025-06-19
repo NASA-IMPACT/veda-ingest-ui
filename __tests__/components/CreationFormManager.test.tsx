@@ -6,8 +6,7 @@ import {
   fireEvent,
   waitFor,
 } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import CreationFormManager from '@/components/CreationFormManager'; // Adjust path as needed
+import CreationFormManager from '@/components/CreationFormManager';
 import React from 'react';
 
 // Mock child components to isolate the manager's logic
@@ -20,7 +19,6 @@ vi.mock('@/components/DatasetIngestionForm', () => ({
         onSubmit({ collection: 'Test Dataset' });
       }}
     >
-      {/* Add a specific button to test the no-data scenario */}
       <button onClick={() => onSubmit(undefined)}>Submit No Data</button>
       {children}
     </form>
@@ -33,7 +31,7 @@ vi.mock('@/components/CollectionIngestionForm', () => ({
       data-testid="collection-ingestion-form"
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit({ collection: 'Test Collection' });
+        onSubmit({ collection: 'Test Collection', id: 'test-collection-id' });
       }}
     >
       {children}
@@ -81,7 +79,7 @@ describe('CreationFormManager', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('handles successful form submission', async () => {
+  it('handles successful dataset form submission', async () => {
     (fetch as Mock).mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ githubURL: 'http://github.com/pr/1' }),
@@ -100,7 +98,10 @@ describe('CreationFormManager', () => {
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('api/create-ingest', {
         method: 'POST',
-        body: JSON.stringify({ collection: 'Test Dataset' }),
+        body: JSON.stringify({
+          data: { collection: 'Test Dataset' },
+          ingestionType: 'dataset',
+        }),
         headers: { 'Content-Type': 'application/json' },
       });
       expect(mockSetPullRequestUrl).toHaveBeenCalledWith(
@@ -110,11 +111,41 @@ describe('CreationFormManager', () => {
     });
   });
 
+  it('handles successful collection form submission', async () => {
+    (fetch as Mock).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ githubURL: 'http://github.com/pr/2' }),
+    });
+
+    render(<CreationFormManager {...defaultProps} formType="collection" />);
+    const form = screen.getByTestId('collection-ingestion-form');
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(mockSetStatus).toHaveBeenCalledWith('loadingGithub');
+      expect(mockSetCollectionName).toHaveBeenCalledWith('Test Collection');
+    });
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith('api/create-ingest', {
+        method: 'POST',
+        body: JSON.stringify({
+          data: { collection: 'Test Collection', id: 'test-collection-id' },
+          ingestionType: 'collection',
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      expect(mockSetPullRequestUrl).toHaveBeenCalledWith(
+        'http://github.com/pr/2'
+      );
+      expect(mockSetStatus).toHaveBeenCalledWith('success');
+    });
+  });
+
   it('handles failed form submission', async () => {
-    const errorResponse = 'API Error: Something went wrong';
     (fetch as Mock).mockResolvedValue({
       ok: false,
-      text: () => Promise.resolve(errorResponse),
+      text: () => Promise.resolve('API Error'),
     });
 
     render(<CreationFormManager {...defaultProps} formType="dataset" />);
@@ -127,7 +158,7 @@ describe('CreationFormManager', () => {
     });
 
     await waitFor(() => {
-      expect(mockSetApiErrorMessage).toHaveBeenCalledWith(errorResponse);
+      expect(mockSetApiErrorMessage).toHaveBeenCalledWith('API Error');
       expect(mockSetStatus).toHaveBeenCalledWith('error');
     });
   });

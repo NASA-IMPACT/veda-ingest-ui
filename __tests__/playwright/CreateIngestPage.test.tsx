@@ -112,7 +112,7 @@ test.describe('Create Ingest Page', () => {
     // Intercept and block the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON(); // Capture full request body
+        const postData = request.postDataJSON();
 
         // Validate the nested JSON field if it's present in the request
         if (postData.renders.dashboard) {
@@ -181,7 +181,7 @@ test.describe('Create Ingest Page', () => {
     // Intercept and block the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON(); // Capture full request body
+        const postData = request.postDataJSON();
 
         // Validate all other expected fields (except the nested one)
         expect(postData).toEqual(expect.objectContaining({ extraField: true }));

@@ -67,7 +67,7 @@ const EditCollectiontClient = function EditCollectiontClient() {
   const handleClick = async (ref: string, title: string) => {
     setStatus('loadingIngest');
     setCollectionName(title);
-    const url = `/api/retrieve-ingest?ref=${ref}`;
+    const url = `/api/retrieve-ingest?ref=${ref}&ingestionType=collection`;
     const requestOptions = {
       method: 'GET',
     };

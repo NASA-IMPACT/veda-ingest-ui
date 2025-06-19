@@ -6,6 +6,7 @@ import { CleanAndPrettifyJSON } from '@/utils/CleanAndPrettifyJson';
 
 interface Data {
   collection: string;
+  id?: string;
   [key: string]: unknown;
   renders?: string;
 }
@@ -25,19 +26,27 @@ const CreatePR = async (
   }
 
   try {
-    const collectionName = data.collection;
     const content = CleanAndPrettifyJSON(data);
-    // Determine the target path based on the ingestionType.
+
+    let fileNameSource: string;
     let targetPath: string;
+
     if (ingestionType === 'dataset') {
       targetPath = 'ingestion-data/staging/dataset-config';
+      fileNameSource = data.collection;
     } else if (ingestionType === 'collection') {
-      targetPath = 'ingestion-data/staging/collections'; // Changed to 'collections' to match the request
+      targetPath = 'ingestion-data/staging/collections';
+      // For collections, use the 'id' field for the filename.
+      // Throw an error if the 'id' is missing.
+      if (!data.id) {
+        throw new Error("Missing 'id' field for collection ingestion.");
+      }
+      fileNameSource = data.id;
     } else {
-      // Fallback or error for unexpected ingestionType, though TypeScript should prevent this.
       throw new Error(`Invalid ingestionType: ${ingestionType}`);
     }
-    const fileName = formatFilename(collectionName);
+
+    const fileName = formatFilename(fileNameSource);
     const path = `${targetPath}/${fileName}.json`;
     const branchName = `feat/${fileName}`;
 
@@ -97,7 +106,7 @@ const CreatePR = async (
       repo,
       head: branchName,
       base: targetBranch,
-      title: `Ingest Request for ${collectionName}`,
+      title: `Ingest Request for ${fileNameSource}`,
     });
 
     return pr.data.html_url;

@@ -32,9 +32,14 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
     setCollectionName(data.collection as string);
 
     const url = 'api/create-ingest';
+    const payload = {
+      data: data,
+      ingestionType: formType,
+    };
+
     const requestOptions = {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' },
     };
 

@@ -169,6 +169,7 @@ function DatasetIngestionForm({
               setHasJSONChanges={setHasJSONChanges}
               additionalProperties={additionalProperties}
               setAdditionalProperties={setAdditionalProperties}
+              disableIdChange={true}
             />
           ),
         },

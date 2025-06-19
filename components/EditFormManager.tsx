@@ -73,12 +73,7 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
 
   const formButtons = (
     <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
-      <Button
-        type="primary"
-        size="large"
-        htmlType="submit" // Important: This button needs to be inside a form to trigger submission
-        disabled={disabled}
-      >
+      <Button type="primary" size="large" htmlType="submit" disabled={disabled}>
         Submit
       </Button>
       <Button
@@ -94,8 +89,6 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      {/* <h2 className="text-xl font-semibold mb-4">Edit {formType.charAt(0).toUpperCase() + formType.slice(1)}</h2> */}
-
       {formType === 'dataset' ? (
         <DatasetIngestionForm
           {...childFormProps}
