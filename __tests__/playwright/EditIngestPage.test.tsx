@@ -58,12 +58,12 @@ const modifiedConfig = {
   },
 };
 
-test.describe('Edit Ingest Page', () => {
-  test('Edit Ingest does not allow renaming collection', async ({
+test.describe('Edit Dataset Page', () => {
+  test('Edit Dataset does not allow renaming collection', async ({
     page,
   }, testInfo) => {
-    await test.step('Navigate to Edit Ingest Page', async () => {
-      await page.goto('/edit-ingest');
+    await test.step('Navigate to Edit Dataset Page', async () => {
+      await page.goto('/edit-dataset');
     });
 
     await test.step('wait for list of of pending requests to load and pick #1', async () => {
@@ -105,11 +105,11 @@ test.describe('Edit Ingest Page', () => {
     });
   });
 
-  test('Edit Ingest allows editing fields other than collection name', async ({
+  test('Edit Dataset allows editing fields other than collection name', async ({
     page,
   }, testInfo) => {
     // Intercept and block the request
-    await page.route('**/create-ingest', async (route, request) => {
+    await page.route('**/create-dataset', async (route, request) => {
       if (request.method() === 'PUT') {
         const postData = request.postDataJSON(); // Capture full request body
 
@@ -149,8 +149,8 @@ test.describe('Edit Ingest Page', () => {
       }
     });
 
-    await test.step('Navigate to Edit Ingest Page', async () => {
-      await page.goto('/edit-ingest');
+    await test.step('Navigate to Edit Dataset Page', async () => {
+      await page.goto('/edit-dataset');
     });
 
     await test.step('wait for list of of pending requests to load and pick #1', async () => {
@@ -192,11 +192,11 @@ test.describe('Edit Ingest Page', () => {
     });
   });
 
-  test('Edit Ingest displays list of open PRs starting with "Ingest Request for"', async ({
+  test('Edit Dataset displays list of open PRs starting with "Ingest Request for"', async ({
     page,
   }, testInfo) => {
-    await test.step('Navigate to Edit Ingest Page', async () => {
-      await page.goto('/edit-ingest');
+    await test.step('Navigate to Edit Dataset Page', async () => {
+      await page.goto('/edit-dataset');
     });
 
     await test.step('verify list of of pending requests loads', async () => {
@@ -221,7 +221,7 @@ test.describe('Edit Ingest Page', () => {
     });
   });
 
-  test('Error Handling - Edit Ingest gracefully handles failed /list-requests call', async ({
+  test('Error Handling - Edit Dataset gracefully handles failed /list-requests call', async ({
     page,
     http,
     worker,
@@ -235,8 +235,8 @@ test.describe('Edit Ingest Page', () => {
       })
     );
 
-    await test.step('Navigate to Edit Ingest Page', async () => {
-      await page.goto('/edit-ingest');
+    await test.step('Navigate to Edit Dataset Page', async () => {
+      await page.goto('/edit-dataset');
     });
 
     await test.step('verify error modal loads', async () => {
@@ -252,7 +252,7 @@ test.describe('Edit Ingest Page', () => {
     });
   });
 
-  test('Error Handling - Edit Ingest gracefully handles failed /retrieve-ingest call', async ({
+  test('Error Handling - Edit Dataset gracefully handles failed /retrieve-ingest call', async ({
     page,
     http,
     worker,
@@ -266,8 +266,8 @@ test.describe('Edit Ingest Page', () => {
       })
     );
 
-    await test.step('Navigate to Edit Ingest Page', async () => {
-      await page.goto('/edit-ingest');
+    await test.step('Navigate to Edit Dataset Page', async () => {
+      await page.goto('/edit-dataset');
     });
 
     await test.step('wait for list of of pending requests to load and pick #1', async () => {

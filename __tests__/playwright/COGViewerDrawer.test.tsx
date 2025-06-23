@@ -5,8 +5,8 @@ test.describe('COG Viewer Drawer', () => {
   test('COG Viewer loads with renders object presets', async ({
     page,
   }, testInfo) => {
-    await test.step('navigate to create ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('navigate to Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('enter URL of Sample File and valid json in renders object', async () => {
@@ -123,8 +123,8 @@ test.describe('COG Viewer Drawer', () => {
   test('COG Viewer loads without entry in renders object', async ({
     page,
   }, testInfo) => {
-    await test.step('navigate to create ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('navigate to Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('enter URL of Sample File but no renders object', async () => {
@@ -185,8 +185,8 @@ test.describe('COG Viewer Drawer', () => {
   test('COG Viewer loads with error in renders object presets', async ({
     page,
   }) => {
-    await test.step('navigate to create ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('navigate to Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('enter URL of Sample File and invalid json in renders object', async () => {
@@ -247,8 +247,8 @@ test.describe('COG Viewer Drawer', () => {
   test('COG Viewer overwrites existing renders object with selections', async ({
     page,
   }) => {
-    await test.step('navigate to create ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('navigate to Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('enter URL of Sample File and valid json in renders object', async () => {
@@ -358,8 +358,8 @@ test.describe('COG Viewer Drawer', () => {
   test('COG Viewer does not open if sample files input is empty', async ({
     page,
   }, testInfo) => {
-    await test.step('navigate to create ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('navigate to Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('do not enter URL of Sample File but enter valid json in renders object', async () => {

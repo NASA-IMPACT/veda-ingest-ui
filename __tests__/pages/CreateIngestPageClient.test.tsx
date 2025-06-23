@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import CreateIngestClient from '@/app/create-ingest/_components/CreateIngestClient';
+import CreateIngestClient from '@/app/create-dataset/_components/CreateIngestClient';
 
 describe('CreateIngestClient Component', () => {
   it('renders the app layout', () => {

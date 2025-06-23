@@ -8,9 +8,9 @@ const IngestClient = function IngestClient() {
     <AppLayout>
       <Row gutter={16}>
         <Col span={12}>
-          <Link href="/create-ingest">
+          <Link href="/create-dataset">
             <Card
-              title="Create New Ingest Request"
+              title="Create New Dataset Ingest Request"
               variant="outlined"
               hoverable={true}
             >
@@ -19,9 +19,9 @@ const IngestClient = function IngestClient() {
           </Link>
         </Col>
         <Col span={12}>
-          <Link href="/edit-ingest">
+          <Link href="/edit-dataset">
             <Card
-              title="Edit Ingest Request"
+              title="Edit Dataset Ingest Request"
               variant="outlined"
               hoverable={true}
             >

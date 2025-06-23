@@ -31,7 +31,7 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
     setStatus('loadingGithub');
     setCollectionName(data.collection as string);
 
-    const url = 'api/create-ingest';
+    const url = 'api/create-dataset';
     const payload = {
       data: data,
       ingestionType: formType,

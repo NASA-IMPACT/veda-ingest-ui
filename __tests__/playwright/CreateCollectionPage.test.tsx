@@ -75,7 +75,7 @@ test.describe('Create Collection Page', () => {
     http,
   }, testInfo) => {
     await worker.use(
-      http.post('/api/create-ingest', async () => {
+      http.post('/api/create-dataset', async () => {
         return HttpResponse.json({ githubURL: MOCK_GITHUB_URL });
       })
     );
@@ -124,7 +124,7 @@ test.describe('Create Collection Page', () => {
     http,
   }, testInfo) => {
     // Intercept the POST request to validate its payload
-    await page.route('**/create-ingest', async (route, request) => {
+    await page.route('**/create-dataset', async (route, request) => {
       if (request.method() === 'POST') {
         const postData = request.postDataJSON();
 
@@ -191,7 +191,7 @@ test.describe('Create Collection Page', () => {
     page,
   }, testInfo) => {
     // Intercept the request to validate the payload
-    await page.route('**/create-ingest', async (route, request) => {
+    await page.route('**/create-dataset', async (route, request) => {
       if (request.method() === 'POST') {
         const postData = request.postDataJSON();
 
@@ -316,7 +316,7 @@ test.describe('Create Collection Page', () => {
   }, testInfo) => {
     // Mock the API response for a duplicate collection
     await worker.use(
-      http.post('/api/create-ingest', () => {
+      http.post('/api/create-dataset', () => {
         return HttpResponse.json(
           { error: 'Reference already exists' },
           { status: 400 }
@@ -360,7 +360,7 @@ test.describe('Create Collection Page', () => {
   }, testInfo) => {
     // Mock the API response for a GitHub auth failure
     await worker.use(
-      http.post('/api/create-ingest', () => {
+      http.post('/api/create-dataset', () => {
         return HttpResponse.json(
           { error: 'Failed to fetch GitHub token' },
           { status: 400 }

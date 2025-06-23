@@ -117,7 +117,7 @@ test.describe('Edit Collection Page', () => {
     page,
   }, testInfo) => {
     // Intercept and block the request to validate the payload
-    await page.route('**/edit-ingest', async (route, request) => {
+    await page.route('**/edit-dataset', async (route, request) => {
       if (request.method() === 'PUT') {
         const postData = request.postDataJSON();
 

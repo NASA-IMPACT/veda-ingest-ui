@@ -54,16 +54,16 @@ const MenuBar = () => {
       type: 'group',
       children: [
         {
-          key: '/create-ingest',
-          label: <Link href="/create-ingest">Create Ingest</Link>,
+          key: '/create-dataset',
+          label: <Link href="/create-dataset">Create Dataset</Link>,
           icon: <PlusCircleOutlined />,
         },
-        // Conditionally add 'Edit Ingest'
+        // Conditionally add 'Edit Dataset'
         ...(hasEditIngestPermission
           ? [
               {
-                key: '/edit-ingest',
-                label: <Link href="/edit-ingest">Edit Ingest</Link>,
+                key: '/edit-dataset',
+                label: <Link href="/edit-dataset">Edit Dataset</Link>,
                 icon: <EditOutlined />,
               },
             ]

@@ -75,20 +75,20 @@ const MOCK_GITHUB_URL = 'https://github.com/nasa-veda/veda-data/pull/12345';
 const DATASET_SUCCESS_DIALOG_TITLE = /Ingest Submitted/i;
 const COLLECTION_SUCCESS_DIALOG_TITLE = /Collection Submitted/i;
 
-test.describe('Create Ingest Page', () => {
-  test('Create Ingest request displays github link to PR', async ({
+test.describe('Create Dataset Page', () => {
+  test('Create Dataset request displays github link to PR', async ({
     page,
     worker,
     http,
   }, testInfo) => {
     await worker.use(
-      http.post('/api/create-ingest', async () => {
+      http.post('/api/create-dataset', async () => {
         return HttpResponse.json({ githubURL: MOCK_GITHUB_URL });
       })
     );
 
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('switch to manual json edit tab', async () => {
@@ -127,11 +127,11 @@ test.describe('Create Ingest Page', () => {
     });
   });
 
-  test('Create Ingest request submitted with pasted JSON', async ({
+  test('Create Dataset request submitted with pasted JSON', async ({
     page,
   }, testInfo) => {
     // Intercept and block the request
-    await page.route('**/create-ingest', async (route, request) => {
+    await page.route('**/create-dataset', async (route, request) => {
       if (request.method() === 'POST') {
         const postData = request.postDataJSON();
 
@@ -161,8 +161,8 @@ test.describe('Create Ingest Page', () => {
       }
     });
 
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('switch to manual json edit tab', async () => {
@@ -209,11 +209,11 @@ test.describe('Create Ingest Page', () => {
     await expect(successDialog.or(legacyDialog)).toBeVisible();
   });
 
-  test('Create Ingest allows extra fields with toggle enabled', async ({
+  test('Create Dataset allows extra fields with toggle enabled', async ({
     page,
   }, testInfo) => {
     // Intercept and block the request
-    await page.route('**/create-ingest', async (route, request) => {
+    await page.route('**/create-dataset', async (route, request) => {
       if (request.method() === 'POST') {
         const postData = request.postDataJSON();
 
@@ -228,8 +228,8 @@ test.describe('Create Ingest Page', () => {
       }
     });
 
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('switch to manual json edit tab', async () => {
@@ -273,11 +273,11 @@ test.describe('Create Ingest Page', () => {
     });
   });
 
-  test('Create Ingest handles errors with pasted JSON', async ({
+  test('Create Dataset handles errors with pasted JSON', async ({
     page,
   }, testInfo) => {
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('switch to manual json edit tab', async () => {
@@ -342,7 +342,7 @@ test.describe('Create Ingest Page', () => {
     worker,
   }, testInfo) => {
     await worker.use(
-      http.post('/api/create-ingest', () => {
+      http.post('/api/create-dataset', () => {
         return HttpResponse.json(
           { error: 'Reference already exists' },
           { status: 400 }
@@ -350,8 +350,8 @@ test.describe('Create Ingest Page', () => {
       })
     );
 
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('switch to manual json edit tab', async () => {
@@ -385,7 +385,7 @@ test.describe('Create Ingest Page', () => {
     worker,
   }, testInfo) => {
     await worker.use(
-      http.post('/api/create-ingest', () => {
+      http.post('/api/create-dataset', () => {
         return HttpResponse.json(
           { error: 'Failed to fetch GitHub token' },
           { status: 400 }
@@ -393,8 +393,8 @@ test.describe('Create Ingest Page', () => {
       })
     );
 
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('switch to manual json edit tab', async () => {
@@ -425,8 +425,8 @@ test.describe('Create Ingest Page', () => {
   test('Hide extended Discovery Items fields by default', async ({
     page,
   }, testInfo) => {
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await expect(
