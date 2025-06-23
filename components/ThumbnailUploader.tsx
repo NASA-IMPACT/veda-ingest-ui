@@ -237,17 +237,11 @@ function ThumbnailUploader({
     }, 200);
   };
 
-  const getS3Uri = (url: string): string => {
-    const parsedUrl = new URL(url);
-    return `s3://${parsedUrl.host.split('.')[0]}/${parsedUrl.pathname.substring(1)}`;
-  };
-
   const handleCopy = async () => {
     if (!uploadedFile) return;
 
     try {
-      const s3Uri = getS3Uri(uploadedFile.url);
-      await navigator.clipboard.writeText(s3Uri);
+      await navigator.clipboard.writeText(uploadedFile.url);
       setCopied(true);
     } catch (error) {
       console.error('Failed to copy to clipboard:', error);
@@ -380,7 +374,7 @@ function ThumbnailUploader({
               <List bordered>
                 <List.Item style={{ display: 'flex' }}>
                   <div>
-                    <strong>S3 URI:</strong> {getS3Uri(uploadedFile.url)}
+                    <strong>URL:</strong> {uploadedFile.url}
                   </div>
                   <Button icon={<CopyOutlined />} onClick={handleCopy}>
                     {copied ? 'Copied!' : 'Copy'}
@@ -391,7 +385,7 @@ function ThumbnailUploader({
                 type="primary"
                 onClick={() => {
                   if (insideDrawer) {
-                    onUploadSuccess?.(getS3Uri(uploadedFile.url));
+                    onUploadSuccess?.(uploadedFile.url);
                   }
                   setUploadedFile(null);
                   setImageValidation(null);

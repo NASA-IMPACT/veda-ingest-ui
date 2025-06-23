@@ -92,8 +92,10 @@ test.describe('Thumbnail Uploader Drawer', () => {
       await expect(sizeStatistic.locator('..')).toContainText('412KB');
     });
     await expect(
-      page.getByText('S3 URI: s3://s3bucket/thumbnail.jpg'),
-      'S3 URI is shown'
+      page.getByText(
+        'URL: https://s3bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg'
+      ),
+      'URL is shown'
     ).toBeVisible();
 
     await expect(
@@ -119,7 +121,7 @@ test.describe('Thumbnail Uploader Drawer', () => {
     await expect(
       page.getByRole('textbox', { name: /href/i }),
       'validate href is populated with upload url'
-    ).toHaveValue('s3://s3bucket/thumbnail.jpg');
+    ).toHaveValue('https://s3bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg');
     await expect(
       page.getByRole('textbox', { name: /collection/i }),
       'validate that other form data has not been overwritten'
