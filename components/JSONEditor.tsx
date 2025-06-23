@@ -21,6 +21,7 @@ interface Renders {
 
 export interface JSONEditorValue {
   collection?: string;
+  id?: string;
   renders?: Renders;
   temporal_extent?: {
     startdate?: string;
@@ -36,6 +37,7 @@ interface JSONEditorProps {
   jsonSchema: Record<string, unknown>;
   onChange: (updatedValue: JSONEditorValue) => void;
   disableCollectionNameChange?: boolean;
+  disableIdChange?: boolean;
   hasJSONChanges?: boolean;
   setHasJSONChanges: (hasJSONChanges: boolean) => void;
   additionalProperties: string[] | null;
@@ -49,6 +51,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
   hasJSONChanges,
   setHasJSONChanges,
   disableCollectionNameChange = false,
+  disableIdChange = false,
   additionalProperties,
   setAdditionalProperties,
 }) => {
@@ -71,6 +74,11 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
     disableCollectionNameChange
       ? (value.collection as string | undefined)
       : undefined
+  )[0];
+
+  // Store initial ID value if disableIdChange is true
+  const initialIdValue = useState<string | undefined>(
+    disableIdChange ? (value.id as string | undefined) : undefined
   )[0];
 
   const validateAndApply = useCallback(
@@ -100,7 +108,6 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         unknown
       >;
 
-      // Ensure strict mode affects additional properties
       if (strictSchema) {
         (modifiedSchema as any).additionalProperties = false;
       } else {
@@ -261,7 +268,13 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         }
       }
 
-      // Check for 'is_periodic' or 'time_density' at the top level
+      if (disableIdChange && initialIdValue !== undefined) {
+        if (parsedValue.id !== initialIdValue) {
+          message.error(`ID cannot be changed! Expected: "${initialIdValue}"`);
+          return;
+        }
+      }
+
       const hasDashboardRelatedKeys =
         Object.prototype.hasOwnProperty.call(parsedValue, 'is_periodic') ||
         Object.prototype.hasOwnProperty.call(parsedValue, 'time_density');
@@ -335,7 +348,12 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
     <Flex vertical gap="middle">
       {disableCollectionNameChange && (
         <Typography.Text type="warning" data-testid="collectionName">
-          Editing <strong>{initialCollectionValue}</strong>
+          Editing Collection: <strong>{initialCollectionValue}</strong>
+        </Typography.Text>
+      )}
+      {disableIdChange && (
+        <Typography.Text type="warning" data-testid="idName">
+          Editing ID: <strong>{initialIdValue}</strong>
         </Typography.Text>
       )}
       <Checkbox
@@ -401,8 +419,6 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         ]}
       >
         <Flex vertical gap="small">
-          {' '}
-          {/* Use Flex for better spacing */}
           <Typography.Paragraph>
             It looks like you&apos;ve included{' '}
             <Typography.Text strong>&quot;is_periodic&quot;</Typography.Text> or{' '}
@@ -420,8 +436,6 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
             How would you like to proceed?
           </Typography.Paragraph>
           <Flex vertical gap="small">
-            {' '}
-            {/* Nest Flex for options */}
             <Typography.Text>
               <Typography.Text strong>
                 Option 1: Accept &amp; Add Prefix

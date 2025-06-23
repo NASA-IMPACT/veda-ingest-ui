@@ -1,6 +1,6 @@
 import { expect, test } from '@/__tests__/playwright/setup-msw';
 import { validateCollectionFormFields } from '../playwright/utils/ValidateFormFields';
-import { HttpResponse } from 'msw';
+import { HttpResponse, http } from 'msw';
 
 const requiredCollectionConfig = {
   id: 'PLAYWRIGHT_1234',
@@ -66,10 +66,20 @@ const requiredCollectionConfig = {
   },
 };
 
+const MOCK_GITHUB_URL = 'https://github.com/nasa-veda/veda-data/pull/12345';
+
 test.describe('Create Collection Page', () => {
   test('Create Collection request displays github link to PR', async ({
     page,
+    worker,
+    http,
   }, testInfo) => {
+    await worker.use(
+      http.post('/api/create-ingest', async () => {
+        return HttpResponse.json({ githubURL: MOCK_GITHUB_URL });
+      })
+    );
+
     await test.step('Navigate to the Create Collection page', async () => {
       await page.goto('/create-collection');
     });
@@ -88,20 +98,18 @@ test.describe('Create Collection Page', () => {
     await test.step('submit completed form', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
+
     await expect(
       page.getByRole('dialog', { name: /Collection Submitted/i })
     ).toBeVisible();
+
     const githubLink = page
       .getByRole('dialog', { name: /Collection Submitted/i })
       .getByRole('link', { name: /github/i });
     await expect(githubLink).toBeVisible();
-    // Get the href attribute value
-    const href = await githubLink.getAttribute('href');
 
-    // Assert that the href attribute is correct
-    expect(href, 'href from github should be correct').toBe(
-      'https://github.com/nasa-veda/veda-data/pull/12345'
-    );
+    const href = await githubLink.getAttribute('href');
+    expect(href, 'href from github should be correct').toBe(MOCK_GITHUB_URL);
 
     const successScreenshot = await page.screenshot();
     testInfo.attach('success modal with github link', {
@@ -112,18 +120,24 @@ test.describe('Create Collection Page', () => {
 
   test('Create Collection request submitted with pasted JSON', async ({
     page,
+    worker,
+    http,
   }, testInfo) => {
     // Intercept the POST request to validate its payload
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
         const postData = request.postDataJSON();
 
-        // Validate that the submitted data matches the required config
-        expect(postData).toEqual(
+        expect(postData.ingestionType).toBe('collection');
+        expect(postData.data).toEqual(
           expect.objectContaining(requiredCollectionConfig)
         );
 
-        await route.continue();
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ githubURL: MOCK_GITHUB_URL }),
+        });
       } else {
         await route.continue();
       }
@@ -167,6 +181,10 @@ test.describe('Create Collection Page', () => {
     await test.step('submit form and validate that POST body values match pasted config values', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
+
+    await expect(
+      page.getByRole('dialog', { name: /Collection Submitted/i })
+    ).toBeVisible();
   });
 
   test('Create Collection allows extra fields with toggle enabled', async ({
@@ -176,8 +194,12 @@ test.describe('Create Collection Page', () => {
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
         const postData = request.postDataJSON();
-        // Assert that the extra field is included in the payload
-        expect(postData).toEqual(expect.objectContaining({ extraField: true }));
+
+        expect(postData.ingestionType).toBe('collection');
+        expect(postData.data).toEqual(
+          expect.objectContaining({ extraField: true })
+        );
+
         await route.abort(); // Abort to prevent actual submission
       } else {
         await route.continue();
@@ -294,7 +316,7 @@ test.describe('Create Collection Page', () => {
   }, testInfo) => {
     // Mock the API response for a duplicate collection
     await worker.use(
-      http.post('/api/create-ingest', ({ request }) => {
+      http.post('/api/create-ingest', () => {
         return HttpResponse.json(
           { error: 'Reference already exists' },
           { status: 400 }
@@ -338,7 +360,7 @@ test.describe('Create Collection Page', () => {
   }, testInfo) => {
     // Mock the API response for a GitHub auth failure
     await worker.use(
-      http.post('/api/create-ingest', ({ request }) => {
+      http.post('/api/create-ingest', () => {
         return HttpResponse.json(
           { error: 'Failed to fetch GitHub token' },
           { status: 400 }

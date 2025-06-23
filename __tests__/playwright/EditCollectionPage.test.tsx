@@ -1,7 +1,6 @@
 import { expect, test } from '@/__tests__/playwright/setup-msw';
 import { HttpResponse } from 'msw';
 
-// A sample configuration object for modifying an existing collection.
 const modifiedCollectionConfig = {
   id: 'PLAYWRIGHT_1234',
   title: 'MODIFIED test collection title',
@@ -183,7 +182,7 @@ test.describe('Edit Collection Page', () => {
     });
 
     await test.step('submit form and validate that PUT body values match pasted config values', async () => {
-      await page.getByRole('button', { name: /submit/i }).click();
+      await page.getByRole('button', { name: /apply changes/i }).click();
     });
   });
 

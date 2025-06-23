@@ -92,7 +92,7 @@ test.describe('Edit Ingest Page', () => {
 
     await expect(
       page.getByText('Collection name cannot be changed!'),
-      'error message appears for attempting Collection rename'
+      'error message appears for attempting Collection name rename'
     ).toBeVisible();
 
     const errorMessageScreenshot = await page.screenshot({
