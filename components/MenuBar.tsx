@@ -12,7 +12,6 @@ import {
   EditOutlined,
   GlobalOutlined,
   CloudUploadOutlined,
-  BlockOutlined,
 } from '@ant-design/icons';
 
 const MenuBar = () => {
@@ -49,7 +48,7 @@ const MenuBar = () => {
       ],
     },
     {
-      label: <Link href="/datasets">Dataset Ingestion</Link>,
+      label: <Link href="/datasets">Datasets</Link>,
       key: 'g2',
       type: 'group',
       children: [
