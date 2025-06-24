@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
     '/create-dataset',
     '/api/list-ingests',
     '/api/retrieve-ingest',
-    '/api/create-dataset',
+    '/api/create-ingest',
     '/api/upload-url',
   ];
 
@@ -78,7 +78,7 @@ export const config = {
     '/cog-viewer',
     '/api/list-ingests',
     '/api/retrieve-ingest',
-    '/api/create-dataset',
+    '/api/create-ingest',
     '/api/upload-url',
   ],
 };

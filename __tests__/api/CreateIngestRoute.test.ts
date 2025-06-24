@@ -7,7 +7,7 @@ import CreatePR from '@/utils/githubUtils/CreatePR';
 vi.mock('@/utils/githubUtils/UpdatePR');
 vi.mock('@/utils/githubUtils/CreatePR');
 
-describe('POST /api/create-dataset', () => {
+describe('POST /api/create-ingest', () => {
   it('returns GitHub URL on successful PR creation for a collection', async () => {
     const mockBody = {
       data: { collection: 'Test Collection' },
@@ -97,7 +97,7 @@ describe('POST /api/create-dataset', () => {
   });
 });
 
-describe('PUT /api/create-dataset', () => {
+describe('PUT /api/create-ingest', () => {
   it('returns success message on successful PR update', async () => {
     const mockRequest = {
       json: vi.fn().mockResolvedValue({

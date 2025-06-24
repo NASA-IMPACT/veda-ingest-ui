@@ -102,7 +102,7 @@ describe('EditFormManager', () => {
     });
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith('api/create-dataset', {
+      expect(fetch).toHaveBeenCalledWith('api/create-ingest', {
         method: 'PUT',
         body: JSON.stringify({
           gitRef: defaultProps.gitRef,

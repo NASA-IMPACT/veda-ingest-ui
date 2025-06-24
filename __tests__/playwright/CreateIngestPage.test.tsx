@@ -82,7 +82,7 @@ test.describe('Create Dataset Page', () => {
     http,
   }, testInfo) => {
     await worker.use(
-      http.post('/api/create-dataset', async () => {
+      http.post('/api/create-ingest', async () => {
         return HttpResponse.json({ githubURL: MOCK_GITHUB_URL });
       })
     );
@@ -342,7 +342,7 @@ test.describe('Create Dataset Page', () => {
     worker,
   }, testInfo) => {
     await worker.use(
-      http.post('/api/create-dataset', () => {
+      http.post('/api/create-ingest', () => {
         return HttpResponse.json(
           { error: 'Reference already exists' },
           { status: 400 }
@@ -385,7 +385,7 @@ test.describe('Create Dataset Page', () => {
     worker,
   }, testInfo) => {
     await worker.use(
-      http.post('/api/create-dataset', () => {
+      http.post('/api/create-ingest', () => {
         return HttpResponse.json(
           { error: 'Failed to fetch GitHub token' },
           { status: 400 }

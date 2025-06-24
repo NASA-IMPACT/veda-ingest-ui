@@ -39,7 +39,7 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
 
     setStatus('loadingGithub');
 
-    const url = 'api/create-dataset';
+    const url = 'api/create-ingest';
     const requestOptions = {
       method: 'PUT',
       body: JSON.stringify({ gitRef, fileSha, filePath, formData }),

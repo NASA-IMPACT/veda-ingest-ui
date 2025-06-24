@@ -96,7 +96,7 @@ describe('CreationFormManager', () => {
     });
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith('api/create-dataset', {
+      expect(fetch).toHaveBeenCalledWith('api/create-ingest', {
         method: 'POST',
         body: JSON.stringify({
           data: { collection: 'Test Dataset' },
@@ -127,7 +127,7 @@ describe('CreationFormManager', () => {
     });
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith('api/create-dataset', {
+      expect(fetch).toHaveBeenCalledWith('api/create-ingest', {
         method: 'POST',
         body: JSON.stringify({
           data: { collection: 'Test Collection', id: 'test-collection-id' },
