@@ -28,16 +28,13 @@ Object.defineProperty(window, 'getComputedStyle', {
   }),
 });
 
-// Mock next/dynamic
 vi.mock('next/dynamic', async () => {
   const CodeEditorModule = await vi.importActual<
     typeof import('@uiw/react-textarea-code-editor')
   >('@uiw/react-textarea-code-editor');
-  const Editor = CodeEditorModule.default;
-  const DynamicEditor = (props: any) => <Editor {...props} />;
-  DynamicEditor.displayName = 'MockedCodeEditor';
   return {
-    default: DynamicEditor,
+    // eslint-disable-next-line react/display-name
+    default: () => CodeEditorModule.default,
   };
 });
 
@@ -56,7 +53,6 @@ vi.mock('@/components/AdditionalPropertyCard', async () => {
       <pre>{JSON.stringify(additionalProperties)}</pre>
     </div>
   ));
-  // Add displayName to the mock
   MockCard.displayName = 'MockAdditionalPropertyCard';
   return {
     default: MockCard,
@@ -67,7 +63,6 @@ vi.mock('@/components/AdditionalPropertyCard', async () => {
 vi.mock('antd', async (importOriginal) => {
   const antd = await importOriginal<typeof import('antd')>();
 
-  // FIX: Define a named function for the mock component to solve the linting error.
   function MockModal({ open, title, children, footer, onCancel }: any) {
     if (!open) return null;
     return (
@@ -89,11 +84,11 @@ vi.mock('antd', async (importOriginal) => {
       </div>
     );
   }
-  MockModal.displayName = 'MockAntdModal'; // Explicitly set for clarity
+  MockModal.displayName = 'MockAntdModal';
 
   return {
     ...antd,
-    Modal: MockModal, // Use the named component
+    Modal: MockModal,
   };
 });
 
