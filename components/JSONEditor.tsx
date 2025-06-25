@@ -40,8 +40,10 @@ interface JSONEditorProps {
   disableIdChange?: boolean;
   hasJSONChanges?: boolean;
   setHasJSONChanges: (hasJSONChanges: boolean) => void;
-  additionalProperties: string[] | null;
-  setAdditionalProperties: (additionalProperties: string[] | null) => void;
+  additionalProperties: { [key: string]: any } | null;
+  setAdditionalProperties: (
+    additionalProperties: { [key: string]: any } | null
+  ) => void;
 }
 
 const JSONEditor: React.FC<JSONEditorProps> = ({
@@ -85,6 +87,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
     (valueToValidate: JSONEditorValue) => {
       let processedValue = structuredClone(valueToValidate);
 
+      // (Code for handling renders.dashboard remains the same)
       if (
         processedValue.renders?.dashboard &&
         typeof processedValue.renders.dashboard === 'object'
@@ -111,7 +114,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       if (strictSchema) {
         (modifiedSchema as any).additionalProperties = false;
       } else {
-        (modifiedSchema as any).additionalProperties = true;
+        delete (modifiedSchema as any).additionalProperties;
       }
 
       // Override "renders.dashboard" property to allow both string & object
@@ -130,24 +133,33 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         };
       }
 
-      // Validate JSON using AJV
-      const ajv = new Ajv({ allErrors: true });
-      addFormats(ajv);
-      const validateSchema = ajv.compile(modifiedSchema);
-
-      const isValid = validateSchema(processedValue);
-      let currentSchemaErrors: string[] = [];
-
       // Extract additional properties manually when strictSchema is false
       if (!strictSchema && typeof processedValue === 'object') {
         const schemaProperties = Object.keys(modifiedSchema.properties || {});
         const userProperties = Object.keys(processedValue);
-        const extraProps = userProperties.filter(
+        const extraPropKeys = userProperties.filter(
           (prop) => !schemaProperties.includes(prop)
         );
 
-        setAdditionalProperties(extraProps.length > 0 ? extraProps : null);
+        if (extraPropKeys.length > 0) {
+          const extraPropsObject = extraPropKeys.reduce(
+            (acc, key) => {
+              acc[key] = processedValue[key];
+              return acc;
+            },
+            {} as { [key: string]: any }
+          );
+          setAdditionalProperties(extraPropsObject);
+        } else {
+          setAdditionalProperties(null);
+        }
       }
+
+      const ajv = new Ajv({ allErrors: true });
+      addFormats(ajv);
+      const validateSchema = ajv.compile(modifiedSchema);
+      const isValid = validateSchema(processedValue);
+      let currentSchemaErrors: string[] = [];
 
       if (!isValid) {
         currentSchemaErrors = [
@@ -155,7 +167,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
           ...(validateSchema.errors?.map((err) =>
             err.message === 'must NOT have additional properties'
               ? `${err.params.additionalProperty} is not defined in schema`
-              : `${err.instancePath} ${err.message}`
+              : `${err.instancePath.substring(1) || ''} ${err.message}`.trim()
           ) || []),
         ];
       }
@@ -181,14 +193,14 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
 
       if (currentSchemaErrors.length > 0) {
         setSchemaErrors(currentSchemaErrors);
+        // Clear additional properties if schema errors exist, as errors are more critical
+        setAdditionalProperties(null);
         setTimeout(() => {
           additionalPropertyCardRef.current?.scrollIntoView({
             behavior: 'smooth',
             block: 'start',
           });
-          if (additionalPropertyCardRef.current) {
-            additionalPropertyCardRef.current.focus();
-          }
+          additionalPropertyCardRef.current?.focus();
         }, 0);
         return;
       }
@@ -199,65 +211,21 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
     },
     [
       strictSchema,
-      setAdditionalProperties,
-      setSchemaErrors,
-      onChange,
       jsonSchema,
+      onChange,
+      setAdditionalProperties,
+      setHasJSONChanges,
     ]
   );
 
-  // Effect to re-run applyChanges after modal action if needed
-  useEffect(() => {
-    // This effect will run after handleModalAccept/handleModalLeaveUnchanged
-    // cause state updates and the component re-renders.
-    if (modalActionType) {
-      // Clear the action type to prevent infinite loops
-      setModalActionType(null);
-      try {
-        const valueFromEditor = JSON.parse(editorValue) as JSONEditorValue;
-        validateAndApply(valueFromEditor);
-      } catch (err) {
-        setJsonError('Invalid JSON format after modal action.');
-      }
-    }
-  }, [modalActionType, editorValue, validateAndApply]);
-
-  useEffect(() => {
-    let updatedValue = { ...value };
-
-    // If "renders.dashboard" is a stringified object, parse it
-    if (
-      value.renders?.dashboard &&
-      typeof value.renders.dashboard === 'string'
-    ) {
-      try {
-        updatedValue.renders = {
-          ...value.renders,
-          dashboard: JSON.parse(value.renders.dashboard),
-        };
-      } catch (err) {
-        console.warn(
-          "Could not parse 'renders.dashboard' as JSON, leaving it as-is."
-        );
-      }
-    }
-
-    setEditorValue(JSON.stringify(updatedValue, null, 2));
-  }, [value]);
-
-  const handleInputChange = (value: string) => {
-    setEditorValue(value);
-    setHasJSONChanges(true);
-    setJsonError(null);
-    setSchemaErrors([]); // Clear schema errors on input change
-  };
-
   const applyChanges = () => {
     try {
+      // Clear both errors and properties before validation
       setAdditionalProperties(null);
-      let parsedValue = JSON.parse(editorValue) as JSONEditorValue;
       setJsonError(null);
-      setSchemaErrors([]); // Clear previous schema errors
+      setSchemaErrors([]);
+
+      let parsedValue = JSON.parse(editorValue) as JSONEditorValue;
 
       if (disableCollectionNameChange && initialCollectionValue !== undefined) {
         if (parsedValue.collection !== initialCollectionValue) {
@@ -294,7 +262,45 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
     }
   };
 
-  // --- Modal Handlers ---
+  useEffect(() => {
+    if (modalActionType) {
+      setModalActionType(null);
+      try {
+        const valueFromEditor = JSON.parse(editorValue) as JSONEditorValue;
+        validateAndApply(valueFromEditor);
+      } catch (err) {
+        setJsonError('Invalid JSON format after modal action.');
+      }
+    }
+  }, [modalActionType, editorValue, validateAndApply]);
+
+  useEffect(() => {
+    let updatedValue = { ...value };
+    if (
+      value.renders?.dashboard &&
+      typeof value.renders.dashboard === 'string'
+    ) {
+      try {
+        updatedValue.renders = {
+          ...value.renders,
+          dashboard: JSON.parse(value.renders.dashboard),
+        };
+      } catch (err) {
+        console.warn(
+          "Could not parse 'renders.dashboard' as JSON, leaving it as-is."
+        );
+      }
+    }
+    setEditorValue(JSON.stringify(updatedValue, null, 2));
+  }, [value]);
+
+  const handleInputChange = (value: string) => {
+    setEditorValue(value);
+    setHasJSONChanges(true);
+    setJsonError(null);
+    setSchemaErrors([]);
+  };
+
   const handleModalAccept = () => {
     let currentEditorParsedValue: JSONEditorValue;
     try {
@@ -341,7 +347,6 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
 
   const handleModalCancel = () => {
     setIsModalVisible(false);
-    // User cancelled, so they might want to re-edit. No apply changes are triggered.
   };
 
   return (
@@ -393,11 +398,27 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       </Button>
 
       {jsonError && <Text type="danger">{jsonError}</Text>}
+
       {schemaErrors.length > 0 && (
         <AdditionalPropertyCard
           ref={additionalPropertyCardRef}
-          additionalProperties={schemaErrors}
+          // Transform the error array into an object for the card
+          additionalProperties={schemaErrors.reduce(
+            (acc, error, index) => {
+              acc[`Error ${index + 1}`] = error;
+              return acc;
+            },
+            {} as { [key: string]: string }
+          )}
           style="error"
+        />
+      )}
+
+      {schemaErrors.length === 0 && additionalProperties && (
+        <AdditionalPropertyCard
+          ref={additionalPropertyCardRef}
+          additionalProperties={additionalProperties}
+          style="warning"
         />
       )}
 

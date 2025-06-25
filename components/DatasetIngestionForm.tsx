@@ -3,7 +3,7 @@
 import '@ant-design/v5-patch-for-react-19';
 
 import { useEffect, useState } from 'react';
-import { Tabs } from 'antd';
+import { Button, Tabs } from 'antd';
 import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
 import validator from '@rjsf/validator-ajv8';
@@ -12,7 +12,6 @@ import { JSONSchema7 } from 'json-schema';
 import ObjectFieldTemplate from '@/utils/ObjectFieldTemplate';
 import jsonSchema from '@/FormSchemas/datasets/datasetSchema.json';
 import { customValidate } from '@/utils/CustomValidation';
-import { handleSubmit } from '@/utils/FormHandlers';
 import JSONEditor from '@/components/JSONEditor';
 import { JSONEditorValue } from '@/components/JSONEditor';
 import AdditionalPropertyCard from '@/components/AdditionalPropertyCard';
@@ -60,18 +59,16 @@ function DatasetIngestionForm({
   defaultTemporalExtent = false,
 }: FormProps) {
   const [activeTab, setActiveTab] = useState<string>('form');
-  const [forceRenderKey, setForceRenderKey] = useState<number>(0); // Force refresh RJSF to clear validation errors
+  const [forceRenderKey, setForceRenderKey] = useState<number>(0);
   const [hasJSONChanges, setHasJSONChanges] = useState<boolean>(false);
-  const [additionalProperties, setAdditionalProperties] = useState<
-    string[] | null
-  >(null);
+  const [additionalProperties, setAdditionalProperties] = useState<{
+    [key: string]: any;
+  } | null>(null);
 
   useEffect(() => {
     if (defaultTemporalExtent) {
       setFormData((prevFormData: FormData | undefined) => {
         const now = new Date();
-
-        // Start of the current UTC day
         const startOfDay = new Date(
           Date.UTC(
             now.getUTCFullYear(),
@@ -82,8 +79,6 @@ function DatasetIngestionForm({
             0
           )
         ).toISOString();
-
-        // End of the current UTC day
         const endOfDay = new Date(
           Date.UTC(
             now.getUTCFullYear(),
@@ -94,7 +89,6 @@ function DatasetIngestionForm({
             59
           )
         ).toISOString();
-
         return {
           ...prevFormData,
           temporal_extent: {
@@ -115,9 +109,17 @@ function DatasetIngestionForm({
 
   const handleJsonEditorChange = (updatedData: JSONEditorValue) => {
     setFormData(updatedData);
-    setForceRenderKey((prev) => prev + 1); // Forces RJSF to re-render and re-validate
+    setForceRenderKey((prev) => prev + 1);
     setActiveTab('form');
     setHasJSONChanges(false);
+  };
+
+  const handleFormSubmit = (rjsfData: { formData?: object }) => {
+    const finalFormData = {
+      ...rjsfData.formData,
+      ...additionalProperties,
+    };
+    onSubmit(finalFormData);
   };
 
   const widgets = {
@@ -145,18 +147,30 @@ function DatasetIngestionForm({
                 }}
                 formData={formData}
                 onChange={onFormDataChanged}
-                onSubmit={(data) => handleSubmit(data, onSubmit)}
+                onSubmit={handleFormSubmit}
                 formContext={{ formData, updateFormData: setFormData }}
                 widgets={widgets}
               >
-                {children}
+                {children ? (
+                  children
+                ) : (
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    style={{ marginTop: '20px' }}
+                    block
+                  >
+                    Submit
+                  </Button>
+                )}
               </Form>
-              {additionalProperties && additionalProperties.length > 0 && (
-                <AdditionalPropertyCard
-                  additionalProperties={additionalProperties}
-                  style="warning"
-                />
-              )}
+              {additionalProperties &&
+                Object.keys(additionalProperties).length > 0 && (
+                  <AdditionalPropertyCard
+                    additionalProperties={additionalProperties}
+                    style="warning"
+                  />
+                )}
             </>
           ),
         },

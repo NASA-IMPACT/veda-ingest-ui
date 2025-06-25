@@ -257,10 +257,29 @@ test.describe('Create Dataset Page', () => {
       await page.getByRole('button', { name: /apply changes/i }).click();
     });
 
-    await expect(
-      page.getByTestId('extra-properties-card').getByText('extraField'),
-      'verify that extra properties are displayed on the form tab'
-    ).toBeVisible();
+    await test.step('verify that extra properties are displayed on the form tab', async () => {
+      const formTabPanel = page.getByRole('tabpanel', { name: 'Form' });
+
+      const extraPropertiesCard = formTabPanel.getByTestId(
+        'extra-properties-card'
+      );
+      await expect(
+        extraPropertiesCard,
+        'The extra properties card should be visible'
+      ).toBeVisible();
+
+      const codeEditor = extraPropertiesCard.locator('textarea');
+      await expect(
+        codeEditor,
+        'The code editor for the extra property should be visible'
+      ).toBeVisible();
+
+      const expectedValue = JSON.stringify({ extraField: true }, null, 2);
+      await expect(
+        codeEditor,
+        'The editor should contain the correct JSON'
+      ).toHaveValue(expectedValue);
+    });
 
     const extraPropertiesScreenshot = await page.screenshot({ fullPage: true });
     testInfo.attach('extra properties listed on form tab', {
@@ -295,9 +314,12 @@ test.describe('Create Dataset Page', () => {
     });
 
     await test.step('paste a JSON not matching required schema in the editor and check for error message', async () => {
-      await page.getByTestId('json-editor').fill('{"validJSON": true}');
+      await page.getByTestId('json-editor').fill('{}');
       await page.getByRole('button', { name: /apply changes/i }).click();
+
       await expect(page.getByText('Schema Validation Errors')).toBeVisible();
+
+      // The list of properties that are expected to be missing.
       const requiredProperties = [
         'collection',
         'title',
@@ -310,23 +332,46 @@ test.describe('Create Dataset Page', () => {
         'data_type',
         'providers',
         'item_assets',
+        'renders',
       ];
 
-      for (const property of requiredProperties) {
-        await expect(
-          page
-            .getByRole('listitem')
-            .filter({ hasText: `must have required property '${property}'` }),
-          `${property} error message should be visible`
-        ).toBeVisible();
-      }
-
+      const errorCard = page.getByTestId('extra-properties-card');
       await expect(
-        page
-          .getByRole('listitem')
-          .filter({ hasText: 'validJSON is not defined in schema' }),
-        'additional property in JSON should create error'
+        errorCard,
+        'The error card container should be visible'
       ).toBeVisible();
+
+      const errorTags = errorCard.locator('.ant-tag');
+      await expect(
+        errorTags,
+        `Should display ${requiredProperties.length} error tags`
+      ).toHaveCount(requiredProperties.length);
+
+      await test.step('verify clicking each error tag shows the correct detail', async () => {
+        for (let i = 0; i < requiredProperties.length; i++) {
+          const propertyName = requiredProperties[i];
+          const expectedTagText = `Error ${i + 1}`;
+          const expectedErrorMessage = `must have required property '${propertyName}'`;
+
+          await errorCard.getByText(expectedTagText, { exact: true }).click();
+
+          const codeEditor = errorCard.locator('textarea');
+          await expect(
+            codeEditor,
+            `Editor for ${expectedTagText} should be visible`
+          ).toBeVisible();
+
+          const expectedValue = JSON.stringify(
+            { [expectedTagText]: expectedErrorMessage },
+            null,
+            2
+          );
+          await expect(
+            codeEditor,
+            `Editor for ${expectedTagText} should show correct error message`
+          ).toHaveValue(expectedValue);
+        }
+      });
     });
 
     const errorMessagesScreenshot = await page.screenshot();

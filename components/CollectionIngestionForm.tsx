@@ -48,7 +48,7 @@ interface FormProps {
   children?: React.ReactNode;
 }
 
-function DatasetIngestionForm({
+function CollectionIngestionForm({
   formData,
   setFormData,
   onSubmit,
@@ -59,9 +59,9 @@ function DatasetIngestionForm({
   const [activeTab, setActiveTab] = useState<string>('form');
   const [forceRenderKey, setForceRenderKey] = useState<number>(0);
   const [hasJSONChanges, setHasJSONChanges] = useState<boolean>(false);
-  const [additionalProperties, setAdditionalProperties] = useState<
-    string[] | null
-  >(null);
+  const [additionalProperties, setAdditionalProperties] = useState<{
+    [key: string]: any;
+  } | null>(null);
 
   // Separate the summaries data from the rest of the form data
   const { summaries: initialSummaries, ...rjsfFormData } = formData || {};
@@ -97,6 +97,8 @@ function DatasetIngestionForm({
     const finalFormData = {
       ...(rjsfData.formData || {}),
       summaries: summariesData,
+      // Also include the additional properties in the final submission
+      ...additionalProperties,
     };
     onSubmit(finalFormData);
   };
@@ -140,6 +142,13 @@ function DatasetIngestionForm({
                   />
                 </div>
                 {children}
+                {additionalProperties &&
+                  Object.keys(additionalProperties).length > 0 && (
+                    <AdditionalPropertyCard
+                      additionalProperties={additionalProperties}
+                      style="warning"
+                    />
+                  )}
                 <Row justify="center" style={{ marginTop: '40px' }}>
                   <Col span={24}>
                     <Button type="primary" htmlType="submit" size="large" block>
@@ -148,12 +157,6 @@ function DatasetIngestionForm({
                   </Col>
                 </Row>
               </Form>
-              {additionalProperties && additionalProperties.length > 0 && (
-                <AdditionalPropertyCard
-                  additionalProperties={additionalProperties}
-                  style="warning"
-                />
-              )}
             </>
           ),
         },
@@ -165,11 +168,11 @@ function DatasetIngestionForm({
               value={formData || {}}
               jsonSchema={fullJsonSchema}
               onChange={handleJsonEditorChange}
+              disableIdChange={isEditMode}
               hasJSONChanges={hasJSONChanges}
               setHasJSONChanges={setHasJSONChanges}
               additionalProperties={additionalProperties}
               setAdditionalProperties={setAdditionalProperties}
-              disableIdChange={true}
             />
           ),
         },
@@ -178,4 +181,4 @@ function DatasetIngestionForm({
   );
 }
 
-export default DatasetIngestionForm;
+export default CollectionIngestionForm;
