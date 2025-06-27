@@ -3,7 +3,7 @@
 import { signIn, signOut } from '@/lib/auth';
 
 export async function keycloakSignIn(callbackUrl: string) {
-  await signIn('keycloak', { callbackUrl: '/create-ingest' });
+  await signIn('keycloak', { callbackUrl: '/create-dataset' });
 }
 
 export async function keycloakSignOut(callbackUrl: string) {

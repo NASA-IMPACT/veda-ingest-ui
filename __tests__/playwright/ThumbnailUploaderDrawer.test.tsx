@@ -29,7 +29,7 @@ test.describe('Thumbnail Uploader Drawer', () => {
 
     //
     await test.step('Navigate to the Ingest Creation Page', async () => {
-      await page.goto('/create-ingest');
+      await page.goto('/create-dataset');
     });
 
     await test.step('enter text in Collection Input to validate later that it is not overwritten', async () => {

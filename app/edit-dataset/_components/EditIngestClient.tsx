@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import AppLayout from '@/components/Layout';
-import IngestEditForm from '@/components/IngestEditForm';
+import EditFormManager from '@/components/EditFormManager';
 import { Button, List, Spin } from 'antd';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -30,7 +30,7 @@ const EditIngestClient = function EditIngestClient() {
 
   const fetchPRs = async () => {
     setStatus('loadingPRs');
-    const url = 'api/list-ingests';
+    const url = 'api/list-ingests?ingestionType=dataset';
     const requestOptions = {
       method: 'GET',
     };
@@ -67,7 +67,7 @@ const EditIngestClient = function EditIngestClient() {
   const handleClick = async (ref: string, title: string) => {
     setStatus('loadingIngest');
     setCollectionName(title);
-    const url = `/api/retrieve-ingest?ref=${ref}`;
+    const url = `/api/retrieve-ingest?ref=${ref}&ingestionType=dataset`;
     const requestOptions = {
       method: 'GET',
     };
@@ -138,8 +138,9 @@ const EditIngestClient = function EditIngestClient() {
       )}
       {status === 'loadingIngest' && <Spin fullscreen />}
       {Object.keys(formData).length > 0 && (
-        <IngestEditForm
-          ref={ref}
+        <EditFormManager
+          formType="dataset"
+          gitRef={ref}
           filePath={filePath}
           fileSha={fileSha}
           formData={formData}

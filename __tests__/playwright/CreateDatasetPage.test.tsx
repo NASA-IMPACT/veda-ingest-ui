@@ -1,6 +1,6 @@
 import { expect, test } from '@/__tests__/playwright/setup-msw';
-import { validateFormFields } from '../playwright/utils/ValidateFormFields';
-import { HttpResponse } from 'msw';
+import { validateIngestFormFields } from '../playwright/utils/ValidateFormFields';
+import { HttpResponse, http } from 'msw';
 
 const requiredConfig = {
   collection: 'test-collection',
@@ -62,14 +62,33 @@ const requiredConfig = {
       roles: ['thumbnail'],
     },
   },
+  stac_version: '1.0.0',
+  stac_extensions: [
+    'https://stac-extensions.github.io/render/v1.0.0/schema.json',
+    'https://stac-extensions.github.io/item-assets/v1.0.0/schema.json',
+  ],
+  links: [],
 };
 
-test.describe('Create Ingest Page', () => {
-  test('Create Ingest request displays github link to PR', async ({
+const MOCK_GITHUB_URL = 'https://github.com/nasa-veda/veda-data/pull/12345';
+
+const DATASET_SUCCESS_DIALOG_TITLE = /Ingest Submitted/i;
+const COLLECTION_SUCCESS_DIALOG_TITLE = /Collection Submitted/i;
+
+test.describe('Create Dataset Page', () => {
+  test('Create Dataset request displays github link to PR', async ({
     page,
+    worker,
+    http,
   }, testInfo) => {
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await worker.use(
+      http.post('/api/create-ingest', async () => {
+        return HttpResponse.json({ githubURL: MOCK_GITHUB_URL });
+      })
+    );
+
+    await test.step('Navigate to the Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('switch to manual json edit tab', async () => {
@@ -77,27 +96,29 @@ test.describe('Create Ingest Page', () => {
     });
 
     await test.step('paste a JSON with config options matching schema minimum', async () => {
-      await page
-        .getByTestId('json-editor')
-        .fill(JSON.stringify(requiredConfig));
+      const { stac_version, stac_extensions, links, ...minimalConfig } =
+        requiredConfig;
+      await page.getByTestId('json-editor').fill(JSON.stringify(minimalConfig));
       await page.getByRole('button', { name: /apply changes/i }).click();
     });
 
     await test.step('submit completed form', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
-    await expect(
-      page.getByRole('dialog', { name: /Collection Submitted/i })
-    ).toBeVisible();
-    const githubLink = page
-      .getByRole('dialog', { name: /Collection Submitted/i })
-      .getByRole('link', { name: /github/i });
-    await expect(githubLink).toBeVisible();
-    // Get the href attribute value
-    const href = await githubLink.getAttribute('href');
 
-    // Assert that the href attribute is correct
-    expect(href).toBe('https://github.com/nasa-veda/veda-data/pull/12345');
+    const successDialog = page.getByRole('dialog', {
+      name: DATASET_SUCCESS_DIALOG_TITLE,
+    });
+    const legacyDialog = page.getByRole('dialog', {
+      name: COLLECTION_SUCCESS_DIALOG_TITLE,
+    });
+    await expect(successDialog.or(legacyDialog)).toBeVisible();
+
+    const githubLink = page.getByRole('link', { name: /github/i }).first();
+    await expect(githubLink).toBeVisible();
+
+    const href = await githubLink.getAttribute('href');
+    expect(href).toBe(MOCK_GITHUB_URL);
 
     const successScreenshot = await page.screenshot();
     testInfo.attach('success modal with github link', {
@@ -106,37 +127,42 @@ test.describe('Create Ingest Page', () => {
     });
   });
 
-  test('Create Ingest request submitted with pasted JSON', async ({
+  test('Create Dataset request submitted with pasted JSON', async ({
     page,
   }, testInfo) => {
     // Intercept and block the request
-    await page.route('**/create-ingest', async (route, request) => {
+    await page.route('**/create-dataset', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON(); // Capture full request body
+        const postData = request.postDataJSON();
 
-        // Validate the nested JSON field if it's present in the request
-        if (postData.renders.dashboard) {
-          const actualNestedJson = JSON.parse(postData.renders.dashboard); // Convert received string to JSON
-          expect(actualNestedJson).toEqual(requiredConfig.renders.dashboard);
-        }
+        expect(postData.ingestionType).toBe('dataset');
 
-        // Extract only the expected fields from postData (ignoring others)
-        const { nestedJsonField, ...filteredPostData } = postData; // Exclude nestedJsonField from object comparison
-        const { renders, ...filteredRequiredConfig } = requiredConfig;
+        const { renders: receivedRendersObj, ...restOfReceivedData } =
+          postData.data;
+        const { renders: expectedRendersObj, ...restOfExpectedData } =
+          requiredConfig;
 
-        // Validate all other expected fields (except the nested one)
-        expect(filteredPostData).toEqual(
-          expect.objectContaining(filteredRequiredConfig)
+        const receivedRenders = JSON.parse(receivedRendersObj.dashboard);
+        const expectedRenders = expectedRendersObj.dashboard;
+
+        expect(receivedRenders).toEqual(expectedRenders);
+
+        expect(restOfReceivedData).toEqual(
+          expect.objectContaining(restOfExpectedData)
         );
 
-        // Block the request
-        await route.continue();
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ githubURL: MOCK_GITHUB_URL }),
+        });
       } else {
         await route.continue();
       }
     });
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+
+    await test.step('Navigate to the Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('switch to manual json edit tab', async () => {
@@ -149,9 +175,9 @@ test.describe('Create Ingest Page', () => {
     ).toBeDisabled();
 
     await test.step('paste a JSON with config options matching schema minimum', async () => {
-      await page
-        .getByTestId('json-editor')
-        .fill(JSON.stringify(requiredConfig));
+      const { stac_version, stac_extensions, links, ...minimalConfig } =
+        requiredConfig;
+      await page.getByTestId('json-editor').fill(JSON.stringify(minimalConfig));
       const JSONScreenshot = await page.screenshot();
       testInfo.attach('pasted JSON in editor', {
         body: JSONScreenshot,
@@ -161,7 +187,7 @@ test.describe('Create Ingest Page', () => {
     });
 
     await test.step('validate that form tab displays with pasted json values now populated in form', async () => {
-      await validateFormFields(page, requiredConfig);
+      await validateIngestFormFields(page, requiredConfig);
     });
 
     const completedFormScreenshot = await page.screenshot({ fullPage: true });
@@ -173,45 +199,57 @@ test.describe('Create Ingest Page', () => {
     await test.step('submit form and validate that POST body values match pasted config values', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
+
+    const successDialog = page.getByRole('dialog', {
+      name: DATASET_SUCCESS_DIALOG_TITLE,
+    });
+    const legacyDialog = page.getByRole('dialog', {
+      name: COLLECTION_SUCCESS_DIALOG_TITLE,
+    });
+    await expect(successDialog.or(legacyDialog)).toBeVisible();
   });
 
-  test('Create Ingest allows extra fields with toggle enabled', async ({
+  test('Create Dataset allows extra fields with toggle enabled', async ({
     page,
   }, testInfo) => {
     // Intercept and block the request
-    await page.route('**/create-ingest', async (route, request) => {
+    await page.route('**/create-dataset', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON(); // Capture full request body
+        const postData = request.postDataJSON();
 
-        // Validate all other expected fields (except the nested one)
-        expect(postData).toEqual(expect.objectContaining({ extraField: true }));
+        expect(postData.ingestionType).toBe('dataset');
+        expect(postData.data).toEqual(
+          expect.objectContaining({ extraField: true })
+        );
 
-        // Block the request
         await route.abort();
       } else {
         await route.continue();
       }
     });
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+
+    await test.step('Navigate to the Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('switch to manual json edit tab', async () => {
       await page.getByRole('tab', { name: /manual json edit/i }).click();
     });
 
-    await test.step('uncheck the Enforce Strict Schema  checkbox', async () => {
+    await test.step('uncheck the Enforce Strict Schema checkbox', async () => {
       await page
         .getByRole('checkbox', { name: /enforce strict schema/i })
         .uncheck();
     });
 
     await test.step('paste in a valid config with an additional field', async () => {
+      const { stac_version, stac_extensions, links, ...minimalConfig } =
+        requiredConfig;
       await page
         .getByTestId('json-editor')
-        .fill(JSON.stringify({ ...requiredConfig, extraField: true }));
+        .fill(JSON.stringify({ ...minimalConfig, extraField: true }));
       const JSONScreenshot = await page.screenshot();
-      testInfo.attach('pasted JSON in editor', {
+      testInfo.attach('pasted JSON in editor with extra field', {
         body: JSONScreenshot,
         contentType: 'image/png',
       });
@@ -219,10 +257,29 @@ test.describe('Create Ingest Page', () => {
       await page.getByRole('button', { name: /apply changes/i }).click();
     });
 
-    await expect(
-      page.getByTestId('extra-properties-card').getByText('extraField'),
-      'verify that extra properties are displayed on the form tab'
-    ).toBeVisible();
+    await test.step('verify that extra properties are displayed on the form tab', async () => {
+      const formTabPanel = page.getByRole('tabpanel', { name: 'Form' });
+
+      const extraPropertiesCard = formTabPanel.getByTestId(
+        'extra-properties-card'
+      );
+      await expect(
+        extraPropertiesCard,
+        'The extra properties card should be visible'
+      ).toBeVisible();
+
+      const codeEditor = extraPropertiesCard.locator('textarea');
+      await expect(
+        codeEditor,
+        'The code editor for the extra property should be visible'
+      ).toBeVisible();
+
+      const expectedValue = JSON.stringify({ extraField: true }, null, 2);
+      await expect(
+        codeEditor,
+        'The editor should contain the correct JSON'
+      ).toHaveValue(expectedValue);
+    });
 
     const extraPropertiesScreenshot = await page.screenshot({ fullPage: true });
     testInfo.attach('extra properties listed on form tab', {
@@ -235,11 +292,11 @@ test.describe('Create Ingest Page', () => {
     });
   });
 
-  test('Create Ingest handles errors with pasted JSON', async ({
+  test('Create Dataset handles errors with pasted JSON', async ({
     page,
   }, testInfo) => {
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('switch to manual json edit tab', async () => {
@@ -257,9 +314,12 @@ test.describe('Create Ingest Page', () => {
     });
 
     await test.step('paste a JSON not matching required schema in the editor and check for error message', async () => {
-      await page.getByTestId('json-editor').fill('{"validJSON": true}');
+      await page.getByTestId('json-editor').fill('{}');
       await page.getByRole('button', { name: /apply changes/i }).click();
+
       await expect(page.getByText('Schema Validation Errors')).toBeVisible();
+
+      // The list of properties that are expected to be missing.
       const requiredProperties = [
         'collection',
         'title',
@@ -272,33 +332,53 @@ test.describe('Create Ingest Page', () => {
         'data_type',
         'providers',
         'item_assets',
+        'renders',
       ];
 
-      for (const property of requiredProperties) {
-        await expect(
-          page
-            .getByRole('listitem')
-            .filter({ hasText: `must have required property '${property}'` }),
-          `${property} error message should be visible`
-        ).toBeVisible();
-      }
-
+      const errorCard = page.getByTestId('extra-properties-card');
       await expect(
-        page
-          .getByRole('listitem')
-          .filter({ hasText: 'validJSON is not defined in schema' }),
-        'additional property in JSON should create error'
+        errorCard,
+        'The error card container should be visible'
       ).toBeVisible();
+
+      const errorTags = errorCard.locator('.ant-tag');
+      await expect(
+        errorTags,
+        `Should display ${requiredProperties.length} error tags`
+      ).toHaveCount(requiredProperties.length);
+
+      await test.step('verify clicking each error tag shows the correct detail', async () => {
+        for (let i = 0; i < requiredProperties.length; i++) {
+          const propertyName = requiredProperties[i];
+          const expectedTagText = `Error ${i + 1}`;
+          const expectedErrorMessage = `must have required property '${propertyName}'`;
+
+          await errorCard.getByText(expectedTagText, { exact: true }).click();
+
+          const codeEditor = errorCard.locator('textarea');
+          await expect(
+            codeEditor,
+            `Editor for ${expectedTagText} should be visible`
+          ).toBeVisible();
+
+          const expectedValue = JSON.stringify(
+            { [expectedTagText]: expectedErrorMessage },
+            null,
+            2
+          );
+          await expect(
+            codeEditor,
+            `Editor for ${expectedTagText} should show correct error message`
+          ).toHaveValue(expectedValue);
+        }
+      });
     });
 
     const errorMessagesScreenshot = await page.screenshot();
-    testInfo.attach(
-      'Default state of COG Viewer Form Controls for single band COG',
-      {
-        body: errorMessagesScreenshot,
-        contentType: 'image/png',
-      }
-    );
+    testInfo.attach('Schema validation error messages', {
+      body: errorMessagesScreenshot,
+      contentType: 'image/png',
+    });
   });
 
   test('Error Handling - Duplicate collection name displays error modal', async ({
@@ -307,7 +387,7 @@ test.describe('Create Ingest Page', () => {
     worker,
   }, testInfo) => {
     await worker.use(
-      http.post('/api/create-ingest', ({ request }) => {
+      http.post('/api/create-ingest', () => {
         return HttpResponse.json(
           { error: 'Reference already exists' },
           { status: 400 }
@@ -315,8 +395,8 @@ test.describe('Create Ingest Page', () => {
       })
     );
 
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('switch to manual json edit tab', async () => {
@@ -324,9 +404,9 @@ test.describe('Create Ingest Page', () => {
     });
 
     await test.step('paste a JSON with config options matching schema minimum', async () => {
-      await page
-        .getByTestId('json-editor')
-        .fill(JSON.stringify(requiredConfig));
+      const { stac_version, stac_extensions, links, ...minimalConfig } =
+        requiredConfig;
+      await page.getByTestId('json-editor').fill(JSON.stringify(minimalConfig));
       await page.getByRole('button', { name: /apply changes/i }).click();
     });
 
@@ -350,7 +430,7 @@ test.describe('Create Ingest Page', () => {
     worker,
   }, testInfo) => {
     await worker.use(
-      http.post('/api/create-ingest', ({ request }) => {
+      http.post('/api/create-ingest', () => {
         return HttpResponse.json(
           { error: 'Failed to fetch GitHub token' },
           { status: 400 }
@@ -358,8 +438,8 @@ test.describe('Create Ingest Page', () => {
       })
     );
 
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await test.step('switch to manual json edit tab', async () => {
@@ -367,9 +447,9 @@ test.describe('Create Ingest Page', () => {
     });
 
     await test.step('paste a JSON with config options matching schema minimum', async () => {
-      await page
-        .getByTestId('json-editor')
-        .fill(JSON.stringify(requiredConfig));
+      const { stac_version, stac_extensions, links, ...minimalConfig } =
+        requiredConfig;
+      await page.getByTestId('json-editor').fill(JSON.stringify(minimalConfig));
       await page.getByRole('button', { name: /apply changes/i }).click();
     });
 
@@ -381,7 +461,7 @@ test.describe('Create Ingest Page', () => {
     ).toBeVisible();
 
     const errorScreenshot = await page.screenshot();
-    testInfo.attach('error modal for duplicate collection name', {
+    testInfo.attach('error modal for failed GitHub authentication', {
       body: errorScreenshot,
       contentType: 'image/png',
     });
@@ -390,8 +470,8 @@ test.describe('Create Ingest Page', () => {
   test('Hide extended Discovery Items fields by default', async ({
     page,
   }, testInfo) => {
-    await test.step('Navigate to the Create Ingest page', async () => {
-      await page.goto('/create-ingest');
+    await test.step('Navigate to the Create Dataset page', async () => {
+      await page.goto('/create-dataset');
     });
 
     await expect(

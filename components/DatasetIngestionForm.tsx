@@ -2,22 +2,21 @@
 
 import '@ant-design/v5-patch-for-react-19';
 
-import { SetStateAction, useEffect, useState } from 'react';
-import { Tabs } from 'antd';
+import { useEffect, useState } from 'react';
+import { Button, Tabs } from 'antd';
 import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
 
 import ObjectFieldTemplate from '@/utils/ObjectFieldTemplate';
-import jsonSchema from '@/FormSchemas/jsonschema.json';
-import { UiSchema } from '@rjsf/utils';
+import jsonSchema from '@/FormSchemas/datasets/datasetSchema.json';
 import { customValidate } from '@/utils/CustomValidation';
-import { handleSubmit } from '@/utils/FormHandlers';
 import JSONEditor from '@/components/JSONEditor';
 import { JSONEditorValue } from '@/components/JSONEditor';
 import AdditionalPropertyCard from '@/components/AdditionalPropertyCard';
 import CodeEditorWidget from './CodeEditorWidget';
+import uiSchema from '@/FormSchemas/datasets/uischema.json';
 
 const Form = withTheme(AntDTheme);
 
@@ -30,40 +29,46 @@ interface FormData {
   temporal_extent?: TemporalExtent;
 }
 
+const lockedFormFields = {
+  collection: {
+    'ui:readonly': true,
+  },
+};
+
+const lockedUiSchema = { ...uiSchema, ...lockedFormFields };
+
 interface FormProps {
   formData: Record<string, unknown> | undefined;
   setFormData: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
-  uiSchema: UiSchema;
   onSubmit: (formData: Record<string, unknown> | undefined) => void;
   setDisabled?: (disabled: boolean) => void;
+  isEditMode?: boolean;
   children?: React.ReactNode;
   defaultTemporalExtent?: boolean;
   disableCollectionNameChange?: boolean;
 }
 
-function IngestForm({
+function DatasetIngestionForm({
   formData,
   setFormData,
-  uiSchema,
   onSubmit,
   setDisabled,
+  isEditMode,
   children,
   disableCollectionNameChange = false,
   defaultTemporalExtent = false,
 }: FormProps) {
   const [activeTab, setActiveTab] = useState<string>('form');
-  const [forceRenderKey, setForceRenderKey] = useState<number>(0); // Force refresh RJSF to clear validation errors
+  const [forceRenderKey, setForceRenderKey] = useState<number>(0);
   const [hasJSONChanges, setHasJSONChanges] = useState<boolean>(false);
-  const [additionalProperties, setAdditionalProperties] = useState<
-    string[] | null
-  >(null);
+  const [additionalProperties, setAdditionalProperties] = useState<{
+    [key: string]: any;
+  } | null>(null);
 
   useEffect(() => {
     if (defaultTemporalExtent) {
       setFormData((prevFormData: FormData | undefined) => {
         const now = new Date();
-
-        // Start of the current UTC day
         const startOfDay = new Date(
           Date.UTC(
             now.getUTCFullYear(),
@@ -74,8 +79,6 @@ function IngestForm({
             0
           )
         ).toISOString();
-
-        // End of the current UTC day
         const endOfDay = new Date(
           Date.UTC(
             now.getUTCFullYear(),
@@ -86,7 +89,6 @@ function IngestForm({
             59
           )
         ).toISOString();
-
         return {
           ...prevFormData,
           temporal_extent: {
@@ -107,14 +109,17 @@ function IngestForm({
 
   const handleJsonEditorChange = (updatedData: JSONEditorValue) => {
     setFormData(updatedData);
-    setForceRenderKey((prev) => prev + 1); // Forces RJSF to re-render and re-validate
+    setForceRenderKey((prev) => prev + 1);
     setActiveTab('form');
     setHasJSONChanges(false);
   };
 
-  const updateFormData = (updatedData: SetStateAction<object | undefined>) => {
-    setFormData((updatedData ?? {}) as Record<string, unknown>);
-    setForceRenderKey((prev) => prev + 1); // Forces RJSF to re-render and re-validate
+  const handleFormSubmit = (rjsfData: { formData?: object }) => {
+    const finalFormData = {
+      ...rjsfData.formData,
+      ...additionalProperties,
+    };
+    onSubmit(finalFormData);
   };
 
   const widgets = {
@@ -134,7 +139,7 @@ function IngestForm({
               <Form
                 key={forceRenderKey} // Forces re-render when data updates
                 schema={jsonSchema as JSONSchema7}
-                uiSchema={uiSchema}
+                uiSchema={isEditMode ? lockedUiSchema : uiSchema}
                 validator={validator}
                 customValidate={customValidate}
                 templates={{
@@ -142,18 +147,30 @@ function IngestForm({
                 }}
                 formData={formData}
                 onChange={onFormDataChanged}
-                onSubmit={(data) => handleSubmit(data, onSubmit)}
+                onSubmit={handleFormSubmit}
                 formContext={{ formData, updateFormData: setFormData }}
                 widgets={widgets}
               >
-                {children}
+                {children ? (
+                  children
+                ) : (
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    style={{ marginTop: '20px' }}
+                    block
+                  >
+                    Submit
+                  </Button>
+                )}
               </Form>
-              {additionalProperties && additionalProperties.length > 0 && (
-                <AdditionalPropertyCard
-                  additionalProperties={additionalProperties}
-                  style="warning"
-                />
-              )}
+              {additionalProperties &&
+                Object.keys(additionalProperties).length > 0 && (
+                  <AdditionalPropertyCard
+                    additionalProperties={additionalProperties}
+                    style="warning"
+                  />
+                )}
             </>
           ),
         },
@@ -163,6 +180,7 @@ function IngestForm({
           children: (
             <JSONEditor
               value={formData || {}}
+              jsonSchema={jsonSchema}
               onChange={handleJsonEditorChange}
               disableCollectionNameChange={disableCollectionNameChange}
               hasJSONChanges={hasJSONChanges}
@@ -177,4 +195,4 @@ function IngestForm({
   );
 }
 
-export default IngestForm;
+export default DatasetIngestionForm;

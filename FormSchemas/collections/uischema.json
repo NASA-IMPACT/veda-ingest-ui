@@ -1,0 +1,66 @@
+{
+  "ui:grid": [
+    {
+      "id": 6,
+      "title": 6,
+      "type": 4,
+      "stac_version": 4,
+      "license": 4
+    },
+    {
+      "description": 12,
+      "keywords": 12
+    },
+    {
+      "extent": 24
+    },
+    {
+      "links": 24
+    },
+    {
+      "summaries": 24
+    },
+    {
+      "providers": 24
+    },
+    {
+      "assets": 24
+    }
+  ],
+  "extent": {
+    "ui:grid": [
+      {
+        "spatial": 12,
+        "temporal": 12
+      }
+    ],
+    "spatial": {
+      "bbox": {
+        "items": {
+          "ui:field": "BboxField",
+          "ui:options": {
+            "label": false
+          }
+        }
+      }
+    },
+    "temporal": {
+      "interval": {
+        "items": {
+          "ui:field": "interval"
+        }
+      }
+    }
+  },
+  "assets": {
+    "ui:field": "asset"
+  },
+  "ui:submitButtonOptions": {
+    "props": {
+      "color": "primary",
+      "variant": "solid",
+      "size": "large",
+      "block": "true"
+    }
+  }
+}

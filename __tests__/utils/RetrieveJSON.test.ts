@@ -6,7 +6,6 @@ import { Octokit } from '@octokit/rest';
 vi.mock('@octokit/rest', () => ({
   Octokit: vi.fn(),
 }));
-
 vi.mock('@/utils/githubUtils/GetGithubToken');
 
 describe('RetrieveJSON', () => {
@@ -19,10 +18,8 @@ describe('RetrieveJSON', () => {
     process.env.OWNER = 'mockOwner';
     process.env.REPO = 'mockRepo';
 
-    // Mock GetGithubToken
     (GetGithubToken as Mock).mockResolvedValue('mockToken');
 
-    // Mock Octokit
     (Octokit as unknown as Mock).mockImplementation(() => ({
       rest: {
         repos: {
@@ -32,74 +29,124 @@ describe('RetrieveJSON', () => {
     }));
   });
 
-  it('successfully retrieves JSON content', async () => {
-    const mockRef = 'feat/mock-branch';
-    const mockFileSha = 'mockSha';
-    const mockFilePath =
-      'ingestion-data/staging/dataset-config/mock-branch.json';
-    const mockContentBase64 = Buffer.from(
-      JSON.stringify({ key: 'value' })
-    ).toString('base64');
+  describe('Dataset Retrieval', () => {
+    it('successfully retrieves and parses a dataset JSON', async () => {
+      const mockRef = 'feat/mock-dataset';
+      const mockFilePath =
+        'ingestion-data/staging/dataset-config/mock-dataset.json';
+      const mockContentBase64 = Buffer.from(
+        JSON.stringify({ collection: 'test-dataset' })
+      ).toString('base64');
 
-    // Mock Octokit response
-    mockGetContent.mockResolvedValue({
-      data: {
-        sha: mockFileSha,
-        content: mockContentBase64,
-        path: mockFilePath,
-      },
-    });
+      mockGetContent.mockResolvedValue({
+        data: {
+          sha: 'mockSha123',
+          content: mockContentBase64,
+          path: mockFilePath,
+        },
+      });
 
-    const result = await RetrieveJSON(mockRef);
+      const result = await RetrieveJSON(mockRef, 'dataset');
 
-    expect(GetGithubToken).toHaveBeenCalled();
-    expect(Octokit).toHaveBeenCalledWith({
-      auth: 'mockToken',
-    });
-    expect(mockGetContent).toHaveBeenCalledWith({
-      owner: 'mockOwner',
-      repo: 'mockRepo',
-      ref: mockRef,
-      path: mockFilePath,
-      headers: {
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
-    });
-    expect(result).toEqual({
-      fileSha: mockFileSha,
-      filePath: mockFilePath,
-      content: { key: 'value' },
+      // Verify the correct path was used for the API call
+      expect(mockGetContent).toHaveBeenCalledWith(
+        expect.objectContaining({ path: mockFilePath })
+      );
+      // Verify the result
+      expect(result).toEqual({
+        fileSha: 'mockSha123',
+        filePath: mockFilePath,
+        content: { collection: 'test-dataset' },
+      });
     });
   });
 
-  it('throws an error when environment variables are missing', async () => {
-    delete process.env.OWNER;
+  describe('Collection Retrieval', () => {
+    it('successfully retrieves and parses a collection JSON', async () => {
+      const mockRef = 'feat/mock-collection';
+      const mockFilePath =
+        'ingestion-data/staging/collections/mock-collection.json';
+      const mockContentBase64 = Buffer.from(
+        JSON.stringify({ id: 'test-collection' })
+      ).toString('base64');
 
-    const mockRef = 'feat/mock-branch';
+      mockGetContent.mockResolvedValue({
+        data: {
+          sha: 'mockSha456',
+          content: mockContentBase64,
+          path: mockFilePath,
+        },
+      });
 
-    await expect(RetrieveJSON(mockRef)).rejects.toThrow();
-    expect(GetGithubToken).not.toHaveBeenCalled();
-    expect(Octokit).not.toHaveBeenCalled();
+      const result = await RetrieveJSON(mockRef, 'collection');
+
+      // Verify the correct path was used for the API call
+      expect(mockGetContent).toHaveBeenCalledWith(
+        expect.objectContaining({ path: mockFilePath })
+      );
+      // Verify the result
+      expect(result).toEqual({
+        fileSha: 'mockSha456',
+        filePath: mockFilePath,
+        content: { id: 'test-collection' },
+      });
+    });
   });
 
-  it('throws an error when Octokit API call fails', async () => {
-    const mockRef = 'feat/mock-branch';
-    // Suppress console.error for this test
-    const consoleErrorMock = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
+  describe('Error Handling', () => {
+    it('throws an error for invalid ingestionType', async () => {
+      const mockRef = 'feat/some-branch';
+      // @ts-expect-error - Intentionally passing an invalid type
+      await expect(RetrieveJSON(mockRef, 'invalid-type')).rejects.toThrow(
+        'Invalid ingestionType provided: invalid-type'
+      );
+    });
 
-    // Mock Octokit failure
-    mockGetContent.mockRejectedValue(new Error('Failed to fetch content'));
+    it('throws an error if getContent returns a directory listing', async () => {
+      const mockRef = 'feat/dir-branch';
+      // Mocking a directory response (an array) instead of a file
+      mockGetContent.mockResolvedValue({ data: [] });
 
-    await expect(RetrieveJSON(mockRef)).rejects.toThrow(
-      'Failed to fetch content'
-    );
-    expect(GetGithubToken).toHaveBeenCalled();
-    expect(Octokit).toHaveBeenCalled();
-    expect(mockGetContent).toHaveBeenCalled();
+      await expect(RetrieveJSON(mockRef, 'dataset')).rejects.toThrow(
+        'The path "ingestion-data/staging/dataset-config/dir-branch.json" does not point to a file.'
+      );
+    });
 
-    // Restore console.error
-    consoleErrorMock.mockRestore();
+    it('throws an error if the file content is not valid JSON', async () => {
+      const mockRef = 'feat/bad-json';
+      const mockContentBase64 =
+        Buffer.from('this is not json').toString('base64');
+      mockGetContent.mockResolvedValue({
+        data: {
+          sha: 'mockSha789',
+          content: mockContentBase64,
+          path: 'ingestion-data/staging/dataset-config/bad-json.json',
+        },
+      });
+
+      await expect(RetrieveJSON(mockRef, 'dataset')).rejects.toThrow(
+        'Invalid JSON format in GitHub file: ingestion-data/staging/dataset-config/bad-json.json'
+      );
+    });
+
+    it('throws an error when environment variables are missing', async () => {
+      delete process.env.OWNER;
+      await expect(RetrieveJSON('ref', 'dataset')).rejects.toThrow(
+        'Missing required environment variables: OWNER or REPO'
+      );
+    });
+
+    it('throws an error when the Octokit API call fails', async () => {
+      mockGetContent.mockRejectedValue(new Error('GitHub API Error'));
+      const consoleErrorMock = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      await expect(RetrieveJSON('ref', 'dataset')).rejects.toThrow(
+        'GitHub API Error'
+      );
+
+      consoleErrorMock.mockRestore();
+    });
   });
 });

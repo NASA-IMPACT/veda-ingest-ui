@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw';
 
 import { githubResponse } from './githubResponse';
 import { retrieveIngestResponse } from './retrieveIngestResponse';
-
+import { collectionIngestResponse } from './collectionIngestResponse';
 // --- Placeholder Tile Logic ---
 const MOCK_TILE_BASE64 =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
@@ -49,14 +49,40 @@ export const handlers = [
 
   http.get('/api/retrieve-ingest', async ({ request }) => {
     const url = new URL(request.url);
-    const githubRef = url.searchParams.get('ref');
+    const ref = url.searchParams.get('ref');
+    const ingestionType = url.searchParams.get('ingestionType');
 
-    if (!githubRef) {
-      return new HttpResponse('Missing github ref in query params', {
-        status: 400,
+    if (!ref) {
+      return HttpResponse.json(
+        { error: 'Missing required query parameter: "ref".' },
+        { status: 400 }
+      );
+    }
+
+    if (!ingestionType || !['dataset', 'collection'].includes(ingestionType)) {
+      return HttpResponse.json(
+        {
+          error:
+            'Missing or invalid "ingestionType". Must be "dataset" or "collection".',
+        },
+        { status: 400 }
+      );
+    }
+
+    if (ingestionType === 'collection') {
+      return HttpResponse.json({
+        filePath: 'ingestion-data/staging/collections/NEW_TEST.json',
+        fileSha: '123456789abcdefg',
+        content: collectionIngestResponse,
       });
     }
-    return HttpResponse.json({ ...retrieveIngestResponse });
+
+    // Default to returning the dataset response
+    return HttpResponse.json({
+      filePath: 'ingestion-data/staging/dataset-config/NEW_TEST.json',
+      fileSha: '123456789abcdefg',
+      content: retrieveIngestResponse,
+    });
   }),
 
   http.put('/api/create-ingest', async ({ request }) => {

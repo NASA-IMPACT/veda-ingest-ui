@@ -12,7 +12,7 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   const protectedRoutes = [
-    '/create-ingest',
+    '/create-dataset',
     '/api/list-ingests',
     '/api/retrieve-ingest',
     '/api/create-ingest',
@@ -21,7 +21,12 @@ export async function middleware(request: NextRequest) {
 
   // Allow access all authenticated users
   if (
-    (pathname.startsWith('/create-ingest') ||
+    (pathname.startsWith('/collections') ||
+      pathname.startsWith('/create-collection') ||
+      pathname.startsWith('/edit-collection') ||
+      pathname.startsWith('/datasets') ||
+      pathname.startsWith('/create-dataset') ||
+      pathname.startsWith('/edit-dataset') ||
       pathname.startsWith('/upload') ||
       pathname.startsWith('/cog-viewer')) &&
     session
@@ -29,9 +34,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Protect /edit-ingest based on the Editor scope
-  if (pathname.startsWith('/edit-ingest')) {
-    if (!session?.scopes?.includes('dataset:update')) {
+  // Protect /edit- routes based on the Editor scope
+  if (
+    pathname.startsWith('/edit-dataset') ||
+    pathname.startsWith('/edit-collection')
+  ) {
+    if (
+      !session?.scopes?.includes('dataset:update') ||
+      !session?.scopes?.includes('Editor')
+    ) {
       if (pathname.startsWith('/api/')) {
         return new NextResponse('Unauthorized', { status: 401 });
       } else {
@@ -57,8 +68,12 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/create-ingest',
-    '/edit-ingest',
+    '/datasets',
+    '/collections',
+    '/create-dataset',
+    '/edit-dataset',
+    '/create-collection',
+    '/edit-collection',
     '/upload',
     '/cog-viewer',
     '/api/list-ingests',

@@ -2,12 +2,12 @@
 import { useState } from 'react';
 import AppLayout from '@/components/Layout';
 import { Spin } from 'antd';
-import IngestCreationForm from '@/components/IngestCreationForm';
+import CreationFormManager from '@/components/CreationFormManager';
 import ErrorModal from '@/components/ErrorModal';
 import SuccessModal from '@/components/SuccessModal';
 import { Status } from '@/types/global';
 
-const CreateIngestClient = function CreateIngestClient() {
+const CreateCollectionClient = function CreateIngestClient() {
   const [status, setStatus] = useState<Status>('idle');
   const [collectionName, setCollectionName] = useState('');
   const [apiErrorMessage, setApiErrorMessage] = useState('');
@@ -15,7 +15,8 @@ const CreateIngestClient = function CreateIngestClient() {
 
   return (
     <AppLayout>
-      <IngestCreationForm
+      <CreationFormManager
+        formType="collection"
         setStatus={setStatus}
         setCollectionName={setCollectionName}
         setApiErrorMessage={setApiErrorMessage}
@@ -41,4 +42,4 @@ const CreateIngestClient = function CreateIngestClient() {
   );
 };
 
-export default CreateIngestClient;
+export default CreateCollectionClient;

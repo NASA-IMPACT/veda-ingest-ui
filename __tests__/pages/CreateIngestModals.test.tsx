@@ -1,17 +1,17 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateIngestClient from '@/app/create-ingest/_components/CreateIngestClient';
+import CreateIngestClient from '@/app/create-dataset/_components/CreateIngestClient';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-// Mock `IngestCreationForm`
-vi.mock('@/components/IngestCreationForm', () => ({
+// Mock `CreationFormManager`
+vi.mock('@/components/CreationFormManager', () => ({
   default: ({
     setStatus,
     setCollectionName,
     setApiErrorMessage,
     setPullRequestUrl,
   }: any) => (
-    <div data-testid="ingest-creation-form">
+    <div data-testid="creation-form-manager">
       <button
         onClick={() => {
           setStatus('success');
@@ -34,7 +34,7 @@ vi.mock('@/components/IngestCreationForm', () => ({
   ),
 }));
 
-// Mock `ErrorModal`
+// Mock ErrorModal
 vi.mock('@/components/ErrorModal', () => ({
   default: ({ collectionName, apiErrorMessage }: any) => (
     <div role="dialog" data-testid="error-modal">
@@ -45,7 +45,7 @@ vi.mock('@/components/ErrorModal', () => ({
   ),
 }));
 
-// Mock `SuccessModal`
+// Mock SuccessModal
 vi.mock('@/components/SuccessModal', () => ({
   default: ({ collectionName, pullRequestUrl }: any) => (
     <div role="dialog" data-testid="success-modal">
@@ -64,11 +64,11 @@ describe('CreateIngestClient modals', () => {
   it('displays the SuccessModal on a successful API call', async () => {
     render(<CreateIngestClient />);
 
-    const formContainer = screen.getByTestId('ingest-creation-form');
+    const formContainer = screen.getByTestId('creation-form-manager');
     const successButton = within(formContainer).getByRole('button', {
       name: 'Simulate Success',
     });
-    userEvent.click(successButton);
+    await userEvent.click(successButton);
 
     const successModal = await screen.findByTestId('success-modal');
     expect(successModal).toHaveTextContent('Success Modal');
@@ -81,11 +81,11 @@ describe('CreateIngestClient modals', () => {
   it('displays the ErrorModal on a failed API call', async () => {
     render(<CreateIngestClient />);
 
-    const formContainer = screen.getByTestId('ingest-creation-form');
+    const formContainer = screen.getByTestId('creation-form-manager');
     const errorButton = within(formContainer).getByRole('button', {
       name: 'Simulate Error',
     });
-    userEvent.click(errorButton);
+    await userEvent.click(errorButton);
 
     const errorModal = await screen.findByTestId('error-modal');
     expect(errorModal).toHaveTextContent('Error Modal');

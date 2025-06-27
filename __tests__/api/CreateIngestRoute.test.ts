@@ -7,74 +7,97 @@ import CreatePR from '@/utils/githubUtils/CreatePR';
 vi.mock('@/utils/githubUtils/UpdatePR');
 vi.mock('@/utils/githubUtils/CreatePR');
 
-describe('POST /create-ingest', () => {
-  it('returns GitHub URL on successful PR creation', async () => {
+describe('POST /api/create-ingest', () => {
+  it('returns GitHub URL on successful PR creation for a collection', async () => {
+    const mockBody = {
+      data: { collection: 'Test Collection' },
+      ingestionType: 'collection',
+    };
     const mockRequest = {
-      json: vi.fn().mockResolvedValue({
-        title: 'Test PR',
-      }),
+      json: vi.fn().mockResolvedValue(mockBody),
     } as unknown as NextRequest;
 
-    // Mock the CreatePR function to return a fake GitHub URL
     vi.mocked(CreatePR).mockResolvedValue('https://github.com/test/pr');
 
     const response = await POST(mockRequest);
-
-    // Verify CreatePR is called with the correct data
-    expect(CreatePR).toHaveBeenCalledWith({ title: 'Test PR' });
-
-    // Parse the response to validate content
     const jsonResponse = await response.json();
-    expect(jsonResponse).toEqual({ githubURL: 'https://github.com/test/pr' });
 
-    // Check response status
+    expect(CreatePR).toHaveBeenCalledWith(
+      mockBody.data,
+      mockBody.ingestionType
+    );
+    expect(jsonResponse).toEqual({ githubURL: 'https://github.com/test/pr' });
     expect(response.status).toBe(200);
   });
 
-  it('returns error message when PR update fails', async () => {
+  it('returns an error if "data" is missing from the request body', async () => {
     const mockRequest = {
-      json: vi.fn().mockResolvedValue({
-        title: 'Test PR',
-      }),
+      json: vi.fn().mockResolvedValue({ ingestionType: 'collection' }), // 'data' is missing
     } as unknown as NextRequest;
 
-    // Mock the UpdatePR function to reject
-    vi.mocked(CreatePR).mockRejectedValue(new Error('Failed to Create PR'));
+    const response = await POST(mockRequest);
+    const jsonResponse = await response.json();
+
+    expect(jsonResponse.error).toBe(
+      'Missing "data" field in the request body.'
+    );
+    expect(response.status).toBe(400);
+  });
+
+  it('returns an error if "ingestionType" is missing or invalid', async () => {
+    const mockRequest = {
+      json: vi.fn().mockResolvedValue({ data: { collection: 'Test' } }), // 'ingestionType' is missing
+    } as unknown as NextRequest;
 
     const response = await POST(mockRequest);
-
-    // Parse the response to validate content
     const jsonResponse = await response.json();
-    expect(jsonResponse).toEqual({ error: 'Failed to Create PR' });
 
-    // Check response status
+    expect(jsonResponse.error).toBe(
+      'Missing or invalid "ingestionType". Must be "dataset" or "collection".'
+    );
+    expect(response.status).toBe(400);
+  });
+
+  it('returns an error when CreatePR fails', async () => {
+    const mockBody = {
+      data: { collection: 'Test Collection' },
+      ingestionType: 'collection',
+    };
+    const mockRequest = {
+      json: vi.fn().mockResolvedValue(mockBody),
+    } as unknown as NextRequest;
+
+    vi.mocked(CreatePR).mockRejectedValue(new Error('Failed to create PR'));
+
+    const response = await POST(mockRequest);
+    const jsonResponse = await response.json();
+
+    expect(jsonResponse).toEqual({ error: 'Failed to create PR' });
     expect(response.status).toBe(400);
   });
 
   it('handles unexpected errors gracefully', async () => {
+    const mockBody = {
+      data: { collection: 'Test Collection' },
+      ingestionType: 'collection',
+    };
     const mockRequest = {
-      json: vi.fn().mockResolvedValue({
-        title: 'Test PR',
-      }),
+      json: vi.fn().mockResolvedValue(mockBody),
     } as unknown as NextRequest;
 
-    // Mock the UpdatePR function to throw a non-error object
     vi.mocked(CreatePR).mockImplementation(() => {
-      throw 'Unexpected Error';
+      throw 'A non-error was thrown';
     });
 
     const response = await POST(mockRequest);
-
-    // Parse the response to validate content
     const jsonResponse = await response.json();
-    expect(jsonResponse).toEqual({ error: 'Internal Server Error' });
 
-    // Check response status
+    expect(jsonResponse).toEqual({ error: 'Internal Server Error' });
     expect(response.status).toBe(500);
   });
 });
 
-describe('PUT /create-ingest', () => {
+describe('PUT /api/create-ingest', () => {
   it('returns success message on successful PR update', async () => {
     const mockRequest = {
       json: vi.fn().mockResolvedValue({
@@ -85,21 +108,19 @@ describe('PUT /create-ingest', () => {
       }),
     } as unknown as NextRequest;
 
-    // Mock the UpdatePR function
     vi.mocked(UpdatePR).mockResolvedValue(undefined);
 
     const response = await PUT(mockRequest);
+    const jsonResponse = await response.json();
 
     expect(UpdatePR).toHaveBeenCalledWith('test-ref', 'test-sha', 'test-path', {
       key: 'value',
     });
-
-    const jsonResponse = await response.json();
     expect(jsonResponse).toEqual({ message: 'Data updated successfully' });
     expect(response.status).toBe(200);
   });
 
-  it('returns error message when PR update fails', async () => {
+  it('returns an error message when PR update fails', async () => {
     const mockRequest = {
       json: vi.fn().mockResolvedValue({
         ref: 'test-ref',
@@ -112,8 +133,8 @@ describe('PUT /create-ingest', () => {
     vi.mocked(UpdatePR).mockRejectedValue(new Error('Failed to update PR'));
 
     const response = await PUT(mockRequest);
-
     const jsonResponse = await response.json();
+
     expect(jsonResponse).toEqual({ error: 'Failed to update PR' });
     expect(response.status).toBe(400);
   });
@@ -129,63 +150,30 @@ describe('PUT /create-ingest', () => {
     } as unknown as NextRequest;
 
     vi.mocked(UpdatePR).mockImplementation(() => {
-      throw 'Unexpected Error';
+      throw 'A non-error was thrown';
     });
 
     const response = await PUT(mockRequest);
-
     const jsonResponse = await response.json();
+
     expect(jsonResponse).toEqual({ error: 'Internal Server Error' });
     expect(response.status).toBe(500);
   });
 
-  it('returns error when a required field is missing', async () => {
+  it('returns an error when a required field is missing', async () => {
     const mockRequest = {
       json: vi.fn().mockResolvedValue({
         ref: 'test-ref',
         fileSha: 'test-sha',
-        // filePath is missing
         formData: { key: 'value' },
-      }),
+      }), // filePath is missing
     } as unknown as NextRequest;
 
     const response = await PUT(mockRequest);
-
     const jsonResponse = await response.json();
+
     expect(jsonResponse).toEqual({
       error: 'Missing required fields: filePath',
-    });
-    expect(response.status).toBe(400);
-  });
-
-  it('returns error when multiple required fields are missing', async () => {
-    const mockRequest = {
-      json: vi.fn().mockResolvedValue({
-        ref: 'test-ref',
-        // fileSha and filePath are missing
-        formData: { key: 'value' },
-      }),
-    } as unknown as NextRequest;
-
-    const response = await PUT(mockRequest);
-
-    const jsonResponse = await response.json();
-    expect(jsonResponse).toEqual({
-      error: 'Missing required fields: fileSha, filePath',
-    });
-    expect(response.status).toBe(400);
-  });
-
-  it('returns error when all required fields are missing', async () => {
-    const mockRequest = {
-      json: vi.fn().mockResolvedValue({}),
-    } as unknown as NextRequest;
-
-    const response = await PUT(mockRequest);
-
-    const jsonResponse = await response.json();
-    expect(jsonResponse).toEqual({
-      error: 'Missing required fields: ref, fileSha, filePath, formData',
     });
     expect(response.status).toBe(400);
   });

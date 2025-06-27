@@ -1,28 +1,36 @@
+import { CustomValidator } from '@rjsf/utils';
+import Ajv from 'ajv';
+
 export const rfc3339Regex =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/;
 
-export const customValidate = (formData: any, errors: any) => {
+const ajv = new Ajv();
+
+export const customValidate: CustomValidator = (formData, errors) => {
+  // Ensure formData is not null or undefined before proceeding
+  if (!formData) {
+    return errors;
+  }
+
   try {
-    // Validate "renders" JSON format
-    if (formData.renders.dashboard) {
+    if (formData.renders && formData.renders.dashboard) {
       const parsed = JSON.parse(formData.renders.dashboard);
       if (
         typeof parsed !== 'object' ||
         parsed === null ||
         Array.isArray(parsed)
       ) {
-        errors.renders?.dashboard.addError(
+        errors.renders?.dashboard?.addError(
           'Input must be a valid JSON object.'
         );
       }
     }
   } catch {
-    errors.renders.dashboard?.addError(
+    errors.renders?.dashboard?.addError(
       'Invalid JSON format. Please enter a valid JSON object.'
     );
   }
 
-  // Allow `null` or empty strings for `startdate` and `enddate`
   if (formData.temporal_extent) {
     const { startdate, enddate } = formData.temporal_extent;
     if (startdate) {
@@ -43,7 +51,6 @@ export const customValidate = (formData: any, errors: any) => {
         );
       }
     }
-
     if (enddate) {
       if (enddate !== null && enddate !== '' && typeof enddate !== 'string') {
         errors.temporal_extent?.enddate?.addError(
@@ -55,7 +62,6 @@ export const customValidate = (formData: any, errors: any) => {
         );
       }
     }
-
     if (
       typeof startdate === 'string' &&
       startdate !== '' &&
@@ -66,13 +72,43 @@ export const customValidate = (formData: any, errors: any) => {
     ) {
       const startDateObj = new Date(startdate);
       const endDateObj = new Date(enddate);
-
       if (startDateObj.getTime() >= endDateObj.getTime()) {
         errors.temporal_extent?.enddate?.addError(
           'End Date must be after Start Date.'
         );
       }
     }
+  }
+
+  if (formData.summaries) {
+    Object.keys(formData.summaries).forEach((key) => {
+      const summaryItem = formData.summaries[key];
+
+      // Validate 'JSON Schema' type
+      if (typeof summaryItem === 'string') {
+        try {
+          const parsedSchema = JSON.parse(summaryItem);
+          const isValidSchema = ajv.validateSchema(parsedSchema);
+          if (!isValidSchema) {
+            // Because this is a custom field, we add the error to the parent `summaries` object.
+            errors.summaries?.addError(
+              `Summary '${key}' is not a valid JSON Schema object.`
+            );
+          }
+        } catch (e) {
+          errors.summaries?.addError(`Summary '${key}' contains invalid JSON.`);
+        }
+      }
+      // Validate 'Set of values' type
+      else if (Array.isArray(summaryItem)) {
+        //  schema requires at least one item for this type.
+        if (summaryItem.length === 0) {
+          errors.summaries?.addError(
+            `Summary '${key}' is a 'Set of values' and must contain at least one value.`
+          );
+        }
+      }
+    });
   }
 
   return errors;
