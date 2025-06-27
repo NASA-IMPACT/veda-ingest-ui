@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import CreateIngestClient from '@/app/create-dataset/_components/CreateIngestClient';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-// Mock the correct component path: CreationFormManager
+// Mock `CreationFormManager`
 vi.mock('@/components/CreationFormManager', () => ({
   default: ({
     setStatus,

@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { FieldProps, RJSFSchema, IdSchema } from '@rjsf/utils';
-import { Input, Button, Row, Col, Card, Tooltip } from 'antd';
-import { PlusCircleOutlined, DeleteOutlined } from '@ant-design/icons';
-
+import { Button, Row, Col, Card, Tooltip } from 'antd';
+import { PlusCircleOutlined } from '@ant-design/icons';
+import EditableAssetRow from './EditableAssetRow';
 const AssetsField: React.FC<FieldProps> = (props) => {
   const {
     formData,
@@ -82,6 +82,7 @@ const AssetsField: React.FC<FieldProps> = (props) => {
         !newKey.trim() ||
         (newKey !== oldKey && formData && formData.hasOwnProperty(newKey))
       ) {
+        onChange({ ...formData });
         return;
       }
       if (oldKey === newKey) return;
@@ -129,27 +130,14 @@ const AssetsField: React.FC<FieldProps> = (props) => {
 
         return (
           <Card key={key} size="small" style={{ marginBottom: '16px' }}>
-            <Row align="middle" gutter={8} wrap={false}>
-              <Col flex="auto">
-                <Input
-                  value={key}
-                  onChange={(e) => handleKeyNameChange(key, e.target.value)}
-                  placeholder={`Asset key (e.g., thumbnail)`}
-                  addonBefore={`Asset #${index + 1}`}
-                />
-              </Col>
-              <Col flex="none">
-                <Tooltip title="Remove Asset">
-                  <Button
-                    danger
-                    type="text"
-                    icon={<DeleteOutlined />}
-                    onClick={handleRemoveAsset(key)}
-                    disabled={disabled || readonly}
-                  />
-                </Tooltip>
-              </Col>
-            </Row>
+            <EditableAssetRow
+              initialKey={key}
+              index={index}
+              onKeyChange={handleKeyNameChange}
+              onRemove={handleRemoveAsset}
+              disabled={disabled}
+              readonly={readonly}
+            />
             <div style={{ marginTop: '16px' }}>
               <SchemaField
                 {...props}

@@ -7,7 +7,7 @@ import {
   fireEvent,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import EditFormManager from '@/components/EditFormManager'; // Adjust path as needed
+import EditFormManager from '@/components/EditFormManager';
 import React from 'react';
 
 // Mock child components to isolate the manager's logic
