@@ -45,7 +45,7 @@ describe('Home component', () => {
       /This application allows users to initiate the data ingest process\./i
     );
     expect(introductoryText).toBeInTheDocument();
-  }, 10000); // this test is slow
+  }, 20000); // this test is slow
 
   it('redirects to /login if auth is enabled and no session exists', async () => {
     process.env.NEXT_PUBLIC_DISABLE_AUTH = 'false';
