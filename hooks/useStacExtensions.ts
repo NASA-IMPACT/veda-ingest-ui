@@ -32,9 +32,19 @@ export function useStacExtensions({ setFormData }: UseStacExtensionsProps) {
         const schema = (await response.json()) as JSONSchema7;
 
         const title = schema.title || url;
-        const properties = schema?.definitions?.fields?.properties || {};
+
+        const fieldsDefinition = schema?.definitions?.fields;
+        const properties =
+          typeof fieldsDefinition === 'object' && fieldsDefinition.properties
+            ? fieldsDefinition.properties
+            : {};
+
+        const requireFieldDefinition = schema?.definitions?.require_field;
         const requiredFields = new Set(
-          schema?.definitions?.require_field?.required || []
+          typeof requireFieldDefinition === 'object' &&
+          Array.isArray(requireFieldDefinition.required)
+            ? requireFieldDefinition.required
+            : []
         );
 
         const fields: ExtensionField[] = Object.keys(properties).map((key) => ({
