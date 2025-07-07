@@ -1,51 +1,55 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, waitFor } from '@testing-library/react';
+import {
+  render,
+  screen,
+  cleanup,
+  waitFor,
+  fireEvent,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CollectionIngestionForm from '@/components/CollectionIngestionForm'; // Adjust path
 import React, { useState } from 'react';
 
+// Import the component to test and the hook to mock
+import CollectionIngestionForm from '@/components/CollectionIngestionForm';
+import { useStacExtensions } from '@/hooks/useStacExtensions';
+
 // --- Mocks ---
+vi.mock('@/hooks/useStacExtensions');
 
-// Mock RJSF's Form component
-vi.mock('@rjsf/core', () => {
-  const MockRjsfForm = vi.fn(({ formData, children, onChange, onSubmit }) => (
-    <form
-      data-testid="rjsf-form"
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit({ formData });
-      }}
-    >
-      <div data-testid="rjsf-formdata">{JSON.stringify(formData)}</div>
-      <button onClick={() => onChange({ formData: { title: 'New Title' } })}>
-        Simulate Form Change
-      </button>
-      {children}
-    </form>
-  ));
-  return {
-    withTheme: () => MockRjsfForm,
-  };
-});
-
-// Mock child components
-vi.mock('@/components/JSONEditor', () => ({
-  default: ({ onChange }: any) => (
-    <div data-testid="json-editor">
+vi.mock('@/components/ExtensionManager', () => ({
+  default: ({ onAddExtension }: any) => (
+    <div data-testid="extension-manager">
       <button
-        onClick={() =>
-          onChange({
-            collection: 'edited from json',
-            summaries: { new: 'summary' },
-          })
-        }
+        onClick={() => onAddExtension('http://example.com/datacube.json')}
       >
-        Simulate JSON Change
+        Add Extension
       </button>
     </div>
   ),
 }));
-
+vi.mock('@/components/CodeEditorWidget', () => ({
+  default: ({ id, value, onChange }: any) => (
+    <textarea
+      id={id}
+      data-testid="code-editor-widget"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  ),
+}));
+vi.mock('@rjsf/core', () => ({
+  withTheme: () =>
+    vi.fn(({ formData, children }) => (
+      <div data-testid="rjsf-form">
+        <div data-testid="rjsf-formdata">{JSON.stringify(formData)}</div>
+        {/* Pass children through to render the submit button in tests */}
+        {children}
+      </div>
+    )),
+}));
+vi.mock('@/components/JSONEditor', () => ({
+  default: () => <div data-testid="json-editor" />,
+}));
 vi.mock('@/components/SummariesManager', () => ({
   default: ({ onChange }: any) => (
     <div data-testid="summaries-manager">
@@ -55,54 +59,68 @@ vi.mock('@/components/SummariesManager', () => ({
     </div>
   ),
 }));
-
 vi.mock('@/components/AdditionalPropertyCard', () => ({
   default: () => <div data-testid="additional-property-card" />,
 }));
-
-// Mock utils & fields since they are used by the form
 vi.mock('@/utils/CustomValidation', () => ({ customValidate: vi.fn() }));
 vi.mock('@/utils/ObjectFieldTemplate', () => ({ default: () => <div /> }));
-vi.mock('@/utils/BboxField', () => ({ default: () => <div /> }));
-vi.mock('@/utils/IntervalField', () => ({ default: () => <div /> }));
-vi.mock('@/utils/AssetsField', () => ({ default: () => <div /> }));
-
-// Mock schema imports
 vi.mock('@/FormSchemas/collections/collectionSchema.json', () => ({
   default: {
     type: 'object',
-    properties: { title: { type: 'string' }, summaries: { type: 'object' } },
+    properties: {
+      title: { type: 'string' },
+      summaries: { type: 'object' },
+      stac_extensions: { type: 'array' },
+    },
   },
 }));
 vi.mock('@/FormSchemas/collections/uischema.json', () => ({ default: {} }));
 
+interface TestWrapperProps {
+  initialFormData?: Record<string, any>;
+  mockExtensionFields?: Record<string, any>;
+  children?: React.ReactNode;
+}
+
 describe('CollectionIngestionForm', () => {
   const mockOnSubmit = vi.fn();
-  const mockSetDisabled = vi.fn();
-  let defaultProps: any;
+  let mockAddExtension: ReturnType<typeof vi.fn>;
+  let mockRemoveExtension: ReturnType<typeof vi.fn>;
 
-  // Use a stateful wrapper to mimic how the parent component would manage state
-  const TestWrapper = (props: any) => {
-    const [formData, setFormData] = useState({
-      title: 'Initial Title',
-      summaries: { initial: 'summary' },
+  const TestWrapper = ({
+    initialFormData = {},
+    mockExtensionFields = {},
+    children,
+  }: TestWrapperProps) => {
+    const [formData, setFormData] = useState(initialFormData);
+
+    (useStacExtensions as any).mockReturnValue({
+      extensionFields: mockExtensionFields,
+      addExtension: mockAddExtension,
+      removeExtension: mockRemoveExtension,
+      isLoading: false,
     });
+
     return (
       <CollectionIngestionForm
-        {...defaultProps}
-        {...props}
         formData={formData}
         setFormData={setFormData}
-      />
+        onSubmit={mockOnSubmit}
+      >
+        {children}
+      </CollectionIngestionForm>
     );
   };
 
   beforeEach(() => {
-    defaultProps = {
-      onSubmit: mockOnSubmit,
-      setDisabled: mockSetDisabled,
-      children: <button type="submit">Submit Form</button>,
-    };
+    mockAddExtension = vi.fn();
+    mockRemoveExtension = vi.fn();
+    (useStacExtensions as any).mockReturnValue({
+      extensionFields: {},
+      addExtension: mockAddExtension,
+      removeExtension: mockRemoveExtension,
+      isLoading: false,
+    });
   });
 
   afterEach(() => {
@@ -110,101 +128,163 @@ describe('CollectionIngestionForm', () => {
     cleanup();
   });
 
-  it('renders the RJSF form and SummariesManager by default', () => {
+  it('renders core components correctly', () => {
     render(<TestWrapper />);
-    expect(screen.getByTestId('rjsf-form')).toBeInTheDocument();
-    expect(screen.getByTestId('summaries-manager')).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Submit Form' })
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('extension-manager')).toBeVisible();
+    expect(screen.getByTestId('rjsf-form')).toBeVisible();
+    expect(screen.getByTestId('summaries-manager')).toBeVisible();
   });
 
-  it('separates summaries from the data passed to the RJSF form', () => {
+  it('renders extension fields when provided by the hook', () => {
+    const mockExtensionData = {
+      'http://example.com/datacube.json': {
+        title: 'Datacube',
+        fields: [
+          { name: 'cube:dimensions', required: true },
+          { name: 'cube:variables', required: false },
+        ],
+      },
+    };
+    render(<TestWrapper mockExtensionFields={mockExtensionData} />);
+
+    expect(screen.getByText('Datacube Fields')).toBeVisible();
+    expect(screen.getByText('cube:dimensions')).toBeVisible();
+    expect(screen.getByText('cube:variables')).toBeVisible();
+  });
+
+  it('calls addExtension from the hook when simulated', async () => {
+    const user = userEvent.setup();
     render(<TestWrapper />);
-    const rjsfFormData = JSON.parse(
-      screen.getByTestId('rjsf-formdata').textContent || '{}'
+    const addButton = screen.getByRole('button', { name: 'Add Extension' });
+    await user.click(addButton);
+    expect(mockAddExtension).toHaveBeenCalledWith(
+      'http://example.com/datacube.json'
     );
-    expect(rjsfFormData.title).toBe('Initial Title');
-    expect(rjsfFormData.summaries).toBeUndefined();
   });
 
-  it('updates form data and re-merges summaries when RJSF form changes', async () => {
-    render(<TestWrapper />);
-    const changeButton = screen.getByRole('button', {
-      name: 'Simulate Form Change',
-    });
-    await userEvent.click(changeButton);
+  it('updates form data when an Extension field value changes', async () => {
+    const user = userEvent.setup();
+    const mockExtensionData = {
+      'http://example.com/datacube.json': {
+        title: 'Datacube',
+        fields: [{ name: 'cube:dimensions', required: false }],
+      },
+    };
+    const initialData = {
+      title: 'Initial Title',
+      summaries: {},
+      'cube:dimensions': { original: 'value' },
+    };
 
-    await waitFor(() => {
-      const rjsfFormData = JSON.parse(
-        screen.getByTestId('rjsf-formdata').textContent || '{}'
-      );
-      // It now reflects the change from the RJSF form
-      expect(rjsfFormData.title).toBe('New Title');
-      // But it still doesn't have the summaries data directly
-      expect(rjsfFormData.summaries).toBeUndefined();
-    });
-    // The disabled prop function should be called
-    expect(mockSetDisabled).toHaveBeenCalledWith(false);
-  });
+    render(
+      <TestWrapper
+        initialFormData={initialData}
+        mockExtensionFields={mockExtensionData}
+      >
+        <button type="submit">Submit</button>
+      </TestWrapper>
+    );
 
-  it('updates form data when SummariesManager changes', async () => {
-    render(<TestWrapper />);
-    const changeButton = screen.getByRole('button', {
-      name: 'Simulate Summaries Change',
+    const codeEditor = screen.getByTestId('code-editor-widget');
+    const newValue = { updated: true };
+    fireEvent.change(codeEditor, {
+      target: { value: JSON.stringify(newValue) },
     });
-    await userEvent.click(changeButton);
 
-    await waitFor(() => {
-      // The data passed to the RJSF form should still only contain the RJSF-specific fields
-      const rjsfFormData = JSON.parse(
-        screen.getByTestId('rjsf-formdata').textContent || '{}'
-      );
-      expect(rjsfFormData.title).toBe('Initial Title'); // Unchanged
-    });
-  });
-
-  it('combines RJSF data and summaries data on final submit', async () => {
-    render(<TestWrapper />);
-    const submitButton = screen.getByRole('button', { name: 'Submit Form' });
-    await userEvent.click(submitButton);
+    const submitButton = screen.getByRole('button', { name: 'Submit' });
+    await user.click(submitButton);
 
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
-        title: 'Initial Title', // From RJSF part of the state
-        summaries: { initial: 'summary' }, // From the separate summaries state
+        ...initialData,
+        'cube:dimensions': newValue,
       });
     });
   });
 
-  it('switches to JSON editor tab and updates all data on change', async () => {
-    render(<TestWrapper />);
+  it('updates form data when SummariesManager changes', async () => {
+    const user = userEvent.setup();
+    const initialData = {
+      title: 'Initial Title',
+      summaries: { initial: 'summary' },
+    };
+    render(
+      <TestWrapper initialFormData={initialData}>
+        <button type="submit">Submit</button>
+      </TestWrapper>
+    );
 
-    // Switch to JSON tab
-    const jsonTab = screen.getByRole('tab', { name: 'Manual JSON Edit' });
-    await userEvent.click(jsonTab);
-
-    // Check that JSON editor is now visible
-    const jsonEditor = await screen.findByTestId('json-editor');
-    expect(jsonEditor).toBeVisible();
-    expect(screen.getByTestId('rjsf-form')).not.toBeVisible();
-
-    // Simulate a change in the JSON editor
     const changeButton = screen.getByRole('button', {
-      name: 'Simulate JSON Change',
+      name: 'Simulate Summaries Change',
     });
-    await userEvent.click(changeButton);
+    await user.click(changeButton);
+
+    const submitButton = screen.getByRole('button', { name: 'Submit' });
+    await user.click(submitButton);
 
     await waitFor(() => {
-      const newRjsfForm = screen.getByTestId('rjsf-form');
-      expect(newRjsfForm).toBeVisible();
+      expect(mockOnSubmit).toHaveBeenCalledWith({
+        title: 'Initial Title',
+        summaries: { a: 1 },
+      });
+    });
+  });
 
-      const rjsfFormData = JSON.parse(
-        screen.getByTestId('rjsf-formdata').textContent || '{}'
-      );
-      expect(rjsfFormData.collection).toBe('edited from json');
-      // The `summaries` key should be gone from the RJSF data, as it's managed separately
-      expect(rjsfFormData.summaries).toBeUndefined();
+  it('correctly separates additional, base, and extension properties', () => {
+    const mockExtensionData = {
+      'http://example.com/datacube.json': {
+        title: 'Datacube',
+        fields: [{ name: 'cube:dimensions', required: true }],
+      },
+    };
+    render(
+      <TestWrapper
+        initialFormData={{
+          title: 'A Base Prop',
+          'cube:dimensions': { some: 'data' },
+          my_extra_prop: 'hello',
+        }}
+        mockExtensionFields={mockExtensionData}
+      />
+    );
+
+    const rjsfFormData = JSON.parse(
+      screen.getByTestId('rjsf-formdata').textContent || '{}'
+    );
+    expect(rjsfFormData.title).toBe('A Base Prop');
+    expect(rjsfFormData['cube:dimensions']).toBeUndefined();
+
+    expect(screen.getByText('cube:dimensions')).toBeVisible();
+    expect(screen.getByTestId('additional-property-card')).toBeVisible();
+  });
+
+  it('combines all data sources on final submit', async () => {
+    const user = userEvent.setup();
+    const initialData = {
+      title: 'Final Submit Test',
+      summaries: { count: 50 },
+      'cube:dimensions': { x: 'lat', y: 'lon' },
+    };
+    const mockExtensionData = {
+      'http://example.com/datacube.json': {
+        title: 'Datacube',
+        fields: [{ name: 'cube:dimensions', required: false }],
+      },
+    };
+    render(
+      <TestWrapper
+        initialFormData={initialData}
+        mockExtensionFields={mockExtensionData}
+      >
+        <button type="submit">Submit</button>
+      </TestWrapper>
+    );
+
+    const submitButton = screen.getByRole('button', { name: 'Submit' });
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockOnSubmit).toHaveBeenCalledWith(initialData);
     });
   });
 });
