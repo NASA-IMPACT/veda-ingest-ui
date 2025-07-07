@@ -259,7 +259,7 @@ function CollectionIngestionForm({
                         >
                           <CodeEditorWidget
                             value={JSON.stringify(
-                              formData?.[name] ?? '',
+                              formData?.[name] ?? undefined,
                               null,
                               2
                             )}
