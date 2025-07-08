@@ -35,7 +35,7 @@ const RjsfCodeEditorWidget: FC<WidgetProps> = ({
 
   return (
     <CodeEditorWidget
-      value={value || ''}
+      value={value || null}
       onChange={handleOnChange}
       readOnly={readonly}
     />
