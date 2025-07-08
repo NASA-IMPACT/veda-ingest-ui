@@ -2,12 +2,13 @@
 
 import '@ant-design/v5-patch-for-react-19';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, FC } from 'react';
 import { Button, Tabs } from 'antd';
 import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
+import { WidgetProps } from '@rjsf/utils';
 
 import ObjectFieldTemplate from '@/utils/ObjectFieldTemplate';
 import jsonSchema from '@/FormSchemas/datasets/datasetSchema.json';
@@ -19,6 +20,27 @@ import CodeEditorWidget from './CodeEditorWidget';
 import uiSchema from '@/FormSchemas/datasets/uischema.json';
 
 const Form = withTheme(AntDTheme);
+
+// --- Adapter Component ---
+// This component accepts RJSF's props and translates them to what CodeEditorWidget expects.
+const RjsfCodeEditorWidget: FC<WidgetProps> = ({
+  value,
+  onChange,
+  readonly,
+}) => {
+  const handleOnChange = (newValue: string) => {
+    // Call RJSF's onChange with the new string value
+    onChange(newValue);
+  };
+
+  return (
+    <CodeEditorWidget
+      value={value || ''}
+      onChange={handleOnChange}
+      readOnly={readonly}
+    />
+  );
+};
 
 interface TemporalExtent {
   startdate?: string;
@@ -123,7 +145,7 @@ function DatasetIngestionForm({
   };
 
   const widgets = {
-    'renders.dashboard': CodeEditorWidget,
+    'renders.dashboard': RjsfCodeEditorWidget,
   };
 
   return (
