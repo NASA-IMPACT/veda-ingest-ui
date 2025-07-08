@@ -150,6 +150,7 @@ function DatasetIngestionForm({
 
   return (
     <Tabs
+      type="card"
       activeKey={activeTab}
       onChange={setActiveTab}
       items={[
