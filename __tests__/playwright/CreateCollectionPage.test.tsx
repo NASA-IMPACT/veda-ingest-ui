@@ -120,8 +120,6 @@ test.describe('Create Collection Page', () => {
 
   test('Create Collection request submitted with pasted JSON', async ({
     page,
-    worker,
-    http,
   }, testInfo) => {
     // Intercept the POST request to validate its payload
     await page.route('**/create-dataset', async (route, request) => {

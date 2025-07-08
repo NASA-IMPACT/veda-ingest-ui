@@ -9,14 +9,10 @@ import {
   Row,
   Tabs,
   Card,
-  Input,
-  Typography,
-  message,
+  Divider,
   Form as AntdForm,
   Alert,
   Space,
-  Tag,
-  Divider,
 } from 'antd';
 import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
@@ -215,7 +211,9 @@ function CollectionIngestionForm({
         onRemoveExtension={removeExtension}
         isLoading={isLoading}
       />
+      <Divider size={'large'} style={{ borderColor: 'rgba(0, 0, 0, 0.2)' }} />
       <Tabs
+        type="card"
         activeKey={activeTab}
         onChange={setActiveTab}
         items={[
@@ -251,28 +249,34 @@ function CollectionIngestionForm({
                     style={{ marginTop: '20px' }}
                   >
                     <Space direction="vertical" style={{ width: '100%' }}>
-                      {fields.map(({ name, required }) => (
-                        <AntdForm.Item
-                          key={name}
-                          label={name}
-                          required={required}
-                        >
-                          <CodeEditorWidget
-                            value={JSON.stringify(
-                              formData?.[name] ?? undefined,
-                              null,
-                              2
-                            )}
-                            onChange={(newValue) =>
-                              handleExtensionValueChange(
-                                name,
-                                required,
-                                newValue
-                              )
-                            }
-                          />
-                        </AntdForm.Item>
-                      ))}
+                      {fields.map(({ name, required }) => {
+                        const fieldId = name;
+
+                        return (
+                          <AntdForm.Item
+                            key={name}
+                            label={name}
+                            required={required}
+                            htmlFor={fieldId}
+                          >
+                            <CodeEditorWidget
+                              id={fieldId}
+                              value={JSON.stringify(
+                                formData?.[name] ?? undefined,
+                                null,
+                                2
+                              )}
+                              onChange={(newValue) =>
+                                handleExtensionValueChange(
+                                  name,
+                                  required,
+                                  newValue
+                                )
+                              }
+                            />
+                          </AntdForm.Item>
+                        );
+                      })}
                     </Space>
                   </Card>
                 ))}
