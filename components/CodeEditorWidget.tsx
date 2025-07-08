@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import debounce from 'lodash/debounce';
 import dynamic from 'next/dynamic';
+import { theme } from 'antd';
 import '@uiw/react-textarea-code-editor/dist.css';
 
 const CodeEditor = dynamic(
@@ -8,15 +9,20 @@ const CodeEditor = dynamic(
   { ssr: false }
 );
 
+const { useToken } = theme;
+
 interface CodeEditorWidgetProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
 }
 
 const CodeEditorWidget: React.FC<CodeEditorWidgetProps> = ({
   value,
   onChange,
+  readOnly = false,
 }) => {
+  const { token } = useToken();
   const [editorValue, setEditorValue] = useState(value);
 
   useEffect(() => {
@@ -25,7 +31,7 @@ const CodeEditorWidget: React.FC<CodeEditorWidgetProps> = ({
 
   const debouncedOnChange = useCallback(
     debounce((newValue: string) => {
-      onChange(newValue);
+      onChange?.(newValue);
     }, 300),
     [onChange]
   );
@@ -35,21 +41,36 @@ const CodeEditorWidget: React.FC<CodeEditorWidgetProps> = ({
     debouncedOnChange(newValue);
   };
 
+  const baseStyle: React.CSSProperties = {
+    fontSize: 14,
+    fontFamily:
+      'ui-monospace,SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace',
+    boxShadow: token.boxShadow,
+    borderRadius: token.borderRadius,
+  };
+
+  // Conditionally apply disabled styles using Ant Design tokens
+  const dynamicStyle: React.CSSProperties = readOnly
+    ? {
+        ...baseStyle,
+        backgroundColor: token.colorBgContainerDisabled,
+        color: token.colorTextDisabled,
+        cursor: 'not-allowed',
+      }
+    : {
+        ...baseStyle,
+        backgroundColor: token.colorBgElevated,
+        color: token.colorText,
+      };
+
   return (
     <CodeEditor
       value={editorValue}
+      readOnly={readOnly}
       language="json"
       onChange={(evn) => handleEditorChange(evn.target.value)}
       padding={15}
-      style={{
-        fontSize: 14,
-        backgroundColor: '#ffffff',
-        color: '#000000',
-        fontFamily:
-          'ui-monospace,SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace',
-        boxShadow: '0px 3px 15px rgba(0, 0, 0, 0.2)',
-        borderRadius: '6px',
-      }}
+      style={dynamicStyle}
       className="lightJSONEditor"
     />
   );

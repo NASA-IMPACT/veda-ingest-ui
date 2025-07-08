@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
+import { Card, Typography, Alert } from 'antd';
 import { Status } from '@/types/global';
 import DatasetIngestionForm from '@/components/DatasetIngestionForm';
 import CollectionIngestionForm from '@/components/CollectionIngestionForm';
+
+const { Title } = Typography;
 
 interface CreationFormManagerProps {
   formType: 'dataset' | 'collection';
@@ -49,6 +52,7 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
           const errorMessage = await response.text();
           setApiErrorMessage(errorMessage);
           setStatus('error');
+          return;
         }
         const responseJson = await response.json();
         setPullRequestUrl(responseJson.githubURL);
@@ -68,11 +72,13 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
     isEditMode: false, // Explicitly false for creation
   };
 
+  const title = `Create New ${formType.charAt(0).toUpperCase() + formType.slice(1)}`;
+
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">
-        Create New {formType.charAt(0).toUpperCase() + formType.slice(1)}
-      </h2>
+    <Card>
+      <Title level={2} style={{ marginBottom: '24px' }}>
+        {title}
+      </Title>
 
       {formType === 'dataset' ? (
         <DatasetIngestionForm
@@ -82,11 +88,13 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
       ) : formType === 'collection' ? (
         <CollectionIngestionForm {...childFormProps} />
       ) : (
-        <div className="text-red-500 text-center p-4">
-          Invalid formType specified. Please use dataset or collection.
-        </div>
+        <Alert
+          message="Invalid formType specified. Please use dataset or collection."
+          type="error"
+          showIcon
+        />
       )}
-    </div>
+    </Card>
   );
 };
 
