@@ -4,14 +4,8 @@ import {
   CloseCircleOutlined,
 } from '@ant-design/icons';
 import React, { forwardRef, useState } from 'react';
-import dynamic from 'next/dynamic';
-import '@uiw/react-textarea-code-editor/dist.css';
 
-// Dynamically import the CodeEditor
-const CodeEditor = dynamic(
-  () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
-  { ssr: false }
-);
+import CodeEditorWidget from './CodeEditorWidget'; // Adjust the path as needed
 
 const { useToken } = theme;
 
@@ -92,18 +86,9 @@ const AdditionalPropertyCard = forwardRef<
         <div>
           <Typography.Text strong>Property Details:</Typography.Text>
           <Divider style={{ margin: '12px 0' }} />
-          <CodeEditor
+          <CodeEditorWidget
             readOnly
             value={JSON.stringify(additionalProperties, null, 2)}
-            language="json"
-            padding={15}
-            style={{
-              fontSize: 14,
-              fontFamily:
-                'ui-monospace,SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace',
-              borderRadius: token.borderRadius,
-              backgroundColor: token.colorFillQuaternary,
-            }}
           />
         </div>
       ) : (
@@ -129,22 +114,13 @@ const AdditionalPropertyCard = forwardRef<
           {selectedKey && (
             <>
               <Divider style={{ margin: '12px 0' }} />
-              <CodeEditor
+              <CodeEditorWidget
                 readOnly
                 value={JSON.stringify(
                   { [selectedKey]: additionalProperties[selectedKey] },
                   null,
                   2
                 )}
-                language="json"
-                padding={15}
-                style={{
-                  fontSize: 14,
-                  fontFamily:
-                    'ui-monospace,SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace',
-                  borderRadius: token.borderRadius,
-                  backgroundColor: token.colorFillQuaternary,
-                }}
               />
             </>
           )}
