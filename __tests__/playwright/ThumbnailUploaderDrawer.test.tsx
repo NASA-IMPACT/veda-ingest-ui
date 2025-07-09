@@ -6,12 +6,6 @@ test.describe('Thumbnail Uploader Drawer', () => {
   test('Upload image populates thumbnail href input', async ({
     page,
   }, testInfo) => {
-    // Skip test based on environment variable
-    test.skip(
-      process.env.NEXT_PUBLIC_ENABLE_THUMBNAIL_UPLOAD !== 'true',
-      'Test does not run if uploads disabled'
-    );
-
     await page.route(
       'https://thumbnails.openveda.cloud/thumbnail.jpg',
       async (route) => {
