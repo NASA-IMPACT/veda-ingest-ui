@@ -15,11 +15,13 @@ interface CodeEditorWidgetProps {
   value: string;
   onChange?: (value: string) => void;
   readOnly?: boolean;
+  id?: string;
 }
 
 const CodeEditorWidget: React.FC<CodeEditorWidgetProps> = ({
   value,
   onChange,
+  id,
   readOnly = false,
 }) => {
   const { token } = useToken();
@@ -72,6 +74,7 @@ const CodeEditorWidget: React.FC<CodeEditorWidgetProps> = ({
       padding={15}
       style={dynamicStyle}
       className="lightJSONEditor"
+      id={id}
     />
   );
 };

@@ -3,6 +3,7 @@ import { http, HttpResponse } from 'msw';
 import { githubResponse } from './githubResponse';
 import { retrieveIngestResponse } from './retrieveIngestResponse';
 import { collectionIngestResponse } from './collectionIngestResponse';
+import { extensionSchemaResponse } from './extensionSchemaResponse';
 // --- Placeholder Tile Logic ---
 const MOCK_TILE_BASE64 =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
@@ -206,4 +207,16 @@ export const handlers = [
       },
     });
   }),
+  http.get(
+    'https://stac-extensions.github.io/testExtension/v2.2.0/schema.json',
+    () => {
+      return HttpResponse.json(extensionSchemaResponse);
+    }
+  ),
+  http.get(
+    'https://stac-extensions.github.io/testExtension/v2.2.0/invalid-schema.json',
+    () => {
+      return HttpResponse.text('Not Found', { status: 404 });
+    }
+  ),
 ];
