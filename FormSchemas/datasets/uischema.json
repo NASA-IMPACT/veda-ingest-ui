@@ -182,5 +182,10 @@
       "size": "large",
       "block": "true"
     }
+  },
+  "sample_files": {
+    "items": {
+      "ui:widget": "testableUrl"
+    }
   }
 }
