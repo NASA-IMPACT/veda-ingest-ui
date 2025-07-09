@@ -5,7 +5,6 @@ import Typography from 'antd/lib/typography';
 import { useState, useEffect, useRef } from 'react';
 import { CheckOutlined, CloseCircleOutlined } from '@ant-design/icons';
 
-// Define the possible states for our validation UI
 type ValidationState = 'idle' | 'loading' | 'validated' | 'error';
 
 export const TestableUrlWidget = ({
