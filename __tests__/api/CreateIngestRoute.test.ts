@@ -101,7 +101,7 @@ describe('PUT /api/create-ingest', () => {
   it('returns success message on successful PR update', async () => {
     const mockRequest = {
       json: vi.fn().mockResolvedValue({
-        ref: 'test-ref',
+        gitRef: 'test-ref',
         fileSha: 'test-sha',
         filePath: 'test-path',
         formData: { key: 'value' },
@@ -123,7 +123,7 @@ describe('PUT /api/create-ingest', () => {
   it('returns an error message when PR update fails', async () => {
     const mockRequest = {
       json: vi.fn().mockResolvedValue({
-        ref: 'test-ref',
+        gitRef: 'test-ref',
         fileSha: 'test-sha',
         filePath: 'test-path',
         formData: { key: 'value' },
@@ -142,7 +142,7 @@ describe('PUT /api/create-ingest', () => {
   it('handles unexpected errors gracefully', async () => {
     const mockRequest = {
       json: vi.fn().mockResolvedValue({
-        ref: 'test-ref',
+        gitRef: 'test-ref',
         fileSha: 'test-sha',
         filePath: 'test-path',
         formData: { key: 'value' },
@@ -163,7 +163,7 @@ describe('PUT /api/create-ingest', () => {
   it('returns an error when a required field is missing', async () => {
     const mockRequest = {
       json: vi.fn().mockResolvedValue({
-        ref: 'test-ref',
+        gitRef: 'test-ref',
         fileSha: 'test-sha',
         formData: { key: 'value' },
       }), // filePath is missing

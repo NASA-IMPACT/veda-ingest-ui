@@ -47,7 +47,7 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const requiredFields = ['ref', 'fileSha', 'filePath', 'formData'];
+    const requiredFields = ['gitRef', 'fileSha', 'filePath', 'formData'];
 
     // Check for missing fields
     const missingFields = requiredFields.filter((field) => !(field in body));
@@ -59,9 +59,9 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { ref, fileSha, filePath, formData } = body;
+    const { gitRef, fileSha, filePath, formData } = body;
 
-    await UpdatePR(ref, fileSha, filePath, formData);
+    await UpdatePR(gitRef, fileSha, filePath, formData);
 
     return NextResponse.json(
       { message: 'Data updated successfully' },
