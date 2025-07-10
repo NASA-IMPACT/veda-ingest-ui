@@ -1,7 +1,6 @@
-// fields/IntervalField.tsx (or IntervalField.tsx)
 import React from 'react';
-import { FieldProps } from '@rjsf/utils'; // <-- Important: Use FieldProps
-import { DatePicker, Row, Col } from 'antd'; // No Typography here
+import { FieldProps } from '@rjsf/utils';
+import { DatePicker, Row, Col } from 'antd';
 import dayjs from 'dayjs';
 import 'dayjs/plugin/utc';
 import 'dayjs/plugin/timezone';
@@ -10,7 +9,7 @@ dayjs.extend(require('dayjs/plugin/utc'));
 dayjs.extend(require('dayjs/plugin/timezone'));
 
 const IntervalField: React.FC<FieldProps> = (props) => {
-  const { formData, onChange, disabled, readonly, idSchema } = props; // <-- Use formData from FieldProps
+  const { formData, onChange, disabled, readonly, idSchema } = props;
 
   // Ensure formData is an array, default to [null, null] if undefined
   const intervalValue =

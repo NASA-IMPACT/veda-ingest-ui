@@ -159,6 +159,7 @@ const AssetsField: React.FC<FieldProps> = (props) => {
         <Col style={{ flex: '0 0 168px' }}>
           <Tooltip title="Add Asset">
             <Button
+              aria-label="Add Asset"
               type="primary"
               icon={<PlusCircleOutlined />}
               onClick={handleAddAsset}

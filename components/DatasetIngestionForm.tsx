@@ -18,6 +18,7 @@ import { JSONEditorValue } from '@/components/JSONEditor';
 import AdditionalPropertyCard from '@/components/AdditionalPropertyCard';
 import CodeEditorWidget from './CodeEditorWidget';
 import uiSchema from '@/FormSchemas/datasets/uischema.json';
+import { TestableUrlWidget } from '@/utils/TestableUrlWidget';
 
 const Form = withTheme(AntDTheme);
 
@@ -146,6 +147,7 @@ function DatasetIngestionForm({
 
   const widgets = {
     'renders.dashboard': RjsfCodeEditorWidget,
+    testableUrl: TestableUrlWidget,
   };
 
   return (
