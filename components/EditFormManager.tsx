@@ -52,13 +52,14 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
           const errorMessage = await response.text();
           setApiErrorMessage(errorMessage);
           setStatus('error');
-          new Error(`There was an error: ${errorMessage}`);
+          return;
         }
         setFormData({});
         setStatus('success');
       })
       .catch((error) => {
         console.error(error);
+        setApiErrorMessage('A network error occurred. Please try again.');
         setStatus('error');
       });
   };
