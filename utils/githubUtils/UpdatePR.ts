@@ -3,7 +3,7 @@ import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 import { CleanAndPrettifyJSON } from '../CleanAndPrettifyJson';
 
 const UpdatePR = async (
-  ref: string,
+  gitRef: string,
   fileSha: string,
   filePath: string,
   formData: any
@@ -19,6 +19,7 @@ const UpdatePR = async (
     throw new Error('Missing required environment variables: OWNER or REPO');
   }
 
+  console.log(`updating ${gitRef}`);
   try {
     const token = await GetGithubToken();
 
@@ -29,7 +30,7 @@ const UpdatePR = async (
     await octokit.rest.repos.createOrUpdateFileContents({
       owner,
       repo,
-      branch: ref,
+      branch: gitRef,
       sha: fileSha,
       path: filePath,
       message: 'update via UI',
