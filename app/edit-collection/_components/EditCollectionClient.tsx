@@ -16,7 +16,7 @@ import SuccessModal from '@/components/SuccessModal';
 type PullRequest =
   Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][number];
 
-const EditCollectiontClient = function EditCollectiontClient() {
+const EditCollectionClient = function EditCollectionClient() {
   const { data: session, status: sessionStatus } = useSession();
   const router = useRouter();
   const [data, setData] = useState<PullRequest[]>([]);
@@ -113,6 +113,20 @@ const EditCollectiontClient = function EditCollectiontClient() {
     setFilePath('');
     setFileSha('');
     setFormData({});
+    // Re-fetch the list of PRs to get the latest data
+    fetchPRs();
+  };
+
+  const handleSuccess = () => {
+    // Reset the form state to return to the initial list view
+    setFormData({});
+    setRef('');
+    setFileSha('');
+    setFilePath('');
+    setCollectionName('');
+
+    // Refetch the PR list to show the latest data
+    fetchPRs();
   };
 
   return (
@@ -161,11 +175,13 @@ const EditCollectiontClient = function EditCollectiontClient() {
         <SuccessModal
           type="edit"
           collectionName={collectionName}
-          setStatus={setStatus}
+          open={status === 'success'}
+          onOk={handleSuccess}
+          onCancel={handleSuccess}
         />
       )}
     </AppLayout>
   );
 };
 
-export default EditCollectiontClient;
+export default EditCollectionClient;

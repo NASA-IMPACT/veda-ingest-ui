@@ -2,17 +2,26 @@ import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import ErrorModal from '@/components/ErrorModal';
+import { ModalProps } from 'antd';
 
-// Mock StyledModal
-vi.mock('@/components/StyledModal', () => ({
-  __esModule: true,
-  default: vi.fn(({ title, children }) => (
-    <div data-testid="styled-modal">
-      <h1>{title}</h1>
-      <div>{children}</div>
-    </div>
-  )),
-}));
+// Mock Ant Design's Modal
+vi.mock('antd', async (importOriginal) => {
+  const antd = await importOriginal<typeof import('antd')>();
+  // The mock renders children and buttons that trigger the callback props
+  const MockModal = ({ children, open, title }: ModalProps) => {
+    if (!open) return null;
+    return (
+      <div data-testid="mock-modal">
+        <h1>{title}</h1>
+        <div>{children}</div>
+      </div>
+    );
+  };
+  return {
+    ...antd,
+    Modal: MockModal,
+  };
+});
 
 describe('ErrorModal Component', () => {
   afterEach(() => {
@@ -27,7 +36,7 @@ describe('ErrorModal Component', () => {
     render(<ErrorModal {...props} />);
 
     // Check modal content
-    const modal = screen.getByTestId('styled-modal');
+    const modal = screen.getByTestId('mock-modal');
     expect(modal).toBeInTheDocument();
     expect(screen.getByText('Collection Name Exists')).toBeInTheDocument();
     expect(
@@ -51,7 +60,7 @@ describe('ErrorModal Component', () => {
     render(<ErrorModal {...props} />);
 
     // Check modal content
-    const modal = screen.getByTestId('styled-modal');
+    const modal = screen.getByTestId('mock-modal');
     expect(modal).toBeInTheDocument();
     expect(screen.getByText('Something Went Wrong')).toBeInTheDocument();
     expect(
@@ -68,7 +77,7 @@ describe('ErrorModal Component', () => {
     render(<ErrorModal {...props} />);
 
     // Check modal content
-    const modal = screen.getByTestId('styled-modal');
+    const modal = screen.getByTestId('mock-modal');
     expect(modal).toBeInTheDocument();
     expect(screen.getByText('Something Went Wrong')).toBeInTheDocument();
     expect(

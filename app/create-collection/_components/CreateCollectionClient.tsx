@@ -13,6 +13,12 @@ const CreateCollectionClient = function CreateIngestClient() {
   const [apiErrorMessage, setApiErrorMessage] = useState('');
   const [pullRequestUrl, setPullRequestUrl] = useState('');
 
+  const handleSuccessModalClose = () => {
+    setStatus('idle');
+    setCollectionName('');
+    setPullRequestUrl('');
+  };
+
   return (
     <AppLayout>
       <CreationFormManager
@@ -33,9 +39,11 @@ const CreateCollectionClient = function CreateIngestClient() {
       {status === 'success' && (
         <SuccessModal
           type="create"
-          setStatus={setStatus}
           collectionName={collectionName}
           pullRequestUrl={pullRequestUrl}
+          open={status === 'success'}
+          onOk={handleSuccessModalClose}
+          onCancel={handleSuccessModalClose}
         />
       )}
     </AppLayout>

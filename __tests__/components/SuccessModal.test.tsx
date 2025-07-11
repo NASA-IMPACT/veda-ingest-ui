@@ -1,77 +1,102 @@
 import React from 'react';
-import { render, screen, cleanup } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { describe, it, vi, expect, afterEach } from 'vitest';
-import SuccessModal from '@/components/SuccessModal';
 import userEvent from '@testing-library/user-event';
+import SuccessModal from '@/components/SuccessModal';
+import { ModalProps } from 'antd';
 
-// Mock StyledModal
-vi.mock('@/components/StyledModal', () => ({
-  __esModule: true,
-  default: vi.fn(({ children, okText, onOk }) => (
-    <div data-testid="styled-modal">
-      {children}
-      <button onClick={onOk}>{okText}</button>
-    </div>
-  )),
-}));
+// Mock Ant Design's Modal
+vi.mock('antd', async (importOriginal) => {
+  const antd = await importOriginal<typeof import('antd')>();
+  // The mock will render its children and buttons that trigger the callback props
+  const MockModal = ({
+    children,
+    onOk,
+    onCancel,
+    okText,
+    open,
+  }: ModalProps) => {
+    if (!open) {
+      return null;
+    }
+    return (
+      <div data-testid="mock-modal">
+        {children}
+        <button onClick={onOk}>{okText || 'OK'}</button>
+        <button onClick={onCancel}>Cancel</button>
+      </div>
+    );
+  };
+  return {
+    ...antd,
+    Modal: MockModal,
+  };
+});
 
 describe('SuccessModal Component', () => {
   afterEach(() => {
     cleanup();
   });
-
-  it('renders correctly for "create" type', () => {
-    const mockSetStatus = vi.fn();
+  describe('when type is "create"', () => {
+    const mockOnOk = vi.fn();
+    const mockOnCancel = vi.fn();
     const props = {
       type: 'create' as const,
       collectionName: 'Test Collection',
       pullRequestUrl: 'https://github.com/test/pr',
-      setStatus: mockSetStatus,
+      open: true,
+      onOk: mockOnOk,
+      onCancel: mockOnCancel,
     };
 
-    render(<SuccessModal {...props} />);
+    it('renders correctly for "create" type', () => {
+      render(<SuccessModal {...props} />);
 
-    // Verify modal content
-    expect(screen.getByTestId('styled-modal')).toBeInTheDocument();
-    expect(
-      screen.getByText(/collection has been submitted\./i)
-    ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Github/i })).toHaveAttribute(
-      'href',
-      'https://github.com/test/pr'
-    );
+      expect(screen.getByTestId('mock-modal')).toBeInTheDocument();
+      expect(
+        screen.getByText(/collection has been submitted/i)
+      ).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Github/i })).toHaveAttribute(
+        'href',
+        'https://github.com/test/pr'
+      );
+    });
+
+    it('calls the onOk handler when OK is clicked', async () => {
+      render(<SuccessModal {...props} />);
+      await userEvent.click(screen.getByRole('button', { name: 'OK' }));
+      expect(mockOnOk).toHaveBeenCalledTimes(1);
+    });
   });
 
-  it('renders correctly for "edit" type', () => {
-    const mockSetStatus = vi.fn();
+  describe('when type is "edit"', () => {
+    const mockOnOk = vi.fn();
+    const mockOnCancel = vi.fn();
     const props = {
       type: 'edit' as const,
       collectionName: 'Edited Collection',
-      setStatus: mockSetStatus,
+      open: true,
+      onOk: mockOnOk,
+      onCancel: mockOnCancel,
     };
 
-    render(<SuccessModal {...props} />);
+    it('renders correctly for "edit" type', () => {
+      render(<SuccessModal {...props} />);
 
-    // Verify modal content
-    expect(screen.getByTestId('styled-modal')).toBeInTheDocument();
-    expect(screen.getByText(/The update to/i)).toBeInTheDocument();
-  });
+      expect(screen.getByTestId('mock-modal')).toBeInTheDocument();
+      expect(screen.getByText(/The update to/i)).toBeInTheDocument();
+    });
 
-  it('calls setStatus with "idle" when OK is clicked', async () => {
-    const mockSetStatus = vi.fn();
-    const props = {
-      type: 'edit' as const,
-      collectionName: 'Edited Collection',
-      setStatus: mockSetStatus,
-    };
+    it('calls the onOk handler when OK is clicked', async () => {
+      render(<SuccessModal {...props} />);
+      await userEvent.click(screen.getByRole('button', { name: 'OK' }));
+      expect(mockOnOk).toHaveBeenCalledTimes(1);
+    });
 
-    render(<SuccessModal {...props} />);
-
-    // Simulate clicking the OK button
-    const okButton = screen.getByText('OK');
-    await userEvent.click(okButton);
-
-    // Verify setStatus is called
-    expect(mockSetStatus).toHaveBeenCalledWith('idle');
+    it('calls the onCancel handler when Cancel is clicked', async () => {
+      render(<SuccessModal {...props} />);
+      await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+      expect(mockOnCancel).toHaveBeenCalledTimes(1);
+    });
   });
 });
