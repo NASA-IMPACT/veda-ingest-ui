@@ -1,34 +1,35 @@
 import React from 'react';
-import StyledModal from '@/components/StyledModal';
-import { Status } from '@/types/global';
+import { Modal, ModalProps } from 'antd';
+
+// Base props shared by both modal types
+type BaseSuccessModalProps = {
+  collectionName: string;
+  onOk: () => void;
+  onCancel: () => void;
+  open: boolean;
+};
 
 type SuccessModalProps =
-  | {
+  | (BaseSuccessModalProps & {
       type: 'create';
-      collectionName: string;
       pullRequestUrl: string;
-      setStatus: (status: Status) => void;
-    }
-  | {
+    })
+  | (BaseSuccessModalProps & {
       type: 'edit';
-      collectionName: string;
-      setStatus: (status: Status) => void;
-    };
+    });
 
 export default function SuccessModal(props: SuccessModalProps) {
-  const { setStatus } = props;
-  const onOk = () => {
-    setStatus('idle');
-  };
+  const title =
+    props.type === 'edit' ? 'Collection Updated' : 'Collection Submitted';
 
-  if (props.type === 'create') {
-    return (
-      <StyledModal
-        title="Collection Submitted"
-        cancelButtonProps={{ style: { display: 'none' } }}
-        okText="OK"
-        onOk={onOk}
-      >
+  const content =
+    props.type === 'edit' ? (
+      <p>
+        The update to <strong>{props.collectionName}</strong> collection has
+        been submitted.
+      </p>
+    ) : (
+      <>
         <p>
           The <strong>{props.collectionName}</strong> collection has been
           submitted.
@@ -45,21 +46,19 @@ export default function SuccessModal(props: SuccessModalProps) {
           </a>
           .
         </p>
-      </StyledModal>
+      </>
     );
-  } else {
-    return (
-      <StyledModal
-        title="Collection Updated"
-        cancelButtonProps={{ style: { display: 'none' } }}
-        okText="OK"
-        onOk={onOk}
-      >
-        <p>
-          The update to <strong>{props.collectionName}</strong> collection has
-          been submitted.
-        </p>
-      </StyledModal>
-    );
-  }
+
+  return (
+    <Modal
+      title={title}
+      open={props.open}
+      onOk={props.onOk}
+      onCancel={props.onCancel}
+      okText="OK"
+      cancelButtonProps={{ style: { display: 'none' } }}
+    >
+      {content}
+    </Modal>
+  );
 }

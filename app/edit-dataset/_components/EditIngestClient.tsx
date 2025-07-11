@@ -12,7 +12,6 @@ import { Endpoints } from '@octokit/types';
 import ErrorModal from '@/components/ErrorModal';
 import SuccessModal from '@/components/SuccessModal';
 
-// Type definitions
 type PullRequest =
   Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][number];
 
@@ -31,15 +30,13 @@ const EditIngestClient = function EditIngestClient() {
   const fetchPRs = async () => {
     setStatus('loadingPRs');
     const url = 'api/list-ingests?ingestionType=dataset';
-    const requestOptions = {
-      method: 'GET',
-    };
     try {
-      const response = await fetch(url, requestOptions);
+      const response = await fetch(url, { method: 'GET' });
 
       if (!response.ok) {
-        const errorMessage = await response.text();
-        throw new Error(`There was an error on fetchPR: ${errorMessage}`);
+        throw new Error(
+          `There was an error on fetchPR: ${await response.text()}`
+        );
       }
 
       const { githubResponse }: { githubResponse: PullRequest[] } =
@@ -68,24 +65,18 @@ const EditIngestClient = function EditIngestClient() {
     setStatus('loadingIngest');
     setCollectionName(title);
     const url = `/api/retrieve-ingest?ref=${ref}&ingestionType=dataset`;
-    const requestOptions = {
-      method: 'GET',
-    };
     try {
-      const response = await fetch(url, requestOptions);
+      const response = await fetch(url, { method: 'GET' });
       setRef(ref);
 
       if (!response.ok) {
         const errorResponse = await response.json();
-        const errorMessage = errorResponse.error || 'Unknown error occurred.';
-        throw new Error(errorMessage);
+        throw new Error(errorResponse.error || 'Unknown error occurred.');
       }
 
       const { fileSha, filePath, content } = await response.json();
 
-      // Ensure renders is stored as a pretty string if it's an object
       if (
-        content.renders &&
         content.renders?.dashboard &&
         typeof content.renders.dashboard === 'object'
       ) {
@@ -113,6 +104,19 @@ const EditIngestClient = function EditIngestClient() {
     setFilePath('');
     setFileSha('');
     setFormData({});
+    fetchPRs();
+  };
+
+  const handleSuccess = () => {
+    // Reset the form state to return to the initial list view
+    setFormData({});
+    setRef('');
+    setFileSha('');
+    setFilePath('');
+    setCollectionName('');
+
+    // Refetch the PR list. This function will handle its own loading and idle states.
+    fetchPRs();
   };
 
   return (
@@ -161,7 +165,9 @@ const EditIngestClient = function EditIngestClient() {
         <SuccessModal
           type="edit"
           collectionName={collectionName}
-          setStatus={setStatus}
+          open={status === 'success'}
+          onOk={handleSuccess}
+          onCancel={handleSuccess}
         />
       )}
     </AppLayout>
