@@ -88,6 +88,50 @@ function DatasetIngestionForm({
     [key: string]: any;
   } | null>(null);
 
+  // --- Set initial "default" data for new forms ---
+  useEffect(() => {
+    if (!isEditMode && (!formData || Object.keys(formData).length === 0)) {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        // Manually set "default" values here
+        license: 'CC0-1.0',
+        stac_version: '1.0.0',
+        spatial_extent: {
+          xmin: -180,
+          ymin: -90,
+          xmax: 180,
+          ymax: 90,
+        },
+        stac_extensions: [
+          'https://stac-extensions.github.io/render/v1.0.0/schema.json',
+          'https://stac-extensions.github.io/item-assets/v1.0.0/schema.json',
+        ],
+        item_assets: {
+          cog_default: {
+            type: 'image/tiff; application=geotiff; profile=cloud-optimized',
+            roles: ['data', 'layer'],
+            title: 'Default COG Layer',
+            description: 'Cloud optimized default layer to display on map',
+          },
+        },
+        providers: [
+          {
+            name: 'NASA VEDA',
+            roles: ['host'],
+            url: 'https://www.earthdata.nasa.gov/dashboard/',
+          },
+        ],
+        assets: {
+          thumbnail: {
+            title: 'Thumbnail',
+            type: 'image/jpeg',
+            roles: ['thumbnail'],
+          },
+        },
+      }));
+    }
+  }, [isEditMode, formData, setFormData]);
+
   useEffect(() => {
     if (defaultTemporalExtent) {
       setFormData((prevFormData: FormData | undefined) => {
