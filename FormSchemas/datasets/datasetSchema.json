@@ -226,11 +226,9 @@
               "type": "string",
               "default": "Cloud optimized default layer to display on map"
             }
-          },
-          "required": ["type", "roles", "title", "description"]
+          }
         }
-      },
-      "required": ["cog_default"]
+      }
     },
     "renders": {
       "title": "Renders",
