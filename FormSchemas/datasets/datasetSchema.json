@@ -11,7 +11,6 @@
     "sample_files",
     "data_type",
     "providers",
-    "item_assets",
     "renders"
   ],
   "properties": {
@@ -208,23 +207,19 @@
           "type": "object",
           "properties": {
             "type": {
-              "type": "string",
-              "default": "image/tiff; application=geotiff; profile=cloud-optimized"
+              "type": "string"
             },
             "roles": {
               "type": "array",
               "items": {
                 "type": "string"
-              },
-              "default": ["data", "layer"]
+              }
             },
             "title": {
-              "type": "string",
-              "default": "Default COG Layer"
+              "type": "string"
             },
             "description": {
-              "type": "string",
-              "default": "Cloud optimized default layer to display on map"
+              "type": "string"
             }
           }
         }
