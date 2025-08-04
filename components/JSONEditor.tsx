@@ -427,7 +427,11 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         open={isModalVisible}
         onCancel={handleModalCancel}
         footer={[
-          <Button key="leave-unchanged" onClick={handleModalLeaveUnchanged}>
+          <Button
+            key="leave-unchanged"
+            onClick={handleModalLeaveUnchanged}
+            danger
+          >
             Leave Unchanged
           </Button>,
           <Button
@@ -459,7 +463,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
           <Flex vertical gap="small">
             <Typography.Text>
               <Typography.Text strong>
-                Option 1: Accept &amp; Add Prefix
+                Recommended: Accept &amp; Add Prefix
               </Typography.Text>
               <br />
               Automatically rename these keys (e.g., &quot;is_periodic&quot;
@@ -467,11 +471,12 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
             </Typography.Text>
             <Typography.Text>
               <Typography.Text strong>
-                Option 2: Leave Unchanged
+                Advanced: Leave Unchanged
               </Typography.Text>
               <br />
-              Keep the keys as they are, and we&apos;ll automatically disable
-              the &quot;Enforce strict schema&quot; check to prevent validation
+              For advanced configurations by the data services team, keep the
+              keys as they are, and we&apos;ll automatically disable the
+              &quot;Enforce strict schema&quot; check to prevent validation
               errors for these properties.
             </Typography.Text>
           </Flex>
