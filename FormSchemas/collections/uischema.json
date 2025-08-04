@@ -62,5 +62,10 @@
       "size": "large",
       "block": "true"
     }
+  },
+  "description": {
+    "ui:options": {
+      "description": "This describes the STAC collection."
+    }
   }
 }
