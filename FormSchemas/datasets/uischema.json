@@ -148,7 +148,7 @@
         "ui:widget": "textarea",
         "ui:options": {
           "rows": 8,
-          "description": "This describes the source of the thumbnail image."
+          "description": "Thumbnail description should also include source attribution."
         }
       }
     }
