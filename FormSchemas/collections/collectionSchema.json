@@ -220,6 +220,19 @@
           }
         }
       }
+    },
+    "dashboard:is_periodic": {
+      "type": "boolean",
+      "title": "Is Periodic?"
+    },
+    "dashboard:time_density": {
+      "type": "string",
+      "title": "Time Density"
+    },
+    "dashboard:time_interval": {
+      "type": "string",
+      "format": "duration",
+      "title": "Time Interval"
     }
   }
 }

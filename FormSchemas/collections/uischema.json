@@ -1,11 +1,16 @@
 {
   "ui:grid": [
     {
-      "id": 6,
-      "title": 6,
-      "type": 4,
+      "id": 8,
+      "title": 12,
+      "type": 4
+    },
+    {
       "stac_version": 4,
-      "license": 4
+      "license": 6,
+      "dashboard:is_periodic": 2,
+      "dashboard:time_density": 6,
+      "dashboard:time_interval": 6
     },
     {
       "description": 12,
@@ -64,8 +69,10 @@
     }
   },
   "description": {
+    "ui:widget": "textarea",
     "ui:options": {
-      "description": "This describes the STAC collection."
+      "description": "This describes the STAC collection.",
+      "rows": 8
     }
   }
 }
