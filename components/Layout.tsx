@@ -1,7 +1,8 @@
 'use client';
 
 import React, { ReactNode, useState } from 'react';
-import { Layout } from 'antd';
+import { Divider, Layout } from 'antd';
+import Image from 'next/image';
 
 import MenuBar from '@/components/MenuBar';
 import dynamic from 'next/dynamic';
@@ -21,7 +22,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
         collapsible
         collapsed={collapsed}
         onCollapse={() => setCollapsed(!collapsed)}
-        width={200}
+        width={220}
         collapsedWidth={80}
       >
         <div
@@ -31,12 +32,21 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
             justifyContent: 'center',
             color: 'white',
             padding: '20px',
-            width: 'calc(100% - 8px)',
-            fontSize: '1.5em',
+            height: '74px',
+            fontSize: '1.2em',
             textAlign: 'center',
+            transition: 'all 0.2s',
           }}
         >
-          VEDA Ingest UI
+          <Image
+            src="/icon.svg"
+            alt="VEDA Ingest UI Logo"
+            width={32}
+            height={32}
+          />
+          {!collapsed && (
+            <span style={{ marginLeft: '12px' }}>VEDA Ingest UI</span>
+          )}
         </div>
         <MenuBar />
         <LogoutButton collapsed={collapsed} />

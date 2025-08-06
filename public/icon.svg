@@ -1,0 +1,15 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle (Globe) using NASA Blue -->
+  <circle cx="32" cy="32" r="30" fill="#0B3D91" stroke="#FFFFFF" stroke-width="2"/>
+
+  <!-- Globe Lines in White -->
+  <path d="M32 2C32 2 42 16 42 32C42 48 32 62 32 62" stroke="#FFFFFF" stroke-width="2"/>
+  <path d="M32 2C32 2 22 16 22 32C22 48 32 62 32 62" stroke="#FFFFFF" stroke-width="2"/>
+  <path d="M4.5 22H59.5" stroke="#FFFFFF" stroke-width="2"/>
+  <path d="M4.5 42H59.5" stroke="#FFFFFF" stroke-width="2"/>
+
+  <!-- Edit Icon (Pencil) in NASA Red -->
+  <g transform="translate(27, 15) rotate(15) scale(1.75)">
+    <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.13,5.12L18.88,8.87M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25Z" fill="#FC3D21"/>
+  </g>
+</svg>
