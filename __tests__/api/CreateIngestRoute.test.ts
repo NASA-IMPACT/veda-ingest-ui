@@ -12,6 +12,7 @@ describe('POST /api/create-ingest', () => {
     const mockBody = {
       data: { collection: 'Test Collection' },
       ingestionType: 'collection',
+      userComment: undefined,
     };
     const mockRequest = {
       json: vi.fn().mockResolvedValue(mockBody),
@@ -24,7 +25,8 @@ describe('POST /api/create-ingest', () => {
 
     expect(CreatePR).toHaveBeenCalledWith(
       mockBody.data,
-      mockBody.ingestionType
+      mockBody.ingestionType,
+      mockBody.userComment
     );
     expect(jsonResponse).toEqual({ githubURL: 'https://github.com/test/pr' });
     expect(response.status).toBe(200);

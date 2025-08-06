@@ -15,7 +15,8 @@ type IngestionType = 'dataset' | 'collection';
 
 const CreatePR = async (
   data: Data,
-  ingestionType: IngestionType
+  ingestionType: IngestionType,
+  userComment?: string
 ): Promise<string> => {
   const targetBranch = process.env.TARGET_BRANCH || 'main';
   const owner = process.env.OWNER;
@@ -107,6 +108,7 @@ const CreatePR = async (
       head: branchName,
       base: targetBranch,
       title: `Ingest Request for ${fileNameSource}`,
+      body: userComment || '',
     });
 
     return pr.data.html_url;

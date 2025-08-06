@@ -6,7 +6,7 @@ type AllowedIngestionType = 'dataset' | 'collection';
 
 export async function POST(request: NextRequest) {
   try {
-    const { data, ingestionType } = await request.json();
+    const { data, ingestionType, userComment } = await request.json();
 
     if (!data) {
       return NextResponse.json(
@@ -27,7 +27,11 @@ export async function POST(request: NextRequest) {
 
     const validatedIngestionType: AllowedIngestionType = ingestionType;
 
-    const githubResponse = await CreatePR(data, validatedIngestionType);
+    const githubResponse = await CreatePR(
+      data,
+      validatedIngestionType,
+      userComment
+    );
 
     return NextResponse.json({ githubURL: githubResponse });
   } catch (error) {
