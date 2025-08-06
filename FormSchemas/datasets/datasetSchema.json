@@ -44,6 +44,11 @@
       "type": "string",
       "title": "Time Density"
     },
+    "dashboard:time_interval": {
+      "type": "string",
+      "format": "duration",
+      "title": "Time Interval"
+    },
     "links": {
       "title": "Links",
       "type": "array",

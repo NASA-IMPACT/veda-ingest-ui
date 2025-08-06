@@ -13,7 +13,7 @@ const CodeEditor = dynamic(
   { ssr: false }
 );
 
-const { Text } = Typography;
+const { Text, Paragraph } = Typography;
 
 interface Renders {
   dashboard?: string | object;
@@ -46,6 +46,14 @@ interface JSONEditorProps {
   ) => void;
 }
 
+const codeEditorStyle = {
+  backgroundColor: '#00152a',
+  fontFamily:
+    'ui-monospace,SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace',
+  boxShadow: '0px 3px 15px rgba(0, 0, 0, 0.2)',
+  borderRadius: '6px',
+};
+
 const JSONEditor: React.FC<JSONEditorProps> = ({
   value,
   jsonSchema,
@@ -67,6 +75,8 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
   const [modalActionType, setModalActionType] = useState<
     'accept' | 'unchanged' | null
   >(null);
+  const [modalBeforeCode, setModalBeforeCode] = useState<string>('');
+  const [modalAfterCode, setModalAfterCode] = useState<string>('');
 
   const editorRef = useRef<any>(null);
   const additionalPropertyCardRef = useRef<HTMLDivElement>(null);
@@ -87,7 +97,6 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
     (valueToValidate: JSONEditorValue) => {
       let processedValue = structuredClone(valueToValidate);
 
-      // (Code for handling renders.dashboard remains the same)
       if (
         processedValue.renders?.dashboard &&
         typeof processedValue.renders.dashboard === 'object'
@@ -243,15 +252,24 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         }
       }
 
-      const hasDashboardRelatedKeys =
-        Object.prototype.hasOwnProperty.call(parsedValue, 'is_periodic') ||
-        Object.prototype.hasOwnProperty.call(parsedValue, 'time_density');
+      const dashboardKeys = ['is_periodic', 'time_density', 'time_duration'];
+      const foundKeys = dashboardKeys.filter((key) =>
+        Object.prototype.hasOwnProperty.call(parsedValue, key)
+      );
 
-      if (hasDashboardRelatedKeys) {
-        if (strictSchema) {
-          setIsModalVisible(true);
-          return;
-        }
+      if (foundKeys.length > 0 && strictSchema) {
+        const before: { [key: string]: any } = {};
+        const after: { [key: string]: any } = {};
+
+        foundKeys.forEach((key) => {
+          before[key] = parsedValue[key as keyof JSONEditorValue];
+          after[`dashboard:${key}`] = parsedValue[key as keyof JSONEditorValue];
+        });
+
+        setModalBeforeCode(JSON.stringify(before, null, 2));
+        setModalAfterCode(JSON.stringify(after, null, 2));
+        setIsModalVisible(true);
+        return;
       }
 
       validateAndApply(parsedValue);
@@ -313,26 +331,14 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       return;
     }
 
-    if (
-      Object.prototype.hasOwnProperty.call(
-        currentEditorParsedValue,
-        'is_periodic'
-      )
-    ) {
-      currentEditorParsedValue['dashboard:is_periodic'] =
-        currentEditorParsedValue.is_periodic;
-      delete currentEditorParsedValue.is_periodic;
-    }
-    if (
-      Object.prototype.hasOwnProperty.call(
-        currentEditorParsedValue,
-        'time_density'
-      )
-    ) {
-      currentEditorParsedValue['dashboard:time_density'] =
-        currentEditorParsedValue.time_density;
-      delete currentEditorParsedValue.time_density;
-    }
+    const keysToPrefix = ['is_periodic', 'time_density', 'time_duration'];
+    keysToPrefix.forEach((key) => {
+      if (Object.prototype.hasOwnProperty.call(currentEditorParsedValue, key)) {
+        currentEditorParsedValue[`dashboard:${key}`] =
+          currentEditorParsedValue[key as keyof JSONEditorValue];
+        delete currentEditorParsedValue[key as keyof JSONEditorValue];
+      }
+    });
 
     setEditorValue(JSON.stringify(currentEditorParsedValue, null, 2));
     setIsModalVisible(false);
@@ -381,11 +387,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         padding={15}
         style={{
           fontSize: 14,
-          backgroundColor: '#00152a',
-          fontFamily:
-            'ui-monospace,SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace',
-          boxShadow: '0px 3px 15px rgba(0, 0, 0, 0.2)',
-          borderRadius: '6px',
+          ...codeEditorStyle,
         }}
       />
       <Button
@@ -426,6 +428,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         title="Suggestion for Dashboard-Related Keys"
         open={isModalVisible}
         onCancel={handleModalCancel}
+        width={700}
         footer={[
           <Button
             key="leave-unchanged"
@@ -444,42 +447,48 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         ]}
       >
         <Flex vertical gap="small">
-          <Typography.Paragraph>
-            It looks like you&apos;ve included{' '}
-            <Typography.Text strong>&quot;is_periodic&quot;</Typography.Text> or{' '}
-            <Typography.Text strong>&quot;time_density&quot;</Typography.Text>{' '}
-            at the top level of your JSON. These keys are typically expected to
-            be prefixed with{' '}
-            <Typography.Text code>&quot;dashboard:&quot;</Typography.Text>{' '}
-            (e.g.,{' '}
-            <Typography.Text code>
-              &quot;dashboard:is_periodic&quot;
-            </Typography.Text>
-            ).
-          </Typography.Paragraph>
-          <Typography.Paragraph>
-            How would you like to proceed?
-          </Typography.Paragraph>
-          <Flex vertical gap="small">
-            <Typography.Text>
-              <Typography.Text strong>
-                Recommended: Accept &amp; Add Prefix
-              </Typography.Text>
-              <br />
-              Automatically rename these keys (e.g., &quot;is_periodic&quot;
-              becomes &quot;dashboard:is_periodic&quot;).
-            </Typography.Text>
-            <Typography.Text>
-              <Typography.Text strong>
-                Advanced: Leave Unchanged
-              </Typography.Text>
-              <br />
-              For advanced configurations by the data services team, keep the
-              keys as they are, and we&apos;ll automatically disable the
-              &quot;Enforce strict schema&quot; check to prevent validation
-              errors for these properties.
-            </Typography.Text>
+          <Paragraph>
+            We noticed some top-level keys that are usually prefixed with{' '}
+            <Text code>dashboard:</Text>. We recommend applying this prefix for
+            better organization.
+          </Paragraph>
+
+          <Flex gap="large" justify="space-around">
+            <Flex vertical flex={1}>
+              <Text strong>Current</Text>
+              <CodeEditor
+                value={modalBeforeCode}
+                language="json"
+                padding={10}
+                readOnly
+                style={{
+                  fontSize: 12,
+                  ...codeEditorStyle,
+                }}
+              />
+            </Flex>
+            <Flex vertical flex={1}>
+              <Text strong>Recommended</Text>
+              <CodeEditor
+                value={modalAfterCode}
+                language="json"
+                padding={10}
+                readOnly
+                style={{
+                  fontSize: 12,
+                  ...codeEditorStyle,
+                }}
+              />
+            </Flex>
           </Flex>
+
+          <Paragraph style={{ marginTop: '16px' }}>
+            <Text strong>Accept & Add Prefix:</Text> Automatically renames these
+            keys.
+            <br />
+            <Text strong>Leave Unchanged:</Text> Keeps the keys as they are and
+            disables the strict schema check to prevent validation errors.
+          </Paragraph>
         </Flex>
       </Modal>
     </Flex>
