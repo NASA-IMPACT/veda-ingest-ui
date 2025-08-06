@@ -23,7 +23,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
         collapsed={collapsed}
         onCollapse={() => setCollapsed(!collapsed)}
         width={220}
-        collapsedWidth={80}
+        collapsedWidth={100}
       >
         <div
           style={{
