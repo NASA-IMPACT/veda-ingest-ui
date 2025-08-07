@@ -99,12 +99,16 @@ test.describe('Create Collection Page', () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
 
+    await test.step('continue without adding a comment', async () => {
+      await page.getByRole('button', { name: /continue & submit/i }).click();
+    });
+
     await expect(
-      page.getByRole('dialog', { name: /Collection Submitted/i })
+      page.getByRole('dialog', { name: /Ingestion Request Submitted/i })
     ).toBeVisible();
 
     const githubLink = page
-      .getByRole('dialog', { name: /Collection Submitted/i })
+      .getByRole('dialog', { name: /Ingestion Request Submitted/i })
       .getByRole('link', { name: /github/i });
     await expect(githubLink).toBeVisible();
 
@@ -179,9 +183,12 @@ test.describe('Create Collection Page', () => {
     await test.step('submit form and validate that POST body values match pasted config values', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
+    await test.step('continue without adding a comment', async () => {
+      await page.getByRole('button', { name: /continue & submit/i }).click();
+    });
 
     await expect(
-      page.getByRole('dialog', { name: /Collection Submitted/i })
+      page.getByRole('dialog', { name: /Ingestion Request Submitted/i })
     ).toBeVisible();
   });
 
@@ -271,6 +278,10 @@ test.describe('Create Collection Page', () => {
 
     await test.step('submit form and validate that POST body includes the extra field', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
+    });
+
+    await test.step('continue without adding a comment', async () => {
+      await page.getByRole('button', { name: /continue & submit/i }).click();
     });
   });
 
@@ -389,6 +400,11 @@ test.describe('Create Collection Page', () => {
     await test.step('submit completed form', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
+
+    await test.step('continue without adding a comment', async () => {
+      await page.getByRole('button', { name: /continue & submit/i }).click();
+    });
+
     await expect(
       page.getByRole('dialog', { name: /Collection Name Exists/i })
     ).toBeVisible();
@@ -433,6 +449,11 @@ test.describe('Create Collection Page', () => {
     await test.step('submit completed form', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
+
+    await test.step('continue without adding a comment', async () => {
+      await page.getByRole('button', { name: /continue & submit/i }).click();
+    });
+
     await expect(
       page.getByRole('dialog', { name: /Something Went Wrong/i })
     ).toBeVisible();

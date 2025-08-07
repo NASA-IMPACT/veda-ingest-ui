@@ -20,7 +20,9 @@ type SuccessModalProps =
 
 export default function SuccessModal(props: SuccessModalProps) {
   const title =
-    props.type === 'edit' ? 'Collection Updated' : 'Collection Submitted';
+    props.type === 'edit'
+      ? 'Ingestion Request Updated'
+      : 'Ingestion Request Submitted';
 
   const content =
     props.type === 'edit' ? (
