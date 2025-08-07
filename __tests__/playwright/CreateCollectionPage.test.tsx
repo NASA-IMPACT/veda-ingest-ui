@@ -99,12 +99,16 @@ test.describe('Create Collection Page', () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
 
+    await test.step('continue without adding a comment', async () => {
+      await page.getByRole('button', { name: /continue & submit/i }).click();
+    });
+
     await expect(
-      page.getByRole('dialog', { name: /Collection Submitted/i })
+      page.getByRole('dialog', { name: /Ingestion Request Submitted/i })
     ).toBeVisible();
 
     const githubLink = page
-      .getByRole('dialog', { name: /Collection Submitted/i })
+      .getByRole('dialog', { name: /Ingestion Request Submitted/i })
       .getByRole('link', { name: /github/i });
     await expect(githubLink).toBeVisible();
 
@@ -121,15 +125,25 @@ test.describe('Create Collection Page', () => {
   test('Create Collection request submitted with pasted JSON', async ({
     page,
   }, testInfo) => {
+    const userComment = 'This comment was entered in the VEDA Ingest UI';
     // Intercept the POST request to validate its payload
     await page.route('**/create-dataset', async (route, request) => {
       if (request.method() === 'POST') {
         const postData = request.postDataJSON();
 
-        expect(postData.ingestionType).toBe('collection');
-        expect(postData.data).toEqual(
-          expect.objectContaining(requiredCollectionConfig)
-        );
+        expect(
+          postData.ingestionType,
+          'Ingestion Type is included in POST data'
+        ).toBe('collection');
+        expect(
+          postData.data,
+          `Collection cofig data is included in POST data`
+        ).toEqual(expect.objectContaining(requiredCollectionConfig));
+
+        expect(
+          postData.userComment,
+          'user comment is included in POST data'
+        ).toBe(userComment);
 
         await route.fulfill({
           status: 200,
@@ -179,9 +193,13 @@ test.describe('Create Collection Page', () => {
     await test.step('submit form and validate that POST body values match pasted config values', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
+    await test.step('add comment and continue', async () => {
+      await page.getByTestId('user-comment-textarea').fill(userComment);
+      await page.getByRole('button', { name: /continue & submit/i }).click();
+    });
 
     await expect(
-      page.getByRole('dialog', { name: /Collection Submitted/i })
+      page.getByRole('dialog', { name: /Ingestion Request Submitted/i })
     ).toBeVisible();
   });
 
@@ -271,6 +289,10 @@ test.describe('Create Collection Page', () => {
 
     await test.step('submit form and validate that POST body includes the extra field', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
+    });
+
+    await test.step('continue without adding a comment', async () => {
+      await page.getByRole('button', { name: /continue & submit/i }).click();
     });
   });
 
@@ -389,6 +411,11 @@ test.describe('Create Collection Page', () => {
     await test.step('submit completed form', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
+
+    await test.step('continue without adding a comment', async () => {
+      await page.getByRole('button', { name: /continue & submit/i }).click();
+    });
+
     await expect(
       page.getByRole('dialog', { name: /Collection Name Exists/i })
     ).toBeVisible();
@@ -433,6 +460,11 @@ test.describe('Create Collection Page', () => {
     await test.step('submit completed form', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
+
+    await test.step('continue without adding a comment', async () => {
+      await page.getByRole('button', { name: /continue & submit/i }).click();
+    });
+
     await expect(
       page.getByRole('dialog', { name: /Something Went Wrong/i })
     ).toBeVisible();

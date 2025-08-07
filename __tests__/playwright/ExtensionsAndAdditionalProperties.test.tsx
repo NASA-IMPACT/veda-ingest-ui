@@ -130,8 +130,13 @@ test.describe('Extensions and Additional Properties', () => {
       });
 
       await page.getByRole('button', { name: /submit/i }).click();
+
+      await test.step('continue without adding a comment', async () => {
+        await page.getByRole('button', { name: /continue & submit/i }).click();
+      });
+
       await expect(
-        page.getByRole('dialog', { name: /Collection Submitted/i })
+        page.getByRole('dialog', { name: /Ingestion Request Submitted/i })
       ).toBeVisible();
     });
   });

@@ -72,9 +72,6 @@ const requiredConfig = {
 
 const MOCK_GITHUB_URL = 'https://github.com/nasa-veda/veda-data/pull/12345';
 
-const DATASET_SUCCESS_DIALOG_TITLE = /Ingest Submitted/i;
-const COLLECTION_SUCCESS_DIALOG_TITLE = /Collection Submitted/i;
-
 test.describe('Create Dataset Page', () => {
   test('Create Dataset request displays github link to PR', async ({
     page,
@@ -106,13 +103,15 @@ test.describe('Create Dataset Page', () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
 
+    await test.step('continue without adding a comment', async () => {
+      await page.getByRole('button', { name: /continue & submit/i }).click();
+    });
+
     const successDialog = page.getByRole('dialog', {
-      name: DATASET_SUCCESS_DIALOG_TITLE,
+      name: /Ingestion Request Submitted/i,
     });
-    const legacyDialog = page.getByRole('dialog', {
-      name: COLLECTION_SUCCESS_DIALOG_TITLE,
-    });
-    await expect(successDialog.or(legacyDialog)).toBeVisible();
+
+    await expect(successDialog).toBeVisible();
 
     const githubLink = page.getByRole('link', { name: /github/i }).first();
     await expect(githubLink).toBeVisible();
@@ -200,13 +199,15 @@ test.describe('Create Dataset Page', () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
 
+    await test.step('continue without adding a comment', async () => {
+      await page.getByRole('button', { name: /continue & submit/i }).click();
+    });
+
     const successDialog = page.getByRole('dialog', {
-      name: DATASET_SUCCESS_DIALOG_TITLE,
+      name: /Ingestion Request Submitted/i,
     });
-    const legacyDialog = page.getByRole('dialog', {
-      name: COLLECTION_SUCCESS_DIALOG_TITLE,
-    });
-    await expect(successDialog.or(legacyDialog)).toBeVisible();
+
+    await expect(successDialog).toBeVisible();
   });
 
   test('Create Dataset allows extra fields with toggle enabled', async ({
@@ -289,6 +290,10 @@ test.describe('Create Dataset Page', () => {
 
     await test.step('submit form and validate that POST body values match pasted config values including extra field', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
+    });
+
+    await test.step('continue without adding a comment', async () => {
+      await page.getByRole('button', { name: /continue & submit/i }).click();
     });
   });
 
@@ -412,6 +417,11 @@ test.describe('Create Dataset Page', () => {
     await test.step('submit completed form', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
+
+    await test.step('continue without adding a comment', async () => {
+      await page.getByRole('button', { name: /continue & submit/i }).click();
+    });
+
     await expect(
       page.getByRole('dialog', { name: /Collection Name Exists/i })
     ).toBeVisible();
@@ -455,6 +465,11 @@ test.describe('Create Dataset Page', () => {
     await test.step('submit completed form', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
+
+    await test.step('continue without adding a comment', async () => {
+      await page.getByRole('button', { name: /continue & submit/i }).click();
+    });
+
     await expect(
       page.getByRole('dialog', { name: /Something Went Wrong/i })
     ).toBeVisible();

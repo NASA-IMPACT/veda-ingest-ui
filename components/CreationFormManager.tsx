@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, Typography, Alert } from 'antd';
+import { Card, Typography, Alert, Modal, Input } from 'antd';
 import { Status } from '@/types/global';
 import DatasetIngestionForm from '@/components/DatasetIngestionForm';
 import CollectionIngestionForm from '@/components/CollectionIngestionForm';
 
 const { Title } = Typography;
+const { TextArea } = Input;
 
 interface CreationFormManagerProps {
   formType: 'dataset' | 'collection';
@@ -24,20 +25,38 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
   setPullRequestUrl,
 }) => {
   const [formData, setFormData] = useState<Record<string, unknown>>({});
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [userComment, setUserComment] = useState('');
+  const [stagedFormData, setStagedFormData] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
 
-  const onFormDataSubmit = (data?: Record<string, unknown>) => {
+  const handleFormSubmit = (data?: Record<string, unknown>) => {
     if (!data) {
       console.error('No form data provided.');
       return;
     }
+    setStagedFormData(data);
+    setIsModalVisible(true);
+  };
 
+  const handleFinalSubmit = () => {
+    if (!stagedFormData) {
+      console.error('No staged form data available for submission.');
+      setIsModalVisible(false);
+      return;
+    }
+
+    setIsModalVisible(false);
     setStatus('loadingGithub');
-    setCollectionName(data.collection as string);
+    setCollectionName(stagedFormData.collection as string);
 
     const url = 'api/create-ingest';
     const payload = {
-      data: data,
+      data: stagedFormData,
       ingestionType: formType,
+      userComment: userComment,
     };
 
     const requestOptions = {
@@ -62,39 +81,73 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
       .catch((error) => {
         console.error(error);
         setStatus('error');
+      })
+      .finally(() => {
+        setStagedFormData(null);
+        setUserComment('');
       });
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    setStagedFormData(null);
+    setUserComment('');
   };
 
   const childFormProps = {
     formData,
     setFormData,
-    onSubmit: onFormDataSubmit,
-    isEditMode: false, // Explicitly false for creation
+    onSubmit: handleFormSubmit,
+    isEditMode: false,
   };
 
   const title = `Create New ${formType.charAt(0).toUpperCase() + formType.slice(1)}`;
 
   return (
-    <Card>
-      <Title level={2} style={{ marginBottom: '24px' }}>
-        {title}
-      </Title>
+    <>
+      <Card>
+        <Title level={2} style={{ marginBottom: '24px' }}>
+          {title}
+        </Title>
 
-      {formType === 'dataset' ? (
-        <DatasetIngestionForm
-          {...childFormProps}
-          defaultTemporalExtent={true}
+        {formType === 'dataset' ? (
+          <DatasetIngestionForm
+            {...childFormProps}
+            defaultTemporalExtent={true}
+          />
+        ) : formType === 'collection' ? (
+          <CollectionIngestionForm {...childFormProps} />
+        ) : (
+          <Alert
+            message="Invalid formType specified. Please use dataset or collection."
+            type="error"
+            showIcon
+          />
+        )}
+      </Card>
+
+      <Modal
+        title="Add an Optional Note for Maintainers"
+        open={isModalVisible}
+        onOk={handleFinalSubmit}
+        onCancel={handleCancel}
+        okText="Continue & Submit"
+        cancelText="Cancel"
+        destroyOnHidden={true}
+      >
+        <p style={{ marginBottom: 8 }}>
+          You can add additional information for the Data Services Team to help
+          with this ingest. This message is optional.
+        </p>
+        <TextArea
+          rows={4}
+          value={userComment}
+          onChange={(e) => setUserComment(e.target.value)}
+          placeholder="e.g., This is a new data type."
+          data-testid="user-comment-textarea"
         />
-      ) : formType === 'collection' ? (
-        <CollectionIngestionForm {...childFormProps} />
-      ) : (
-        <Alert
-          message="Invalid formType specified. Please use dataset or collection."
-          type="error"
-          showIcon
-        />
-      )}
-    </Card>
+      </Modal>
+    </>
   );
 };
 
