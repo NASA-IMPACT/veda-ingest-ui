@@ -144,6 +144,7 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
           value={userComment}
           onChange={(e) => setUserComment(e.target.value)}
           placeholder="e.g., This is a new data type."
+          data-testid="user-comment-textarea"
         />
       </Modal>
     </>
