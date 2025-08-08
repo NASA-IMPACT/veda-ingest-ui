@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Input, Button, Select, Form as AntdForm, Space } from 'antd';
 import { PlusCircleOutlined, DeleteOutlined } from '@ant-design/icons';
-import CodeEditorWidget from './CodeEditorWidget';
+import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
 
 const SUMMARY_TYPES = {
   JSON_SCHEMA: 'JSON Schema',
