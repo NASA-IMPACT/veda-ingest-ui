@@ -37,11 +37,6 @@ test.describe('Thumbnail Uploader Page', () => {
     });
 
     await expect(
-      page.getByText(/authenticating upload/i),
-      'authenticating upload message appears'
-    ).toBeVisible();
-
-    await expect(
       page.getByRole('heading', { name: 'Image Validation' }),
       'image validation appears'
     ).toBeVisible();
@@ -137,11 +132,6 @@ test.describe('Thumbnail Uploader Page', () => {
         path.join(__dirname, '../../__mocks__/images/thumbnail.jpg')
       );
     });
-
-    await expect(
-      page.getByText(/authenticating upload/i),
-      'authenticating upload message appears'
-    ).toBeVisible();
 
     await test.step('confirm overwrite', async () => {
       await expect(

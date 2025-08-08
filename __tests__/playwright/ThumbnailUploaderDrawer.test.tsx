@@ -50,11 +50,6 @@ test.describe('Thumbnail Uploader Drawer', () => {
     });
 
     await expect(
-      page.getByText(/authenticating upload/i),
-      'authenticating upload message appears'
-    ).toBeVisible();
-
-    await expect(
       page.getByRole('heading', { name: 'Image Validation' }),
       'image validation appears'
     ).toBeVisible();

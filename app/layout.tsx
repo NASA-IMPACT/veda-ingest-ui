@@ -7,6 +7,9 @@ import 'leaflet/dist/leaflet.css';
 import { SessionProvider } from 'next-auth/react';
 import type { Metadata } from 'next';
 
+import { ConfigProvider } from 'antd';
+import theme from '@/theme/themeConfig';
+
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
@@ -26,7 +29,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AntdRegistry>
-          <SessionProvider>{children}</SessionProvider>
+          <ConfigProvider theme={theme}>
+            <SessionProvider>{children}</SessionProvider>
+          </ConfigProvider>
         </AntdRegistry>
       </body>
     </html>
