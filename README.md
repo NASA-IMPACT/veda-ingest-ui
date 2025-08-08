@@ -26,7 +26,82 @@ const branchName = `feat/${collectionName}`;
 
 All API calls require users to be authenticated via AWS Cognito. The API then obtains a github token and makes the desired calls with the github token.
 
-Users are allowed to edit PRs starting with the prefix `'Ingest Request for '`. It is assumed that all PRs will have the appropriate json file in the standard filepath. The existing values in the json will be loaded into a form. A user can update those values and a new commit will be added to the PR with the new values.
+Users are allowed to edit open PRs that are modifying json files in the standard filepath for each ingestion type. The existing values in the json will be loaded into a form. A user can update those values and a new commit will be added to the PR with the new values.
+
+## Creation Component Architecture
+
+```mermaid
+graph TD
+    subgraph "Creation Flow"
+        A[CreationFormManager] -->|Sends POST Request| API_POST[API];
+        A -->|Receives 'ingestionType' prop| B{Render based on type};
+
+        subgraph "UI & Validation"
+            C[DatasetIngestionForm]
+            C --> C_E{Render UI Tabs};
+            C_E --> C_F[RJSF Form];
+            C_E --> C_G[JSON Editor];
+            C_F --> C_H["FormSchemas/datasets"];
+            C_G --> C_H;
+        end
+
+        subgraph "UI & Validation"
+            D[CollectionIngestionForm]
+            D --> D_E{Render UI Tabs};
+            D_E --> D_F[RJSF Form];
+            D_E --> D_G[JSON Editor];
+            D_F --> D_I["FormSchemas/collections"];
+            D_G --> D_I;
+        end
+
+        B -- "dataset" --> C;
+        B -- "collection" --> D;
+    end
+
+    style A fill:#0B3D91,stroke:#fff,stroke-width:2px,color:#fff
+    style B fill:#BCC6CC,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#A4D3EE,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#A4D3EE,stroke:#333,stroke-width:2px,color:#000
+    style API_POST fill:#FC3D21,stroke:#333,stroke-width:2px
+```
+
+## Edit Component Architecture
+
+```mermaid
+graph TD
+    subgraph "Edit Flow"
+        A[EditFormManager] -->|Sends PUT Request| API_PUT[API];
+        A -->|Receives 'ingestionType' & 'disableName' props| B{Render based on type};
+
+        subgraph "Dataset Form"
+            C_Edit[DatasetIngestionForm]
+            C_Edit --Name fields disabled--> C_E_Edit{Render UI Tabs};
+            C_E_Edit --> C_F_Edit[RJSF Form];
+            C_E_Edit --> C_G_Edit[JSON Editor];
+            C_F_Edit --> C_H_Edit["FormSchemas/datasets"];
+            C_G_Edit --> C_H_Edit;
+        end
+
+        subgraph "Collection Form"
+            D_Edit[CollectionIngestionForm]
+            D_Edit --Name fields disabled--> D_E_Edit{Render UI Tabs};
+            D_E_Edit --> D_F_Edit[RJSF Form];
+            D_E_Edit --> D_G_Edit[JSON Editor];
+            D_F_Edit --> D_I_Edit["FormSchemas/collections"];
+            D_G_Edit --> D_I_Edit;
+        end
+
+        B -- "dataset" --> C_Edit;
+        B -- "collection" --> D_Edit;
+    end
+
+    style A fill:#0B3D91,stroke:#fff,stroke-width:2px,color:#fff
+    style B fill:#BCC6CC,stroke:#333,stroke-width:2px,color:#000
+    style C_Edit fill:#A4D3EE,stroke:#333,stroke-width:2px,color:#000
+    style D_Edit fill:#A4D3EE,stroke:#333,stroke-width:2px,color:#000
+    style API_PUT fill:#FC3D21,stroke:#333,stroke-width:2px
+
+```
 
 # Requirements
 
