@@ -1,5 +1,5 @@
 import { Drawer } from 'antd';
-import ThumbnailUploader from '@/components/ThumbnailUploader';
+import ThumbnailUploader from '@/components/thumbnails/ThumbnailUploader';
 
 interface ThumbnailUploaderDrawerProps {
   open: boolean;

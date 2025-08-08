@@ -5,7 +5,7 @@ import {
 } from '@ant-design/icons';
 import React, { forwardRef, useState } from 'react';
 
-import CodeEditorWidget from './CodeEditorWidget'; // Adjust the path as needed
+import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
 
 const { useToken } = theme;
 

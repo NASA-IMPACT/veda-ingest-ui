@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 
 // Dynamically load the COGViewerContent component to prevent SSR issues
 const COGViewerContent = dynamic(
-  () => import('@/components/COGViewerContent'),
+  () => import('@/components/COGViewer/COGViewerContent'),
   {
     ssr: false,
   }
