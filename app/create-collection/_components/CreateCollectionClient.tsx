@@ -1,10 +1,10 @@
 'use client';
 import { useState } from 'react';
-import AppLayout from '@/components/Layout';
+import AppLayout from '@/components/layout/Layout';
 import { Spin } from 'antd';
-import CreationFormManager from '@/components/CreationFormManager';
-import ErrorModal from '@/components/ErrorModal';
-import SuccessModal from '@/components/SuccessModal';
+import CreationFormManager from '@/components/ingestion/CreationFormManager';
+import ErrorModal from '@/components/ui/ErrorModal';
+import SuccessModal from '@/components/ui/SuccessModal';
 import { Status } from '@/types/global';
 
 const CreateCollectionClient = function CreateIngestClient() {

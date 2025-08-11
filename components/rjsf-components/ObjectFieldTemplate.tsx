@@ -26,8 +26,8 @@ import {
 import Button from 'antd/lib/button';
 import { CloudUploadOutlined, ImportOutlined } from '@ant-design/icons';
 
-import COGDrawerViewer from '@/components/COGDrawerViewer';
-import ThumbnailUploaderDrawer from '@/components/ThumbnailUploaderDrawer';
+import COGDrawerViewer from '@/components/COGViewer/COGDrawerViewer';
+import ThumbnailUploaderDrawer from '@/components/thumbnails/ThumbnailUploaderDrawer';
 import { Alert } from 'antd';
 import DiscoveryItemObjectFieldTemplate from './DiscoveryItemObjectFieldTemplate'; // Import the specific template
 

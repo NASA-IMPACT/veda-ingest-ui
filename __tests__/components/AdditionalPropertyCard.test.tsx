@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import AdditionalPropertyCard from '@/components/AdditionalPropertyCard';
+import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 
 // Mock Ant Design's useToken hook
 vi.mock('antd', async (importOriginal) => {

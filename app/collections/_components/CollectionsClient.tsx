@@ -1,6 +1,6 @@
 'use client';
-import AppLayout from '@/components/Layout';
-import { Card, Col, Row, Spin } from 'antd';
+import AppLayout from '@/components/layout/Layout';
+import { Card, Col, Row } from 'antd';
 import Link from 'next/link';
 
 const IngestClient = function IngestClient() {

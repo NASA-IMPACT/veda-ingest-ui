@@ -1,16 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import AppLayout from '@/components/Layout';
-import EditFormManager from '@/components/EditFormManager';
+import AppLayout from '@/components/layout/Layout';
+import EditFormManager from '@/components/ingestion/EditFormManager';
 import { Button, List, Spin } from 'antd';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 import { Status } from '@/types/global';
 import { Endpoints } from '@octokit/types';
-import ErrorModal from '@/components/ErrorModal';
-import SuccessModal from '@/components/SuccessModal';
+import ErrorModal from '@/components/ui/ErrorModal';
+import SuccessModal from '@/components/ui/SuccessModal';
 
 // Type definitions
 type PullRequest =

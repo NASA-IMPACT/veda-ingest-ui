@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button, Typography, Checkbox, Flex, message, Modal } from 'antd';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import AdditionalPropertyCard from '@/components/AdditionalPropertyCard';
+import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 import dynamic from 'next/dynamic';
 import '@uiw/react-textarea-code-editor/dist.css';
 

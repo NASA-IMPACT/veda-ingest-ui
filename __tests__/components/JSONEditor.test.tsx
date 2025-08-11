@@ -16,7 +16,7 @@ import {
   fireEvent,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import JSONEditor from '@/components/JSONEditor';
+import JSONEditor from '@/components/ui/JSONEditor';
 import { message } from 'antd';
 import type { MessageType } from 'antd/es/message/interface';
 import React from 'react';
@@ -39,7 +39,7 @@ vi.mock('next/dynamic', async () => {
 });
 
 // Mock the AdditionalPropertyCard component
-vi.mock('@/components/AdditionalPropertyCard', async () => {
+vi.mock('@/components/rjsf-components/AdditionalPropertyCard', async () => {
   const React = await vi.importActual<typeof import('react')>('react');
   const MockCard = React.forwardRef<
     HTMLDivElement,

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import DatasetIngestionForm from '@/components/DatasetIngestionForm'; // Adjust path
+import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm'; // Adjust path
 import React, { useState } from 'react';
 
 // Mock RJSF's Form component to isolate our component's logic
@@ -30,7 +30,7 @@ vi.mock('@rjsf/core', () => {
 });
 
 // Mock child components
-vi.mock('@/components/JSONEditor', () => ({
+vi.mock('@/components/ui/JSONEditor', () => ({
   default: ({ onChange }: any) => (
     <div data-testid="json-editor">
       <button onClick={() => onChange({ collection: 'edited from json' })}>
@@ -40,11 +40,11 @@ vi.mock('@/components/JSONEditor', () => ({
   ),
 }));
 
-vi.mock('@/components/AdditionalPropertyCard', () => ({
+vi.mock('@/components/rjsf-components/AdditionalPropertyCard', () => ({
   default: () => <div data-testid="additional-property-card" />,
 }));
 
-vi.mock('@/components/CodeEditorWidget', () => ({
+vi.mock('@/components/ui/CodeEditorWidget', () => ({
   default: () => <div data-testid="code-editor-widget" />,
 }));
 

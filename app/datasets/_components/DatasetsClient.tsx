@@ -1,5 +1,5 @@
 'use client';
-import AppLayout from '@/components/Layout';
+import AppLayout from '@/components/layout/Layout';
 import { Card, Col, Row, Spin } from 'antd';
 import Link from 'next/link';
 

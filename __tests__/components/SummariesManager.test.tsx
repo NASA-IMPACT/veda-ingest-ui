@@ -3,13 +3,13 @@ import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import SummariesManager from '@/components/SummariesManager';
+import SummariesManager from '@/components/rjsf-components/SummariesManager';
 
 // --- Mocks ---
 
 // Mock the new AddSummaryForm. We just need to know if it's visible
 // and provide a way to simulate it calling the `onAdd` prop.
-vi.mock('@/components/AddSummaryForm', () => ({
+vi.mock('@/components/rjsf-components/AddSummaryForm', () => ({
   AddSummaryForm: vi.fn(({ onAdd }) => (
     <div data-testid="add-summary-form">
       <button onClick={() => onAdd({ key: 'mock-key', value: 'mock-value' })}>

@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 import React from 'react';
 
 // Mock AppLayout
-vi.mock('@/components/Layout', () => ({
+vi.mock('@/components/layout/Layout', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="app-layout">{children}</div>

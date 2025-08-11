@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { Status } from '@/types/global';
-import DatasetIngestionForm from '@/components/DatasetIngestionForm';
-import CollectionIngestionForm from '@/components/CollectionIngestionForm';
+import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm';
+import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
 import { Button } from 'antd';
 
 interface EditFormManagerProps {

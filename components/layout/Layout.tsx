@@ -4,10 +4,10 @@ import React, { ReactNode, useState } from 'react';
 import { Divider, Layout } from 'antd';
 import Image from 'next/image';
 
-import MenuBar from '@/components/MenuBar';
+import MenuBar from '@/components/layout/MenuBar';
 import dynamic from 'next/dynamic';
 
-const LogoutButton = dynamic(() => import('@/components/LogoutButton'), {
+const LogoutButton = dynamic(() => import('@/components/ui/LogoutButton'), {
   ssr: false,
 });
 

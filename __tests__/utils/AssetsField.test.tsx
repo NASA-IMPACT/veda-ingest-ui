@@ -3,7 +3,7 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import React from 'react';
 import { FieldProps } from '@rjsf/utils';
-import AssetsField from '@/utils/AssetsField';
+import AssetsField from '@/components/rjsf-components/AssetsField';
 
 // We will test against the real child components, so the mock is removed.
 // We still need to mock the RJSF-provided fields/templates.

@@ -7,11 +7,11 @@ import {
   fireEvent,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import EditFormManager from '@/components/EditFormManager';
+import EditFormManager from '@/components/ingestion/EditFormManager';
 import React from 'react';
 
 // Mock child components to isolate the manager's logic
-vi.mock('@/components/DatasetIngestionForm', () => ({
+vi.mock('@/components/ingestion/DatasetIngestionForm', () => ({
   default: ({ onSubmit, children, setDisabled }: any) => (
     <form
       data-testid="dataset-ingestion-form"
@@ -26,7 +26,7 @@ vi.mock('@/components/DatasetIngestionForm', () => ({
   ),
 }));
 
-vi.mock('@/components/CollectionIngestionForm', () => ({
+vi.mock('@/components/ingestion/CollectionIngestionForm', () => ({
   default: ({ onSubmit, children }: any) => (
     <form
       data-testid="collection-ingestion-form"

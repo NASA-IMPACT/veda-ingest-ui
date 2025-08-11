@@ -1,7 +1,7 @@
 'use client';
 
-import AppLayout from '@/components/Layout';
-import ThumbnailUploader from '@/components/ThumbnailUploader';
+import AppLayout from '@/components/layout/Layout';
+import ThumbnailUploader from '@/components/thumbnails/ThumbnailUploader';
 
 function UploadClient() {
   return (

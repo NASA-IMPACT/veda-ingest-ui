@@ -3,7 +3,7 @@ import { render, screen, cleanup, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import ExtensionManager from '@/components/ExtensionManager';
+import ExtensionManager from '@/components/ui/ExtensionManager';
 import { message } from 'antd';
 
 // Mock Ant Design's message service

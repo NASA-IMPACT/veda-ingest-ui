@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { Card, Typography, Alert, Modal, Input } from 'antd';
 import { Status } from '@/types/global';
-import DatasetIngestionForm from '@/components/DatasetIngestionForm';
-import CollectionIngestionForm from '@/components/CollectionIngestionForm';
+import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm';
+import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
 
 const { Title } = Typography;
 const { TextArea } = Input;
