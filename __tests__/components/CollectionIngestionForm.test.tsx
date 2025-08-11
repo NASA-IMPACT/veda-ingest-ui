@@ -10,13 +10,13 @@ import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
 
 // Import the component to test and the hook to mock
-import CollectionIngestionForm from '@/components/CollectionIngestionForm';
+import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
 import { useStacExtensions } from '@/hooks/useStacExtensions';
 
 // --- Mocks ---
 vi.mock('@/hooks/useStacExtensions');
 
-vi.mock('@/components/ExtensionManager', () => ({
+vi.mock('@/components/ui/ExtensionManager', () => ({
   default: ({ onAddExtension }: any) => (
     <div data-testid="extension-manager">
       <button
@@ -27,7 +27,7 @@ vi.mock('@/components/ExtensionManager', () => ({
     </div>
   ),
 }));
-vi.mock('@/components/CodeEditorWidget', () => ({
+vi.mock('@/components/ui/CodeEditorWidget', () => ({
   default: ({ id, value, onChange }: any) => (
     <textarea
       id={id}
@@ -47,10 +47,10 @@ vi.mock('@rjsf/core', () => ({
       </div>
     )),
 }));
-vi.mock('@/components/JSONEditor', () => ({
+vi.mock('@/components/ui/JSONEditor', () => ({
   default: () => <div data-testid="json-editor" />,
 }));
-vi.mock('@/components/SummariesManager', () => ({
+vi.mock('@/components/rjsf-components/SummariesManager', () => ({
   default: ({ onChange }: any) => (
     <div data-testid="summaries-manager">
       <button onClick={() => onChange({ a: 1 })}>
@@ -59,7 +59,7 @@ vi.mock('@/components/SummariesManager', () => ({
     </div>
   ),
 }));
-vi.mock('@/components/AdditionalPropertyCard', () => ({
+vi.mock('@/components/rjsf-components/AdditionalPropertyCard', () => ({
   default: () => <div data-testid="additional-property-card" />,
 }));
 vi.mock('@/utils/CustomValidation', () => ({ customValidate: vi.fn() }));

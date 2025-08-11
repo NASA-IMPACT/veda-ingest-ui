@@ -1,20 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  render,
-  screen,
-  cleanup,
-  fireEvent,
-  within,
-  waitFor,
-} from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import { AddSummaryForm } from '@/components/AddSummaryForm';
+import { AddSummaryForm } from '@/components/rjsf-components/AddSummaryForm';
 
 // --- Mocks ---
 
-vi.mock('@/components/CodeEditorWidget', () => ({
+vi.mock('@/components/ui/CodeEditorWidget', () => ({
   default: ({ value, onChange }: any) => (
     <textarea
       data-testid="code-editor-widget"

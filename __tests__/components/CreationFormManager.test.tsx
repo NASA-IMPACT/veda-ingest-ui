@@ -15,7 +15,7 @@ import {
   fireEvent,
   waitFor,
 } from '@testing-library/react';
-import CreationFormManager from '@/components/CreationFormManager';
+import CreationFormManager from '@/components/ingestion/CreationFormManager';
 import React from 'react';
 
 // --- JSDOM Workaround for Ant Design ---
@@ -37,7 +37,7 @@ beforeAll(() => {
 });
 
 // Mock child components to isolate the manager's logic
-vi.mock('@/components/DatasetIngestionForm', () => ({
+vi.mock('@/components/ingestion/DatasetIngestionForm', () => ({
   default: ({ onSubmit }: any) => (
     <form
       data-testid="dataset-ingestion-form"
@@ -49,7 +49,7 @@ vi.mock('@/components/DatasetIngestionForm', () => ({
   ),
 }));
 
-vi.mock('@/components/CollectionIngestionForm', () => ({
+vi.mock('@/components/ingestion/CollectionIngestionForm', () => ({
   default: ({ onSubmit }: any) => (
     <form
       data-testid="collection-ingestion-form"

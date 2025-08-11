@@ -2,7 +2,7 @@ import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { describe, it, vi, expect, afterEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import SuccessModal from '@/components/SuccessModal';
+import SuccessModal from '@/components/ui/SuccessModal';
 import { ModalProps } from 'antd';
 
 // Mock Ant Design's Modal

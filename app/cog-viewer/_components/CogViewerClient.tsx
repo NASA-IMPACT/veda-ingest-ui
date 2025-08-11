@@ -1,6 +1,6 @@
 'use client';
 
-import AppLayout from '@/components/Layout';
+import AppLayout from '@/components/layout/Layout';
 import { Input, message } from 'antd';
 import { useCOGViewer } from '@/hooks/useCOGViewer';
 import dynamic from 'next/dynamic';
@@ -8,7 +8,7 @@ import 'leaflet/dist/leaflet.css';
 
 // Dynamically load the COGViewerContent component to prevent SSR issues
 const COGViewerContent = dynamic(
-  () => import('@/components/COGViewerContent'),
+  () => import('@/components/COGViewer/COGViewerContent'),
   {
     ssr: false,
   }

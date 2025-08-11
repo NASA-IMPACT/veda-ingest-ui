@@ -1,7 +1,7 @@
 import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import ErrorModal from '@/components/ErrorModal';
+import ErrorModal from '@/components/ui/ErrorModal';
 import { ModalProps } from 'antd';
 
 // Mock Ant Design's Modal

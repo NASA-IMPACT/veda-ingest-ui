@@ -4,7 +4,7 @@ import CreateIngestClient from '@/app/create-dataset/_components/CreateIngestCli
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // Mock `CreationFormManager`
-vi.mock('@/components/CreationFormManager', () => ({
+vi.mock('@/components/ingestion/CreationFormManager', () => ({
   default: ({
     setStatus,
     setCollectionName,
@@ -35,7 +35,7 @@ vi.mock('@/components/CreationFormManager', () => ({
 }));
 
 // Mock ErrorModal
-vi.mock('@/components/ErrorModal', () => ({
+vi.mock('@/components/ui/ErrorModal', () => ({
   default: ({ collectionName, apiErrorMessage }: any) => (
     <div role="dialog" data-testid="error-modal">
       <p>Error Modal</p>
@@ -46,7 +46,7 @@ vi.mock('@/components/ErrorModal', () => ({
 }));
 
 // Mock SuccessModal
-vi.mock('@/components/SuccessModal', () => ({
+vi.mock('@/components/ui/SuccessModal', () => ({
   default: ({ collectionName, pullRequestUrl }: any) => (
     <div role="dialog" data-testid="success-modal">
       <p>Success Modal</p>

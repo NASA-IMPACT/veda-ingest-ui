@@ -1,5 +1,5 @@
 import '@ant-design/v5-patch-for-react-19';
-import AppLayout from '@/components/Layout';
+import AppLayout from '@/components/layout/Layout';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 
