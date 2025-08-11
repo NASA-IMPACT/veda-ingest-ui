@@ -21,14 +21,14 @@ import { JSONSchema7 } from 'json-schema';
 
 import { useStacExtensions } from '@/hooks/useStacExtensions';
 import ExtensionManager from '@/components/ui/ExtensionManager';
-import ObjectFieldTemplate from '@/utils/ObjectFieldTemplate';
+import ObjectFieldTemplate from '@/components/rjsf-components/ObjectFieldTemplate';
 import { customValidate } from '@/utils/CustomValidation';
 import JSONEditor from '@/components/ui/JSONEditor';
 import { JSONEditorValue } from '@/components/ui/JSONEditor';
 import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 import BboxField from '@/utils/BboxField';
 import IntervalField from '@/utils/IntervalField';
-import AssetField from '@/utils/AssetsField';
+import AssetField from '@/components/rjsf-components/AssetsField';
 import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
 import SummariesManager from '@/components/rjsf-components/SummariesManager';
 

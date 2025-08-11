@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { TestableUrlWidget } from '@/utils/TestableUrlWidget';
+import { TestableUrlWidget } from '@/components/rjsf-components/TestableUrlWidget';
 import { WidgetProps } from '@rjsf/utils';
 
 // Mock Ant Design components

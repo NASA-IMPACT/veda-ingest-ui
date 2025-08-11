@@ -10,7 +10,7 @@ import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
 import { WidgetProps } from '@rjsf/utils';
 
-import ObjectFieldTemplate from '@/utils/ObjectFieldTemplate';
+import ObjectFieldTemplate from '@/components/rjsf-components/ObjectFieldTemplate';
 import jsonSchema from '@/FormSchemas/datasets/datasetSchema.json';
 import { customValidate } from '@/utils/CustomValidation';
 import JSONEditor from '@/components/ui/JSONEditor';
@@ -18,7 +18,7 @@ import { JSONEditorValue } from '@/components/ui/JSONEditor';
 import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
 import uiSchema from '@/FormSchemas/datasets/uischema.json';
-import { TestableUrlWidget } from '@/utils/TestableUrlWidget';
+import { TestableUrlWidget } from '@/components/rjsf-components/TestableUrlWidget';
 
 const Form = withTheme(AntDTheme);
 
