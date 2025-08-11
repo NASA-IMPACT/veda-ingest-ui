@@ -10,7 +10,7 @@ interface SelectedIngest {
   title: string;
 }
 
-const EditCollectionClient = () => {
+const EditDatasetClient = () => {
   const [selectedIngest, setSelectedIngest] = useState<SelectedIngest | null>(
     null
   );
@@ -27,14 +27,14 @@ const EditCollectionClient = () => {
     <AppLayout>
       {selectedIngest ? (
         <EditIngestView
-          ingestionType="collection"
+          ingestionType="dataset"
           gitRef={selectedIngest.ref}
           initialTitle={selectedIngest.title}
           onComplete={handleReturnToList}
         />
       ) : (
         <PendingIngestList
-          ingestionType="collection"
+          ingestionType="dataset"
           onIngestSelect={handleIngestSelect}
         />
       )}
@@ -42,4 +42,4 @@ const EditCollectionClient = () => {
   );
 };
 
-export default EditCollectionClient;
+export default EditDatasetClient;

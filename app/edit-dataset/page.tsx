@@ -1,12 +1,12 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import EditIngestClient from './_components/EditIngestClient';
+import EditDatasetClient from './_components/EditDatasetClient';
 
 const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
-export default async function EditIngestPage() {
+export default async function EditDatasetPage() {
   if (DISABLE_AUTH) {
-    return <EditIngestClient />;
+    return <EditDatasetClient />;
   }
 
   const session = await auth();
@@ -15,5 +15,5 @@ export default async function EditIngestPage() {
     redirect('/login');
   }
 
-  return <EditIngestClient />;
+  return <EditDatasetClient />;
 }
