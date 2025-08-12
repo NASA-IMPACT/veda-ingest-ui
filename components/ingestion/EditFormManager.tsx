@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Status } from '@/types/global';
 import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm';
 import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
-import { Button } from 'antd';
+import { Button, Card, Space, Alert } from 'antd';
 
 interface EditFormManagerProps {
   formType: 'dataset' | 'collection';
@@ -73,23 +73,20 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
   };
 
   const formButtons = (
-    <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+    <Space
+      style={{ display: 'flex', justifyContent: 'center', paddingTop: '24px' }}
+    >
       <Button type="primary" size="large" htmlType="submit" disabled={disabled}>
         Submit
       </Button>
-      <Button
-        color="danger"
-        variant="outlined"
-        size="large"
-        onClick={handleCancel}
-      >
+      <Button size="large" onClick={handleCancel} danger>
         Cancel
       </Button>
-    </div>
+    </Space>
   );
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
+    <Card>
       {formType === 'dataset' ? (
         <DatasetIngestionForm
           {...childFormProps}
@@ -102,11 +99,13 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
           {formButtons}
         </CollectionIngestionForm>
       ) : (
-        <div className="text-red-500 text-center p-4">
-          Invalid formType specified. Please use dataset or collection.
-        </div>
+        <Alert
+          message="Invalid formType specified. Please use dataset or collection."
+          type="error"
+          showIcon
+        />
       )}
-    </div>
+    </Card>
   );
 };
 
