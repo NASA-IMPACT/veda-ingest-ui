@@ -227,6 +227,7 @@
     },
     "dashboard:time_density": {
       "type": "string",
+      "enum": ["day", "month", "year"],
       "title": "Time Density"
     },
     "dashboard:time_interval": {

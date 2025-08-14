@@ -54,6 +54,9 @@
   },
   "discovery_items": {
     "items": {
+      "datetime_range": {
+        "ui:help": "omit for sub-daily data"
+      },
       "ui:grid": [
         {
           "discovery": 8,
