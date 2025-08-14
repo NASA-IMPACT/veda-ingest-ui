@@ -42,6 +42,7 @@
     },
     "dashboard:time_density": {
       "type": "string",
+      "enum": ["day", "month", "year"],
       "title": "Time Density"
     },
     "dashboard:time_interval": {
@@ -146,6 +147,7 @@
           },
           "datetime_range": {
             "type": "string",
+            "enum": ["day", "month", "year"],
             "title": "Datetime Range"
           },
           "start_datetime": {
