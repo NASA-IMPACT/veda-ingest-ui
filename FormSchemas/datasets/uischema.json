@@ -2,14 +2,14 @@
   "ui:grid": [
     {
       "collection": 8,
-      "title": 12,
-      "data_type": 4
+      "title": 16
     },
     {
+      "data_type": 4,
       "stac_version": 4,
-      "license": 6,
+      "license": 4,
       "dashboard:is_periodic": 2,
-      "dashboard:time_density": 6,
+      "dashboard:time_density": 4,
       "dashboard:time_interval": 6
     },
     {
@@ -67,16 +67,14 @@
           "filename_regex": 24
         },
         {
-          "datetime_range": 24
-        },
-        {
           "stac_extensions": 12,
           "links": 12
         },
         {
-          "start_datetime": 8,
-          "end_datetime": 8,
-          "single_datetime": 8
+          "datetime_range": 6,
+          "start_datetime": 6,
+          "end_datetime": 6,
+          "single_datetime": 6
         },
         {
           "id_regex": 8,
