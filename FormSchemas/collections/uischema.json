@@ -2,14 +2,14 @@
   "ui:grid": [
     {
       "id": 8,
-      "title": 12,
-      "type": 4
+      "title": 16
     },
     {
+      "type": 4,
       "stac_version": 4,
-      "license": 6,
+      "license": 4,
       "dashboard:is_periodic": 2,
-      "dashboard:time_density": 6,
+      "dashboard:time_density": 4,
       "dashboard:time_interval": 6
     },
     {

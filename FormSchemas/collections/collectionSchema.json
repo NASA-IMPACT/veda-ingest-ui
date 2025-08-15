@@ -159,6 +159,7 @@
       }
     },
     "providers": {
+      "title": "Providers",
       "type": "array",
       "items": {
         "type": "object",
