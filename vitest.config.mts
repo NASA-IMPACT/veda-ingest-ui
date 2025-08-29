@@ -18,6 +18,7 @@ export default defineConfig({
         'components/*.tsx',
         'app/**/tsx',
         'hooks/*.ts',
+        'lib/**/*.ts',
       ],
       exclude: [
         'tests/**',

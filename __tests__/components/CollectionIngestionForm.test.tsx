@@ -9,12 +9,13 @@ import {
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
 
-// Import the component to test and the hook to mock
 import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
 import { useStacExtensions } from '@/hooks/useStacExtensions';
+import { useTenants } from '@/hooks/useTenants';
 
 // --- Mocks ---
 vi.mock('@/hooks/useStacExtensions');
+vi.mock('@/hooks/useTenants');
 
 vi.mock('@/components/ui/ExtensionManager', () => ({
   default: ({ onAddExtension }: any) => (
@@ -42,7 +43,6 @@ vi.mock('@rjsf/core', () => ({
     vi.fn(({ formData, children }) => (
       <div data-testid="rjsf-form">
         <div data-testid="rjsf-formdata">{JSON.stringify(formData)}</div>
-        {/* Pass children through to render the submit button in tests */}
         {children}
       </div>
     )),
@@ -71,6 +71,12 @@ vi.mock('@/FormSchemas/collections/collectionSchema.json', () => ({
       title: { type: 'string' },
       summaries: { type: 'object' },
       stac_extensions: { type: 'array' },
+      tenants: {
+        type: 'array',
+        title: 'Tenants',
+        items: { type: 'string' },
+        uniqueItems: true,
+      },
     },
   },
 }));
@@ -86,6 +92,21 @@ describe('CollectionIngestionForm', () => {
   const mockOnSubmit = vi.fn();
   let mockAddExtension: ReturnType<typeof vi.fn>;
   let mockRemoveExtension: ReturnType<typeof vi.fn>;
+
+  const mockedSchemaForTests = {
+    type: 'object',
+    properties: {
+      title: { type: 'string' },
+      summaries: { type: 'object' },
+      stac_extensions: { type: 'array' },
+      tenants: {
+        type: 'array',
+        title: 'Tenants',
+        items: { type: 'string' },
+        uniqueItems: true,
+      },
+    },
+  };
 
   const TestWrapper = ({
     initialFormData = {},
@@ -119,6 +140,23 @@ describe('CollectionIngestionForm', () => {
       extensionFields: {},
       addExtension: mockAddExtension,
       removeExtension: mockRemoveExtension,
+      isLoading: false,
+    });
+
+    (useTenants as any).mockReturnValue({
+      schema: {
+        ...mockedSchemaForTests,
+        properties: {
+          ...mockedSchemaForTests.properties,
+          tenants: {
+            ...mockedSchemaForTests.properties.tenants,
+            items: {
+              ...mockedSchemaForTests.properties.tenants.items,
+              enum: ['mockTenant1', 'mockTenant2'],
+            },
+          },
+        },
+      },
       isLoading: false,
     });
   });

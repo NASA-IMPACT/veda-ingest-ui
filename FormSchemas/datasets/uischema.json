@@ -1,6 +1,9 @@
 {
   "ui:grid": [
     {
+      "tenant": 24
+    },
+    {
       "collection": 8,
       "title": 16
     },

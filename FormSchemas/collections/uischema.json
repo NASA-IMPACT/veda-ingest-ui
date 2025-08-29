@@ -1,6 +1,9 @@
 {
   "ui:grid": [
     {
+      "tenant": 24
+    },
+    {
       "id": 8,
       "title": 16
     },
@@ -74,5 +77,8 @@
       "description": "This describes the STAC collection.",
       "rows": 8
     }
+  },
+  "tenant": {
+    "classNames": "tenants-field"
   }
 }

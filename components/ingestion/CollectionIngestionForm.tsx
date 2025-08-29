@@ -13,6 +13,7 @@ import {
   Form as AntdForm,
   Alert,
   Space,
+  Spin,
 } from 'antd';
 import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
@@ -20,6 +21,8 @@ import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
 
 import { useStacExtensions } from '@/hooks/useStacExtensions';
+import { useTenants } from '@/hooks/useTenants';
+
 import ExtensionManager from '@/components/ui/ExtensionManager';
 import ObjectFieldTemplate from '@/components/rjsf-components/ObjectFieldTemplate';
 import { customValidate } from '@/utils/CustomValidation';
@@ -66,6 +69,10 @@ function CollectionIngestionForm({
   isEditMode,
   children,
 }: FormProps) {
+  const { schema: dynamicSchema, isLoading: isTenantsLoading } = useTenants(
+    fullJsonSchema as JSONSchema7
+  );
+
   const [activeTab, setActiveTab] = useState<string>('form');
   const [forceRenderKey, setForceRenderKey] = useState<number>(0);
   const [hasJSONChanges, setHasJSONChanges] = useState<boolean>(false);
@@ -141,7 +148,7 @@ function CollectionIngestionForm({
   };
 
   const { rjsfFormData, additionalProperties } = useMemo(() => {
-    const baseKeys = new Set(Object.keys(fullJsonSchema.properties || {}));
+    const baseKeys = new Set(Object.keys(dynamicSchema.properties || {}));
     baseKeys.add('stac_extensions');
 
     const currentExtensionKeys = new Set<string>();
@@ -169,12 +176,12 @@ function CollectionIngestionForm({
   );
 
   const schemaForRJSF = useMemo(() => {
-    const newSchema = JSON.parse(JSON.stringify(fullJsonSchema));
+    const newSchema = JSON.parse(JSON.stringify(dynamicSchema));
     if (newSchema.properties?.summaries) {
       delete newSchema.properties.summaries;
     }
     return newSchema;
-  }, []);
+  }, [dynamicSchema]);
 
   const onRJSFDataChanged = (formState: { formData?: object }) => {
     const updatedRjsfData =
@@ -202,6 +209,21 @@ function CollectionIngestionForm({
     setActiveTab('form');
     setHasJSONChanges(false);
   };
+
+  if (isTenantsLoading) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '200px',
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -327,7 +349,7 @@ function CollectionIngestionForm({
             children: (
               <JSONEditor
                 value={formData || {}}
-                jsonSchema={fullJsonSchema}
+                jsonSchema={dynamicSchema}
                 onChange={handleJsonEditorChange}
                 disableIdChange={isEditMode}
                 hasJSONChanges={hasJSONChanges}
