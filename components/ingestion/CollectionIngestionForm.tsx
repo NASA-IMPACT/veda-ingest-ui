@@ -35,7 +35,7 @@ import AssetField from '@/components/rjsf-components/AssetsField';
 import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
 import SummariesManager from '@/components/rjsf-components/SummariesManager';
 
-import fullJsonSchema from '@/FormSchemas/collections/collectionSchema.json';
+import staticBaseSchema from '@/FormSchemas/collections/collectionSchema.json';
 import uiSchema from '@/FormSchemas/collections/uischema.json';
 
 const Form = withTheme(AntDTheme);
@@ -70,7 +70,7 @@ function CollectionIngestionForm({
   children,
 }: FormProps) {
   const { schema: dynamicSchema, isLoading: isTenantsLoading } = useTenants(
-    fullJsonSchema as JSONSchema7
+    staticBaseSchema as JSONSchema7
   );
 
   const [activeTab, setActiveTab] = useState<string>('form');

@@ -7,7 +7,7 @@ import { useTenants } from '@/hooks/useTenants';
 const baseSchema: JSONSchema7 = {
   type: 'object',
   properties: {
-    tenants: {
+    tenant: {
       type: 'array',
       items: { type: 'string' },
     },
@@ -27,7 +27,7 @@ describe('useTenants Hook Logic', () => {
     });
 
     const expectedSchema = JSON.parse(JSON.stringify(baseSchema));
-    (expectedSchema.properties.tenants.items as JSONSchema7).enum = mockTenants;
+    (expectedSchema.properties.tenant.items as JSONSchema7).enum = mockTenants;
 
     expect(result.current.schema).toEqual(expectedSchema);
     expect(mockFetcher).toHaveBeenCalledTimes(1);

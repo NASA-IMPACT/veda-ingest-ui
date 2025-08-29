@@ -17,7 +17,7 @@ import { JSONEditorValue } from '@/components/ui/JSONEditor';
 import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
 
-import fullJsonSchema from '@/FormSchemas/datasets/datasetSchema.json';
+import staticBaseSchema from '@/FormSchemas/datasets/datasetSchema.json';
 import uiSchema from '@/FormSchemas/datasets/uischema.json';
 import { TestableUrlWidget } from '@/components/rjsf-components/TestableUrlWidget';
 
@@ -85,7 +85,7 @@ function DatasetIngestionForm({
   defaultTemporalExtent = false,
 }: FormProps) {
   const { schema: dynamicSchema, isLoading: isTenantsLoading } = useTenants(
-    fullJsonSchema as JSONSchema7
+    staticBaseSchema as JSONSchema7
   );
 
   const [activeTab, setActiveTab] = useState<string>('form');
@@ -200,6 +200,11 @@ function DatasetIngestionForm({
     'renders.dashboard': RjsfCodeEditorWidget,
     testableUrl: TestableUrlWidget,
   };
+
+  console.log(
+    'Schema being passed to RJSF:',
+    JSON.stringify(dynamicSchema, null, 2)
+  );
 
   if (isTenantsLoading) {
     return (

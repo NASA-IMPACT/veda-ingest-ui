@@ -196,5 +196,9 @@
     "items": {
       "ui:widget": "testableUrl"
     }
+  },
+  "tenant": {
+    "classNames": "tenants-field",
+    "ui:help": "Optional list of tenants allowed to access this item."
   }
 }

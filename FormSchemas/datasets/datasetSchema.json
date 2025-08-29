@@ -321,7 +321,6 @@
     "tenant": {
       "type": "array",
       "title": "Tenants",
-      "description": "Optional list of tenants allowed to access this item.",
       "items": {
         "type": "string"
       },

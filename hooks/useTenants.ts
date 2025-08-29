@@ -20,8 +20,8 @@ export const useTenants = (
 
         const newSchema = JSON.parse(JSON.stringify(baseSchema));
 
-        if (newSchema.properties && newSchema.properties.tenants) {
-          const tenantProperty = newSchema.properties.tenants as JSONSchema7;
+        if (newSchema.properties && newSchema.properties.tenant) {
+          const tenantProperty = newSchema.properties.tenant as JSONSchema7;
           if (
             tenantProperty.items &&
             typeof tenantProperty.items === 'object'
