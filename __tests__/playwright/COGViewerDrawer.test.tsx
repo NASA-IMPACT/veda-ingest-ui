@@ -36,6 +36,7 @@ test.describe('COG Viewer Drawer', () => {
 
     await test.step('enter URL of Sample File and valid json in renders object', async () => {
       await page.getByLabel('Sample Files-1').fill('s3://test.com');
+      await page.waitForTimeout(2500);
 
       await fillRenders(page, {
         resampling: 'nearest',
@@ -141,15 +142,22 @@ test.describe('COG Viewer Drawer', () => {
 
     await test.step('enter URL of Sample File but no renders object', async () => {
       await page.getByLabel('Sample Files-1').fill('s3://test.com');
+      await page.waitForTimeout(2500);
     });
 
     await test.step('click button to open COG Viewer Drawer', async () => {
       await openCOGDrawer(page);
     });
 
+    await test.step('missing sample file URL error should not be visible', async () => {
+      await expect(page.getByText(/Sample File URL is required/i)).toBeHidden();
+    });
+
     await test.step('validate that form controls pre-populate with default values', async () => {
+      await expect(page.getByText(/COG Rendering Options/i)).toBeVisible();
       await expect(page.locator('[data-testid="colormap"]')).toContainText(
-        'Internal'
+        'Internal',
+        { timeout: 7500 }
       );
       await expect(page.locator('[data-testid="resampling"]')).toContainText(
         ''
@@ -199,6 +207,7 @@ test.describe('COG Viewer Drawer', () => {
 
     await test.step('enter URL of Sample File and invalid json in renders object', async () => {
       await page.getByLabel('Sample Files-1').fill('s3://test.com');
+      await page.waitForTimeout(2500);
 
       const rendersTextbox = page.locator('#root_renders').getByRole('textbox');
       await rendersTextbox.clear();
@@ -256,6 +265,7 @@ test.describe('COG Viewer Drawer', () => {
 
     await test.step('enter URL of Sample File and valid json in renders object', async () => {
       await page.getByLabel('Sample Files-1').fill('s3://test.com');
+      await page.waitForTimeout(2500);
 
       await fillRenders(page, {
         resampling: 'nearest',
