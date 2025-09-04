@@ -1,20 +1,18 @@
 import { Octokit } from '@octokit/rest';
 import { Endpoints } from '@octokit/types';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
+import { IngestPullRequest } from '@/types/ingest';
 
 const base = process.env.TARGET_BRANCH || 'main';
 const owner = process.env.OWNER || '';
 const repo = process.env.REPO || '';
 
-// Define the directory paths for collections and datasets.
 const TARGET_PATHS = {
   collection: 'ingestion-data/staging/collections/',
   dataset: 'ingestion-data/staging/dataset-config/',
 };
 
 type IngestionType = 'collection' | 'dataset';
-type PullRequest =
-  Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][0];
 
 /**
  * Lists open pull requests that contain changes to files in a specific directory
@@ -26,8 +24,8 @@ type PullRequest =
  */
 const ListPRs = async (
   ingestionType: IngestionType
-): Promise<PullRequest[]> => {
-  // Validate the ingestionType parameter.
+): Promise<IngestPullRequest[]> => {
+  // Ensure the return type is correct
   if (!ingestionType || !TARGET_PATHS[ingestionType]) {
     throw new Error(
       'ingestionType parameter is required and must be either "collection" or "dataset".'
@@ -55,26 +53,43 @@ const ListPRs = async (
         pull_number: pr.number,
       });
 
-      // 3. Check if any file in the PR matches the target directory and extension.
-      const hasMatchingFile = files.some(
+      const matchingFile = files.find(
         (file) =>
           file.filename.startsWith(targetPath) &&
           file.filename.endsWith('.json')
       );
 
-      // Return the pull request if it matches, otherwise null.
-      return hasMatchingFile ? pr : null;
+      if (matchingFile) {
+        // If a file matches, fetch its content from the PR's branch
+        const { data: contentData } = await octokit.rest.repos.getContent({
+          owner,
+          repo,
+          path: matchingFile.filename,
+          ref: pr.head.sha,
+        });
+
+        if ('content' in contentData) {
+          const fileContent = Buffer.from(
+            contentData.content,
+            'base64'
+          ).toString('utf-8');
+          try {
+            return { pr, content: JSON.parse(fileContent) };
+          } catch (e) {
+            console.error(`Failed to parse JSON for PR #${pr.number}`);
+            return { pr, content: null };
+          }
+        }
+      }
+      return null;
     });
 
-    // 4. Wait for all the file checks to complete.
     const results = await Promise.all(checkFilePromises);
 
-    // 5. Filter out the null results to get the final list of matching pull requests.
-    const filteredRequests = results.filter(
-      (pr): pr is PullRequest => pr !== null
+    // Filter out any PRs that didn't have a matching or valid file
+    return results.filter(
+      (ingest): ingest is IngestPullRequest => ingest !== null
     );
-
-    return filteredRequests;
   } catch (error) {
     console.error('Failed to list pull requests:', error);
     throw error;

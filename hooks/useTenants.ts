@@ -10,13 +10,10 @@ import { useUserTenants } from '@/app/contexts/TenantContext';
  * @returns An object containing the dynamically updated schema and a loading state.
  */
 export const useTenants = (baseSchema: JSONSchema7) => {
-  // 2. Get the tenants and loading state from the context
   const { allowedTenants, isLoading } = useUserTenants();
 
-  // 3. Use useMemo to create the new schema.
-  // This ensures the schema is only rebuilt when the base schema or the tenants change.
   const dynamicSchema = useMemo(() => {
-    // If tenants haven't loaded yet, return the base schema
+    // If tenants haven't loaded, return the base schema
     if (!allowedTenants) {
       return baseSchema;
     }
@@ -32,8 +29,7 @@ export const useTenants = (baseSchema: JSONSchema7) => {
     }
 
     return newSchema;
-  }, [baseSchema, allowedTenants]); // Dependencies for the memo
+  }, [baseSchema, allowedTenants]);
 
-  // 4. Return the new schema and the loading state from the context
   return { schema: dynamicSchema, isLoading };
 };

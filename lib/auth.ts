@@ -1,65 +1,90 @@
-import NextAuth, { type NextAuthConfig } from 'next-auth';
+import NextAuth, { type NextAuthConfig, Session } from 'next-auth';
 import KeycloakProvider from 'next-auth/providers/keycloak';
 import { JWT } from 'next-auth/jwt';
-import { Session } from 'next-auth';
+import { NextResponse } from 'next/server';
 
-const providers = [];
+const authDisabled = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
-if (process.env.NEXT_PUBLIC_DISABLE_AUTH !== 'true') {
-  providers.push(
+let auth: any, handlers: any, signIn: any, signOut: any;
+
+if (authDisabled) {
+  // --- MOCKED AUTH FOR TESTING --- 🎭
+  console.log('🎭 Auth is disabled. Using mock session.');
+
+  const mockSession: Session = {
+    user: {
+      name: 'Mock User',
+      email: 'test@example.com',
+    },
+    expires: '2099-12-31T23:59:59.999Z',
+    tenants: ['tenant1', 'tenant2', 'tenant3'],
+  };
+
+  // The `auth` function is used by middleware and server components
+  auth = async () => mockSession;
+
+  handlers = {
+    GET: async () => NextResponse.json(mockSession),
+    POST: async () => new NextResponse(),
+  };
+
+  signIn = async () => {};
+  signOut = async () => {};
+} else {
+  // --- REAL NEXTAUTH.JS CONFIGURATION FOR PRODUCTION ---
+
+  const providers = [
     KeycloakProvider({
       clientId: process.env.KEYCLOAK_CLIENT_ID!,
       clientSecret: process.env.KEYCLOAK_CLIENT_SECRET!,
       issuer: process.env.NEXT_PUBLIC_KEYCLOAK_ISSUER!,
-    })
-  );
+    }),
+  ];
+
+  const authOptions: NextAuthConfig = {
+    secret: process.env.NEXTAUTH_SECRET,
+    trustHost: true,
+    providers,
+    session: {
+      strategy: 'jwt',
+    },
+    callbacks: {
+      async jwt({ token, account }) {
+        if (account?.access_token) {
+          const base64Payload = account.access_token.split('.')[1];
+          const decodedPayload = JSON.parse(
+            Buffer.from(base64Payload, 'base64').toString()
+          );
+
+          (token as JWT).accessToken = account.access_token;
+          const tenants = decodedPayload.groups || [];
+          (token as JWT).tenants = tenants;
+
+          const rawScopes = decodedPayload.scope;
+          if (Array.isArray(rawScopes)) {
+            (token as JWT).scopes = rawScopes;
+          } else if (typeof rawScopes === 'string') {
+            (token as JWT).scopes = rawScopes.split(' ');
+          }
+        }
+        return token;
+      },
+      async session({ session, token }) {
+        const customToken = token as JWT;
+        const customSession = session as Session & { tenants?: string[] };
+        customSession.tenants = customToken.tenants;
+        return customSession;
+      },
+    },
+  };
+
+  const nextAuthExports = NextAuth(authOptions);
+  auth = nextAuthExports.auth;
+  handlers = nextAuthExports.handlers;
+  signIn = nextAuthExports.signIn;
+  signOut = nextAuthExports.signOut;
 }
 
-const authOptions: NextAuthConfig = {
-  secret: process.env.NEXTAUTH_SECRET,
-  trustHost: true,
-  providers,
-  session: {
-    strategy: 'jwt',
-  },
-  callbacks: {
-    async jwt({ token, account }) {
-      if (account?.access_token) {
-        const base64Payload = account.access_token.split('.')[1];
-        const decodedPayload = JSON.parse(
-          Buffer.from(base64Payload, 'base64').toString()
-        );
+export { auth, handlers, signIn, signOut };
 
-        (token as JWT).accessToken = account.access_token;
-
-        const rawScopes = decodedPayload.scope;
-        if (Array.isArray(rawScopes)) {
-          (token as JWT).scopes = rawScopes;
-        } else if (typeof rawScopes === 'string') {
-          (token as JWT).scopes = rawScopes.split(' ');
-        } else {
-          (token as JWT).scopes = [];
-        }
-      }
-      return token;
-    },
-
-    async session({ session, token }) {
-      const customToken = token as JWT;
-      const customSession = session as Session & {
-        accessToken?: string;
-        scopes?: string[];
-      };
-
-      customSession.accessToken = customToken.accessToken;
-      customSession.scopes = customToken.scopes;
-
-      return customSession;
-    },
-  },
-};
-
-const { handlers, auth, signIn, signOut } = NextAuth(authOptions);
-
-export { auth, signIn, signOut, authOptions };
 export const { GET, POST } = handlers;
