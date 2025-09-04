@@ -3,6 +3,7 @@
 import React, { ReactNode, useState } from 'react';
 import { Divider, Layout } from 'antd';
 import Image from 'next/image';
+import { AlertFilled } from '@ant-design/icons/';
 
 import MenuBar from '@/components/layout/MenuBar';
 import dynamic from 'next/dynamic';
@@ -48,6 +49,34 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
             <span style={{ marginLeft: '12px' }}>VEDA Ingest UI</span>
           )}
         </div>
+        {!collapsed &&
+          (process.env.NEXT_PUBLIC_MOCK_TENANTS === 'true' ||
+            process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true') && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginLeft: '12px',
+                color: '#faad14',
+              }}
+            >
+              <AlertFilled style={{ marginRight: 8 }} />
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  flexDirection: 'column',
+                }}
+              >
+                {process.env.NEXT_PUBLIC_MOCK_TENANTS === 'true' && (
+                  <div>Mocking Tenants</div>
+                )}
+                {process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true' && (
+                  <div>Mocking Auth</div>
+                )}
+              </div>
+            </div>
+          )}
         <MenuBar />
         <LogoutButton collapsed={collapsed} />
       </Sider>
