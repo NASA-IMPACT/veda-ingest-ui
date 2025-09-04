@@ -201,11 +201,6 @@ function DatasetIngestionForm({
     testableUrl: TestableUrlWidget,
   };
 
-  console.log(
-    'Schema being passed to RJSF:',
-    JSON.stringify(dynamicSchema, null, 2)
-  );
-
   if (isTenantsLoading) {
     return (
       <div

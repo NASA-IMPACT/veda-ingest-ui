@@ -1,46 +1,39 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { JSONSchema7 } from 'json-schema';
-import { fetchTenantsFromApi as defaultFetchTenants } from '@/lib/services/tenantService';
 
-type TenantFetcher = () => Promise<string[]>;
+import { useUserTenants } from '@/app/contexts/TenantContext';
 
-export const useTenants = (
-  baseSchema: JSONSchema7,
-  // The dependency is now an argument with a default value
-  fetcher: TenantFetcher = defaultFetchTenants
-) => {
-  const [schema, setSchema] = useState<JSONSchema7>(baseSchema);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+/**
+ * A reusable hook that takes a base JSON schema and injects the list of
+ * tenants from the global TenantContext.
+ * @param baseSchema The static base JSON schema to modify.
+ * @returns An object containing the dynamically updated schema and a loading state.
+ */
+export const useTenants = (baseSchema: JSONSchema7) => {
+  // 2. Get the tenants and loading state from the context
+  const { allowedTenants, isLoading } = useUserTenants();
 
-  useEffect(() => {
-    const updateSchemaWithTenants = async () => {
-      try {
-        setIsLoading(true);
-        const tenantEnums = await fetcher();
+  // 3. Use useMemo to create the new schema.
+  // This ensures the schema is only rebuilt when the base schema or the tenants change.
+  const dynamicSchema = useMemo(() => {
+    // If tenants haven't loaded yet, return the base schema
+    if (!allowedTenants) {
+      return baseSchema;
+    }
 
-        const newSchema = JSON.parse(JSON.stringify(baseSchema));
+    // Create a deep copy to avoid mutating the original object
+    const newSchema = JSON.parse(JSON.stringify(baseSchema));
 
-        if (newSchema.properties && newSchema.properties.tenant) {
-          const tenantProperty = newSchema.properties.tenant as JSONSchema7;
-          if (
-            tenantProperty.items &&
-            typeof tenantProperty.items === 'object'
-          ) {
-            (tenantProperty.items as JSONSchema7).enum = tenantEnums;
-          }
-        }
-
-        setSchema(newSchema);
-      } catch (error) {
-        console.error('Failed to fetch tenants and update schema:', error);
-        setSchema(baseSchema);
-      } finally {
-        setIsLoading(false);
+    if (newSchema.properties && newSchema.properties.tenant) {
+      const tenantProperty = newSchema.properties.tenant as JSONSchema7;
+      if (tenantProperty.items && typeof tenantProperty.items === 'object') {
+        (tenantProperty.items as JSONSchema7).enum = allowedTenants;
       }
-    };
+    }
 
-    updateSchemaWithTenants();
-  }, [baseSchema, fetcher]);
+    return newSchema;
+  }, [baseSchema, allowedTenants]); // Dependencies for the memo
 
-  return { schema, isLoading };
+  // 4. Return the new schema and the loading state from the context
+  return { schema: dynamicSchema, isLoading };
 };
