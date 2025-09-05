@@ -14,7 +14,7 @@ export const useTenants = (baseSchema: JSONSchema7) => {
 
   const dynamicSchema = useMemo(() => {
     // If tenants haven't loaded, return the base schema
-    if (!allowedTenants) {
+    if (!allowedTenants || allowedTenants.length === 0) {
       return baseSchema;
     }
 

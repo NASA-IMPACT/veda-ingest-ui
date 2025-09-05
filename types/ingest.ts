@@ -5,10 +5,10 @@ type GitHubPullRequest =
   Endpoints['GET /repos/{owner}/{repo}/pulls']['response']['data'][0];
 
 /**
- * Defines the shape of an ingest object, which includes both the
- * original pull request data and the parsed content of its JSON file.
+ * Defines the shape of an ingest object, which includes the
+ * pull request data and its associated tenants array.
  */
 export interface IngestPullRequest {
   pr: GitHubPullRequest;
-  content: Record<string, any> | null;
+  tenants: string[] | undefined; // Changed from 'content' to 'tenants'
 }

@@ -28,12 +28,7 @@ export async function GET(request: NextRequest) {
     const allIngests = await ListPRs(ingestionType);
 
     const filteredIngests = allIngests.filter((ingest) => {
-      // Ignore PRs that had invalid or unparsable JSON content
-      if (!ingest.content) {
-        return false;
-      }
-
-      const fileTenants = ingest.content.tenant as string[] | undefined;
+      const fileTenants = ingest.tenants as string[] | undefined;
 
       // Condition 1: If the ingest has no 'tenants' array, it's public and should be shown.
       if (!fileTenants || fileTenants.length === 0) {

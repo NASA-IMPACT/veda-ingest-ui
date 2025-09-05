@@ -34,6 +34,7 @@ const mockSession = {
     email: 'test.user@example.com',
     image: null,
   },
+  tenants: ['tenant1', 'tenant2', 'tenant3'],
   expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
 };
 

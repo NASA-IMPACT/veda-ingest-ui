@@ -14,18 +14,9 @@ const TARGET_PATHS = {
 
 type IngestionType = 'collection' | 'dataset';
 
-/**
- * Lists open pull requests that contain changes to files in a specific directory
- * based on the ingestion type.
- *
- * @param ingestionType - The type of ingestion, determines which directory to check for file changes.
- * @returns A promise that resolves to an array of pull request objects.
- * @throws An error if the ingestionType parameter is missing or invalid.
- */
 const ListPRs = async (
   ingestionType: IngestionType
 ): Promise<IngestPullRequest[]> => {
-  // Ensure the return type is correct
   if (!ingestionType || !TARGET_PATHS[ingestionType]) {
     throw new Error(
       'ingestionType parameter is required and must be either "collection" or "dataset".'
@@ -74,10 +65,11 @@ const ListPRs = async (
             'base64'
           ).toString('utf-8');
           try {
-            return { pr, content: JSON.parse(fileContent) };
+            const parsedContent = JSON.parse(fileContent);
+            return { pr, tenants: parsedContent.tenant };
           } catch (e) {
             console.error(`Failed to parse JSON for PR #${pr.number}`);
-            return { pr, content: null };
+            return { pr, tenants: undefined };
           }
         }
       }
