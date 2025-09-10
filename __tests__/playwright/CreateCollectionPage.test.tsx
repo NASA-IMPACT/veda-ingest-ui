@@ -475,4 +475,166 @@ test.describe('Create Collection Page', () => {
       contentType: 'image/png',
     });
   });
+
+  test('Create Collection with tenants in form mode', async ({
+    page,
+    worker,
+    http,
+  }) => {
+    // Intercept and block the request
+    await page.route('**/create-ingest', async (route, request) => {
+      if (request.method() === 'POST') {
+        const postData = request.postDataJSON();
+
+        expect(postData.data.tenant).toEqual(['tenant1', 'tenant2']);
+
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ githubURL: MOCK_GITHUB_URL }),
+        });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await test.step('Navigate to the Create Collection page', async () => {
+      await page.goto('/create-collection');
+    });
+
+    await test.step('switch to manual json edit tab', async () => {
+      await page.getByRole('tab', { name: /manual json edit/i }).click();
+    });
+
+    await test.step('paste JSON with tenants', async () => {
+      const configWithTenants = {
+        ...requiredCollectionConfig,
+      };
+      await page
+        .getByTestId('json-editor')
+        .fill(JSON.stringify(configWithTenants, null, 2));
+      await page.getByRole('button', { name: /apply changes/i }).click();
+    });
+
+    await test.step('select tenants', async () => {
+      const tenantDropdown = page.getByLabel('Tenant');
+      await tenantDropdown.click();
+
+      // Select two tenants
+      await page.getByText('tenant1').click();
+      await page.getByText('tenant2').click();
+
+      // Close dropdown
+      await page.keyboard.press('Escape');
+
+      // Verify selections
+      await expect(
+        page.locator('.ant-select-selection-item', { hasText: /tenant1/i })
+      ).toBeVisible();
+      await expect(
+        page.locator('.ant-select-selection-item', { hasText: /tenant2/i })
+      ).toBeVisible();
+    });
+
+    await test.step('submit form and verify tenants are included', async () => {
+      await page.getByRole('button', { name: /submit/i }).click();
+      await page.getByRole('button', { name: /continue & submit/i }).click();
+    });
+  });
+
+  test('Create Collection with tenants in JSON mode', async ({
+    page,
+    worker,
+    http,
+  }) => {
+    // Intercept and block the request
+    await page.route('**/create-ingest', async (route, request) => {
+      if (request.method() === 'POST') {
+        const postData = request.postDataJSON();
+
+        expect(postData.data.tenant).toEqual(['tenant1', 'tenant2']);
+
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ githubURL: MOCK_GITHUB_URL }),
+        });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await test.step('Navigate to the Create Collection page', async () => {
+      await page.goto('/create-collection');
+    });
+
+    await test.step('switch to manual json edit tab', async () => {
+      await page.getByRole('tab', { name: /manual json edit/i }).click();
+    });
+
+    await test.step('paste JSON with tenants', async () => {
+      const configWithTenants = {
+        ...requiredCollectionConfig,
+        tenant: ['tenant1', 'tenant2'],
+      };
+      await page
+        .getByTestId('json-editor')
+        .fill(JSON.stringify(configWithTenants, null, 2));
+      await page.getByRole('button', { name: /apply changes/i }).click();
+    });
+
+    await test.step('verify tenants persist when switching back to form', async () => {
+      await page.getByRole('tab', { name: /form/i }).click();
+      await expect(
+        page.locator('.tenants-field').getByText('tenant1tenant2')
+      ).toBeVisible();
+    });
+
+    await test.step('submit and verify tenants in request', async () => {
+      await test.step('submit completed form', async () => {
+        await page.getByRole('button', { name: /submit/i }).click();
+      });
+
+      await test.step('continue without adding a comment', async () => {
+        await page.getByRole('button', { name: /continue & submit/i }).click();
+      });
+
+      await expect(
+        page.getByRole('dialog', { name: /Ingestion Request Submitted/i })
+      ).toBeVisible();
+    });
+  });
+
+  test('Validate tenant restrictions', async ({ page }) => {
+    await test.step('Navigate to the Create Collection page', async () => {
+      await page.goto('/create-collection');
+    });
+
+    await test.step('verify JSON validation for unauthorized tenants', async () => {
+      await page.getByRole('tab', { name: /manual json edit/i }).click();
+
+      const invalidConfig = {
+        ...requiredCollectionConfig,
+        tenant: ['tenant1', 'unauthorized-tenant'],
+      };
+
+      await page
+        .getByTestId('json-editor')
+        .fill(JSON.stringify(invalidConfig, null, 2));
+      await page.getByRole('button', { name: /apply changes/i }).click();
+
+      await expect(
+        page.getByText(
+          '"tenant/1 must be equal to one of the allowed values"',
+          { exact: true }
+        ),
+        'Should show validation error'
+      ).toBeVisible();
+
+      await expect(
+        page.getByTestId('json-editor'),
+        'JSON Editor Should still be visible'
+      ).toBeVisible();
+    });
+  });
 });

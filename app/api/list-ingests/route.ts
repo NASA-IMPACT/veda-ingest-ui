@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import ListPRs from '@/utils/githubUtils/ListPRs';
-import { auth } from '@/lib/auth'; // The NextAuth.js helper to get the session on the server
+import { auth } from '@/lib/auth';
 
 import ListPRs from '@/utils/githubUtils/ListPRs';
 
