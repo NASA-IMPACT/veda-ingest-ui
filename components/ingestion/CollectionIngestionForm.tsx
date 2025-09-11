@@ -52,8 +52,6 @@ const lockedFormFields = {
   },
 };
 
-const lockedUiSchema = { ...uiSchema, ...lockedFormFields };
-
 interface FormProps {
   formData: Record<string, unknown> | undefined;
   setFormData: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
@@ -69,9 +67,11 @@ function CollectionIngestionForm({
   isEditMode,
   children,
 }: FormProps) {
-  const { schema: dynamicSchema, isLoading: isTenantsLoading } = useTenants(
-    staticBaseSchema as JSONSchema7
-  );
+  const {
+    schema: dynamicSchema,
+    uiSchema: dynamicUiSchema,
+    isLoading: isTenantsLoading,
+  } = useTenants(staticBaseSchema as JSONSchema7, uiSchema);
 
   const [activeTab, setActiveTab] = useState<string>('form');
   const [forceRenderKey, setForceRenderKey] = useState<number>(0);
@@ -81,6 +81,10 @@ function CollectionIngestionForm({
 
   const { extensionFields, addExtension, removeExtension, isLoading } =
     useStacExtensions({ setFormData });
+
+  const lockedUiSchema = dynamicUiSchema
+    ? { ...dynamicUiSchema, ...lockedFormFields }
+    : { ...uiSchema, ...lockedFormFields };
 
   const prevFormDataRef = useRef(formData);
   useEffect(() => {
@@ -247,7 +251,9 @@ function CollectionIngestionForm({
                 <Form
                   key={forceRenderKey}
                   schema={schemaForRJSF as JSONSchema7}
-                  uiSchema={isEditMode ? lockedUiSchema : uiSchema}
+                  uiSchema={
+                    isEditMode ? lockedUiSchema : dynamicUiSchema || uiSchema
+                  }
                   validator={validator}
                   customValidate={customValidate}
                   templates={{ ObjectFieldTemplate }}

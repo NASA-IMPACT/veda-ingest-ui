@@ -29,7 +29,10 @@ describe('useTenants', () => {
     isLoading: true,
   });
   const { result } = renderHook(() => useTenants(baseSchema));
-  expect(result.current.schema).toEqual(baseSchema);
+  expect(result.current.schema).toEqual({
+    type: 'object',
+    properties: {},
+  });
   expect(result.current.isLoading).toBe(true);
 
   it('should return the updated schema when the context has loaded', () => {
@@ -58,5 +61,62 @@ describe('useTenants', () => {
     const baseSchemaCopy = JSON.parse(JSON.stringify(baseSchema));
     renderHook(() => useTenants(baseSchemaCopy));
     expect(baseSchemaCopy.properties?.tenant?.items?.enum).toBeUndefined();
+  });
+
+  it('should remove tenant property if allowedTenants is empty', () => {
+    const mockContextValue = {
+      allowedTenants: [],
+      isLoading: false,
+    };
+    mockedUseUserTenants.mockReturnValue(mockContextValue);
+
+    const schemaWithTenant: JSONSchema7 = {
+      type: 'object',
+      properties: {
+        tenant: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+        other: {
+          type: 'string',
+        },
+      },
+    };
+
+    const { result } = renderHook(() => useTenants(schemaWithTenant));
+    expect(result.current.schema.properties?.tenant).toBeUndefined();
+    expect(result.current.schema.properties?.other).toBeDefined();
+  });
+
+  it('should remove tenant from ui:grid if allowedTenants is empty', () => {
+    const mockContextValue = {
+      allowedTenants: [],
+      isLoading: false,
+    };
+    mockedUseUserTenants.mockReturnValue(mockContextValue);
+
+    const baseUiSchema = {
+      'ui:grid': [{ tenant: {} }, { other: {} }],
+    };
+
+    const { result } = renderHook(() => useTenants(baseSchema, baseUiSchema));
+    expect(result.current.uiSchema['ui:grid']).toEqual([{ other: {} }]);
+  });
+
+  it('should not mutate the original baseSchema and baseUiSchema', () => {
+    const mockContextValue = {
+      allowedTenants: ['tenant-X'],
+      isLoading: false,
+    };
+    mockedUseUserTenants.mockReturnValue(mockContextValue);
+
+    const schemaCopy = JSON.parse(JSON.stringify(baseSchema));
+    const uiSchemaCopy = { 'ui:grid': [{ tenant: {} }] };
+
+    renderHook(() => useTenants(schemaCopy, uiSchemaCopy));
+    expect(schemaCopy).toEqual(baseSchema);
+    expect(uiSchemaCopy).toEqual({ 'ui:grid': [{ tenant: {} }] });
   });
 });

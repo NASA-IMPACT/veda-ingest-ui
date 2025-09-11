@@ -9,27 +9,45 @@ import { useUserTenants } from '@/app/contexts/TenantContext';
  * @param baseSchema The static base JSON schema to modify.
  * @returns An object containing the dynamically updated schema and a loading state.
  */
-export const useTenants = (baseSchema: JSONSchema7) => {
+export const useTenants = (baseSchema: JSONSchema7, baseUiSchema?: any) => {
   const { allowedTenants, isLoading } = useUserTenants();
 
-  const dynamicSchema = useMemo(() => {
-    // If tenants haven't loaded, return the base schema
-    if (!allowedTenants || allowedTenants.length === 0) {
-      return baseSchema;
-    }
-
-    // Create a deep copy to avoid mutating the original object
+  const { dynamicSchema, dynamicUiSchema } = useMemo(() => {
+    // Create deep copies to avoid mutating the original objects
     const newSchema = JSON.parse(JSON.stringify(baseSchema));
+    const newUiSchema = baseUiSchema
+      ? JSON.parse(JSON.stringify(baseUiSchema))
+      : undefined;
 
-    if (newSchema.properties && newSchema.properties.tenant) {
-      const tenantProperty = newSchema.properties.tenant as JSONSchema7;
-      if (tenantProperty.items && typeof tenantProperty.items === 'object') {
-        (tenantProperty.items as JSONSchema7).enum = allowedTenants;
+    if (!allowedTenants || allowedTenants.length === 0) {
+      if (newSchema.properties?.tenant) {
+        delete newSchema.properties.tenant;
+      }
+
+      if (newUiSchema?.['ui:grid']?.length > 0) {
+        newUiSchema['ui:grid'] = newUiSchema['ui:grid'].filter(
+          (item: any) => !Object.keys(item).includes('tenant')
+        );
+      }
+    } else {
+      // Add tenant enum values to the schema
+      if (newSchema.properties?.tenant) {
+        const tenantProperty = newSchema.properties.tenant as JSONSchema7;
+        if (tenantProperty.items && typeof tenantProperty.items === 'object') {
+          (tenantProperty.items as JSONSchema7).enum = allowedTenants;
+        }
       }
     }
 
-    return newSchema;
-  }, [baseSchema, allowedTenants]);
+    return {
+      dynamicSchema: newSchema,
+      dynamicUiSchema: newUiSchema,
+    };
+  }, [baseSchema, baseUiSchema, allowedTenants]);
 
-  return { schema: dynamicSchema, isLoading };
+  return {
+    schema: dynamicSchema,
+    uiSchema: dynamicUiSchema,
+    isLoading,
+  };
 };

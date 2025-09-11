@@ -61,8 +61,6 @@ const lockedFormFields = {
   },
 };
 
-const lockedUiSchema = { ...uiSchema, ...lockedFormFields };
-
 interface FormProps {
   formData: Record<string, unknown> | undefined;
   setFormData: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
@@ -84,9 +82,11 @@ function DatasetIngestionForm({
   disableCollectionNameChange = false,
   defaultTemporalExtent = false,
 }: FormProps) {
-  const { schema: dynamicSchema, isLoading: isTenantsLoading } = useTenants(
-    staticBaseSchema as JSONSchema7
-  );
+  const {
+    schema: dynamicSchema,
+    uiSchema: dynamicUiSchema,
+    isLoading: isTenantsLoading,
+  } = useTenants(staticBaseSchema as JSONSchema7, uiSchema);
 
   const [activeTab, setActiveTab] = useState<string>('form');
   const [forceRenderKey, setForceRenderKey] = useState<number>(0);
@@ -94,6 +94,10 @@ function DatasetIngestionForm({
   const [additionalProperties, setAdditionalProperties] = useState<{
     [key: string]: any;
   } | null>(null);
+
+  const lockedUiSchema = dynamicUiSchema
+    ? { ...dynamicUiSchema, ...lockedFormFields }
+    : { ...uiSchema, ...lockedFormFields };
 
   // --- Set initial "default" data for new forms ---
   useEffect(() => {
@@ -230,7 +234,9 @@ function DatasetIngestionForm({
               <Form
                 key={forceRenderKey} // Forces re-render when data updates
                 schema={dynamicSchema as JSONSchema7}
-                uiSchema={isEditMode ? lockedUiSchema : uiSchema}
+                uiSchema={
+                  isEditMode ? lockedUiSchema : dynamicUiSchema || uiSchema
+                }
                 validator={validator}
                 customValidate={customValidate}
                 templates={{
