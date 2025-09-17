@@ -37,7 +37,14 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
       console.error('No form data provided.');
       return;
     }
-    setStagedFormData(data);
+
+    // Clean up the form data
+    const cleanedData = { ...data };
+    if (Array.isArray(cleanedData.tenant) && cleanedData.tenant.length === 0) {
+      delete cleanedData.tenant;
+    }
+
+    setStagedFormData(cleanedData);
     setIsModalVisible(true);
   };
 

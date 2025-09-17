@@ -81,7 +81,10 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
       if (request.method() === 'POST') {
         const postData = request.postDataJSON();
 
-        expect(postData.data.tenant).toEqual(['tenant1', 'tenant2']);
+        expect(
+          postData.data.tenant,
+          'tenant key value should match selection'
+        ).toEqual(['tenant1', 'tenant2']);
 
         await route.fulfill({
           status: 200,
@@ -150,7 +153,7 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
     });
   });
 
-  test('not selecting tenants in form mode passes empty tenant array', async ({
+  test('not selecting tenants in form mode omits tenant key', async ({
     page,
   }) => {
     // Intercept and block the request
@@ -158,7 +161,10 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
       if (request.method() === 'POST') {
         const postData = request.postDataJSON();
 
-        expect(postData.data.tenant).toEqual([]);
+        expect(
+          postData.data,
+          'tenant key should not be included'
+        ).not.toHaveProperty('tenant');
 
         await route.fulfill({
           status: 200,
@@ -197,7 +203,10 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
       if (request.method() === 'POST') {
         const postData = request.postDataJSON();
 
-        expect(postData.data.tenant).toEqual(['tenant1', 'tenant2']);
+        expect(
+          postData.data.tenant,
+          'tenant key value should match JSON entry'
+        ).toEqual(['tenant1', 'tenant2']);
 
         await route.fulfill({
           status: 200,
@@ -309,7 +318,10 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
       if (request.method() === 'POST') {
         const postData = request.postDataJSON();
 
-        expect(postData.data).not.toHaveProperty('tenant');
+        expect(
+          postData.data,
+          'tenant key should not be in POST data'
+        ).not.toHaveProperty('tenant');
 
         await route.fulfill({
           status: 200,
