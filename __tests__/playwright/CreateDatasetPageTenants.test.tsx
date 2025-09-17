@@ -250,7 +250,9 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
     });
   });
 
-  test('Validate tenant restrictions', async ({ page }) => {
+  test('Validate tenant restrictions enforced on JSON Editor', async ({
+    page,
+  }) => {
     await test.step('Navigate to the Create Dataset page', async () => {
       await page.goto('/create-dataset');
     });
@@ -302,6 +304,23 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
       })
     );
 
+    // Intercept and block the request
+    await page.route('**/create-ingest', async (route, request) => {
+      if (request.method() === 'POST') {
+        const postData = request.postDataJSON();
+
+        expect(postData.data).not.toHaveProperty('tenant');
+
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ githubURL: MOCK_GITHUB_URL }),
+        });
+      } else {
+        await route.continue();
+      }
+    });
+
     await test.step('Navigate to Create Dataset page', async () => {
       await page.goto('/create-dataset');
     });
@@ -320,25 +339,18 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
       });
     });
 
+    await test.step('switch to manual json edit tab', async () => {
+      await page.getByRole('tab', { name: /manual json edit/i }).click();
+    });
+
+    await test.step('paste JSON without tenants', async () => {
+      await page
+        .getByTestId('json-editor')
+        .fill(JSON.stringify(requiredConfig, null, 2));
+      await page.getByRole('button', { name: /apply changes/i }).click();
+    });
+
     await test.step('verify form submission succeeds without tenant field', async () => {
-      // Intercept the submission to verify tenant field is not included
-      await page.route('**/create-ingest', async (route, request) => {
-        if (request.method() === 'POST') {
-          const postData = request.postDataJSON();
-
-          // Verify tenant field is not present in submission
-          expect(postData.data).not.toHaveProperty('tenant');
-
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify({ githubURL: MOCK_GITHUB_URL }),
-          });
-        } else {
-          await route.continue();
-        }
-      });
-
       await page.getByRole('button', { name: /submit/i }).click();
       await page.getByRole('button', { name: /continue & submit/i }).click();
 
