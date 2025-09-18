@@ -26,7 +26,6 @@ export async function middleware(request: NextRequest) {
     '/api/retrieve-ingest',
     '/api/create-ingest',
     '/api/upload-url',
-    '/api/tenants',
   ];
 
   // Allow access all authenticated users
@@ -38,7 +37,6 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith('/create-dataset') ||
       pathname.startsWith('/edit-dataset') ||
       pathname.startsWith('/upload') ||
-      pathname.startsWith('tenants') ||
       pathname.startsWith('/cog-viewer')) &&
     session
   ) {
@@ -91,6 +89,5 @@ export const config = {
     '/api/retrieve-ingest',
     '/api/create-ingest',
     '/api/upload-url',
-    '/api/tenants',
   ],
 };
