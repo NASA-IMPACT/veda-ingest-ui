@@ -1,7 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button, List, Spin, Card, Row, Col, Typography, Empty } from 'antd';
+import {
+  Button,
+  List,
+  Spin,
+  Card,
+  Row,
+  Col,
+  Typography,
+  Empty,
+  Tooltip,
+} from 'antd';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import ErrorModal from '@/components/ui/ErrorModal';
@@ -92,20 +102,38 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
             );
 
             return (
-              <Col key={tenant} xs={24} sm={12} md={8} lg={6}>
+              <Col
+                key={tenant}
+                xs={24}
+                sm={12}
+                md={8}
+                lg={6}
+                data-testid={`tenant-column-${tenant}`}
+              >
                 <Card title={`Tenant: ${tenant}`}>
                   <List
                     dataSource={tenantIngests}
                     renderItem={(item: IngestPullRequest) => (
                       <List.Item>
-                        <Button
-                          onClick={() =>
-                            onIngestSelect(item.pr.head.ref, item.pr.title)
-                          }
-                          block
-                        >
-                          {item.pr.title}
-                        </Button>
+                        <Tooltip title={item.pr.title} placement="topLeft">
+                          <Button
+                            onClick={() =>
+                              onIngestSelect(item.pr.head.ref, item.pr.title)
+                            }
+                            block
+                          >
+                            <span
+                              style={{
+                                display: 'block',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                            >
+                              {item.pr.title.replace('Ingest Request for ', '')}
+                            </span>
+                          </Button>
+                        </Tooltip>
                       </List.Item>
                     )}
                     locale={{ emptyText: 'No pending ingests' }}
@@ -116,20 +144,38 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
           })}
 
           {publicIngests.length > 0 && (
-            <Col key="public" xs={24} sm={12} md={8} lg={6}>
+            <Col
+              key="public"
+              xs={24}
+              sm={12}
+              md={8}
+              lg={6}
+              data-testid="tenant-column-public"
+            >
               <Card title="Public">
                 <List
                   dataSource={publicIngests}
                   renderItem={(item: IngestPullRequest) => (
                     <List.Item>
-                      <Button
-                        onClick={() =>
-                          onIngestSelect(item.pr.head.ref, item.pr.title)
-                        }
-                        block
-                      >
-                        {item.pr.title}
-                      </Button>
+                      <Tooltip title={item.pr.title} placement="topLeft">
+                        <Button
+                          onClick={() =>
+                            onIngestSelect(item.pr.head.ref, item.pr.title)
+                          }
+                          block
+                        >
+                          <span
+                            style={{
+                              display: 'block',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                          >
+                            {item.pr.title.replace('Ingest Request for ', '')}
+                          </span>
+                        </Button>
+                      </Tooltip>
                     </List.Item>
                   )}
                   locale={{ emptyText: 'No pending ingests' }}

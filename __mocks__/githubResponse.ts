@@ -137,6 +137,6 @@ export const githubResponse = [
       base: { ref: 'main' },
       author_association: 'CONTRIBUTOR',
     },
-    tenants: ['tenant1', 'admin-tenant'],
+    tenants: ['tenant1', 'tenant2'],
   },
 ];

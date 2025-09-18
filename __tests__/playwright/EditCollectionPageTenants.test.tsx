@@ -63,8 +63,70 @@ const modifiedCollectionConfig = {
     'eo:bands': ['B1', 'B2'],
   },
 };
-
 test.describe('Tenant Functionality - Edit Collection Page', () => {
+  test('Edit Collection displays list of open PRs ordered by tenants', async ({
+    page,
+  }, testInfo) => {
+    const seededTenants = {
+      tenant1: ['seeded ingest #1', 'Multi-tenant sentinel data'],
+      tenant2: ['Multi-tenant sentinel data'],
+      tenant3: ['seeded ingest #2'],
+      public: ['Public Landsat ingest'],
+    };
+
+    await test.step('Navigate to Edit Collection Page', async () => {
+      await page.goto('/edit-collection');
+    });
+
+    await test.step('wait for list of pending requests to load', async () => {
+      await expect(
+        page.getByRole('heading', {
+          level: 3,
+          name: /Pending Ingest Requests/i,
+        }),
+        'Pending Ingest header is visible'
+      ).toBeVisible();
+    });
+
+    await test.step('verify columns for each tenant', async () => {
+      const cardTitles = page.locator('.ant-card-head-title');
+      await expect(cardTitles, '4 columns should be visible').toHaveCount(4);
+
+      const tenantKeys = Object.keys(seededTenants);
+      for (let i = 0; i < tenantKeys.length; i++) {
+        await expect(
+          cardTitles.nth(i),
+          `${tenantKeys[i]} should be visible`
+        ).toHaveText(new RegExp(tenantKeys[i], 'i'));
+      }
+      await expect(
+        cardTitles.last(),
+        `public column should be visible`
+      ).toHaveText(/public/i);
+    });
+
+    const tenantScreenshot = await page.screenshot({
+      animations: 'disabled',
+    });
+    testInfo.attach('Ingest Requests Arranged by Tenant', {
+      body: tenantScreenshot,
+      contentType: 'image/png',
+    });
+
+    await test.step('verify ingests are in correct columns', async () => {
+      for (const [tenant, requests] of Object.entries(seededTenants)) {
+        const column = page.getByTestId(`tenant-column-${tenant}`);
+        const requestButtons = column.getByRole('button');
+        await expect(requestButtons).toHaveCount(requests.length);
+        for (const requestName of requests) {
+          await expect(
+            column.getByRole('button', { name: new RegExp(requestName, 'i') })
+          ).toBeVisible();
+        }
+      }
+    });
+  });
+
   test('Edit Collection preserves existing tenants in form mode', async ({
     page,
   }) => {
