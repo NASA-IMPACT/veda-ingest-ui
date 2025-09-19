@@ -1,5 +1,6 @@
-import ListPRs from '@/utils/githubUtils/ListPRs';
 import { NextRequest, NextResponse } from 'next/server';
+
+import ListPRs from '@/utils/githubUtils/ListPRs';
 
 type IngestionType = 'collection' | 'dataset';
 

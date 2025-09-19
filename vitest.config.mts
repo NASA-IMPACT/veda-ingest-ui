@@ -25,6 +25,14 @@ export default defineConfig({
         'node_modules/**',
         'utils/amplify-server-util.ts',
       ],
+      thresholds: {
+        global: {
+          branches: 70,
+          functions: 70,
+          lines: 70,
+          statements: 70,
+        },
+      },
     },
   },
 });

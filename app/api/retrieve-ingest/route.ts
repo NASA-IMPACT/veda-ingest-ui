@@ -1,5 +1,6 @@
-import RetrieveJSON from '@/utils/githubUtils/RetrieveJSON';
 import { NextRequest, NextResponse } from 'next/server';
+
+import RetrieveJSON from '@/utils/githubUtils/RetrieveJSON';
 
 type IngestionType = 'collection' | 'dataset';
 

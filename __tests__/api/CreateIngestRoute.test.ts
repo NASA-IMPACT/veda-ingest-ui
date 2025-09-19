@@ -41,7 +41,7 @@ describe('POST /api/create-ingest', () => {
     const jsonResponse = await response.json();
 
     expect(jsonResponse.error).toBe(
-      'Missing "data" field in the request body.'
+      'Missing or invalid "data" field in the request body.'
     );
     expect(response.status).toBe(400);
   });

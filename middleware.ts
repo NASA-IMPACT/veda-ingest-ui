@@ -4,7 +4,16 @@ import { NextResponse, NextRequest } from 'next/server';
 const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
 export async function middleware(request: NextRequest) {
+  // Security: Ensure auth is never disabled in production
+  if (DISABLE_AUTH && process.env.NODE_ENV === 'production') {
+    console.error(
+      'SECURITY WARNING: Authentication cannot be disabled in production'
+    );
+    throw new Error('Authentication cannot be disabled in production');
+  }
+
   if (DISABLE_AUTH) {
+    console.warn('WARNING: Authentication is disabled for development');
     return NextResponse.next(); // Bypass authentication
   }
 

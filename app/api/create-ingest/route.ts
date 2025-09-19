@@ -1,16 +1,28 @@
+import { NextRequest, NextResponse } from 'next/server';
+
 import CreatePR from '@/utils/githubUtils/CreatePR';
 import UpdatePR from '@/utils/githubUtils/UpdatePR';
-import { NextRequest, NextResponse } from 'next/server';
 
 type AllowedIngestionType = 'dataset' | 'collection';
 
 export async function POST(request: NextRequest) {
   try {
-    const { data, ingestionType, userComment } = await request.json();
+    const body = await request.json();
 
-    if (!data) {
+    // Input validation
+    if (!body || typeof body !== 'object') {
       return NextResponse.json(
-        { error: 'Missing "data" field in the request body.' },
+        { error: 'Invalid request body' },
+        { status: 400 }
+      );
+    }
+
+    const { data, ingestionType, userComment } = body;
+
+    // Validate required fields
+    if (!data || typeof data !== 'object') {
+      return NextResponse.json(
+        { error: 'Missing or invalid "data" field in the request body.' },
         { status: 400 }
       );
     }
@@ -21,6 +33,14 @@ export async function POST(request: NextRequest) {
           error:
             'Missing or invalid "ingestionType". Must be "dataset" or "collection".',
         },
+        { status: 400 }
+      );
+    }
+
+    // Validate userComment if provided
+    if (userComment !== undefined && typeof userComment !== 'string') {
+      return NextResponse.json(
+        { error: 'Invalid "userComment" field. Must be a string.' },
         { status: 400 }
       );
     }
