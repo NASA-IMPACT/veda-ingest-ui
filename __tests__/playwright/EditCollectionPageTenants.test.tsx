@@ -151,9 +151,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
     });
 
     await test.step('wait for list of pending requests to load and pick #1', async () => {
-      await page
-        .getByRole('button', { name: /Ingest Request for seeded ingest #1/i })
-        .click();
+      await page.getByRole('button', { name: /seeded ingest #1/i }).click();
     });
 
     await test.step('verify existing tenants are hidden', async () => {
@@ -203,9 +201,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
     });
 
     await test.step('wait for list of pending requests to load and pick #1', async () => {
-      await page
-        .getByRole('button', { name: /Ingest Request for seeded ingest #1/i })
-        .click();
+      await page.getByRole('button', { name: /seeded ingest #1/i }).click();
     });
 
     await test.step('edit collection via JSON Editor', async () => {
@@ -253,9 +249,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
     });
 
     await test.step('wait for list of pending requests to load and pick #1', async () => {
-      await page
-        .getByRole('button', { name: /Ingest Request for seeded ingest #1/i })
-        .click();
+      await page.getByRole('button', { name: /seeded ingest #1/i }).click();
     });
 
     await test.step('verify available tenant options', async () => {

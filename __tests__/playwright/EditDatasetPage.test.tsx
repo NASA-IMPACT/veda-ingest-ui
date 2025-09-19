@@ -68,9 +68,7 @@ test.describe('Edit Dataset Page', () => {
     });
 
     await test.step('wait for list of of pending requests to load and pick #1', async () => {
-      await page
-        .getByRole('button', { name: /Ingest Request for seeded ingest #1/i })
-        .click();
+      await page.getByRole('button', { name: /seeded ingest #1/i }).click();
     });
 
     await expect(
@@ -155,9 +153,7 @@ test.describe('Edit Dataset Page', () => {
     });
 
     await test.step('wait for list of of pending requests to load and pick #1', async () => {
-      await page
-        .getByRole('button', { name: /Ingest Request for seeded ingest #1/i })
-        .click();
+      await page.getByRole('button', { name: /seeded ingest #1/i }).click();
     });
 
     await expect(
@@ -203,12 +199,12 @@ test.describe('Edit Dataset Page', () => {
     await test.step('verify list of of pending requests loads', async () => {
       await expect(
         page.getByRole('button', {
-          name: /Ingest Request for seeded ingest #1/i,
+          name: /seeded ingest #1/i,
         })
       ).toBeVisible();
       await expect(
         page.getByRole('button', {
-          name: /Ingest Request for seeded ingest #2/i,
+          name: /seeded ingest #2/i,
         })
       ).toBeVisible();
     });
@@ -272,9 +268,7 @@ test.describe('Edit Dataset Page', () => {
     });
 
     await test.step('wait for list of of pending requests to load and pick #1', async () => {
-      await page
-        .getByRole('button', { name: /Ingest Request for seeded ingest #1/i })
-        .click();
+      await page.getByRole('button', { name: /seeded ingest #1/i }).click();
     });
 
     await test.step('verify error modal loads', async () => {

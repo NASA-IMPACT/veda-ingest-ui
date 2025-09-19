@@ -84,9 +84,7 @@ test.describe('Edit Dataset Page', () => {
     });
 
     await test.step('wait for list of pending requests and select first item', async () => {
-      await page
-        .getByRole('button', { name: /Ingest Request for seeded ingest #1/i })
-        .click();
+      await page.getByRole('button', { name: /seeded ingest #1/i }).click();
     });
 
     await test.step('verify existing tenants are hidden', async () => {
@@ -137,9 +135,7 @@ test.describe('Edit Dataset Page', () => {
     });
 
     await test.step('wait for list of pending requests and select first item', async () => {
-      await page
-        .getByRole('button', { name: /Ingest Request for seeded ingest #1/i })
-        .click();
+      await page.getByRole('button', { name: /seeded ingest #1/i }).click();
     });
 
     await test.step('edit dataset via JSON Editor', async () => {
@@ -185,9 +181,7 @@ test.describe('Edit Dataset Page', () => {
     });
 
     await test.step('wait for list of pending requests and select first item', async () => {
-      await page
-        .getByRole('button', { name: /Ingest Request for seeded ingest #1/i })
-        .click();
+      await page.getByRole('button', { name: /seeded ingest #1/i }).click();
     });
 
     await test.step('verify available tenant options', async () => {
