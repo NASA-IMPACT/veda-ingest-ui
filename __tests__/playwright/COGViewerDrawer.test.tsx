@@ -198,6 +198,9 @@ test.describe('COG Viewer Drawer', () => {
         .fill('"test": true');
     });
 
+    await expect(page.getByLabel('Sample Files-1')).toHaveValue(
+      's3://test.com'
+    );
     await test.step('click button to open COG Viewer Drawer', async () => {
       await page
         .getByRole('button', {

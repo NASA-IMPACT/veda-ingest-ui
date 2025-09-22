@@ -2,18 +2,54 @@
 
 This application is to allow users to create PRs in [veda-data](https://github.com/NASA-IMPACT/veda-data) to ingest data.
 
+## Quick Start
+
+```bash
+# Install dependencies
+yarn install
+
+# Copy environment configuration
+cp .env.example .env
+
+# Start development server
+yarn dev
+```
+
 ## Feature Tour
 
 The latest Playwright test report is published after each merge to `main`. This provides screenshots and descriptions of features in the veda-ingest-ui.
 https://nasa-impact.github.io/veda-ingest-ui/
 
-It leverages the [Next.js](https://nextjs.org/) and the [react-jsonschema-form](https://github.com/rjsf-team/react-jsonschema-form) to create a React form component based on the JSON Schema for the data ingestion.
+## Tech Stack
 
-The styling of the form uses the [ant design](https://ant.design/) React Framework for components.
+- **Framework**: [Next.js](https://nextjs.org/) 15+ with App Router
+- **Form Generation**: [react-jsonschema-form](https://github.com/rjsf-team/react-jsonschema-form) for dynamic forms
+- **UI Components**: [Ant Design](https://ant.design/) React framework
+- **GitHub API**: [@octokit/rest](https://github.com/octokit/rest.js) for GitHub operations
+- **Authentication**: Keycloak via NextAuth.js
+- **Testing**: Vitest + Playwright for comprehensive testing
+- **Deployment**: AWS Amplify with serverless architecture
 
-Accessing the Github API is done through the [@octokit/rest](https://github.com/octokit/rest.js) GitHub REST API client for JavaScript.
+## 📁 Project Structure
 
-Deployment is handled by AWS Amplify
+```
+├── app/                    # Next.js App Router pages
+│   ├── api/               # API routes for GitHub operations
+│   ├── collections/       # Collection management pages
+│   ├── datasets/          # Dataset management pages
+│   └── upload/            # File upload functionality
+├── components/            # Reusable React components
+│   ├── layout/           # Layout components (header, sidebar, etc.)
+│   ├── rjsf-components/  # Custom RJSF form components
+│   ├── thumbnails/       # Thumbnail upload components
+│   └── ui/               # General UI components
+├── FormSchemas/          # JSON schemas for form generation
+├── hooks/                # Custom React hooks
+├── lib/                  # Utility libraries and configurations
+├── types/                # TypeScript type definitions
+├── utils/                # Helper functions and GitHub utilities
+└── __tests__/            # Test suites (unit, integration, e2e)
+```
 
 # Architecture
 
