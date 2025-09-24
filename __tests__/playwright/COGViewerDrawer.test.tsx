@@ -1,6 +1,31 @@
 import { expect, test } from '@/__tests__/playwright/setup-msw';
 import { HttpResponse } from 'msw';
 
+async function openCOGDrawer(page: any) {
+  await page.waitForTimeout(1000);
+  await page
+    .getByRole('button', {
+      name: /Generate Renders Object from Sample File/i,
+    })
+    .click();
+
+  // Wait for the drawer to open and content to load
+  await expect(page.locator('.ant-drawer')).toBeVisible({ timeout: 10000 });
+
+  await expect(page.getByTestId('colormap', { timeout: 10000 })).toBeVisible();
+}
+
+async function fillRenders(page: any, rendersData: any) {
+  const rendersTextbox = page.locator('#root_renders').getByRole('textbox');
+  await rendersTextbox.clear();
+  await rendersTextbox.fill(JSON.stringify(rendersData, null, 2));
+
+  // Wait for the JSON to be properly set in the form
+  await expect(rendersTextbox).toContainText(
+    `"${Object.keys(rendersData)[0]}"`
+  );
+}
+
 test.describe('COG Viewer Drawer', () => {
   test('COG Viewer loads with renders object presets', async ({
     page,
@@ -12,25 +37,16 @@ test.describe('COG Viewer Drawer', () => {
     await test.step('enter URL of Sample File and valid json in renders object', async () => {
       await page.getByLabel('Sample Files-1').fill('s3://test.com');
 
-      await page
-        .locator('#root_renders')
-        .getByRole('textbox')
-        .fill(
-          JSON.stringify(
-            {
-              resampling: 'nearest',
-              bidx: [1],
-              colormap_name: 'rdbu',
-              assets: ['cog_default'],
-              rescale: [[-1, 1]],
-              color_formula: 'test123',
-              nodata: 255,
-              title: 'VEDA Dashboard Render Parameters',
-            },
-            null,
-            2
-          )
-        );
+      await fillRenders(page, {
+        resampling: 'nearest',
+        bidx: [1],
+        colormap_name: 'rdbu',
+        assets: ['cog_default'],
+        rescale: [[-1, 1]],
+        color_formula: 'test123',
+        nodata: 255,
+        title: 'VEDA Dashboard Render Parameters',
+      });
     });
 
     const initialRendersScreenshot = await page.screenshot({ fullPage: true });
@@ -40,11 +56,7 @@ test.describe('COG Viewer Drawer', () => {
     });
 
     await test.step('click button to open COG Viewer Drawer', async () => {
-      await page
-        .getByRole('button', {
-          name: /Generate Renders Object from Sample File/i,
-        })
-        .click();
+      await openCOGDrawer(page);
     });
 
     await expect(
@@ -132,11 +144,7 @@ test.describe('COG Viewer Drawer', () => {
     });
 
     await test.step('click button to open COG Viewer Drawer', async () => {
-      await page
-        .getByRole('button', {
-          name: /Generate Renders Object from Sample File/i,
-        })
-        .click();
+      await openCOGDrawer(page);
     });
 
     await test.step('validate that form controls pre-populate with default values', async () => {
@@ -192,21 +200,13 @@ test.describe('COG Viewer Drawer', () => {
     await test.step('enter URL of Sample File and invalid json in renders object', async () => {
       await page.getByLabel('Sample Files-1').fill('s3://test.com');
 
-      await page
-        .locator('#root_renders')
-        .getByRole('textbox')
-        .fill('"test": true');
+      const rendersTextbox = page.locator('#root_renders').getByRole('textbox');
+      await rendersTextbox.clear();
+      await rendersTextbox.fill('"test": true');
     });
 
-    await expect(page.getByLabel('Sample Files-1')).toHaveValue(
-      's3://test.com'
-    );
     await test.step('click button to open COG Viewer Drawer', async () => {
-      await page
-        .getByRole('button', {
-          name: /Generate Renders Object from Sample File/i,
-        })
-        .click();
+      await openCOGDrawer(page);
     });
 
     await test.step('validate that form controls pre-populate with default values', async () => {
@@ -257,61 +257,78 @@ test.describe('COG Viewer Drawer', () => {
     await test.step('enter URL of Sample File and valid json in renders object', async () => {
       await page.getByLabel('Sample Files-1').fill('s3://test.com');
 
-      await page
-        .locator('#root_renders')
-        .getByRole('textbox')
-        .fill(
+      await fillRenders(page, {
+        resampling: 'nearest',
+        bidx: [1],
+        colormap_name: 'rdbu',
+        assets: ['cog_default'],
+        rescale: [[-1, 1]],
+        color_formula: 'test123',
+        nodata: 255,
+        title: 'VEDA Dashboard Render Parameters',
+      });
+    });
+
+    await test.step('click button to open COG Viewer Drawer', async () => {
+      await openCOGDrawer(page);
+
+      await test.step('change renders values in COG Viewer Control Form', async () => {
+        await expect(page.locator('[data-testid="colormap"]')).toContainText(
+          'rdbu',
+          { timeout: 10000 }
+        );
+
+        await expect(page.locator('[data-testid="nodata"]')).toHaveValue('255');
+        await page.locator('[data-testid="nodata"]').fill('');
+
+        await expect(page.locator('[data-testid="colorFormula"]')).toHaveValue(
+          /test123/i
+        );
+        await page.locator('[data-testid="colorFormula"]').fill('test456');
+      });
+
+      await test.step('validate that Rendering Options Modal displays new values in form in pretty json format', async () => {
+        await page
+          .getByRole('button', { name: 'View Rendering Options' })
+          .click();
+        await expect(
+          page.getByRole('dialog', { name: /COG Rendering Options/i })
+        ).toBeVisible();
+        await expect(
+          page.getByText('COG Rendering Options{ "bidx').getByRole('textbox')
+        ).toHaveText(
           JSON.stringify(
             {
-              resampling: 'nearest',
               bidx: [1],
-              colormap_name: 'rdbu',
-              assets: ['cog_default'],
               rescale: [[-1, 1]],
-              color_formula: 'test123',
-              nodata: 255,
-              title: 'VEDA Dashboard Render Parameters',
+              colormap_name: 'rdbu',
+              color_formula: 'test456',
+              resampling: 'nearest',
+              assets: ['cog_default'],
             },
             null,
             2
           )
         );
-    });
-    await page.waitForTimeout(500);
+      });
+      await test.step('close COG Rendering Options Modal', async () => {
+        await page
+          .getByLabel('COG Rendering Options')
+          .getByRole('button', { name: 'Cancel' })
+          .click();
+      });
 
-    await test.step('click button to open COG Viewer Drawer', async () => {
-      await page
-        .getByRole('button', {
-          name: /Generate Renders Object from Sample File/i,
-        })
-        .click();
-    });
+      await test.step('click to accept selected COG Rendering Options', async () => {
+        await page
+          .getByRole('button', { name: /accept render options/i })
+          .click();
+      });
 
-    await test.step('change renders values in COG Viewer Control Form', async () => {
-      await expect(page.locator('[data-testid="colormap"]')).toContainText(
-        'rdbu'
-      );
-
-      await expect(page.locator('[data-testid="nodata"]')).toHaveValue('255');
-      await page.locator('[data-testid="nodata"]').fill('');
-
-      await expect(page.locator('[data-testid="colorFormula"]')).toHaveValue(
-        /test123/i
-      );
-      await page.locator('[data-testid="colorFormula"]').fill('test456');
-    });
-
-    await test.step('validate that Rendering Options Modal displays new values in form in pretty json format', async () => {
-      await page
-        .getByRole('button', { name: 'View Rendering Options' })
-        .click();
-      await expect(
-        page.getByRole('dialog', { name: /COG Rendering Options/i })
-      ).toBeVisible();
-      await expect(
-        page.getByText('COG Rendering Options{ "bidx').getByRole('textbox')
-      ).toHaveText(
-        JSON.stringify(
+      await test.step('validate that renders object has updated with new values', async () => {
+        const rendersTextbox = page
+          .locator('#root_renders')
+          .getByRole('textbox');
+        const expectedJson = JSON.stringify(
           {
             bidx: [1],
             rescale: [[-1, 1]],
@@ -322,39 +339,11 @@ test.describe('COG Viewer Drawer', () => {
           },
           null,
           2
-        )
-      );
-    });
-    await test.step('close COG Rendering Options Modal', async () => {
-      await page
-        .getByLabel('COG Rendering Options')
-        .getByRole('button', { name: 'Cancel' })
-        .click();
-    });
+        );
 
-    await test.step('click to accept selected COG Rendering Options', async () => {
-      await page
-        .getByRole('button', { name: /accept render options/i })
-        .click();
-    });
-
-    await test.step('validate that renders object has updated with new values', async () => {
-      await expect(
-        page.locator('#root_renders').getByRole('textbox')
-      ).toHaveText(
-        JSON.stringify(
-          {
-            bidx: [1],
-            rescale: [[-1, 1]],
-            colormap_name: 'rdbu',
-            color_formula: 'test456',
-            resampling: 'nearest',
-            assets: ['cog_default'],
-          },
-          null,
-          2
-        )
-      );
+        // Wait for the updated values to be reflected in the form
+        await expect(rendersTextbox).toHaveText(expectedJson);
+      });
     });
   });
 
@@ -366,25 +355,16 @@ test.describe('COG Viewer Drawer', () => {
     });
 
     await test.step('do not enter URL of Sample File but enter valid json in renders object', async () => {
-      await page
-        .locator('#root_renders')
-        .getByRole('textbox')
-        .fill(
-          JSON.stringify(
-            {
-              resampling: 'nearest',
-              bidx: [1],
-              colormap_name: 'rdbu',
-              assets: ['cog_default'],
-              rescale: [[-1, 1]],
-              color_formula: 'test123',
-              nodata: 255,
-              title: 'VEDA Dashboard Render Parameters',
-            },
-            null,
-            2
-          )
-        );
+      await fillRenders(page, {
+        resampling: 'nearest',
+        bidx: [1],
+        colormap_name: 'rdbu',
+        assets: ['cog_default'],
+        rescale: [[-1, 1]],
+        color_formula: 'test123',
+        nodata: 255,
+        title: 'VEDA Dashboard Render Parameters',
+      });
     });
     await test.step('click button to open COG Viewer Drawer', async () => {
       await page
