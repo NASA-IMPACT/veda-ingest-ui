@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+
 import { checkFileExists, generateSignedUrl } from '@/utils/s3';
 
 const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png'];

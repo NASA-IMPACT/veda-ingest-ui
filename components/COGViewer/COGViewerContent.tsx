@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Spin } from 'antd';
 import { Map as LeafletMap } from 'leaflet';
 
