@@ -135,7 +135,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       if (request.method() === 'PUT') {
         const putData = request.postDataJSON();
 
-        expect(putData.formData.tenant).toEqual(['tenant1', 'tenant2']);
+        expect(putData.formData.tenant).toEqual('tenant1');
 
         await route.fulfill({
           status: 200,
@@ -158,9 +158,6 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       await expect(
         page.locator('.ant-select-selection-item', { hasText: /tenant1/i })
       ).toBeHidden();
-      await expect(
-        page.locator('.ant-select-selection-item', { hasText: /tenant2/i })
-      ).toBeHidden();
     });
 
     await test.step('modify tenants', async () => {
@@ -168,7 +165,6 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       await tenantDropdown.click();
 
       await page.getByText('tenant1').click();
-      await page.getByText('tenant2').click();
 
       // Close dropdown
       await page.keyboard.press('Escape');
@@ -186,7 +182,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       if (request.method() === 'PUT') {
         const putData = request.postDataJSON();
 
-        expect(putData.formData.tenant).toEqual(['tenant1', 'tenant3']);
+        expect(putData.formData.tenant).toEqual('tenant3');
 
         await route.fulfill({
           status: 200,
@@ -208,7 +204,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       const updatedConfig = {
         ...modifiedCollectionConfig,
         id: 'Playwright_TEST',
-        tenant: ['tenant1', 'tenant3'], // Change tenants
+        tenant: 'tenant3',
       };
 
       await expect(page.locator('.tenants-field')).toBeVisible();
@@ -227,9 +223,6 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
     await test.step('verify tenant changes in form view', async () => {
       await expect(page.locator('.tenants-field')).toBeVisible();
 
-      await expect(
-        page.locator('.ant-select-selection-item', { hasText: /tenant1/i })
-      ).toBeVisible();
       await expect(
         page.locator('.ant-select-selection-item', { hasText: /tenant3/i })
       ).toBeVisible();
@@ -276,7 +269,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       const invalidConfig = {
         ...modifiedCollectionConfig,
         id: 'Playwright_TEST',
-        tenant: ['tenant1', 'unauthorized-tenant'],
+        tenant: 'unauthorized-tenant',
       };
 
       await page
@@ -289,10 +282,9 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
 
       // Should show validation error
       await expect(
-        page.getByText(
-          '"tenant/1 must be equal to one of the allowed values"',
-          { exact: true }
-        )
+        page.getByText('"tenant must be equal to one of the allowed values"', {
+          exact: true,
+        })
       ).toBeVisible();
     });
   });

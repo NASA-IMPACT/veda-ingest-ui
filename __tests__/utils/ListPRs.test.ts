@@ -60,7 +60,7 @@ describe('ListPRs Utility', () => {
       ],
     });
     const fileContent = Buffer.from(
-      JSON.stringify({ tenant: ['tenant1', 'tenant2'] })
+      JSON.stringify({ tenant: 'tenant2' })
     ).toString('base64');
     mockGetContent.mockResolvedValue({
       data: { content: fileContent },

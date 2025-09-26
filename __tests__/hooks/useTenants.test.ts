@@ -15,25 +15,24 @@ const baseSchema: JSONSchema7 = {
   type: 'object',
   properties: {
     tenant: {
-      type: 'array',
-      items: {
-        type: 'string',
-      },
+      type: 'string',
     },
   },
 };
 
 describe('useTenants', () => {
-  mockedUseUserTenants.mockReturnValue({
-    allowedTenants: undefined,
-    isLoading: true,
+  it('should remove tenant property when allowedTenants is undefined and loading', () => {
+    mockedUseUserTenants.mockReturnValue({
+      allowedTenants: undefined,
+      isLoading: true,
+    });
+    const { result } = renderHook(() => useTenants(baseSchema));
+    expect(result.current.schema).toEqual({
+      type: 'object',
+      properties: {},
+    });
+    expect(result.current.isLoading).toBe(true);
   });
-  const { result } = renderHook(() => useTenants(baseSchema));
-  expect(result.current.schema).toEqual({
-    type: 'object',
-    properties: {},
-  });
-  expect(result.current.isLoading).toBe(true);
 
   it('should return the updated schema when the context has loaded', () => {
     const mockTenants = ['tenant-A', 'tenant-B'];
@@ -45,22 +44,23 @@ describe('useTenants', () => {
     mockedUseUserTenants.mockReturnValue(mockContextValue);
 
     const { result } = renderHook(() => useTenants(baseSchema));
-    expect(result.current.schema.properties?.tenant?.items?.enum).toEqual(
-      mockTenants
-    );
+    expect(result.current.schema.properties?.tenant?.type).toBe('string');
+    expect(result.current.schema.properties?.tenant?.enum).toEqual(mockTenants);
     expect(result.current.isLoading).toBe(false);
   });
 
-  it('should return the base schema while the context is loading', () => {
+  it('should return the updated schema even while loading if tenants are available', () => {
     const mockTenants = ['tenant-A'];
     const mockContextValue = {
       allowedTenants: mockTenants,
       isLoading: true,
     };
     mockedUseUserTenants.mockReturnValue(mockContextValue);
-    const baseSchemaCopy = JSON.parse(JSON.stringify(baseSchema));
-    renderHook(() => useTenants(baseSchemaCopy));
-    expect(baseSchemaCopy.properties?.tenant?.items?.enum).toBeUndefined();
+
+    const { result } = renderHook(() => useTenants(baseSchema));
+    expect(result.current.schema.properties?.tenant?.type).toBe('string');
+    expect(result.current.schema.properties?.tenant?.enum).toEqual(mockTenants);
+    expect(result.current.isLoading).toBe(true);
   });
 
   it('should remove tenant property if allowedTenants is empty', () => {
@@ -74,10 +74,8 @@ describe('useTenants', () => {
       type: 'object',
       properties: {
         tenant: {
-          type: 'array',
-          items: {
-            type: 'string',
-          },
+          type: 'string',
+          enum: ['testTenant'],
         },
         other: {
           type: 'string',

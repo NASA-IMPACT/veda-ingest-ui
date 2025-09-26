@@ -7,6 +7,7 @@ import { useUserTenants } from '@/app/contexts/TenantContext';
  * A reusable hook that takes a base JSON schema and injects the list of
  * tenants from the global TenantContext.
  * @param baseSchema The static base JSON schema to modify.
+ * @param baseUiSchema Optional UI schema to modify.
  * @returns An object containing the dynamically updated schema and a loading state.
  */
 export const useTenants = (baseSchema: JSONSchema7, baseUiSchema?: any) => {
@@ -30,12 +31,11 @@ export const useTenants = (baseSchema: JSONSchema7, baseUiSchema?: any) => {
         );
       }
     } else {
-      // Add tenant enum values to the schema
+      // Add tenant enum values to the schema (single string selection)
       if (newSchema.properties?.tenant) {
         const tenantProperty = newSchema.properties.tenant as JSONSchema7;
-        if (tenantProperty.items && typeof tenantProperty.items === 'object') {
-          (tenantProperty.items as JSONSchema7).enum = allowedTenants;
-        }
+        tenantProperty.type = 'string';
+        tenantProperty.enum = allowedTenants;
       }
     }
 

@@ -79,7 +79,7 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
         expect(
           postData.data.tenant,
           'tenant key value should match selection'
-        ).toEqual(['tenant1', 'tenant2']);
+        ).toEqual('tenant2');
 
         await route.fulfill({
           status: 200,
@@ -118,17 +118,12 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
         contentType: 'image/png',
       });
 
-      // Select two tenants
-      await page.getByText('tenant1').click();
       await page.getByText('tenant2').click();
 
       // Close dropdown
       await page.keyboard.press('Escape');
 
-      // Verify selections
-      await expect(
-        page.locator('.ant-select-selection-item', { hasText: /tenant1/i })
-      ).toBeVisible();
+      // Verify selection
       await expect(
         page.locator('.ant-select-selection-item', { hasText: /tenant2/i })
       ).toBeVisible();
@@ -201,7 +196,7 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
         expect(
           postData.data.tenant,
           'tenant key value should match JSON entry'
-        ).toEqual(['tenant1', 'tenant2']);
+        ).toEqual('tenant3');
 
         await route.fulfill({
           status: 200,
@@ -224,7 +219,7 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
     await test.step('paste JSON with tenants', async () => {
       const configWithTenants = {
         ...requiredCollectionConfig,
-        tenant: ['tenant1', 'tenant2'],
+        tenant: 'tenant3',
       };
       await page
         .getByTestId('json-editor')
@@ -235,7 +230,7 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
     await test.step('verify tenants persist when switching back to form', async () => {
       await page.getByRole('tab', { name: /form/i }).click();
       await expect(
-        page.locator('.tenants-field').getByText('tenant1tenant2')
+        page.locator('.tenants-field').getByText('tenant3')
       ).toBeVisible();
     });
 
@@ -266,7 +261,7 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
 
       const invalidConfig = {
         ...requiredCollectionConfig,
-        tenant: ['tenant1', 'unauthorized-tenant'],
+        tenant: 'unauthorized-tenant',
       };
 
       await page
@@ -278,10 +273,9 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
       await page.getByRole('button', { name: /apply changes/i }).click();
 
       await expect(
-        page.getByText(
-          '"tenant/1 must be equal to one of the allowed values"',
-          { exact: true }
-        ),
+        page.getByText('"tenant must be equal to one of the allowed values"', {
+          exact: true,
+        }),
         'Should show validation error'
       ).toBeVisible();
 

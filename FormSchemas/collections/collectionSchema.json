@@ -237,12 +237,8 @@
       "title": "Time Interval"
     },
     "tenant": {
-      "type": "array",
-      "title": "Tenants",
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true
+      "type": "string",
+      "title": "Tenants"
     }
   }
 }

@@ -6,7 +6,7 @@ const modifiedConfig = {
   title: 'test title',
   description: 'test description',
   license: 'test license',
-  tenant: ['tenant1', 'tenant2'],
+  tenant: 'tenant2',
   discovery_items: [
     {
       filename_regex: '(.*)Test_(.*).tif$',
@@ -68,7 +68,7 @@ test.describe('Edit Dataset Page', () => {
       if (request.method() === 'PUT') {
         const putData = request.postDataJSON();
 
-        expect(putData.formData.tenant).toEqual(['tenant1', 'tenant2']);
+        expect(putData.formData.tenant).toEqual('tenant1');
 
         await route.fulfill({
           status: 200,
@@ -101,7 +101,6 @@ test.describe('Edit Dataset Page', () => {
       await tenantDropdown.click();
 
       await page.getByText('tenant1').click();
-      await page.getByText('tenant2').click();
 
       // Close dropdown
       await page.keyboard.press('Escape');
@@ -119,7 +118,7 @@ test.describe('Edit Dataset Page', () => {
       if (request.method() === 'PUT') {
         const putData = request.postDataJSON();
 
-        expect(putData.formData.tenant).toEqual(['tenant1', 'tenant3']);
+        expect(putData.formData.tenant).toEqual('tenant3');
 
         await route.fulfill({
           status: 200,
@@ -141,7 +140,7 @@ test.describe('Edit Dataset Page', () => {
     await test.step('edit dataset via JSON Editor', async () => {
       const updatedConfig = {
         ...modifiedConfig,
-        tenant: ['tenant1', 'tenant3'], // Change tenants
+        tenant: 'tenant3',
       };
 
       await expect(page.locator('.tenants-field')).toBeVisible();
@@ -160,9 +159,6 @@ test.describe('Edit Dataset Page', () => {
     await test.step('verify tenant changes in form view', async () => {
       await expect(page.locator('.tenants-field')).toBeVisible();
 
-      await expect(
-        page.locator('.ant-select-selection-item', { hasText: /tenant1/i })
-      ).toBeVisible();
       await expect(
         page.locator('.ant-select-selection-item', { hasText: /tenant3/i })
       ).toBeVisible();
@@ -199,7 +195,7 @@ test.describe('Edit Dataset Page', () => {
 
       const invalidConfig = {
         ...modifiedConfig,
-        tenant: ['tenant1', 'unauthorized-tenant'],
+        tenant: 'unauthorized-tenant',
       };
 
       await page
@@ -209,10 +205,9 @@ test.describe('Edit Dataset Page', () => {
 
       // Should show validation error
       await expect(
-        page.getByText(
-          '"tenant/1 must be equal to one of the allowed values"',
-          { exact: true }
-        )
+        page.getByText('"tenant must be equal to one of the allowed values"', {
+          exact: true,
+        })
       ).toBeVisible();
     });
   });
