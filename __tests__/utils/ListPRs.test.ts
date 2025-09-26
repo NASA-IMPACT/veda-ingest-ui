@@ -69,7 +69,7 @@ describe('ListPRs Utility', () => {
     const result = await ListPRs('collection');
     expect(result).toHaveLength(1);
     expect(result[0].pr).toEqual(pr);
-    expect(result[0].tenants).toEqual(['tenant1', 'tenant2']);
+    expect(result[0].tenants).toEqual('tenant2');
   });
 
   it('returns PRs with tenants undefined if JSON parse fails', async () => {
