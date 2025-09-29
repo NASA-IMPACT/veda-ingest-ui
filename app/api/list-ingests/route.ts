@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { getUserTenants } from '@/lib/serverTenantValidation';
 
 import ListPRs from '@/utils/githubUtils/ListPRs';
 
@@ -13,7 +14,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const userTenants = session.tenants || [];
+    const userTenants = await getUserTenants(session);
 
     const searchParams = request.nextUrl.searchParams;
     const ingestionType = searchParams.get('ingestionType') as IngestionType;

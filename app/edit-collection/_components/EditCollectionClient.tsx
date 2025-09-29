@@ -4,6 +4,10 @@ import { useState } from 'react';
 import AppLayout from '@/components/layout/Layout';
 import PendingIngestList from '@/components/ingestion/PendingIngestList';
 import EditIngestView from '@/components/ingestion/EditIngestView';
+import {
+  TenantErrorBoundary,
+  APIErrorBoundary,
+} from '@/components/error-boundaries';
 
 interface SelectedIngest {
   ref: string;
@@ -25,19 +29,31 @@ const EditCollectionClient = () => {
 
   return (
     <AppLayout>
-      {selectedIngest ? (
-        <EditIngestView
-          ingestionType="collection"
-          gitRef={selectedIngest.ref}
-          initialTitle={selectedIngest.title}
-          onComplete={handleReturnToList}
-        />
-      ) : (
-        <PendingIngestList
-          ingestionType="collection"
-          onIngestSelect={handleIngestSelect}
-        />
-      )}
+      <TenantErrorBoundary>
+        <APIErrorBoundary
+          onRetry={() => {
+            // If editing, return to list to retry
+            if (selectedIngest) {
+              setSelectedIngest(null);
+            }
+            // Otherwise, the component will re-render and retry automatically
+          }}
+        >
+          {selectedIngest ? (
+            <EditIngestView
+              ingestionType="collection"
+              gitRef={selectedIngest.ref}
+              initialTitle={selectedIngest.title}
+              onComplete={handleReturnToList}
+            />
+          ) : (
+            <PendingIngestList
+              ingestionType="collection"
+              onIngestSelect={handleIngestSelect}
+            />
+          )}
+        </APIErrorBoundary>
+      </TenantErrorBoundary>
     </AppLayout>
   );
 };

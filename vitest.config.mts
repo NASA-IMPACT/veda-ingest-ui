@@ -35,5 +35,13 @@ export default defineConfig({
         },
       },
     },
+    server: {
+      deps: {
+        inline: ['next-auth', '@next-auth/core'],
+      },
+    },
+  },
+  define: {
+    global: 'globalThis',
   },
 });

@@ -6,6 +6,10 @@ import CreationFormManager from '@/components/ingestion/CreationFormManager';
 import ErrorModal from '@/components/ui/ErrorModal';
 import SuccessModal from '@/components/ui/SuccessModal';
 import { Status } from '@/types/global';
+import {
+  TenantErrorBoundary,
+  APIErrorBoundary,
+} from '@/components/error-boundaries';
 
 const CreateIngestClient = function CreateIngestClient() {
   const [status, setStatus] = useState<Status>('idle');
@@ -21,13 +25,23 @@ const CreateIngestClient = function CreateIngestClient() {
 
   return (
     <AppLayout>
-      <CreationFormManager
-        formType="dataset"
-        setStatus={setStatus}
-        setCollectionName={setCollectionName}
-        setApiErrorMessage={setApiErrorMessage}
-        setPullRequestUrl={setPullRequestUrl}
-      />
+      <TenantErrorBoundary>
+        <APIErrorBoundary
+          onRetry={() => {
+            // Reset form state on retry
+            setStatus('idle');
+            setApiErrorMessage('');
+          }}
+        >
+          <CreationFormManager
+            formType="dataset"
+            setStatus={setStatus}
+            setCollectionName={setCollectionName}
+            setApiErrorMessage={setApiErrorMessage}
+            setPullRequestUrl={setPullRequestUrl}
+          />
+        </APIErrorBoundary>
+      </TenantErrorBoundary>
 
       {status === 'loadingGithub' && <Spin fullscreen />}
       {status === 'error' && (
