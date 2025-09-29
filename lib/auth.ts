@@ -5,11 +5,27 @@ import { NextResponse } from 'next/server';
 
 const authDisabled = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
+// Helper function to get mock tenants from environment variable
+const getMockTenants = (): string[] => {
+  const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
+  if (mockTenants && mockTenants.trim() !== '') {
+    return mockTenants
+      .split(',')
+      .map((tenant) => tenant.trim())
+      .filter(Boolean);
+  }
+  // Default fallback tenants if none specified
+  return [''];
+};
+
 let auth: any, handlers: any, signIn: any, signOut: any;
 
 if (authDisabled) {
   // --- MOCKED AUTH FOR TESTING --- 🎭
   console.log('🎭 Auth is disabled. Using mock session.');
+
+  const mockTenants = getMockTenants();
+  console.log('🎭 Mock tenants:', mockTenants);
 
   const mockSession: Session = {
     user: {
@@ -17,7 +33,7 @@ if (authDisabled) {
       email: 'test@example.com',
     },
     expires: '2099-12-31T23:59:59.999Z',
-    tenants: ['tenant1', 'tenant2', 'tenant3'],
+    tenants: mockTenants,
   };
 
   // The `auth` function is used by middleware and server components
@@ -72,7 +88,20 @@ if (authDisabled) {
       async session({ session, token }) {
         const customToken = token as JWT;
         const customSession = session as Session & { tenants?: string[] };
-        customSession.tenants = customToken.tenants;
+
+        // Check if we should use mock tenants instead of real ones
+        const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
+        if (mockTenants && mockTenants.trim() !== '') {
+          const tenants = mockTenants
+            .split(',')
+            .map((tenant) => tenant.trim())
+            .filter(Boolean);
+          console.log('🎭 Overriding real tenants with mock tenants:', tenants);
+          customSession.tenants = tenants;
+        } else {
+          customSession.tenants = customToken.tenants;
+        }
+
         return customSession;
       },
     },

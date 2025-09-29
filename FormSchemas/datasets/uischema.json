@@ -199,6 +199,6 @@
   },
   "tenant": {
     "classNames": "tenants-field",
-    "ui:help": "Optional list of tenants allowed to access this item."
+    "ui:help": "Optional tenant allowed to access this item."
   }
 }

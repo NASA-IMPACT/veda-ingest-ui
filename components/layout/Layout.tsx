@@ -50,7 +50,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
           )}
         </div>
         {!collapsed &&
-          (process.env.NEXT_PUBLIC_MOCK_TENANTS === 'true' ||
+          (process.env.NEXT_PUBLIC_MOCK_TENANTS ||
             process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true') && (
             <div
               style={{
@@ -68,8 +68,10 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
                   flexDirection: 'column',
                 }}
               >
-                {process.env.NEXT_PUBLIC_MOCK_TENANTS === 'true' && (
-                  <div>Mocking Tenants</div>
+                {process.env.NEXT_PUBLIC_MOCK_TENANTS && (
+                  <div>
+                    Mocking Tenants: {process.env.NEXT_PUBLIC_MOCK_TENANTS}
+                  </div>
                 )}
                 {process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true' && (
                   <div>Mocking Auth</div>
