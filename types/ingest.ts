@@ -10,5 +10,5 @@ type GitHubPullRequest =
  */
 export interface IngestPullRequest {
   pr: GitHubPullRequest;
-  tenants: string[] | undefined; // Changed from 'content' to 'tenants'
+  tenant: string | undefined;
 }

@@ -35,10 +35,9 @@ export const githubResponse = [
       base: { ref: 'main' },
       author_association: 'CONTRIBUTOR',
     },
-    tenants: ['tenant1'],
+    tenant: 'tenant1',
   },
   {
-    // PR #2: Belongs to 'tenant3'
     pr: {
       url: 'https://api.github.com/repos/NASA-IMPACT/veda-data/pulls/2',
       id: 2240904598,
@@ -73,7 +72,7 @@ export const githubResponse = [
       base: { ref: 'main' },
       author_association: 'CONTRIBUTOR',
     },
-    tenants: ['tenant3'],
+    tenant: 'tenant3',
   },
   {
     // PR #3: Public (no tenants specified)
@@ -108,14 +107,13 @@ export const githubResponse = [
     // No 'tenants' key makes this a public ingest
   },
   {
-    // PR #4: Belongs to multiple tenants
     pr: {
       url: 'https://api.github.com/repos/NASA-IMPACT/veda-data/pulls/4',
       id: 2250000004,
       number: 4,
       state: 'open',
       locked: false,
-      title: 'Multi-tenant Sentinel Data',
+      title: 'Seeded Ingest #3 for tenant3',
       user: {
         login: 'veda-test[bot]',
         id: 189034726,
@@ -137,6 +135,6 @@ export const githubResponse = [
       base: { ref: 'main' },
       author_association: 'CONTRIBUTOR',
     },
-    tenants: ['tenant1', 'tenant2'],
+    tenant: 'tenant3',
   },
 ];

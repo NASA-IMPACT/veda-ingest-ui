@@ -83,7 +83,7 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
   }
 
   const publicIngests = allIngests.filter(
-    (ingest) => !ingest.tenants || ingest.tenants.length === 0
+    (ingest) => !ingest.tenant || ingest.tenant === ''
   );
 
   return (
@@ -98,7 +98,7 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
         <Row gutter={[16, 16]}>
           {allowedTenants?.map((tenant: string) => {
             const tenantIngests: IngestPullRequest[] = allIngests.filter(
-              (ingest: IngestPullRequest) => ingest.tenants?.includes(tenant)
+              (ingest: IngestPullRequest) => ingest.tenant === tenant
             );
 
             return (

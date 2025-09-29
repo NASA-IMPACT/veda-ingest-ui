@@ -68,9 +68,9 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
     page,
   }, testInfo) => {
     const seededTenants = {
-      tenant1: ['seeded ingest #1', 'Multi-tenant sentinel data'],
-      tenant2: ['Multi-tenant sentinel data'],
-      tenant3: ['seeded ingest #2'],
+      tenant1: ['seeded ingest #1'],
+      tenant2: [],
+      tenant3: ['seeded ingest #2', 'seeded ingest #3'],
       public: ['Public Landsat ingest'],
     };
 

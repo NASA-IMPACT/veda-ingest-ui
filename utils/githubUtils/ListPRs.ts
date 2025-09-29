@@ -66,10 +66,10 @@ const ListPRs = async (
           ).toString('utf-8');
           try {
             const parsedContent = JSON.parse(fileContent);
-            return { pr, tenants: parsedContent.tenant };
+            return { pr, tenant: parsedContent.tenant };
           } catch (e) {
             console.error(`Failed to parse JSON for PR #${pr.number}`);
-            return { pr, tenants: undefined };
+            return { pr, tenant: undefined };
           }
         }
       }

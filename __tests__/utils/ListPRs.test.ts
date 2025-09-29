@@ -50,7 +50,7 @@ describe('ListPRs Utility', () => {
     expect(mockList).toHaveBeenCalled();
   });
 
-  it('returns PRs with valid matching file and tenants', async () => {
+  it('returns PRs with valid matching file and tenant', async () => {
     const pr = { number: 1, head: { sha: 'abc123' } };
     mockList.mockResolvedValue({ data: [pr] });
     mockListFiles.mockResolvedValue({
@@ -69,10 +69,10 @@ describe('ListPRs Utility', () => {
     const result = await ListPRs('collection');
     expect(result).toHaveLength(1);
     expect(result[0].pr).toEqual(pr);
-    expect(result[0].tenants).toEqual('tenant2');
+    expect(result[0].tenant).toEqual('tenant2');
   });
 
-  it('returns PRs with tenants undefined if JSON parse fails', async () => {
+  it('returns PRs with tenant undefined if JSON parse fails', async () => {
     const pr = { number: 2, head: { sha: 'def456' } };
     mockList.mockResolvedValue({ data: [pr] });
     mockListFiles.mockResolvedValue({
@@ -86,7 +86,7 @@ describe('ListPRs Utility', () => {
     const result = await ListPRs('collection');
     expect(result).toHaveLength(1);
     expect(result[0].pr).toEqual(pr);
-    expect(result[0].tenants).toBeUndefined();
+    expect(result[0].tenant).toBeUndefined();
   });
 
   it('filters out PRs without matching files', async () => {

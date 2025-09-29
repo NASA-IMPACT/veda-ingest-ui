@@ -27,17 +27,15 @@ export async function GET(request: NextRequest) {
     const allIngests = await ListPRs(ingestionType);
 
     const filteredIngests = allIngests.filter((ingest) => {
-      const fileTenants = ingest.tenants as string[] | undefined;
+      const fileTenant = ingest.tenant;
 
-      // Condition 1: If the ingest has no 'tenants' array, it's public and should be shown.
-      if (!fileTenants || fileTenants.length === 0) {
+      // Condition 1: If the ingest has no tenant, it's public and should be shown.
+      if (!fileTenant || fileTenant === '') {
         return true;
       }
 
-      // Condition 2: If the ingest has tenants, show it only if the user's tenants match.
-      return fileTenants.every((fileTenant) =>
-        userTenants.includes(fileTenant)
-      );
+      // Condition 2: If the ingest has a tenant, show it only if the user has access to that tenant.
+      return userTenants.includes(fileTenant);
     });
 
     return NextResponse.json({ githubResponse: filteredIngests });
