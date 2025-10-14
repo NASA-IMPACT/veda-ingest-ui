@@ -43,7 +43,10 @@ vi.mock('@/components/ingestion/DatasetIngestionForm', () => ({
       data-testid="dataset-ingestion-form"
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit({ collection: 'Test Dataset' });
+        onSubmit({
+          collection: 'Test Dataset',
+          sample_files: 'http://example.com/file.tif',
+        });
       }}
     ></form>
   ),
@@ -64,6 +67,22 @@ vi.mock('@/components/ingestion/CollectionIngestionForm', () => ({
 // Mock global fetch
 global.fetch = vi.fn();
 
+// Mock functions for the useCogValidation hook
+const mockShowCogValidationModal = vi.fn();
+const mockHideCogValidationModal = vi.fn();
+const mockValidateFormDataCog = vi.fn().mockResolvedValue(true);
+
+// Mock the useCogValidation hook
+vi.mock('@/hooks/useCogValidation', () => ({
+  useCogValidation: () => ({
+    isCogValidationModalVisible: false,
+    isValidatingCog: false,
+    showCogValidationModal: mockShowCogValidationModal,
+    hideCogValidationModal: mockHideCogValidationModal,
+    validateFormDataCog: mockValidateFormDataCog,
+  }),
+}));
+
 describe('CreationFormManager', () => {
   const mockSetStatus = vi.fn();
   const mockSetCollectionName = vi.fn();
@@ -79,6 +98,9 @@ describe('CreationFormManager', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Set default behavior for COG validation
+    mockValidateFormDataCog.mockResolvedValue(true); // Default to validation passing
+
     // Since Antd Modals are rendered in a portal, we need a container in the body
     const portalRoot = document.createElement('div');
     portalRoot.setAttribute('id', 'portal-root');
@@ -138,7 +160,10 @@ describe('CreationFormManager', () => {
       expect(fetch).toHaveBeenCalledWith('api/create-ingest', {
         method: 'POST',
         body: JSON.stringify({
-          data: { collection: 'Test Dataset' },
+          data: {
+            collection: 'Test Dataset',
+            sample_files: 'http://example.com/file.tif',
+          },
           ingestionType: 'dataset',
           userComment: 'This is a test',
         }),
@@ -212,6 +237,53 @@ describe('CreationFormManager', () => {
       expect(mockSetStatus).toHaveBeenCalledWith('loadingGithub');
       expect(mockSetApiErrorMessage).toHaveBeenCalledWith('API Error');
       expect(mockSetStatus).toHaveBeenCalledWith('error');
+    });
+  });
+
+  it('shows COG validation modal when validation fails for datasets', async () => {
+    mockValidateFormDataCog.mockResolvedValue(false);
+
+    render(<CreationFormManager {...defaultProps} formType="dataset" />);
+
+    const form = screen.getByTestId('dataset-ingestion-form');
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(mockValidateFormDataCog).toHaveBeenCalledWith(
+        {
+          collection: 'Test Dataset',
+          sample_files: 'http://example.com/file.tif',
+        },
+        'dataset'
+      );
+      expect(mockShowCogValidationModal).toHaveBeenCalled();
+    });
+
+    expect(
+      screen.queryByText('Add an Optional Note for Maintainers'),
+      'do not show comment modal when COG validation fails'
+    ).not.toBeInTheDocument();
+  });
+
+  it('skips COG validation for collection forms and shows comment modal directly', async () => {
+    mockValidateFormDataCog.mockResolvedValue(true);
+
+    render(<CreationFormManager {...defaultProps} formType="collection" />);
+
+    const form = screen.getByTestId('collection-ingestion-form');
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(mockValidateFormDataCog).toHaveBeenCalledWith(
+        { collection: 'Test Collection', id: 'test-collection-id' },
+        'collection'
+      );
+    });
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('Add an Optional Note for Maintainers')
+      ).toBeInTheDocument();
     });
   });
 
