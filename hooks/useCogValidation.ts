@@ -35,9 +35,8 @@ export const useCogValidation = (): UseCogValidationReturn => {
     formData: Record<string, unknown>,
     formType: 'dataset' | 'collection'
   ): Promise<boolean> => {
-    // Only validate dataset forms with sample files
     if (formType !== 'dataset' || !formData.sample_files) {
-      return true; // No validation needed
+      return true;
     }
 
     const sampleFiles = formData.sample_files as string | string[];
@@ -46,7 +45,7 @@ export const useCogValidation = (): UseCogValidationReturn => {
       : sampleFiles;
 
     if (!sampleFileUrl) {
-      return true; // No URL to validate
+      return true;
     }
 
     setIsValidatingCog(true);
