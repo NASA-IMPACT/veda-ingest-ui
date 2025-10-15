@@ -215,6 +215,29 @@ describe('DatasetIngestionForm', () => {
     });
   });
 
+  it('enables submit button when changes are made in JSON Editor', async () => {
+    const mockSetFormData = vi.fn();
+    render(
+      <DatasetIngestionForm
+        {...defaultProps}
+        formData={{ collection: 'initial' }}
+        setFormData={mockSetFormData}
+      />
+    );
+
+    const jsonTab = screen.getByRole('tab', { name: 'Manual JSON Edit' });
+    await userEvent.click(jsonTab);
+
+    // Simulate making a change in the JSON Editor
+    const changeButton = screen.getByRole('button', {
+      name: 'Simulate JSON Change',
+    });
+    await userEvent.click(changeButton);
+
+    // Verify that setDisabled(false) was called to enable the submit button
+    expect(mockSetDisabled).toHaveBeenCalledWith(false);
+  });
+
   it('uses the locked UI schema when isEditMode is true', () => {
     const mockSetFormData = vi.fn();
     render(
