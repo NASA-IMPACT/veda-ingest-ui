@@ -17,7 +17,10 @@ vi.mock('@/components/ingestion/DatasetIngestionForm', () => ({
       data-testid="dataset-ingestion-form"
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit({ mockData: 'dataset' });
+        onSubmit({
+          mockData: 'dataset',
+          sample_files: 'http://example.com/file.tif',
+        });
       }}
     >
       <button onClick={() => setDisabled(false)}>Enable Submit</button>
@@ -43,6 +46,22 @@ vi.mock('@/components/ingestion/CollectionIngestionForm', () => ({
 // Mock global fetch
 global.fetch = vi.fn();
 
+// Create shared mock functions for the useCogValidation hook
+const mockShowCogValidationModal = vi.fn();
+const mockHideCogValidationModal = vi.fn();
+const mockValidateFormDataCog = vi.fn();
+
+// Mock the useCogValidation hook
+vi.mock('@/hooks/useCogValidation', () => ({
+  useCogValidation: () => ({
+    isCogValidationModalVisible: false,
+    isValidatingCog: false,
+    showCogValidationModal: mockShowCogValidationModal,
+    hideCogValidationModal: mockHideCogValidationModal,
+    validateFormDataCog: mockValidateFormDataCog,
+  }),
+}));
+
 describe('EditFormManager', () => {
   const mockSetStatus = vi.fn();
   const mockSetApiErrorMessage = vi.fn();
@@ -62,6 +81,7 @@ describe('EditFormManager', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockValidateFormDataCog.mockResolvedValue(true);
   });
 
   afterEach(() => {
@@ -108,7 +128,10 @@ describe('EditFormManager', () => {
           gitRef: defaultProps.gitRef,
           fileSha: defaultProps.fileSha,
           filePath: defaultProps.filePath,
-          formData: { mockData: 'dataset' },
+          formData: {
+            mockData: 'dataset',
+            sample_files: 'http://example.com/file.tif',
+          },
         }),
         headers: { 'Content-Type': 'application/json' },
       });
@@ -174,6 +197,64 @@ describe('EditFormManager', () => {
     await userEvent.click(enableButton);
 
     expect(submitButton).not.toBeDisabled();
+  });
+
+  it('shows COG validation modal when validation fails for datasets', async () => {
+    // Set up mock to fail validation
+    mockValidateFormDataCog.mockResolvedValue(false);
+
+    render(<EditFormManager {...defaultProps} formType="dataset" />);
+
+    const form = screen.getByTestId('dataset-ingestion-form');
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(mockValidateFormDataCog).toHaveBeenCalledWith(
+        { mockData: 'dataset', sample_files: 'http://example.com/file.tif' },
+        'dataset'
+      );
+      expect(mockShowCogValidationModal).toHaveBeenCalled();
+    });
+
+    // Should NOT proceed with API submission when COG validation fails
+    expect(fetch).not.toHaveBeenCalled();
+    expect(mockSetStatus).not.toHaveBeenCalledWith('loadingGithub');
+  });
+
+  it('proceeds with submission when COG validation passes', async () => {
+    // Set up mock to pass validation
+    mockValidateFormDataCog.mockResolvedValue(true);
+
+    (fetch as Mock).mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve('Success'),
+    });
+
+    render(<EditFormManager {...defaultProps} formType="dataset" />);
+
+    const form = screen.getByTestId('dataset-ingestion-form');
+    fireEvent.submit(form);
+
+    await waitFor(() => {
+      expect(mockValidateFormDataCog).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith('api/create-ingest', {
+        method: 'PUT',
+        body: JSON.stringify({
+          gitRef: defaultProps.gitRef,
+          fileSha: defaultProps.fileSha,
+          filePath: defaultProps.filePath,
+          formData: {
+            mockData: 'dataset',
+            sample_files: 'http://example.com/file.tif',
+          },
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+      expect(mockSetStatus).toHaveBeenCalledWith('success');
+    });
   });
 
   it('renders an error message for an invalid formType', () => {
