@@ -197,6 +197,9 @@ function DatasetIngestionForm({
     setForceRenderKey((prev) => prev + 1);
     setActiveTab('form');
     setHasJSONChanges(false);
+    if (setDisabled) {
+      setDisabled(false);
+    }
   };
 
   const handleFormSubmit = (rjsfData: { formData?: object }) => {
