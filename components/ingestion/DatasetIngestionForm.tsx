@@ -2,7 +2,7 @@
 
 import '@ant-design/v5-patch-for-react-19';
 
-import { useEffect, useState, FC } from 'react';
+import React, { useEffect, useState, FC } from 'react';
 import { Button, Tabs, Spin } from 'antd';
 import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
@@ -32,14 +32,32 @@ const RjsfCodeEditorWidget: FC<WidgetProps> = ({
   onChange,
   readonly,
 }) => {
+  // Convert object to JSON string for display in editor
+  const stringValue = React.useMemo(() => {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    // If it's an object, stringify it with proper formatting
+    return JSON.stringify(value, null, 2);
+  }, [value]);
+
   const handleOnChange = (newValue: string) => {
-    // Call RJSF's onChange with the new string value
-    onChange(newValue);
+    try {
+      // Try to parse as JSON, if successful pass as object, otherwise pass as string
+      const parsedValue = JSON.parse(newValue);
+      onChange(parsedValue);
+    } catch {
+      // If parsing fails, pass the raw string (user might still be typing)
+      onChange(newValue);
+    }
   };
 
   return (
     <CodeEditorWidget
-      value={value || null}
+      value={stringValue}
       onChange={handleOnChange}
       readOnly={readonly}
     />
@@ -190,6 +208,9 @@ function DatasetIngestionForm({
     setForceRenderKey((prev) => prev + 1);
     setActiveTab('form');
     setHasJSONChanges(false);
+    if (setDisabled) {
+      setDisabled(false);
+    }
   };
 
   const handleFormSubmit = (rjsfData: { formData?: object }) => {

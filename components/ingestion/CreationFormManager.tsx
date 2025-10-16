@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, Typography, Alert, Modal, Input } from 'antd';
+import { Card, Typography, Alert, Modal, Input, Spin } from 'antd';
 import { Status } from '@/types/global';
 import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm';
 import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
+import { useCogValidation } from '@/hooks/useCogValidation';
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -32,7 +33,15 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
     unknown
   > | null>(null);
 
-  const handleFormSubmit = (data?: Record<string, unknown>) => {
+  const {
+    isCogValidationModalVisible,
+    isValidatingCog,
+    showCogValidationModal,
+    hideCogValidationModal,
+    validateFormDataCog,
+  } = useCogValidation();
+
+  const handleFormSubmit = async (data?: Record<string, unknown>) => {
     if (!data) {
       console.error('No form data provided.');
       return;
@@ -45,6 +54,18 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
     }
 
     setStagedFormData(cleanedData);
+
+    const isValid = await validateFormDataCog(cleanedData, formType);
+    if (!isValid) {
+      showCogValidationModal();
+      return;
+    }
+
+    setIsModalVisible(true);
+  };
+
+  const handleCogValidationContinue = () => {
+    hideCogValidationModal();
     setIsModalVisible(true);
   };
 
@@ -101,6 +122,11 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
     setUserComment('');
   };
 
+  const handleCogValidationCancel = () => {
+    hideCogValidationModal();
+    setStagedFormData(null);
+  };
+
   const childFormProps = {
     formData,
     setFormData,
@@ -134,6 +160,22 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
       </Card>
 
       <Modal
+        title="COG Validation Warning"
+        open={isCogValidationModalVisible}
+        onOk={handleCogValidationContinue}
+        onCancel={handleCogValidationCancel}
+        okText="Continue Anyway"
+        cancelText="Cancel"
+        destroyOnHidden={true}
+      >
+        <p>
+          Sample File COG Validation failed. The COG defined at the sample file
+          URL may be invalid or unreachable. Before data is ready for production
+          this COG file should be updated.
+        </p>
+      </Modal>
+
+      <Modal
         title="Add an Optional Note for Maintainers"
         open={isModalVisible}
         onOk={handleFinalSubmit}
@@ -154,6 +196,8 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
           data-testid="user-comment-textarea"
         />
       </Modal>
+
+      {isValidatingCog && <Spin fullscreen />}
     </>
   );
 };

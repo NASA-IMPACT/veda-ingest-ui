@@ -220,4 +220,7 @@ export const handlers = [
       return HttpResponse.text('Not Found', { status: 404 });
     }
   ),
+  http.get('https://staging.openveda.cloud/api/raster/cog/validate', () => {
+    return HttpResponse.json({ COG: true });
+  }),
 ];

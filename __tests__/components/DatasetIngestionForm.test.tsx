@@ -49,7 +49,15 @@ vi.mock('@/components/rjsf-components/AdditionalPropertyCard', () => ({
 }));
 
 vi.mock('@/components/ui/CodeEditorWidget', () => ({
-  default: () => <div data-testid="code-editor-widget" />,
+  default: ({ value, onChange }: any) => (
+    <div data-testid="code-editor-widget">
+      <textarea
+        data-testid="code-editor-textarea"
+        value={value || ''}
+        onChange={(e) => onChange?.(e.target.value)}
+      />
+    </div>
+  ),
 }));
 
 // Mock utils
@@ -262,6 +270,29 @@ describe('DatasetIngestionForm', () => {
     });
   });
 
+  it('enables submit button when changes are made in JSON Editor', async () => {
+    const mockSetFormData = vi.fn();
+    render(
+      <DatasetIngestionForm
+        {...defaultProps}
+        formData={{ collection: 'initial' }}
+        setFormData={mockSetFormData}
+      />
+    );
+
+    const jsonTab = screen.getByRole('tab', { name: 'Manual JSON Edit' });
+    await userEvent.click(jsonTab);
+
+    // Simulate making a change in the JSON Editor
+    const changeButton = screen.getByRole('button', {
+      name: 'Simulate JSON Change',
+    });
+    await userEvent.click(changeButton);
+
+    // Verify that setDisabled(false) was called to enable the submit button
+    expect(mockSetDisabled).toHaveBeenCalledWith(false);
+  });
+
   it('uses the locked UI schema when isEditMode is true', () => {
     const mockSetFormData = vi.fn();
     render(
@@ -275,5 +306,37 @@ describe('DatasetIngestionForm', () => {
     const uiSchemaDiv = screen.getByTestId('rjsf-uischema');
     const uiSchema = JSON.parse(uiSchemaDiv.textContent || '{}');
     expect(uiSchema.collection['ui:readonly']).toBe(true);
+  });
+
+  it('correctly handles nested dashboard objects in form rendering', () => {
+    const mockSetFormData = vi.fn();
+    const formDataWithDashboard = {
+      collection: 'test',
+      renders: {
+        dashboard: {
+          data: { foo: 'bar', nested: { key: 'value' } },
+        },
+      },
+    };
+
+    render(
+      <DatasetIngestionForm
+        {...defaultProps}
+        formData={formDataWithDashboard}
+        setFormData={mockSetFormData}
+      />
+    );
+
+    expect(screen.getByTestId('rjsf-form')).toBeInTheDocument();
+
+    const formDataDiv = screen.getByTestId('rjsf-formdata');
+    const displayedFormData = JSON.parse(formDataDiv.textContent || '{}');
+
+    expect(displayedFormData.renders?.dashboard).toEqual({
+      data: { foo: 'bar', nested: { key: 'value' } },
+    });
+
+    // Verify it's not showing '[object Object]'
+    expect(formDataDiv.textContent).not.toContain('[object Object]');
   });
 });
