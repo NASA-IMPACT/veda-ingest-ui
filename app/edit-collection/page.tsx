@@ -15,5 +15,10 @@ export default async function EditIngestPage() {
     redirect('/login');
   }
 
+  // Check if user has the required scope to edit ingests
+  if (!session.scopes?.includes('dataset:update')) {
+    redirect('/unauthorized');
+  }
+
   return <EditCollectionClient />;
 }

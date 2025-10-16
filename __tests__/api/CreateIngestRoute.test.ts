@@ -1,11 +1,17 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi, beforeEach, Mock } from 'vitest';
 import { POST, PUT } from '@/app/api/create-ingest/route';
 import { NextRequest } from 'next/server';
 import UpdatePR from '@/utils/githubUtils/UpdatePR';
 import CreatePR from '@/utils/githubUtils/CreatePR';
+import { auth } from '@/lib/auth';
 
 vi.mock('@/utils/githubUtils/UpdatePR');
 vi.mock('@/utils/githubUtils/CreatePR');
+vi.mock('@/lib/auth', () => ({
+  auth: vi.fn(),
+}));
+
+const authMock = auth as Mock;
 
 describe('POST /api/create-ingest', () => {
   it('returns GitHub URL on successful PR creation for a collection', async () => {
@@ -100,6 +106,15 @@ describe('POST /api/create-ingest', () => {
 });
 
 describe('PUT /api/create-ingest', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Mock auth to return a session with the required dataset:update scope
+    authMock.mockResolvedValue({
+      user: { name: 'Test User' },
+      scopes: ['dataset:update'],
+    });
+  });
+
   it('returns success message on successful PR update', async () => {
     const mockRequest = {
       json: vi.fn().mockResolvedValue({

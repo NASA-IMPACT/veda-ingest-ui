@@ -14,6 +14,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Check if user has the required scope to list ingests for editing
+    if (!session.scopes?.includes('dataset:update')) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions: dataset:update scope required' },
+        { status: 403 }
+      );
+    }
+
     const userTenants = await getUserTenants(session);
 
     const searchParams = request.nextUrl.searchParams;

@@ -118,7 +118,12 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
         contentType: 'image/png',
       });
 
-      await page.getByText('tenant2').click();
+      // Wait for dropdown to be visible and click the tenant option
+      await page.locator('.ant-select-dropdown').waitFor({ state: 'visible' });
+      await page
+        .locator('.ant-select-dropdown')
+        .getByText('tenant2', { exact: true })
+        .click();
 
       // Close dropdown
       await page.keyboard.press('Escape');
