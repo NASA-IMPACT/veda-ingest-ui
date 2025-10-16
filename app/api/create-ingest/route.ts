@@ -93,7 +93,6 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    // Check authentication and scope for update operations
     const session = await auth();
     if (!session) {
       return NextResponse.json(
@@ -102,7 +101,6 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Check if user has the required scope to update ingests
     if (!session.scopes?.includes('dataset:update')) {
       return NextResponse.json(
         { error: 'Insufficient permissions: dataset:update scope required' },

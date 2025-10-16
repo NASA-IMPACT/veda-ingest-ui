@@ -7,7 +7,6 @@ type IngestionType = 'collection' | 'dataset';
 
 export async function GET(request: NextRequest) {
   try {
-    // Check authentication and scope for retrieve operations
     const session = await auth();
     if (!session) {
       return NextResponse.json(
@@ -16,7 +15,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Check if user has the required scope to retrieve ingests for editing
     if (!session.scopes?.includes('dataset:update')) {
       return NextResponse.json(
         { error: 'Insufficient permissions: dataset:update scope required' },
