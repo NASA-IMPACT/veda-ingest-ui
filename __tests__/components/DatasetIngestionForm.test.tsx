@@ -8,7 +8,7 @@ import { useTenants } from '@/hooks/useTenants';
 // Mock RJSF's Form component to isolate our component's logic
 vi.mock('@rjsf/core', () => {
   const MockRjsfForm = vi.fn(
-    ({ schema, uiSchema, children, onChange, onSubmit }) => (
+    ({ schema, uiSchema, formData, children, onChange, onSubmit }) => (
       <form
         data-testid="rjsf-form"
         onSubmit={(e) => {
@@ -19,6 +19,7 @@ vi.mock('@rjsf/core', () => {
       >
         <div data-testid="rjsf-uischema">{JSON.stringify(uiSchema)}</div>
         <div data-testid="rjsf-schema">{JSON.stringify(schema)}</div>
+        <div data-testid="rjsf-formdata">{JSON.stringify(formData)}</div>
         <button onClick={() => onChange({ formData: { changed: true } })}>
           Simulate Form Change
         </button>
