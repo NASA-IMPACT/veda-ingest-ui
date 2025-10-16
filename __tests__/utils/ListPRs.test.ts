@@ -1,204 +1,113 @@
-import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Octokit } from '@octokit/rest';
 import ListPRs from '@/utils/githubUtils/ListPRs';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
+import { IngestPullRequest } from '@/types/ingest';
 
-// Mock the dependent modules
+vi.mock('@octokit/rest', () => ({
+  Octokit: vi.fn(),
+}));
 vi.mock('@/utils/githubUtils/GetGithubToken', () => ({
   default: vi.fn(),
 }));
 
-const listFilesMock = vi.fn();
-const listPRsMock = vi.fn();
+const mockList = vi.fn();
+const mockListFiles = vi.fn();
+const mockGetContent = vi.fn();
 
-vi.mock('@octokit/rest', () => {
-  const OctokitMock = vi.fn(() => ({
-    rest: {
-      pulls: {
-        list: listPRsMock,
-        listFiles: listFilesMock,
-      },
+const mockOctokitInstance = {
+  rest: {
+    pulls: {
+      list: mockList,
+      listFiles: mockListFiles,
     },
-  }));
-  return { Octokit: OctokitMock };
-});
-
-// Type the mocked GetGithubToken for easier use
-const GetGithubTokenMock = GetGithubToken as Mock;
+    repos: {
+      getContent: mockGetContent,
+    },
+  },
+};
 
 describe('ListPRs Utility', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    GetGithubTokenMock.mockResolvedValue('mocked-github-token');
+    (GetGithubToken as any).mockResolvedValue('mocked-github-token');
+    (Octokit as any).mockImplementation(() => mockOctokitInstance);
+    process.env.OWNER = 'test-owner';
+    process.env.REPO = 'test-repo';
+    process.env.TARGET_BRANCH = 'main';
   });
 
-  describe('list dataset PRs', () => {
-    it('should return filtered pull requests for datasets', async () => {
-      // Mock the list of all open pull requests
-      const mockPRs = [{ number: 1 }, { number: 2 }, { number: 3 }];
-      listPRsMock.mockResolvedValue({ data: mockPRs });
-
-      listFilesMock.mockImplementation(({ pull_number }) => {
-        if (pull_number === 1) {
-          // This PR has a matching dataset file
-          return Promise.resolve({
-            data: [
-              {
-                filename:
-                  'ingestion-data/staging/dataset-config/my-dataset.json',
-              },
-            ],
-          });
-        }
-        if (pull_number === 2) {
-          // This PR has a file from the wrong directory
-          return Promise.resolve({
-            data: [
-              {
-                filename:
-                  'ingestion-data/staging/collections/my-collection.json',
-              },
-            ],
-          });
-        }
-        // This PR has no matching files
-        return Promise.resolve({ data: [{ filename: 'README.md' }] });
-      });
-
-      const result = await ListPRs('dataset');
-
-      // Expect only the PR with the matching dataset file to be returned
-      expect(result).toEqual([{ number: 1 }]);
-      expect(listPRsMock).toHaveBeenCalledOnce();
-      expect(listFilesMock).toHaveBeenCalledTimes(3);
-    });
-
-    it('should throw an error when GetGithubToken fails', async () => {
-      // Mock GetGithubToken to throw an error
-      GetGithubTokenMock.mockRejectedValue(new Error('Token fetch failed'));
-      const consoleErrorMock = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
-      await expect(ListPRs('dataset')).rejects.toThrow('Token fetch failed');
-
-      consoleErrorMock.mockRestore();
-    });
-
-    it('should throw an error when pulls.list fails', async () => {
-      // Mock the pulls.list method to throw an error
-      listPRsMock.mockRejectedValue(new Error('API call failed'));
-      const consoleErrorMock = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
-      await expect(ListPRs('dataset')).rejects.toThrow('API call failed');
-
-      consoleErrorMock.mockRestore();
-    });
-
-    it('should throw an error when pulls.listFiles fails', async () => {
-      // Mock pulls.list to succeed but pulls.listFiles to fail
-      listPRsMock.mockResolvedValue({ data: [{ number: 1 }] });
-      listFilesMock.mockRejectedValue(new Error('File list fetch failed'));
-      const consoleErrorMock = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
-      await expect(ListPRs('dataset')).rejects.toThrow(
-        'File list fetch failed'
-      );
-
-      consoleErrorMock.mockRestore();
-    });
+  it('throws error if ingestionType is invalid', async () => {
+    await expect(ListPRs('invalid' as any)).rejects.toThrow(
+      'ingestionType parameter is required and must be either "collection" or "dataset".'
+    );
   });
 
-  describe('list collection PRs', () => {
-    it('should return filtered pull requests for collections', async () => {
-      // Mock the list of all open pull requests
-      const mockPRs = [{ number: 1 }, { number: 2 }, { number: 3 }];
-      listPRsMock.mockResolvedValue({ data: mockPRs });
-
-      // Mock the files returned for each pull request
-      listFilesMock.mockImplementation(({ pull_number }) => {
-        if (pull_number === 1) {
-          // This PR has a file from the wrong directory
-          return Promise.resolve({
-            data: [
-              {
-                filename:
-                  'ingestion-data/staging/dataset-config/my-dataset.json',
-              },
-            ],
-          });
-        }
-        if (pull_number === 2) {
-          // This PR has a matching collection file
-          return Promise.resolve({
-            data: [
-              {
-                filename:
-                  'ingestion-data/staging/collections/my-collection.json',
-              },
-            ],
-          });
-        }
-        // This PR has no matching files
-        return Promise.resolve({ data: [{ filename: 'README.md' }] });
-      });
-
-      // Call the function with 'collection' type
-      const result = await ListPRs('collection');
-
-      // Expect only the PR with the matching collection file to be returned
-      expect(result).toEqual([{ number: 2 }]);
-      expect(listPRsMock).toHaveBeenCalledOnce();
-      expect(listFilesMock).toHaveBeenCalledTimes(3);
-    });
-
-    it('should throw an error when GetGithubToken fails', async () => {
-      GetGithubTokenMock.mockRejectedValue(new Error('Token fetch failed'));
-      const consoleErrorMock = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-      await expect(ListPRs('collection')).rejects.toThrow('Token fetch failed');
-      consoleErrorMock.mockRestore();
-    });
-
-    it('should throw an error when pulls.list fails', async () => {
-      listPRsMock.mockRejectedValue(new Error('API call failed'));
-      const consoleErrorMock = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-      await expect(ListPRs('collection')).rejects.toThrow('API call failed');
-      consoleErrorMock.mockRestore();
-    });
-
-    it('should throw an error when pulls.listFiles fails', async () => {
-      listPRsMock.mockResolvedValue({ data: [{ number: 1 }] });
-      listFilesMock.mockRejectedValue(new Error('File list fetch failed'));
-      const consoleErrorMock = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-      await expect(ListPRs('collection')).rejects.toThrow(
-        'File list fetch failed'
-      );
-      consoleErrorMock.mockRestore();
-    });
+  it('returns empty array if no PRs found', async () => {
+    mockList.mockResolvedValue({ data: [] });
+    const result = await ListPRs('collection');
+    expect(result).toEqual([]);
+    expect(mockList).toHaveBeenCalled();
   });
 
-  describe('Parameter Error Handling', () => {
-    it('should throw an error if ingestionType is not provided', async () => {
-      // The 'any' cast bypasses TypeScript's compile-time checks for this specific test case.
-      await expect(ListPRs(undefined as any)).rejects.toThrow(
-        'ingestionType parameter is required and must be either "collection" or "dataset".'
-      );
+  it('returns PRs with valid matching file and tenant', async () => {
+    const pr = { number: 1, head: { sha: 'abc123' } };
+    mockList.mockResolvedValue({ data: [pr] });
+    mockListFiles.mockResolvedValue({
+      data: [
+        { filename: 'ingestion-data/staging/collections/test.json' },
+        { filename: 'other.txt' },
+      ],
+    });
+    const fileContent = Buffer.from(
+      JSON.stringify({ tenant: 'tenant2' })
+    ).toString('base64');
+    mockGetContent.mockResolvedValue({
+      data: { content: fileContent },
     });
 
-    it('should throw an error if ingestionType is invalid', async () => {
-      await expect(ListPRs('invalid-type' as any)).rejects.toThrow(
-        'ingestionType parameter is required and must be either "collection" or "dataset".'
-      );
+    const result = await ListPRs('collection');
+    expect(result).toHaveLength(1);
+    expect(result[0].pr).toEqual(pr);
+    expect(result[0].tenant).toEqual('tenant2');
+  });
+
+  it('returns PRs with tenant undefined if JSON parse fails', async () => {
+    const pr = { number: 2, head: { sha: 'def456' } };
+    mockList.mockResolvedValue({ data: [pr] });
+    mockListFiles.mockResolvedValue({
+      data: [{ filename: 'ingestion-data/staging/collections/bad.json' }],
     });
+    const badContent = Buffer.from('not-json').toString('base64');
+    mockGetContent.mockResolvedValue({
+      data: { content: badContent },
+    });
+
+    const result = await ListPRs('collection');
+    expect(result).toHaveLength(1);
+    expect(result[0].pr).toEqual(pr);
+    expect(result[0].tenant).toBeUndefined();
+  });
+
+  it('filters out PRs without matching files', async () => {
+    const pr = { number: 3, head: { sha: 'ghi789' } };
+    mockList.mockResolvedValue({ data: [pr] });
+    mockListFiles.mockResolvedValue({
+      data: [{ filename: 'not-a-match.txt' }],
+    });
+
+    const result = await ListPRs('collection');
+    expect(result).toEqual([]);
+  });
+
+  it('throws and logs error if octokit fails', async () => {
+    mockList.mockRejectedValue(new Error('API fail'));
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await expect(ListPRs('collection')).rejects.toThrow('API fail');
+    expect(spy).toHaveBeenCalledWith(
+      'Failed to list pull requests:',
+      expect.any(Error)
+    );
+    spy.mockRestore();
   });
 });

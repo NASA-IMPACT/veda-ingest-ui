@@ -7,6 +7,7 @@ import addFormats from 'ajv-formats';
 import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 import dynamic from 'next/dynamic';
 import '@uiw/react-textarea-code-editor/dist.css';
+import { JSONSchema7 } from 'json-schema';
 
 const CodeEditor = dynamic(
   () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
@@ -34,7 +35,7 @@ export interface JSONEditorValue {
 
 interface JSONEditorProps {
   value: JSONEditorValue;
-  jsonSchema: Record<string, unknown>;
+  jsonSchema: JSONSchema7;
   onChange: (updatedValue: JSONEditorValue) => void;
   disableCollectionNameChange?: boolean;
   disableIdChange?: boolean;

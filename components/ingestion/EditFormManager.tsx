@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Status } from '@/types/global';
 import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm';
 import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
@@ -31,6 +31,28 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
   setApiErrorMessage,
 }) => {
   const [disabled, setDisabled] = useState(true);
+  const [originalFormData, setOriginalFormData] = useState<
+    Record<string, unknown>
+  >({});
+
+  // When component mounts or formData is initially set, store it as the original state
+  useEffect(() => {
+    if (
+      Object.keys(formData).length > 0 &&
+      Object.keys(originalFormData).length === 0
+    ) {
+      setOriginalFormData(JSON.parse(JSON.stringify(formData)));
+    }
+  }, [formData, originalFormData]);
+
+  // Compare current form data with original to determine if there are changes
+  useEffect(() => {
+    if (Object.keys(originalFormData).length > 0) {
+      const hasChanges =
+        JSON.stringify(formData) !== JSON.stringify(originalFormData);
+      setDisabled(!hasChanges);
+    }
+  }, [formData, originalFormData]);
 
   const {
     isCogValidationModalVisible,
@@ -98,7 +120,7 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
     formData,
     setFormData,
     onSubmit: onFormDataSubmit,
-    setDisabled: setDisabled,
+    setDisabled: (value: boolean) => setDisabled(value),
     isEditMode: true,
   };
 

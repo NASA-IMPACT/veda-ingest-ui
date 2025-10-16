@@ -1,6 +1,6 @@
 import { expect, test } from '@/__tests__/playwright/setup-msw';
 import { validateIngestFormFields } from '../playwright/utils/ValidateFormFields';
-import { HttpResponse, http } from 'msw';
+import { HttpResponse } from 'msw';
 
 const requiredConfig = {
   collection: 'test-collection',

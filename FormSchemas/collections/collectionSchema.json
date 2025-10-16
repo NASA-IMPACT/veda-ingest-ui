@@ -237,13 +237,8 @@
       "title": "Time Interval"
     },
     "tenant": {
-      "type": "array",
-      "title": "Tenants",
-      "description": "Optional list of tenants allowed to access this item.",
-      "items": {
-        "type": "string"
-      },
-      "uniqueItems": true
+      "type": "string",
+      "title": "Tenants"
     }
   }
 }

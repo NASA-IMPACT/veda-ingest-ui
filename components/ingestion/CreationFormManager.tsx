@@ -47,9 +47,15 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
       return;
     }
 
-    setStagedFormData(data);
+    // Clean up the form data
+    const cleanedData = { ...data };
+    if (Array.isArray(cleanedData.tenant) && cleanedData.tenant.length === 0) {
+      delete cleanedData.tenant;
+    }
 
-    const isValid = await validateFormDataCog(data, formType);
+    setStagedFormData(cleanedData);
+
+    const isValid = await validateFormDataCog(cleanedData, formType);
     if (!isValid) {
       showCogValidationModal();
       return;

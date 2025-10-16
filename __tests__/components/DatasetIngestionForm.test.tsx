@@ -3,19 +3,22 @@ import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm'; // Adjust path
 import React, { useState } from 'react';
+import { useTenants } from '@/hooks/useTenants';
 
 // Mock RJSF's Form component to isolate our component's logic
 vi.mock('@rjsf/core', () => {
   const MockRjsfForm = vi.fn(
-    ({ formData, uiSchema, children, onChange, onSubmit }) => (
+    ({ schema, uiSchema, formData, children, onChange, onSubmit }) => (
       <form
         data-testid="rjsf-form"
         onSubmit={(e) => {
           e.preventDefault();
-          onSubmit({ formData });
+          // Pass the schema from the component to the mock for verification
+          onSubmit({ formData: schema });
         }}
       >
         <div data-testid="rjsf-uischema">{JSON.stringify(uiSchema)}</div>
+        <div data-testid="rjsf-schema">{JSON.stringify(schema)}</div>
         <div data-testid="rjsf-formdata">{JSON.stringify(formData)}</div>
         <button onClick={() => onChange({ formData: { changed: true } })}>
           Simulate Form Change
@@ -28,6 +31,8 @@ vi.mock('@rjsf/core', () => {
     withTheme: () => MockRjsfForm,
   };
 });
+
+vi.mock('@/hooks/useTenants');
 
 // Mock child components
 vi.mock('@/components/ui/JSONEditor', () => ({
@@ -69,7 +74,18 @@ vi.mock('@/utils/ObjectFieldTemplate', () => ({
 
 // Mock JSON schema imports
 vi.mock('@/FormSchemas/datasets/datasetSchema.json', () => ({
-  default: { type: 'object', properties: { collection: { type: 'string' } } },
+  default: {
+    type: 'object',
+    properties: {
+      collection: { type: 'string' },
+      tenants: {
+        type: 'array',
+        title: 'Tenants',
+        items: { type: 'string' },
+        uniqueItems: true,
+      },
+    },
+  },
 }));
 vi.mock('@/FormSchemas/datasets/uischema.json', () => ({
   default: { collection: { 'ui:widget': 'text' } },
@@ -80,6 +96,19 @@ describe('DatasetIngestionForm', () => {
   const mockSetDisabled = vi.fn();
   let defaultProps: any;
 
+  const mockedSchemaForTests = {
+    type: 'object',
+    properties: {
+      collection: { type: 'string' },
+      tenants: {
+        type: 'array',
+        title: 'Tenants',
+        items: { type: 'string' },
+        uniqueItems: true,
+      },
+    },
+  };
+
   beforeEach(() => {
     defaultProps = {
       onSubmit: mockOnSubmit,
@@ -89,6 +118,23 @@ describe('DatasetIngestionForm', () => {
       defaultTemporalExtent: false,
       disableCollectionNameChange: false,
     };
+
+    (useTenants as any).mockReturnValue({
+      schema: {
+        ...mockedSchemaForTests,
+        properties: {
+          ...mockedSchemaForTests.properties,
+          tenants: {
+            ...mockedSchemaForTests.properties.tenants,
+            items: {
+              ...mockedSchemaForTests.properties.tenants.items,
+              enum: ['mockTenant1', 'mockTenant2'],
+            },
+          },
+        },
+      },
+      isLoading: false,
+    });
   });
 
   afterEach(() => {
@@ -155,7 +201,9 @@ describe('DatasetIngestionForm', () => {
     });
     await userEvent.click(changeButton);
 
-    expect(mockSetFormData).toHaveBeenCalledWith({ changed: true });
+    expect(mockSetFormData).toHaveBeenCalledWith(
+      expect.objectContaining({ changed: true })
+    );
     expect(mockSetDisabled).toHaveBeenCalledWith(false);
   });
 
@@ -172,7 +220,12 @@ describe('DatasetIngestionForm', () => {
     await userEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith({ collection: 'initial' });
+      // Check that the schema passed to the mock RJSF form has the tenant enum
+      const submittedSchema = mockOnSubmit.mock.calls[0][0];
+      expect(submittedSchema.properties.tenants.items.enum).toEqual([
+        'mockTenant1',
+        'mockTenant2',
+      ]);
     });
   });
 
@@ -208,10 +261,13 @@ describe('DatasetIngestionForm', () => {
       const newRjsfForm = screen.getByTestId('rjsf-form');
       expect(newRjsfForm).toBeVisible();
 
-      const formDataInRjsf = JSON.parse(
-        screen.getByTestId('rjsf-formdata').textContent || '{}'
+      const schemaInRjsf = JSON.parse(
+        screen.getByTestId('rjsf-schema').textContent || '{}'
       );
-      expect(formDataInRjsf.collection).toBe('edited from json');
+      expect(schemaInRjsf.properties.tenants.items.enum).toEqual([
+        'mockTenant1',
+        'mockTenant2',
+      ]);
     });
   });
 

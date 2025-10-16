@@ -3,7 +3,7 @@
 import '@ant-design/v5-patch-for-react-19';
 
 import React, { useEffect, useState, FC } from 'react';
-import { Button, Tabs } from 'antd';
+import { Button, Tabs, Spin } from 'antd';
 import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
 import validator from '@rjsf/validator-ajv8';
@@ -11,14 +11,17 @@ import { JSONSchema7 } from 'json-schema';
 import { WidgetProps } from '@rjsf/utils';
 
 import ObjectFieldTemplate from '@/components/rjsf-components/ObjectFieldTemplate';
-import jsonSchema from '@/FormSchemas/datasets/datasetSchema.json';
 import { customValidate } from '@/utils/CustomValidation';
 import JSONEditor from '@/components/ui/JSONEditor';
 import { JSONEditorValue } from '@/components/ui/JSONEditor';
 import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
+
+import staticBaseSchema from '@/FormSchemas/datasets/datasetSchema.json';
 import uiSchema from '@/FormSchemas/datasets/uischema.json';
 import { TestableUrlWidget } from '@/components/rjsf-components/TestableUrlWidget';
+
+import { useTenants } from '@/hooks/useTenants';
 
 const Form = withTheme(AntDTheme);
 
@@ -76,8 +79,6 @@ const lockedFormFields = {
   },
 };
 
-const lockedUiSchema = { ...uiSchema, ...lockedFormFields };
-
 interface FormProps {
   formData: Record<string, unknown> | undefined;
   setFormData: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
@@ -99,12 +100,22 @@ function DatasetIngestionForm({
   disableCollectionNameChange = false,
   defaultTemporalExtent = false,
 }: FormProps) {
+  const {
+    schema: dynamicSchema,
+    uiSchema: dynamicUiSchema,
+    isLoading: isTenantsLoading,
+  } = useTenants(staticBaseSchema as JSONSchema7, uiSchema);
+
   const [activeTab, setActiveTab] = useState<string>('form');
   const [forceRenderKey, setForceRenderKey] = useState<number>(0);
   const [hasJSONChanges, setHasJSONChanges] = useState<boolean>(false);
   const [additionalProperties, setAdditionalProperties] = useState<{
     [key: string]: any;
   } | null>(null);
+
+  const lockedUiSchema = dynamicUiSchema
+    ? { ...dynamicUiSchema, ...lockedFormFields }
+    : { ...uiSchema, ...lockedFormFields };
 
   // --- Set initial "default" data for new forms ---
   useEffect(() => {
@@ -215,6 +226,21 @@ function DatasetIngestionForm({
     testableUrl: TestableUrlWidget,
   };
 
+  if (isTenantsLoading) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '200px',
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
+
   return (
     <Tabs
       type="card"
@@ -228,8 +254,10 @@ function DatasetIngestionForm({
             <>
               <Form
                 key={forceRenderKey} // Forces re-render when data updates
-                schema={jsonSchema as JSONSchema7}
-                uiSchema={isEditMode ? lockedUiSchema : uiSchema}
+                schema={dynamicSchema as JSONSchema7}
+                uiSchema={
+                  isEditMode ? lockedUiSchema : dynamicUiSchema || uiSchema
+                }
                 validator={validator}
                 customValidate={customValidate}
                 templates={{
@@ -270,7 +298,7 @@ function DatasetIngestionForm({
           children: (
             <JSONEditor
               value={formData || {}}
-              jsonSchema={jsonSchema}
+              jsonSchema={dynamicSchema}
               onChange={handleJsonEditorChange}
               disableCollectionNameChange={disableCollectionNameChange}
               hasJSONChanges={hasJSONChanges}

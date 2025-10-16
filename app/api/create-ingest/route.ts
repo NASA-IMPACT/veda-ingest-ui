@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { validateTenantAccess } from '@/lib/serverTenantValidation';
 
 import CreatePR from '@/utils/githubUtils/CreatePR';
 import UpdatePR from '@/utils/githubUtils/UpdatePR';
@@ -47,6 +49,28 @@ export async function POST(request: NextRequest) {
 
     const validatedIngestionType: AllowedIngestionType = ingestionType;
 
+    if (data.tenant) {
+      const session = await auth();
+      if (!session) {
+        return NextResponse.json(
+          { error: 'Authentication required for tenant-specific requests' },
+          { status: 401 }
+        );
+      }
+
+      const tenantValidation = await validateTenantAccess(data.tenant, request);
+      if (!tenantValidation.isValid) {
+        return NextResponse.json(
+          {
+            error:
+              'Access denied: You do not have permission to create ingests for this tenant',
+            details: tenantValidation.error,
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     const githubResponse = await CreatePR(
       data,
       validatedIngestionType,
@@ -84,6 +108,31 @@ export async function PUT(request: NextRequest) {
     }
 
     const { gitRef, fileSha, filePath, formData } = body;
+
+    if (formData?.tenant) {
+      const session = await auth();
+      if (!session) {
+        return NextResponse.json(
+          { error: 'Authentication required for tenant-specific updates' },
+          { status: 401 }
+        );
+      }
+
+      const tenantValidation = await validateTenantAccess(
+        formData.tenant,
+        request
+      );
+      if (!tenantValidation.isValid) {
+        return NextResponse.json(
+          {
+            error:
+              'Access denied: You do not have permission to update ingests for this tenant',
+            details: tenantValidation.error,
+          },
+          { status: 403 }
+        );
+      }
+    }
 
     await UpdatePR(gitRef, fileSha, filePath, formData);
 

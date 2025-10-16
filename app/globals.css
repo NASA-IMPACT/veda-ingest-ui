@@ -122,3 +122,17 @@ label[title='cog_default'],
 .lightJSONEditor .language-json.code-highlight .token.punctuation {
   color: #7a7a7a !important; /* Punctuation */
 }
+
+.tenants-field {
+  background-color: #f0f8ff;
+  border: 1px solid #91d5ff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px !important;
+}
+
+.tenants-field .ant-form-item-label > label {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: #0050b3;
+}

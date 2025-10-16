@@ -18,6 +18,7 @@ export default defineConfig({
         'components/*.tsx',
         'app/**/tsx',
         'hooks/*.ts',
+        'lib/**/*.ts',
       ],
       exclude: [
         'tests/**',
@@ -34,5 +35,13 @@ export default defineConfig({
         },
       },
     },
+    server: {
+      deps: {
+        inline: ['next-auth', '@next-auth/core'],
+      },
+    },
+  },
+  define: {
+    global: 'globalThis',
   },
 });
