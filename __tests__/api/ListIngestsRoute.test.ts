@@ -18,9 +18,10 @@ const authMock = auth as Mock;
 describe('GET /api/list-ingests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Provide a default mock session that simulates a logged-in user
+    // Provide a default mock session that simulates a logged-in user with required scope
     authMock.mockResolvedValue({
       user: { name: 'Test User' },
+      scopes: ['dataset:update'],
       tenants: ['tenant1', 'tenant3'],
     });
   });

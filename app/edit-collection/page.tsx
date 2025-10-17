@@ -15,5 +15,9 @@ export default async function EditIngestPage() {
     redirect('/login');
   }
 
+  if (!session.scopes?.includes('dataset:update')) {
+    redirect('/unauthorized');
+  }
+
   return <EditCollectionClient />;
 }

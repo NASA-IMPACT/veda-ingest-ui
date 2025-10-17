@@ -2,12 +2,17 @@ import { describe, expect, it, vi, beforeEach, Mock } from 'vitest';
 import { GET } from '@/app/api/retrieve-ingest/route';
 import RetrieveJSON from '@/utils/githubUtils/RetrieveJSON';
 import { NextRequest } from 'next/server';
+import { auth } from '@/lib/auth';
 
 vi.mock('@/utils/githubUtils/RetrieveJSON', () => {
   return {
     default: vi.fn(),
   };
 });
+
+vi.mock('@/lib/auth', () => ({
+  auth: vi.fn(),
+}));
 
 const createMockRequest = (params: Record<string, string>): NextRequest => {
   const url = new URL('http://localhost/api/retrieve-ingest');
@@ -18,10 +23,16 @@ const createMockRequest = (params: Record<string, string>): NextRequest => {
 };
 
 const RetrieveJSONMock = RetrieveJSON as Mock;
+const authMock = auth as Mock;
 
 describe('GET /api/retrieve-ingest', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Mock auth to return a session with the required dataset:update scope
+    authMock.mockResolvedValue({
+      user: { name: 'Test User' },
+      scopes: ['dataset:update'],
+    });
   });
 
   describe('with ingestionType="dataset"', () => {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 
 import RetrieveJSON from '@/utils/githubUtils/RetrieveJSON';
 
@@ -6,6 +7,21 @@ type IngestionType = 'collection' | 'dataset';
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    if (!session.scopes?.includes('dataset:update')) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions: dataset:update scope required' },
+        { status: 403 }
+      );
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const ref = searchParams.get('ref');
     const ingestionType = searchParams.get('ingestionType') as IngestionType;

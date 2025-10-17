@@ -93,6 +93,21 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Authentication required for updates' },
+        { status: 401 }
+      );
+    }
+
+    if (!session.scopes?.includes('dataset:update')) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions: dataset:update scope required' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
 
     const requiredFields = ['gitRef', 'fileSha', 'filePath', 'formData'];

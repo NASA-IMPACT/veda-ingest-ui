@@ -164,7 +164,12 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       const tenantDropdown = page.getByLabel('Tenant');
       await tenantDropdown.click();
 
-      await page.getByText('tenant1').click();
+      // Wait for dropdown to be visible and click the tenant option
+      await page.locator('.ant-select-dropdown').waitFor({ state: 'visible' });
+      await page
+        .locator('.ant-select-dropdown')
+        .getByText('tenant1', { exact: true })
+        .click();
 
       // Close dropdown
       await page.keyboard.press('Escape');

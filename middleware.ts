@@ -43,15 +43,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Protect /edit- routes based on the Editor scope
   if (
     pathname.startsWith('/edit-dataset') ||
     pathname.startsWith('/edit-collection')
   ) {
-    if (
-      !session?.scopes?.includes('dataset:update') ||
-      !session?.scopes?.includes('Editor')
-    ) {
+    if (!session?.scopes?.includes('dataset:update')) {
       if (pathname.startsWith('/api/')) {
         return new NextResponse('Unauthorized', { status: 401 });
       } else {

@@ -15,5 +15,9 @@ export default async function EditDatasetPage() {
     redirect('/login');
   }
 
+  if (!session.scopes?.includes('dataset:update')) {
+    redirect('/unauthorized');
+  }
+
   return <EditDatasetClient />;
 }
