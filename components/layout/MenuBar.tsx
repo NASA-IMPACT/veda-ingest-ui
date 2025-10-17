@@ -12,6 +12,9 @@ import {
   EditOutlined,
   GlobalOutlined,
   CloudUploadOutlined,
+  FileAddOutlined,
+  FormOutlined,
+  DatabaseOutlined,
 } from '@ant-design/icons';
 
 const MenuBar = () => {
@@ -27,43 +30,58 @@ const MenuBar = () => {
       icon: <HomeOutlined />,
     },
     {
-      label: <Link href="/collections">Collections</Link>,
+      label: <Link href="/collections">Collection Management</Link>,
       key: 'g1',
       type: 'group',
       children: [
         {
           key: '/create-collection',
           label: <Link href="/create-collection">Create Collection</Link>,
-          icon: <PlusCircleOutlined />,
+          icon: <FileAddOutlined />,
         },
         ...(hasEditIngestPermission
           ? [
               {
                 key: '/edit-collection',
-                label: <Link href="/edit-collection">Edit Collection</Link>,
-                icon: <EditOutlined />,
+                label: (
+                  <Link href="/edit-collection">Edit Collection Ingest</Link>
+                ),
+                icon: <FormOutlined />,
+              },
+            ]
+          : []),
+        ...(hasEditIngestPermission
+          ? [
+              {
+                key: '/edit-existing-collection',
+                label: (
+                  <Link href="/edit-existing-collection">
+                    Edit Existing Collection
+                  </Link>
+                ),
+                icon: <DatabaseOutlined />,
               },
             ]
           : []),
       ],
     },
     {
-      label: <Link href="/datasets">Datasets</Link>,
+      label: <Link href="/datasets">Dataset Management</Link>,
       key: 'g2',
       type: 'group',
       children: [
         {
           key: '/create-dataset',
           label: <Link href="/create-dataset">Create Dataset</Link>,
-          icon: <PlusCircleOutlined />,
+          icon: <FileAddOutlined />,
         },
         // Conditionally add 'Edit Dataset'
         ...(hasEditIngestPermission
           ? [
               {
                 key: '/edit-dataset',
-                label: <Link href="/edit-dataset">Edit Dataset</Link>,
-                icon: <EditOutlined />,
+                label: <Link href="/edit-dataset">Edit Dataset Ingestion</Link>,
+                icon: <FormOutlined />,
               },
             ]
           : []),
