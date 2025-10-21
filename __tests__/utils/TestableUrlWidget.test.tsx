@@ -1,4 +1,14 @@
-import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  beforeAll,
+  afterAll,
+  Mock,
+} from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TestableUrlWidget } from '@/components/rjsf-components/TestableUrlWidget';
@@ -14,6 +24,13 @@ vi.mock('antd', async (importOriginal) => {
       Text: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
     },
   };
+});
+
+beforeAll(() => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+afterAll(() => {
+  vi.restoreAllMocks();
 });
 
 describe('TestableUrlWidget', () => {

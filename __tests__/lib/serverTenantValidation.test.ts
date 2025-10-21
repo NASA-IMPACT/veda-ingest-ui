@@ -1,4 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterAll,
+  beforeAll,
+} from 'vitest';
 import {
   validateTenantAccess,
   getUserTenants,
@@ -10,6 +18,13 @@ vi.mock('@/lib/auth', () => ({
 }));
 
 import { auth } from '@/lib/auth';
+
+beforeAll(() => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+afterAll(() => {
+  vi.restoreAllMocks();
+});
 
 describe('Server-side Tenant Validation', () => {
   beforeEach(() => {

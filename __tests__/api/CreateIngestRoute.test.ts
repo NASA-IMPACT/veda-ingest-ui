@@ -1,4 +1,13 @@
-import { describe, expect, it, vi, beforeEach, Mock } from 'vitest';
+import {
+  describe,
+  expect,
+  it,
+  vi,
+  beforeEach,
+  Mock,
+  beforeAll,
+  afterAll,
+} from 'vitest';
 import { POST, PUT } from '@/app/api/create-ingest/route';
 import { NextRequest } from 'next/server';
 import UpdatePR from '@/utils/githubUtils/UpdatePR';
@@ -12,6 +21,13 @@ vi.mock('@/lib/auth', () => ({
 }));
 
 const authMock = auth as Mock;
+
+beforeAll(() => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+afterAll(() => {
+  vi.restoreAllMocks();
+});
 
 describe('POST /api/create-ingest', () => {
   it('returns GitHub URL on successful PR creation for a collection', async () => {
