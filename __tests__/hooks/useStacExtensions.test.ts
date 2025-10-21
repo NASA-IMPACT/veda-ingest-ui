@@ -1,4 +1,13 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  afterAll,
+  beforeAll,
+} from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useStacExtensions } from '@/hooks/useStacExtensions';
 import { message } from 'antd';
@@ -43,6 +52,14 @@ describe('useStacExtensions', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+  });
+
+  beforeAll(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    vi.restoreAllMocks();
   });
 
   it('should initialize with default empty state', () => {
