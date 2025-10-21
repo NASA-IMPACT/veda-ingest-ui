@@ -1,4 +1,14 @@
-import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  Mock,
+  afterAll,
+  beforeAll,
+} from 'vitest';
 import {
   render,
   screen,
@@ -78,6 +88,13 @@ describe('EditFormManager', () => {
     setApiErrorMessage: mockSetApiErrorMessage,
     handleCancel: mockHandleCancel,
   };
+
+  beforeAll(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();

@@ -199,7 +199,6 @@ export const handlers = [
       console.error('[MSW] Mock tile buffer is invalid for OSM!');
       return new HttpResponse('Error generating mock tile', { status: 500 });
     }
-
     return new HttpResponse(mockTileBuffer, {
       status: 200,
       headers: {
