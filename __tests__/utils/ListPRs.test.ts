@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 import { Octokit } from '@octokit/rest';
 import ListPRs from '@/utils/githubUtils/ListPRs';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
@@ -35,6 +35,10 @@ describe('ListPRs Utility', () => {
     process.env.OWNER = 'test-owner';
     process.env.REPO = 'test-repo';
     process.env.TARGET_BRANCH = 'main';
+  });
+
+  beforeAll(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   it('throws error if ingestionType is invalid', async () => {

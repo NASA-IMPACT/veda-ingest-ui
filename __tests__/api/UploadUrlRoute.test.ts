@@ -1,4 +1,12 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import {
+  describe,
+  expect,
+  it,
+  vi,
+  beforeEach,
+  afterAll,
+  beforeAll,
+} from 'vitest';
 import { POST } from '@/app/api/upload-url/route';
 import { NextRequest } from 'next/server';
 import * as s3Utils from '@/utils/s3';
@@ -11,6 +19,13 @@ vi.mock('@/utils/s3', () => ({
   checkFileExists: vi.fn(),
   generateSignedUrl: vi.fn(),
 }));
+
+beforeAll(() => {
+  vi.spyOn(console, 'error').mockImplementation(() => {});
+});
+afterAll(() => {
+  vi.restoreAllMocks();
+});
 
 describe('POST /api/upload-url', () => {
   beforeEach(() => {

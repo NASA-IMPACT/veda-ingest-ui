@@ -1,4 +1,14 @@
-import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  Mock,
+  afterAll,
+  beforeAll,
+} from 'vitest';
 import CreatePR from '@/utils/githubUtils/CreatePR';
 import { createOctokit } from '@/utils/githubUtils/OctokitFactory';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
@@ -63,6 +73,13 @@ describe('CreatePR', () => {
 
   afterEach(() => {
     vi.unstubAllEnvs();
+  });
+
+  beforeAll(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  afterAll(() => {
+    vi.restoreAllMocks();
   });
 
   describe('Collection Ingestion', () => {
