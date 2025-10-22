@@ -34,6 +34,7 @@ if (authDisabled) {
     },
     expires: '2099-12-31T23:59:59.999Z',
     tenants: mockTenants,
+    scopes: ['dataset:update', 'stac:collection:update'],
   };
 
   // The `auth` function is used by middleware and server components
