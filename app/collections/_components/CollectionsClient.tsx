@@ -4,7 +4,7 @@ import { Card, Col, Row, Tooltip, theme } from 'antd';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 
-const IngestClient = function IngestClient() {
+const CollectionsClient = function CollectionsClient() {
   const { useToken } = theme;
   const { token } = useToken();
   const { data: session } = useSession();
@@ -118,4 +118,4 @@ const IngestClient = function IngestClient() {
   );
 };
 
-export default IngestClient;
+export default CollectionsClient;
