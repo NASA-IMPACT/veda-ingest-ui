@@ -4,7 +4,7 @@ import { Layout, List, Typography, Row, Col, Card, Tooltip, theme } from 'antd';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 
-const IngestClient = function IngestClient() {
+const DatasetsClient = function DatasetsClient() {
   const { useToken } = theme;
   const { token } = useToken();
   const { data: session } = useSession();
@@ -71,4 +71,4 @@ const IngestClient = function IngestClient() {
   );
 };
 
-export default IngestClient;
+export default DatasetsClient;
