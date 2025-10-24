@@ -11,6 +11,7 @@ import {
   Typography,
   Empty,
   Tooltip,
+  Alert,
 } from 'antd';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -88,7 +89,9 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
 
   return (
     <>
-      <Title level={3}>Pending Ingest Requests</Title>
+      <Title level={3} style={{ marginBottom: 24 }}>
+        Edit Pending Ingest Requests
+      </Title>
 
       {!apiError && allIngests.length === 0 && (
         <Empty description="No pending ingests found." />
@@ -110,7 +113,14 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
                 lg={6}
                 data-testid={`tenant-column-${tenant}`}
               >
-                <Card title={`Tenant: ${tenant}`}>
+                <Card
+                  title={`Tenant: ${tenant}`}
+                  style={{
+                    marginBottom: 24,
+                    borderRadius: 8,
+                    boxShadow: '0 2px 8px #f0f1f2',
+                  }}
+                >
                   <List
                     dataSource={tenantIngests}
                     renderItem={(item: IngestPullRequest) => (
@@ -152,7 +162,14 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
               lg={6}
               data-testid="tenant-column-public"
             >
-              <Card title="Public">
+              <Card
+                title="Public"
+                style={{
+                  marginBottom: 24,
+                  borderRadius: 8,
+                  boxShadow: '0 2px 8px #f0f1f2',
+                }}
+              >
                 <List
                   dataSource={publicIngests}
                   renderItem={(item: IngestPullRequest) => (
@@ -196,4 +213,4 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
   );
 };
 
-export default PendingIngestList;
+export { PendingIngestList };

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import AppLayout from '@/components/layout/Layout';
-import PendingIngestList from '@/components/ingestion/PendingIngestList';
+import { PendingIngestList } from '@/components/ingestion/PendingIngestList';
 import EditIngestView from '@/components/ingestion/EditIngestView';
 import {
   TenantErrorBoundary,

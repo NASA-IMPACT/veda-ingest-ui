@@ -82,7 +82,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       await expect(
         page.getByRole('heading', {
           level: 3,
-          name: /Pending Ingest Requests/i,
+          name: /Edit Pending Ingest Requests/i,
         }),
         'Pending Ingest header is visible'
       ).toBeVisible();

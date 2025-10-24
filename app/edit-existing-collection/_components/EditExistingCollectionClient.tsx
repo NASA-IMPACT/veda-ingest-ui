@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import AppLayout from '@/components/layout/Layout';
-import PendingIngestList from '@/components/ingestion/PendingIngestList';
+import ExistingCollectionsList from '@/components/ingestion/ExistingCollectionsList';
 import EditIngestView from '@/components/ingestion/EditIngestView';
 import {
   TenantErrorBoundary,
   APIErrorBoundary,
 } from '@/components/error-boundaries';
+import { Alert } from 'antd';
 
 interface SelectedIngest {
   ref: string;
@@ -39,6 +40,24 @@ const EditExistingCollectionClient = () => {
             // Otherwise, the component will re-render and retry automatically
           }}
         >
+          <div
+            style={{
+              position: 'sticky',
+              top: 0,
+              zIndex: 1000,
+              width: '100%',
+            }}
+            aria-live="assertive"
+            role="alert"
+          >
+            <Alert
+              message="Warning: Changes here will affect the published collection."
+              type="warning"
+              showIcon
+              banner
+            />
+            <div style={{ paddingBottom: 16 }} />
+          </div>
           {selectedIngest ? (
             <EditIngestView
               ingestionType="collection"
@@ -47,10 +66,7 @@ const EditExistingCollectionClient = () => {
               onComplete={handleReturnToList}
             />
           ) : (
-            <PendingIngestList
-              ingestionType="collection"
-              onIngestSelect={handleIngestSelect}
-            />
+            <ExistingCollectionsList onCollectionSelect={handleIngestSelect} />
           )}
         </APIErrorBoundary>
       </TenantErrorBoundary>
