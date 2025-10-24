@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import EditFormManager from '@/components/ingestion/EditFormManager';
-import { Spin } from 'antd';
+import { Spin, Button } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Status } from '@/types/global';
 import ErrorModal from '@/components/ui/ErrorModal';
 import SuccessModal from '@/components/ui/SuccessModal';
@@ -58,6 +59,15 @@ const EditIngestView: React.FC<EditIngestViewProps> = ({
 
   return (
     <>
+      <Button
+        type="default"
+        icon={<ArrowLeftOutlined />}
+        onClick={onComplete}
+        style={{ marginBottom: 16 }}
+        aria-label="Back to collection list"
+      >
+        Back
+      </Button>
       <EditFormManager
         formType={ingestionType}
         gitRef={gitRef}
