@@ -6,70 +6,24 @@ const { Option, OptGroup } = Select;
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useUserTenants } from '@/app/contexts/TenantContext';
-import { IngestPullRequest } from '@/types/ingest';
+import { truncateWords } from '@/utils/truncateWords';
+
+// --- Types for STAC Collections API ---
+interface StacCollection {
+  id: string;
+  title?: string;
+  tenant?: string;
+  description?: string;
+}
+
+interface StacCollectionsResponse {
+  collections: StacCollection[];
+}
 
 const { Title } = Typography;
 
-type GroupedCollections = Record<string, IngestPullRequest[]>;
-
-function groupCollectionsByTenant(
-  ingests: IngestPullRequest[]
-): GroupedCollections {
-  return ingests.reduce((acc, ingest) => {
-    const group =
-      ingest.tenant && ingest.tenant !== '' ? ingest.tenant : 'Public';
-    if (!acc[group]) acc[group] = [];
-    acc[group].push(ingest);
-    return acc;
-  }, {} as GroupedCollections);
-}
-
-type SelectOption = {
-  value: string;
-  label: string;
-  fullTitle: string;
-};
-
-type GroupedOption = {
-  label: string;
-  options: SelectOption[];
-};
-
-function buildGroupedOptions(grouped: GroupedCollections): GroupedOption[] {
-  return Object.entries(grouped).map(([group, items]) => ({
-    label: group,
-    options: items.map((item) => ({
-      value: item.pr.head.ref,
-      label: item.pr.title.replace('Ingest Request for ', ''),
-      fullTitle: item.pr.title,
-    })),
-  }));
-}
-
-function filterGroupedOptions(
-  groups: GroupedOption[],
-  selectedTenant?: string,
-  searchValue?: string
-): GroupedOption[] {
-  let filtered = selectedTenant
-    ? groups.filter((g) => g.label === selectedTenant)
-    : groups;
-
-  if (searchValue) {
-    filtered = filtered
-      .map((group) => ({
-        ...group,
-        options: group.options.filter((option) =>
-          option.label.toLowerCase().includes(searchValue.toLowerCase())
-        ),
-      }))
-      .filter((group) => group.options.length > 0);
-  }
-  return filtered;
-}
-
 interface ExistingCollectionsListProps {
-  onCollectionSelect: (ref: string, title: string) => void;
+  onCollectionSelect: (ref: string, title: string, data: any) => void;
 }
 
 const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
@@ -77,7 +31,7 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
 }) => {
   const { status: sessionStatus } = useSession();
   const router = useRouter();
-  const [allIngests, setAllIngests] = useState<IngestPullRequest[]>([]);
+  const [collections, setCollections] = useState<StacCollection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState('');
   const [selectedTenant, setSelectedTenant] = useState<string | undefined>(
@@ -101,17 +55,20 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
       router.push('/login');
     }
     if (sessionStatus === 'authenticated') {
-      const fetchPRs = async () => {
+      const fetchCollections = async () => {
         setIsLoading(true);
         setApiError('');
         try {
-          const url = `api/list-ingests?ingestionType=collection`;
+          let url = 'https://staging.openveda.cloud/api/stac/collections';
+          if (selectedTenant) {
+            url += `?tenant=${encodeURIComponent(selectedTenant)}`;
+          }
           const response = await fetch(url);
           if (!response.ok) {
             throw new Error(await response.text());
           }
-          const { githubResponse } = await response.json();
-          setAllIngests(githubResponse);
+          const data: StacCollectionsResponse = await response.json();
+          setCollections(data.collections);
         } catch (err) {
           setApiError(
             err instanceof Error ? err.message : 'An unknown error occurred.'
@@ -120,21 +77,44 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
           setIsLoading(false);
         }
       };
-      fetchPRs();
+      fetchCollections();
     }
-  }, [sessionStatus, router]);
+  }, [sessionStatus, router, selectedTenant]);
 
-  const groupedCollections = groupCollectionsByTenant(allIngests);
-  const groupedOptions = buildGroupedOptions(groupedCollections);
-  const filteredGroupsWithSearch = filterGroupedOptions(
-    groupedOptions,
-    selectedTenant,
-    searchValue
-  );
+  // Build collection dropdown options
+  const collectionOptions = collections
+    .filter(
+      (col) =>
+        !searchValue ||
+        col.title?.toLowerCase().includes(searchValue.toLowerCase()) ||
+        col.id.toLowerCase().includes(searchValue.toLowerCase())
+    )
+    .map((col) => ({
+      value: col.id,
+      label: col.title || col.id,
+      title: col.title,
+    }));
 
   if (sessionStatus === 'loading' || isLoading) {
     return <Spin fullscreen />;
   }
+
+  // Fetch collection details and call onCollectionSelect
+  const handleCollectionSelect = async (
+    collectionId: string,
+    title: string
+  ) => {
+    try {
+      const response = await fetch(
+        `https://staging.openveda.cloud/api/stac/collections/${encodeURIComponent(collectionId)}`
+      );
+      if (!response.ok) throw new Error(await response.text());
+      const data = await response.json();
+      onCollectionSelect(collectionId, title, data);
+    } catch (err) {
+      // TODO: handle error (e.g., show a message)
+    }
+  };
 
   return (
     <>
@@ -149,70 +129,88 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
           style={{ marginBottom: 24 }}
         />
       )}
-      <Card
-        style={{
-          marginBottom: 24,
-          borderRadius: 8,
-          boxShadow: '0 2px 8px #f0f1f2',
-        }}
-      >
-        <Title level={5} style={{ marginBottom: 16 }}>
-          Select Tenant
-        </Title>
-        <Select
-          style={{ width: 300 }}
-          options={tenantOptions}
-          placeholder="Select a tenant (optional)"
-          value={selectedTenant}
-          onSelect={setSelectedTenant}
-          onChange={setSelectedTenant}
-          allowClear
-          showSearch
-          optionLabelProp="label"
-        />
-      </Card>
-      <Card
-        title={
-          selectedTenant
-            ? `Collections for Tenant: ${selectedTenant}`
-            : 'All Collections'
-        }
-        style={{ borderRadius: 8, boxShadow: '0 2px 8px #f0f1f2' }}
-      >
-        <Select
-          style={{ width: '100%' }}
-          showSearch
-          placeholder="Select or search a collection"
-          value={selectedCollection}
-          onChange={(value) => {
-            setSelectedCollection(value);
-            const selected = filteredGroupsWithSearch
-              .flatMap((g) => g.options)
-              .find((opt) => opt.value === value);
-            if (selected) {
-              onCollectionSelect(selected.value, selected.fullTitle);
-            }
-          }}
-          onSearch={setSearchValue}
-          filterOption={false}
-          notFoundContent={<Empty description="No collections found" />}
-          allowClear
-        >
-          {filteredGroupsWithSearch.map((group) => (
-            <OptGroup key={group.label} label={group.label}>
-              {group.options.map((option) => (
-                <Option
-                  key={option.value}
-                  value={option.value}
-                  label={option.label}
-                >
-                  {option.label}
-                </Option>
-              ))}
-            </OptGroup>
-          ))}
-        </Select>
-      </Card>
+      <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+        <div>
+          <Title level={5} style={{ marginBottom: 8 }}>
+            Select Tenant
+          </Title>
+          <Select
+            style={{ width: 220 }}
+            options={tenantOptions}
+            placeholder="Select a tenant (optional)"
+            value={selectedTenant}
+            onSelect={setSelectedTenant}
+            onChange={setSelectedTenant}
+            allowClear
+            showSearch
+            optionLabelProp="label"
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <Title level={5} style={{ marginBottom: 8 }}>
+            Select Collection
+          </Title>
+          <Select
+            style={{ width: '100%' }}
+            showSearch
+            placeholder="Select or search a collection"
+            value={selectedCollection}
+            onChange={async (value) => {
+              setSelectedCollection(value);
+              const selected = collectionOptions.find(
+                (opt) => opt.value === value
+              );
+              if (selected) {
+                await handleCollectionSelect(
+                  selected.value,
+                  selected.title || selected.value
+                );
+              }
+            }}
+            onSearch={setSearchValue}
+            filterOption={false}
+            notFoundContent={<Empty description="No collections found" />}
+            allowClear
+            options={collectionOptions}
+          />
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+        {collectionOptions.length === 0 ? (
+          <Empty description="No collections found" />
+        ) : (
+          collectionOptions.map((col) => {
+            const collection = collections.find((c) => c.id === col.value);
+            return (
+              <Card
+                key={col.value}
+                title={col.label}
+                style={{
+                  width: 320,
+                  borderRadius: 8,
+                  boxShadow: '0 2px 8px #f0f1f2',
+                }}
+                hoverable
+                onClick={() =>
+                  handleCollectionSelect(col.value, col.title || col.value)
+                }
+              >
+                <div style={{ fontWeight: 500, marginBottom: 8 }}>
+                  ID: {col.value}
+                </div>
+                <div style={{ color: '#888', marginBottom: 8 }}>
+                  {truncateWords(collection?.description, 20)}
+                </div>
+                {collection?.tenant && (
+                  <div style={{ fontSize: 12, color: '#666' }}>
+                    Tenant: {collection.tenant}
+                  </div>
+                )}
+              </Card>
+            );
+          })
+        )}
+      </div>
     </>
   );
 };

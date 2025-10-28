@@ -3,29 +3,27 @@
 import { useState } from 'react';
 import AppLayout from '@/components/layout/Layout';
 import ExistingCollectionsList from '@/components/ingestion/ExistingCollectionsList';
-import EditIngestView from '@/components/ingestion/EditIngestView';
+import EditCollectionView from '@/components/ingestion/EditCollectionView';
 import {
   TenantErrorBoundary,
   APIErrorBoundary,
 } from '@/components/error-boundaries';
 import { Alert } from 'antd';
 
-interface SelectedIngest {
-  ref: string;
-  title: string;
+interface SelectedCollection {
+  data: any;
 }
 
 const EditExistingCollectionClient = () => {
-  const [selectedIngest, setSelectedIngest] = useState<SelectedIngest | null>(
-    null
-  );
+  const [selectedCollection, setSelectedCollection] =
+    useState<SelectedCollection | null>(null);
 
-  const handleIngestSelect = (ref: string, title: string) => {
-    setSelectedIngest({ ref, title });
+  const handleCollectionSelect = (data: any) => {
+    setSelectedCollection(data);
   };
 
   const handleReturnToList = () => {
-    setSelectedIngest(null);
+    setSelectedCollection(null);
   };
 
   return (
@@ -34,8 +32,8 @@ const EditExistingCollectionClient = () => {
         <APIErrorBoundary
           onRetry={() => {
             // If editing, return to list to retry
-            if (selectedIngest) {
-              setSelectedIngest(null);
+            if (selectedCollection) {
+              setSelectedCollection(null);
             }
             // Otherwise, the component will re-render and retry automatically
           }}
@@ -58,15 +56,15 @@ const EditExistingCollectionClient = () => {
             />
             <div style={{ paddingBottom: 16 }} />
           </div>
-          {selectedIngest ? (
-            <EditIngestView
-              ingestionType="collection"
-              gitRef={selectedIngest.ref}
-              initialTitle={selectedIngest.title}
+          {selectedCollection ? (
+            <EditCollectionView
+              collectionData={selectedCollection.data}
               onComplete={handleReturnToList}
             />
           ) : (
-            <ExistingCollectionsList onCollectionSelect={handleIngestSelect} />
+            <ExistingCollectionsList
+              onCollectionSelect={handleCollectionSelect}
+            />
           )}
         </APIErrorBoundary>
       </TenantErrorBoundary>
