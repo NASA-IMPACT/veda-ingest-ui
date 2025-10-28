@@ -1,0 +1,255 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stac_version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "links": {
+      "title": "Links",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rel", "href"],
+        "properties": {
+          "href": {
+            "title": "Link reference",
+            "type": "string",
+            "minLength": 1
+          },
+          "rel": {
+            "title": "Link relation type",
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "title": "Link type",
+            "type": "string"
+          },
+          "title": {
+            "title": "Link title",
+            "type": "string"
+          }
+        }
+      }
+    },
+    "stac_extensions": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "title": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "type": {
+      "title": "Type of STAC entity",
+      "type": "string",
+      "const": "Collection"
+    },
+    "assets": {
+      "title": "Asset links",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["href"],
+            "properties": {
+              "href": {
+                "title": "Asset reference",
+                "type": "string",
+                "minLength": 1
+              },
+              "title": {
+                "title": "Asset title",
+                "type": "string"
+              },
+              "description": {
+                "title": "Asset description",
+                "type": "string"
+              },
+              "type": {
+                "title": "Asset type",
+                "type": "string"
+              },
+              "roles": {
+                "title": "Asset roles",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "license": {
+      "type": "string",
+      "minLength": 1
+    },
+    "extent": {
+      "title": "Extents",
+      "type": "object",
+      "required": ["spatial", "temporal"],
+      "properties": {
+        "spatial": {
+          "title": "Spatial extent object",
+          "type": "object",
+          "required": ["bbox"],
+          "properties": {
+            "bbox": {
+              "title": "Spatial extents",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "array",
+                "title": "Spatial extent",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "temporal": {
+          "title": "Temporal extent object",
+          "type": "object",
+          "required": ["interval"],
+          "properties": {
+            "interval": {
+              "title": "Temporal extents",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "title": "Temporal extent",
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": {
+                  "type": ["string", "null"],
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "keywords": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "providers": {
+      "title": "Providers",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": {
+                "title": "Organization name",
+                "type": "string"
+              },
+              "description": {
+                "title": "Organization description",
+                "type": "string"
+              },
+              "roles": {
+                "title": "Organization roles",
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": ["producer", "licensor", "processor", "host"]
+                }
+              },
+              "url": {
+                "title": "Organization homepage",
+                "type": "string"
+              }
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "summaries": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "minimum": {},
+                  "maximum": {}
+                }
+              },
+              {
+                "type": "array"
+              },
+              {
+                "type": "object"
+              }
+            ]
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "description",
+    "stac_version",
+    "links",
+    "type",
+    "license",
+    "extent"
+  ],
+  "additionalProperties": true
+}
