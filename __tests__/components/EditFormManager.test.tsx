@@ -280,7 +280,7 @@ describe('EditFormManager', () => {
 
     expect(
       screen.getByText(
-        'Invalid formType specified. Please use dataset or collection.'
+        'Invalid formType specified. Please use dataset, collection, or existingCollection.'
       )
     ).toBeInTheDocument();
     expect(
