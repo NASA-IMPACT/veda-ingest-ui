@@ -23,7 +23,7 @@ interface StacCollectionsResponse {
 const { Title } = Typography;
 
 interface ExistingCollectionsListProps {
-  onCollectionSelect: (ref: string, title: string, data: any) => void;
+  onCollectionSelect: (data: any) => void;
 }
 
 const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
@@ -110,7 +110,7 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
       );
       if (!response.ok) throw new Error(await response.text());
       const data = await response.json();
-      onCollectionSelect(collectionId, title, data);
+      onCollectionSelect(data);
     } catch (err) {
       // TODO: handle error (e.g., show a message)
     }

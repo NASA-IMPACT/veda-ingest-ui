@@ -1,15 +1,8 @@
 'use client';
-import { useState } from 'react';
-import { Card, Alert, Spin, Button } from 'antd';
-import { withTheme } from '@rjsf/core';
-import { Theme as AntDTheme } from '@rjsf/antd';
-import validator from '@rjsf/validator-ajv8';
-import { JSONSchema7 } from 'json-schema';
 
-import collectionSchema from '@/FormSchemas/collections/collectionSchema.json';
-import collectionUiSchema from '@/FormSchemas/collections/uischema.json';
-
-const Form = withTheme(AntDTheme);
+import { useState, useEffect } from 'react';
+import { Spin, Alert } from 'antd';
+import EditFormManager from '@/components/ingestion/EditFormManager';
 
 interface EditCollectionViewProps {
   collectionData: any;
@@ -20,67 +13,38 @@ const EditCollectionView: React.FC<EditCollectionViewProps> = ({
   collectionData,
   onComplete,
 }) => {
-  const [formData, setFormData] = useState<any>(collectionData);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [formData, setFormData] = useState<any>(collectionData || {});
+  const [status, setStatus] = useState<string>('idle');
+  const [apiErrorMessage, setApiErrorMessage] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(!collectionData);
 
-  const handleSubmit = async ({ formData }: any) => {
-    setIsSubmitting(true);
-    setError(null);
-    setSuccess(false);
-    try {
-      // TODO: Replace with update API call or Github PR
-      setSuccess(true);
-      onComplete();
-    } catch (err: any) {
-      setError(err.message || 'Failed to update collection.');
-    } finally {
-      setIsSubmitting(false);
+  // Sync formData with collectionData when it changes
+  useEffect(() => {
+    if (collectionData) {
+      setFormData(collectionData);
+      setLoading(false);
+    } else {
+      setLoading(true);
     }
-  };
+  }, [collectionData]);
+
+  if (loading) {
+    return <Spin tip="Loading collection..." />;
+  }
+
+  if (!formData || Object.keys(formData).length === 0) {
+    return <Alert type="error" message="No collection data found." showIcon />;
+  }
 
   return (
-    <Card
-      title={`Edit Collection: ${collectionData?.title || collectionData?.id}`}
-    >
-      {error && (
-        <Alert
-          type="error"
-          message={error}
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
-      )}
-      {success && (
-        <Alert
-          type="success"
-          message="Collection updated successfully!"
-          showIcon
-          style={{ marginBottom: 16 }}
-        />
-      )}
-      <Form
-        schema={collectionSchema as JSONSchema7}
-        uiSchema={collectionUiSchema}
-        formData={formData}
-        onChange={(e) => setFormData(e.formData)}
-        onSubmit={handleSubmit}
-        validator={validator}
-        disabled={isSubmitting}
-      >
-        <Button type="primary" htmlType="submit" loading={isSubmitting}>
-          Save Changes
-        </Button>
-        <Button
-          style={{ marginLeft: 8 }}
-          onClick={onComplete}
-          disabled={isSubmitting}
-        >
-          Cancel
-        </Button>
-      </Form>
-    </Card>
+    <EditFormManager
+      formType="existingCollection"
+      formData={formData}
+      setFormData={setFormData}
+      setStatus={setStatus}
+      setApiErrorMessage={setApiErrorMessage}
+      handleCancel={onComplete}
+    />
   );
 };
 

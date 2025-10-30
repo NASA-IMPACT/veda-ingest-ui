@@ -10,13 +10,8 @@ import {
 } from '@/components/error-boundaries';
 import { Alert } from 'antd';
 
-interface SelectedCollection {
-  data: any;
-}
-
 const EditExistingCollectionClient = () => {
-  const [selectedCollection, setSelectedCollection] =
-    useState<SelectedCollection | null>(null);
+  const [selectedCollection, setSelectedCollection] = useState<any>(null);
 
   const handleCollectionSelect = (data: any) => {
     setSelectedCollection(data);
@@ -58,7 +53,7 @@ const EditExistingCollectionClient = () => {
           </div>
           {selectedCollection ? (
             <EditCollectionView
-              collectionData={selectedCollection.data}
+              collectionData={selectedCollection}
               onComplete={handleReturnToList}
             />
           ) : (
