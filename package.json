@@ -51,7 +51,8 @@
     "next-remove-imports": "^1.0.12",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
-    "react-leaflet": "^5.0.0"
+    "react-leaflet": "^5.0.0",
+    "virtual-react-json-diff": "^1.0.15"
   },
   "devDependencies": {
     "@octokit/types": "^13.6.2",
