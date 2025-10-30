@@ -8,10 +8,10 @@ import { Button, Card, Space, Alert, Modal, Spin } from 'antd';
 import { useCogValidation } from '@/hooks/useCogValidation';
 
 interface EditFormManagerProps {
-  formType: 'dataset' | 'collection';
-  gitRef: string;
-  filePath: string;
-  fileSha: string;
+  formType: 'dataset' | 'collection' | 'existingCollection';
+  gitRef?: string;
+  filePath?: string;
+  fileSha?: string;
   formData: Record<string, unknown>;
   setFormData: any;
   setStatus: (status: Status) => void;
@@ -38,7 +38,9 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
   // When component mounts or formData is initially set, store it as the original state
   useEffect(() => {
     if (
+      formData &&
       Object.keys(formData).length > 0 &&
+      originalFormData &&
       Object.keys(originalFormData).length === 0
     ) {
       setOriginalFormData(JSON.parse(JSON.stringify(formData)));
@@ -47,7 +49,11 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
 
   // Compare current form data with original to determine if there are changes
   useEffect(() => {
-    if (Object.keys(originalFormData).length > 0) {
+    if (
+      formData &&
+      originalFormData &&
+      Object.keys(originalFormData).length > 0
+    ) {
       const hasChanges =
         JSON.stringify(formData) !== JSON.stringify(originalFormData);
       setDisabled(!hasChanges);
@@ -80,12 +86,23 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
   const submitFormData = (formData: Record<string, unknown>) => {
     setStatus('loadingGithub');
 
-    const url = 'api/create-ingest';
-    const requestOptions = {
-      method: 'PUT',
-      body: JSON.stringify({ gitRef, fileSha, filePath, formData }),
-      headers: { 'Content-Type': 'application/json' },
-    };
+    let url = 'api/create-ingest';
+    let requestOptions: RequestInit;
+
+    if (formType === 'existingCollection') {
+      url = '/api/existing-collection';
+      requestOptions = {
+        method: 'PUT',
+        body: JSON.stringify({ formData }),
+        headers: { 'Content-Type': 'application/json' },
+      };
+    } else {
+      requestOptions = {
+        method: 'PUT',
+        body: JSON.stringify({ gitRef, fileSha, filePath, formData }),
+        headers: { 'Content-Type': 'application/json' },
+      };
+    }
 
     fetch(url, requestOptions)
       .then(async (response) => {
@@ -151,9 +168,13 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
           <CollectionIngestionForm {...childFormProps}>
             {formButtons}
           </CollectionIngestionForm>
+        ) : formType === 'existingCollection' ? (
+          <CollectionIngestionForm {...childFormProps}>
+            {formButtons}
+          </CollectionIngestionForm>
         ) : (
           <Alert
-            message="Invalid formType specified. Please use dataset or collection."
+            message="Invalid formType specified. Please use dataset, collection, or existingCollection."
             type="error"
             showIcon
           />
