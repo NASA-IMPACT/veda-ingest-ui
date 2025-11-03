@@ -72,7 +72,7 @@ test.describe('Edit Dataset Page', () => {
     });
 
     await expect(
-      page.getByLabel('Collection'),
+      page.getByLabel('Collection', { exact: true }),
       'Collection Input should be disabled'
     ).toBeDisabled();
 
@@ -157,7 +157,7 @@ test.describe('Edit Dataset Page', () => {
     });
 
     await expect(
-      page.getByLabel('Collection'),
+      page.getByLabel('Collection', { exact: true }),
       'Collection Input should be disabled'
     ).toBeDisabled();
 
