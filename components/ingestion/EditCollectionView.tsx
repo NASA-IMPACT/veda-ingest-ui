@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Spin, Alert } from 'antd';
+import { Spin, Alert, Button } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import EditFormManager from '@/components/ingestion/EditFormManager';
 
 interface EditCollectionViewProps {
@@ -37,14 +38,25 @@ const EditCollectionView: React.FC<EditCollectionViewProps> = ({
   }
 
   return (
-    <EditFormManager
-      formType="existingCollection"
-      formData={formData}
-      setFormData={setFormData}
-      setStatus={setStatus}
-      setApiErrorMessage={setApiErrorMessage}
-      handleCancel={onComplete}
-    />
+    <>
+      <Button
+        type="default"
+        icon={<ArrowLeftOutlined />}
+        onClick={onComplete}
+        style={{ marginBottom: 16 }}
+        aria-label="Back to collection list"
+      >
+        Back
+      </Button>
+      <EditFormManager
+        formType="existingCollection"
+        formData={formData}
+        setFormData={setFormData}
+        setStatus={setStatus}
+        setApiErrorMessage={setApiErrorMessage}
+        handleCancel={onComplete}
+      />
+    </>
   );
 };
 
