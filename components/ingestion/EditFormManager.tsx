@@ -6,6 +6,7 @@ import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm';
 import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
 import { Button, Card, Space, Alert, Modal, Spin } from 'antd';
 import { useCogValidation } from '@/hooks/useCogValidation';
+import { VirtualDiffViewer } from 'virtual-react-json-diff';
 
 interface EditFormManagerProps {
   formType: 'dataset' | 'collection' | 'existingCollection';
@@ -34,6 +35,11 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
   const [originalFormData, setOriginalFormData] = useState<
     Record<string, unknown>
   >({});
+  const [isDiffModalVisible, setIsDiffModalVisible] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
 
   // When component mounts or formData is initially set, store it as the original state
   useEffect(() => {
@@ -74,13 +80,32 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
       return;
     }
 
-    const isValid = await validateFormDataCog(formData, formType);
+    setPendingFormData(formData);
+    setIsDiffModalVisible(true);
+  };
+
+  const handleDiffModalConfirm = async () => {
+    setIsDiffModalVisible(false);
+
+    if (!pendingFormData) {
+      console.error('No pending form data.');
+      return;
+    }
+
+    // Proceed to COG validation
+    const isValid = await validateFormDataCog(pendingFormData, formType);
     if (!isValid) {
       showCogValidationModal();
       return;
     }
 
-    submitFormData(formData);
+    // If COG validation passes, submit immediately
+    submitFormData(pendingFormData);
+  };
+
+  const handleDiffModalCancel = () => {
+    setIsDiffModalVisible(false);
+    setPendingFormData(null);
   };
 
   const submitFormData = (formData: Record<string, unknown>) => {
@@ -124,8 +149,8 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
 
   const handleCogValidationContinue = () => {
     hideCogValidationModal();
-    if (formData) {
-      submitFormData(formData);
+    if (pendingFormData) {
+      submitFormData(pendingFormData);
     }
   };
 
@@ -180,6 +205,35 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
           />
         )}
       </Card>
+
+      <Modal
+        title="Review Changes"
+        open={isDiffModalVisible}
+        onOk={handleDiffModalConfirm}
+        onCancel={handleDiffModalCancel}
+        okText="Confirm Changes"
+        cancelText="Cancel"
+        width={1200}
+        destroyOnHidden={true}
+      >
+        <div style={{ marginBottom: 16 }}>
+          <Alert
+            message="Review the changes below before submitting"
+            type="info"
+            showIcon
+          />
+        </div>
+        {pendingFormData && (
+          <VirtualDiffViewer
+            oldValue={originalFormData}
+            newValue={pendingFormData}
+            height={500}
+            showLineCount={true}
+            showObjectCountStats={false}
+            differOptions={{ showModifications: true }}
+          />
+        )}
+      </Modal>
 
       <Modal
         title="COG Validation Warning"
