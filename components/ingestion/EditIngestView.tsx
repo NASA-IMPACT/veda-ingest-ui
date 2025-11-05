@@ -41,7 +41,27 @@ const EditIngestView: React.FC<EditIngestViewProps> = ({
         const { fileSha, filePath, content } = await response.json();
         setFilePath(filePath);
         setFileSha(fileSha);
-        setFormData(content);
+
+        // Normalize the content for RJSF - convert renders.dashboard object to string
+        const normalizedContent = { ...content };
+        if (
+          ingestionType === 'dataset' &&
+          normalizedContent.renders &&
+          typeof normalizedContent.renders === 'object' &&
+          normalizedContent.renders.dashboard &&
+          typeof normalizedContent.renders.dashboard === 'object'
+        ) {
+          normalizedContent.renders = {
+            ...normalizedContent.renders,
+            dashboard: JSON.stringify(
+              normalizedContent.renders.dashboard,
+              null,
+              2
+            ),
+          };
+        }
+
+        setFormData(normalizedContent);
         setStatus('idle');
       } catch (err) {
         setApiErrorMessage(

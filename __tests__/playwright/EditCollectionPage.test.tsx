@@ -2,7 +2,7 @@ import { expect, test } from '@/__tests__/playwright/setup-msw';
 import { HttpResponse } from 'msw';
 
 const modifiedCollectionConfig = {
-  id: 'PLAYWRIGHT_1234',
+  id: 'Playwright_TEST',
   title: 'MODIFIED test collection title',
   stac_version: '1.0.0',
   type: 'Collection',
@@ -132,9 +132,12 @@ test.describe('Edit Collection Page', () => {
   test('Edit Collection allows editing fields other than ID', async ({
     page,
   }, testInfo) => {
-    // Intercept and block the request to validate the payload
-    await page.route('**/edit-dataset', async (route, request) => {
+    let putRequestIntercepted = false;
+
+    // Intercept and validate the request payload
+    await page.route('**/api/create-ingest', async (route, request) => {
       if (request.method() === 'PUT') {
+        putRequestIntercepted = true;
         const postData = request.postDataJSON();
 
         expect(postData, 'validate filePath property exists').toHaveProperty(
@@ -153,7 +156,13 @@ test.describe('Edit Collection Page', () => {
           'validate formData matches modified json'
         ).toMatchObject(modifiedCollectionConfig);
 
-        await route.abort(); // Block the request
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            githubURL: 'https://github.com/test/repo/pull/123',
+          }),
+        });
       } else {
         await route.continue();
       }
@@ -195,8 +204,37 @@ test.describe('Edit Collection Page', () => {
       contentType: 'image/png',
     });
 
+    await page.getByRole('button', { name: /submit/i }).click();
+
+    await test.step('review changes in diff modal', async () => {
+      await expect(
+        page.getByRole('dialog', { name: /review changes/i })
+      ).toBeVisible();
+
+      const diffModalScreenshot = await page.screenshot({ fullPage: true });
+      testInfo.attach('diff modal showing changes', {
+        body: diffModalScreenshot,
+        contentType: 'image/png',
+      });
+    });
+
     await test.step('submit form and validate that PUT body values match pasted config values', async () => {
-      await page.getByRole('button', { name: /apply changes/i }).click();
+      // Wait for the PUT request to be made
+      const requestPromise = page.waitForRequest(
+        (req) =>
+          req.url().includes('/api/create-ingest') && req.method() === 'PUT'
+      );
+
+      await page.getByRole('button', { name: /confirm changes/i }).click();
+
+      // Ensure the request was actually made
+      await requestPromise;
+
+      // Verify our route handler was called
+      expect(
+        putRequestIntercepted,
+        'PUT request should have been intercepted'
+      ).toBe(true);
     });
   });
 
