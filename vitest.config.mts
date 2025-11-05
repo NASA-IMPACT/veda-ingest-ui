@@ -15,9 +15,9 @@ export default defineConfig({
       include: [
         'utils/**/*.ts',
         'utils/**/*.tsx',
-        'components/*.tsx',
-        'app/**/tsx',
-        'hooks/*.ts',
+        'components/**/*.tsx',
+        'app/**/*.tsx',
+        'hooks/**/*.ts',
         'lib/**/*.ts',
       ],
       exclude: [
@@ -25,6 +25,9 @@ export default defineConfig({
         'mocks/**',
         'node_modules/**',
         'utils/amplify-server-util.ts',
+        'app/**/page.tsx', // Exclude Next.js page files (thin server components)
+        'app/layout.tsx', // Exclude root layout (minimal logic)
+        'app/not-found.tsx', // Exclude error pages
       ],
       thresholds: {
         global: {
