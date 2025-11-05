@@ -4,6 +4,8 @@ import { githubResponse } from './githubResponse';
 import { retrieveIngestResponse } from './retrieveIngestResponse';
 import { collectionIngestResponse } from './collectionIngestResponse';
 import { extensionSchemaResponse } from './extensionSchemaResponse';
+import { stacCollectionsResponse } from './stacCollectionsResponse';
+import { stacCollectionResponse } from './stacCollectionResponse';
 // --- Placeholder Tile Logic ---
 const MOCK_TILE_BASE64 =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
@@ -224,4 +226,17 @@ export const handlers = [
   http.get('https://staging.openveda.cloud/api/raster/cog/validate', () => {
     return HttpResponse.json({ COG: true });
   }),
+  http.get('https://staging.openveda.cloud/api/stac/collections', () => {
+    return HttpResponse.json(stacCollectionsResponse);
+  }),
+  http.get(
+    'https://staging.openveda.cloud/api/stac/collections/:collectionId',
+    ({ params }) => {
+      // Return the mock collection response for any collection ID
+      return HttpResponse.json({
+        ...stacCollectionResponse,
+        id: params.collectionId,
+      });
+    }
+  ),
 ];
