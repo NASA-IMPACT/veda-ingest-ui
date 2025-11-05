@@ -107,9 +107,12 @@ test.describe('Edit Dataset Page', () => {
   test('Edit Dataset allows editing fields other than collection name', async ({
     page,
   }, testInfo) => {
-    // Intercept and block the request
-    await page.route('**/create-dataset', async (route, request) => {
+    let putRequestIntercepted = false;
+
+    // Intercept and validate the request
+    await page.route('**/api/create-ingest', async (route, request) => {
       if (request.method() === 'PUT') {
+        putRequestIntercepted = true;
         const postData = request.postDataJSON(); // Capture full request body
 
         expect(postData, 'validate filePath property exists').toHaveProperty(
@@ -141,8 +144,14 @@ test.describe('Edit Dataset Page', () => {
           'validate formData matches modified json'
         ).toMatchObject(expectedModifiedConfig);
 
-        // Block the request
-        await route.abort();
+        // Return a successful response instead of aborting
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            githubURL: 'https://github.com/test/repo/pull/123',
+          }),
+        });
       } else {
         await route.continue();
       }
@@ -184,8 +193,37 @@ test.describe('Edit Dataset Page', () => {
       contentType: 'image/png',
     });
 
+    await page.getByRole('button', { name: /submit/i }).click();
+
+    await test.step('review changes in diff modal', async () => {
+      await expect(
+        page.getByRole('dialog', { name: /review changes/i })
+      ).toBeVisible();
+
+      const diffModalScreenshot = await page.screenshot({ fullPage: true });
+      testInfo.attach('diff modal showing changes', {
+        body: diffModalScreenshot,
+        contentType: 'image/png',
+      });
+    });
+
     await test.step('submit form and validate that PUT body values match pasted config values', async () => {
-      await page.getByRole('button', { name: /submit/i }).click();
+      // Wait for the PUT request to be made
+      const requestPromise = page.waitForRequest(
+        (req) =>
+          req.url().includes('/api/create-ingest') && req.method() === 'PUT'
+      );
+
+      await page.getByRole('button', { name: /confirm changes/i }).click();
+
+      // Ensure the request was actually made
+      await requestPromise;
+
+      // Verify our route handler was called
+      expect(
+        putRequestIntercepted,
+        'PUT request should have been intercepted'
+      ).toBe(true);
     });
   });
 
