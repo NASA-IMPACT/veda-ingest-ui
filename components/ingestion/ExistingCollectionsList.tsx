@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Select, Card, Spin, Typography, Empty, Alert } from 'antd';
+import { Select, Card, Spin, Typography, Empty } from 'antd';
 const { Option, OptGroup } = Select;
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useUserTenants } from '@/app/contexts/TenantContext';
 import { truncateWords } from '@/utils/truncateWords';
+import ErrorModal from '@/components/ui/ErrorModal';
 
 // --- Types for STAC Collections API ---
 interface StacCollection {
@@ -81,6 +82,18 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
     }
   }, [sessionStatus, router, selectedTenant]);
 
+  // Automatically clear the error after a delay
+  useEffect(() => {
+    if (apiError) {
+      const timer = setTimeout(() => {
+        setApiError(''); // Clear error after 5 seconds
+      }, 5000);
+
+      // Clean up the timer if the component unmounts or the error changes
+      return () => clearTimeout(timer);
+    }
+  }, [apiError]);
+
   // Build collection dropdown options
   const collectionOptions = collections
     .filter(
@@ -112,7 +125,9 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
       const data = await response.json();
       onCollectionSelect(data);
     } catch (err) {
-      // TODO: handle error (e.g., show a message)
+      setApiError(
+        err instanceof Error ? err.message : 'An unknown error occurred.'
+      );
     }
   };
 
@@ -121,14 +136,6 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
       <Title level={3} style={{ marginBottom: 24 }}>
         Edit Existing Collection
       </Title>
-      {apiError && (
-        <Alert
-          type="error"
-          message={apiError}
-          showIcon
-          style={{ marginBottom: 24 }}
-        />
-      )}
       <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
         <div>
           <Title level={5} style={{ marginBottom: 8 }}>
@@ -211,6 +218,8 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
           })
         )}
       </div>
+
+      {apiError && <ErrorModal collectionName="" apiErrorMessage={apiError} />}
     </>
   );
 };
