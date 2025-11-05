@@ -14,6 +14,14 @@ vi.mock('@/utils/truncateWords', () => ({
   truncateWords: (text: string | undefined, maxWords: number) =>
     text ? text.split(' ').slice(0, maxWords).join(' ') : '',
 }));
+vi.mock('@/components/ui/ErrorModal', () => ({
+  default: ({ collectionName, apiErrorMessage }: any) => (
+    <div data-testid="error-modal">
+      <div data-testid="error-collection-name">{collectionName}</div>
+      <div data-testid="error-message">{apiErrorMessage}</div>
+    </div>
+  ),
+}));
 
 describe('ExistingCollectionsList', () => {
   const mockOnCollectionSelect = vi.fn();
@@ -140,14 +148,14 @@ describe('ExistingCollectionsList', () => {
     });
   });
 
-  it('should display error alert when API fetch fails', async () => {
+  it('should display error modal when API fetch fails', async () => {
     vi.mocked(useSession).mockReturnValue({
       data: { user: { name: 'Test User' } },
       status: 'authenticated',
       update: vi.fn(),
     } as any);
 
-    const errorMessage = 'Failed to fetch collections';
+    const errorMessage = 'something went wrong';
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: false,
       text: async () => errorMessage,
@@ -158,7 +166,11 @@ describe('ExistingCollectionsList', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText(errorMessage)).toBeInTheDocument();
+      expect(screen.getByTestId('error-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('error-collection-name')).toHaveTextContent('');
+      expect(screen.getByTestId('error-message')).toHaveTextContent(
+        errorMessage
+      );
     });
   });
 
@@ -464,9 +476,10 @@ describe('ExistingCollectionsList', () => {
     });
 
     // Mock fetch failure for collection details
+    const errorMessage = 'Collection not found';
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: false,
-      text: async () => 'Collection not found',
+      text: async () => errorMessage,
     } as Response);
 
     // Click on the first card
@@ -481,5 +494,13 @@ describe('ExistingCollectionsList', () => {
 
     // Should not call onCollectionSelect on error
     expect(mockOnCollectionSelect).not.toHaveBeenCalled();
+
+    // Should display error in ErrorModal
+    await waitFor(() => {
+      expect(screen.getByTestId('error-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('error-message')).toHaveTextContent(
+        errorMessage
+      );
+    });
   });
 });
