@@ -186,7 +186,7 @@ test.describe('Edit Existing Collection Page', () => {
           }),
         });
       } else {
-        await route.continue();
+        await route.fallback();
       }
     });
 
@@ -314,17 +314,14 @@ test.describe('Edit Existing Collection Page', () => {
     http,
     worker,
   }, testInfo) => {
-    // Mock a failure for the list collectionss API endpoint
+    // Mock a failure for the existing collection API endpoint
     await worker.use(
-      http.get(
-        'https://staging.openveda.cloud/api/stac/collections',
-        ({ request }) => {
-          return HttpResponse.json(
-            { error: 'something went wrong' },
-            { status: 400 }
-          );
-        }
-      )
+      http.get('/api/existing-collection', ({ request }) => {
+        return HttpResponse.json(
+          { error: 'something went wrong' },
+          { status: 400 }
+        );
+      })
     );
 
     await test.step('Navigate to Edit Collection Page', async () => {
@@ -349,17 +346,14 @@ test.describe('Edit Existing Collection Page', () => {
     http,
     worker,
   }, testInfo) => {
-    // Mock a failure for the retrieve-collection API endpoint
+    // Mock a failure for the individual collection retrieval API endpoint
     await worker.use(
-      http.get(
-        'https://staging.openveda.cloud/api/stac/collections/test-collection-1',
-        ({ request }) => {
-          return HttpResponse.json(
-            { error: 'something went wrong' },
-            { status: 400 }
-          );
-        }
-      )
+      http.get('/api/existing-collection/test-collection-1', ({ request }) => {
+        return HttpResponse.json(
+          { error: 'something went wrong' },
+          { status: 400 }
+        );
+      })
     );
 
     await test.step('Navigate to Edit Existing Collection Page', async () => {
