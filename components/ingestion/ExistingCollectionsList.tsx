@@ -60,7 +60,7 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
         setIsLoading(true);
         setApiError('');
         try {
-          let url = 'https://staging.openveda.cloud/api/stac/collections';
+          let url = '/api/existing-collection';
           if (selectedTenant) {
             url += `?tenant=${encodeURIComponent(selectedTenant)}`;
           }
@@ -119,7 +119,7 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
   ) => {
     try {
       const response = await fetch(
-        `https://staging.openveda.cloud/api/stac/collections/${encodeURIComponent(collectionId)}`
+        `/api/existing-collection/${encodeURIComponent(collectionId)}`
       );
       if (!response.ok) throw new Error(await response.text());
       const data = await response.json();

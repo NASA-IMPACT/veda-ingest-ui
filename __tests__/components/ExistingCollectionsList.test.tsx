@@ -121,9 +121,7 @@ describe('ExistingCollectionsList', () => {
       expect(screen.getByText('Public Collection')).toBeInTheDocument();
     });
 
-    expect(fetch).toHaveBeenCalledWith(
-      'https://staging.openveda.cloud/api/stac/collections'
-    );
+    expect(fetch).toHaveBeenCalledWith('/api/existing-collection');
   });
 
   it('should display tenant information in cards', async () => {
@@ -221,7 +219,7 @@ describe('ExistingCollectionsList', () => {
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        'https://staging.openveda.cloud/api/stac/collections?tenant=nasa'
+        '/api/existing-collection?tenant=nasa'
       );
     });
   });
@@ -262,7 +260,7 @@ describe('ExistingCollectionsList', () => {
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        'https://staging.openveda.cloud/api/stac/collections/collection-1'
+        '/api/existing-collection/collection-1'
       );
       expect(mockOnCollectionSelect).toHaveBeenCalledWith(collectionDetails);
     });
@@ -318,7 +316,7 @@ describe('ExistingCollectionsList', () => {
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        'https://staging.openveda.cloud/api/stac/collections/collection-2'
+        '/api/existing-collection/collection-2'
       );
       expect(mockOnCollectionSelect).toHaveBeenCalledWith(collectionDetails);
     });
@@ -488,7 +486,7 @@ describe('ExistingCollectionsList', () => {
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        'https://staging.openveda.cloud/api/stac/collections/collection-1'
+        '/api/existing-collection/collection-1'
       );
     });
 

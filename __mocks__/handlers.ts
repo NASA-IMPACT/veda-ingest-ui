@@ -226,17 +226,33 @@ export const handlers = [
   http.get('https://staging.openveda.cloud/api/raster/cog/validate', () => {
     return HttpResponse.json({ COG: true });
   }),
-  http.get('https://staging.openveda.cloud/api/stac/collections', () => {
-    return HttpResponse.json(stacCollectionsResponse);
-  }),
-  http.get(
-    'https://staging.openveda.cloud/api/stac/collections/:collectionId',
-    ({ params }) => {
-      // Return the mock collection response for any collection ID
-      return HttpResponse.json({
-        ...stacCollectionResponse,
-        id: params.collectionId,
-      });
+
+  http.get('/api/existing-collection', ({ request }) => {
+    const url = new URL(request.url);
+    const tenant = url.searchParams.get('tenant');
+
+    let filteredResponse = { ...stacCollectionsResponse };
+
+    // Filter by tenant if specified
+    if (tenant) {
+      filteredResponse.collections = stacCollectionsResponse.collections.filter(
+        (collection: any) => {
+          if (tenant === 'Public') {
+            return !collection.tenant || collection.tenant === '';
+          }
+          return collection.tenant === tenant;
+        }
+      );
     }
-  ),
+
+    return HttpResponse.json(filteredResponse);
+  }),
+
+  http.get('/api/existing-collection/:collectionId', ({ params }) => {
+    // Return the same mock collection response for any collection ID
+    return HttpResponse.json({
+      ...stacCollectionResponse,
+      id: params.collectionId,
+    });
+  }),
 ];
