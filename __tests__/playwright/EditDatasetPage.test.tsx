@@ -276,7 +276,7 @@ test.describe('Edit Dataset Page', () => {
 
     await test.step('verify error modal loads', async () => {
       await expect(
-        page.getByRole('dialog', { name: /Something went wrong/i })
+        page.getByRole('dialog', { name: /Failed to Load Pending Ingests/i })
       ).toBeVisible();
     });
 

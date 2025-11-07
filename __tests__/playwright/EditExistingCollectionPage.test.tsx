@@ -330,7 +330,7 @@ test.describe('Edit Existing Collection Page', () => {
 
     await test.step('verify error modal loads', async () => {
       await expect(
-        page.getByRole('dialog', { name: /Something went wrong/i })
+        page.getByRole('dialog', { name: /Failed to Load Collections/i })
       ).toBeVisible();
     });
 
@@ -380,10 +380,7 @@ test.describe('Edit Existing Collection Page', () => {
 
     await test.step('verify error modal loads', async () => {
       await expect(
-        page.getByRole('dialog', { name: /Something went wrong/i })
-      ).toBeVisible();
-      await expect(
-        page.getByRole('dialog', { name: /Something went wrong/i })
+        page.getByRole('dialog', { name: /Collection Access Error/i })
       ).toBeVisible();
     });
 

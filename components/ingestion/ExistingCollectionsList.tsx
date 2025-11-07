@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { Select, Card, Spin, Typography, Empty } from 'antd';
-const { Option, OptGroup } = Select;
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useUserTenants } from '@/app/contexts/TenantContext';
@@ -35,6 +34,7 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
   const [collections, setCollections] = useState<StacCollection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState('');
+  const [collectionSelectError, setCollectionSelectError] = useState('');
   const [selectedTenant, setSelectedTenant] = useState<string | undefined>(
     undefined
   );
@@ -125,7 +125,7 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
       const data = await response.json();
       onCollectionSelect(data);
     } catch (err) {
-      setApiError(
+      setCollectionSelectError(
         err instanceof Error ? err.message : 'An unknown error occurred.'
       );
     }
@@ -219,7 +219,15 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
         )}
       </div>
 
-      {apiError && <ErrorModal collectionName="" apiErrorMessage={apiError} />}
+      {apiError && (
+        <ErrorModal context="collections-fetch" apiErrorMessage={apiError} />
+      )}
+      {collectionSelectError && (
+        <ErrorModal
+          context="collection-select"
+          apiErrorMessage={collectionSelectError}
+        />
+      )}
     </>
   );
 };
