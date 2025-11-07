@@ -203,7 +203,9 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
         </Row>
       )}
 
-      {apiError && <ErrorModal collectionName="" apiErrorMessage={apiError} />}
+      {apiError && (
+        <ErrorModal context="ingests-fetch" apiErrorMessage={apiError} />
+      )}
     </>
   );
 };
