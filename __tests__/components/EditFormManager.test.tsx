@@ -45,7 +45,7 @@ vi.mock('@/components/ingestion/CollectionIngestionForm', () => ({
       data-testid="collection-ingestion-form"
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit({ mockData: 'collection' });
+        onSubmit({ id: 'test-collection-id', mockData: 'collection' });
       }}
     >
       {children}
@@ -385,14 +385,18 @@ describe('EditFormManager', () => {
     });
 
     await waitFor(() => {
-      // Should use /api/existing-collection endpoint instead of api/create-ingest
-      expect(fetch).toHaveBeenCalledWith('/api/existing-collection', {
-        method: 'PUT',
-        body: JSON.stringify({
-          formData: { mockData: 'collection' },
-        }),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      // Should use /api/existing-collection/[collectionId] endpoint
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/existing-collection/test-collection-id',
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            id: 'test-collection-id',
+            mockData: 'collection',
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
       expect(mockSetStatus).toHaveBeenCalledWith('success');
       expect(mockSetFormData).toHaveBeenCalledWith({});
     });
@@ -431,7 +435,8 @@ describe('EditFormManager', () => {
     expect(requestBody).not.toHaveProperty('gitRef');
     expect(requestBody).not.toHaveProperty('fileSha');
     expect(requestBody).not.toHaveProperty('filePath');
-    expect(requestBody).toHaveProperty('formData');
+    expect(requestBody).toHaveProperty('id');
+    expect(requestBody).toHaveProperty('mockData');
   });
 
   it('renders an error message for an invalid formType', () => {

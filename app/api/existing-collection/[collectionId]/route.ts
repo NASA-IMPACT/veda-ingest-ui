@@ -11,7 +11,7 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
-    if (!session) {
+    if (!session || !(session as any).accessToken) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
@@ -21,7 +21,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { collectionId } = await params;
 
     const stacUrl = `https://staging.openveda.cloud/api/stac/collections/${encodeURIComponent(collectionId)}`;
-    const stacResponse = await fetch(stacUrl);
+    const stacResponse = await fetch(stacUrl, {
+      headers: {
+        Authorization: `Bearer ${(session as any).accessToken}`,
+      },
+    });
 
     if (!stacResponse.ok) {
       const errorText = await stacResponse.text();
@@ -59,6 +63,85 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     console.error('Error fetching collection:', error);
     return NextResponse.json(
       { error: 'Failed to fetch collection' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: NextRequest, { params }: RouteParams) {
+  try {
+    const session = await auth();
+    if (!session || !(session as any).accessToken) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const { collectionId } = await params;
+    const formData = await request.json();
+
+    // First, get the existing collection to check tenant access
+    const stacUrl = `https://staging.openveda.cloud/api/stac/collections/${encodeURIComponent(collectionId)}`;
+    const existingResponse = await fetch(stacUrl, {
+      headers: {
+        Authorization: `Bearer ${(session as any).accessToken}`,
+      },
+    });
+
+    if (!existingResponse.ok) {
+      return NextResponse.json(
+        { error: 'Collection not found' },
+        { status: 404 }
+      );
+    }
+
+    const existingCollection = await existingResponse.json();
+
+    // Validate tenant access if collection has a tenant
+    if (
+      existingCollection.tenant &&
+      existingCollection.tenant !== '' &&
+      existingCollection.tenant !== 'Public'
+    ) {
+      const tenantValidation = await validateTenantAccess(
+        existingCollection.tenant,
+        session
+      );
+
+      if (!tenantValidation.isValid) {
+        return NextResponse.json(
+          {
+            error: `Access denied for collection from tenant: ${existingCollection.tenant}`,
+          },
+          { status: 403 }
+        );
+      }
+    }
+
+    const updateResponse = await fetch(stacUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${(session as any).accessToken}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!updateResponse.ok) {
+      const errorText = await updateResponse.text();
+      return NextResponse.json(
+        { error: `Failed to update collection: ${errorText}` },
+        { status: updateResponse.status }
+      );
+    }
+
+    const updatedCollection = await updateResponse.json();
+    return NextResponse.json(updatedCollection);
+  } catch (error) {
+    console.error('Error updating collection:', error);
+    return NextResponse.json(
+      { error: 'Failed to update collection' },
       { status: 500 }
     );
   }

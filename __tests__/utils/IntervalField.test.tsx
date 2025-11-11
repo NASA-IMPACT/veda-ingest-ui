@@ -88,7 +88,7 @@ describe('IntervalField', () => {
     expect(screen.getByPlaceholderText('End Date')).toHaveValue('');
   });
 
-  it('should call onChange with the updated start date as an ISO string', () => {
+  it('should call onChange with the updated start date in STAC format', () => {
     render(<IntervalField {...baseProps} />);
     const newDate = '2025-08-01T00:00:00.000Z';
 
@@ -96,11 +96,14 @@ describe('IntervalField', () => {
     fireEvent.change(startDateInput, { target: { value: newDate } });
 
     expect(mockOnChange).toHaveBeenCalledTimes(1);
-    // The component should convert the dayjs object back to an ISO string
-    expect(mockOnChange).toHaveBeenCalledWith([newDate, initialEndDate]);
+    // The component should convert to STAC-compliant datetime format
+    expect(mockOnChange).toHaveBeenCalledWith([
+      '2025-08-01 00:00:00+00:00',
+      initialEndDate,
+    ]);
   });
 
-  it('should call onChange with the updated end date as an ISO string', () => {
+  it('should call onChange with the updated end date in STAC format', () => {
     render(<IntervalField {...baseProps} />);
     const newDate = '2025-09-15T00:00:00.000Z';
 
@@ -108,8 +111,11 @@ describe('IntervalField', () => {
     fireEvent.change(endDateInput, { target: { value: newDate } });
 
     expect(mockOnChange).toHaveBeenCalledTimes(1);
-    // The component should convert the dayjs object back to an ISO string
-    expect(mockOnChange).toHaveBeenCalledWith([initialStartDate, newDate]);
+    // The component should convert to STAC-compliant datetime format
+    expect(mockOnChange).toHaveBeenCalledWith([
+      initialStartDate,
+      '2025-09-15 00:00:00+00:00',
+    ]);
   });
 
   it('should disable both inputs when the disabled prop is true', () => {

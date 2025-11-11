@@ -163,19 +163,15 @@ test.describe('Edit Existing Collection Page', () => {
     let putRequestIntercepted = false;
 
     // Intercept and validate the request payload
-    await page.route('**/api/existing-collection', async (route, request) => {
+    await page.route('**/api/existing-collection/*', async (route, request) => {
       if (request.method() === 'PUT') {
         putRequestIntercepted = true;
         const postData = request.postDataJSON();
 
-        expect(postData, 'validate formData property exists').toHaveProperty(
-          'formData'
-        );
-
-        // Assert that the submitted formData matches the modified config
+        // Assert that the submitted data matches the modified config
         expect(
-          postData.formData,
-          'validate formData matches modified json'
+          postData,
+          'validate request body matches modified json'
         ).toMatchObject(modifiedCollectionConfig);
 
         await route.fulfill({
@@ -258,7 +254,7 @@ test.describe('Edit Existing Collection Page', () => {
       // Wait for the PUT request to be made
       const requestPromise = page.waitForRequest(
         (req) =>
-          req.url().includes('/api/existing-collection') &&
+          req.url().includes('/api/existing-collection/') &&
           req.method() === 'PUT'
       );
 
