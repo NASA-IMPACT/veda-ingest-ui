@@ -111,20 +111,87 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
   const submitFormData = (formData: Record<string, unknown>) => {
     setStatus('loadingGithub');
 
+    // Sanitize the form data to ensure STAC schema compliance
+    const sanitizeFormData = (data: any): any => {
+      if (Array.isArray(data)) {
+        return data.map(sanitizeFormData);
+      } else if (data && typeof data === 'object') {
+        const sanitized: any = {};
+        for (const [key, value] of Object.entries(data)) {
+          // Convert null values to empty arrays for fields that should be arrays
+          if (value === null && shouldBeArray(key)) {
+            sanitized[key] = [];
+          }
+          // Convert null values to empty objects for fields that should be objects
+          else if (value === null && shouldBeObject(key)) {
+            sanitized[key] = {};
+          } else {
+            sanitized[key] = sanitizeFormData(value);
+          }
+        }
+        return sanitized;
+      } else if (typeof data === 'string') {
+        // Fix datetime format issues for existing data that wasn't processed by IntervalField
+        return sanitizeDatetime(data);
+      }
+      return data;
+    };
+
+    // Fix datetime format to comply with STAC schema
+    const sanitizeDatetime = (dateStr: string): string => {
+      // Fix timezone format: +00 -> +00:00 and ensure T separator
+      if (dateStr.match(/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}\+00$/)) {
+        return dateStr.replace(' ', 'T').replace('+00', '+00:00');
+      }
+      // Ensure T separator for datetime strings
+      if (dateStr.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/)) {
+        return dateStr.replace(' ', 'T');
+      }
+      return dateStr;
+    };
+
+    // Define which fields should be arrays when they're null
+    const shouldBeArray = (fieldName: string): boolean => {
+      const arrayFields = ['stac_extensions', 'keywords', 'providers', 'links'];
+      return arrayFields.includes(fieldName);
+    };
+
+    // Define which fields should be objects when they're null
+    const shouldBeObject = (fieldName: string): boolean => {
+      const objectFields = ['assets', 'item_assets', 'summaries'];
+      return objectFields.includes(fieldName);
+    };
+
+    const sanitizedFormData = sanitizeFormData(formData);
+
     let url = 'api/create-ingest';
     let requestOptions: RequestInit;
 
     if (formType === 'existingCollection') {
-      url = '/api/existing-collection';
+      const collectionId = sanitizedFormData.id as string;
+      if (!collectionId) {
+        console.error(
+          'Collection ID is required for existing collection updates'
+        );
+        setApiErrorMessage('Collection ID is missing');
+        setStatus('error');
+        return;
+      }
+      url = `/api/existing-collection/${encodeURIComponent(collectionId)}`;
       requestOptions = {
         method: 'PUT',
-        body: JSON.stringify({ formData }),
+        body: JSON.stringify(sanitizedFormData),
         headers: { 'Content-Type': 'application/json' },
       };
     } else {
       requestOptions = {
         method: 'PUT',
-        body: JSON.stringify({ gitRef, fileSha, filePath, formData }),
+        body: JSON.stringify({
+          gitRef,
+          fileSha,
+          filePath,
+          formData: sanitizedFormData,
+        }),
         headers: { 'Content-Type': 'application/json' },
       };
     }

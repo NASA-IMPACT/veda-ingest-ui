@@ -8,13 +8,10 @@ import {
   beforeAll,
   afterAll,
 } from 'vitest';
-import { GET, PUT } from '@/app/api/existing-collection/route';
+import { GET } from '@/app/api/existing-collection/route';
 import { NextRequest } from 'next/server';
 import { auth } from '@/lib/auth';
-import {
-  getUserTenants,
-  validateTenantAccess,
-} from '@/lib/serverTenantValidation';
+import { getUserTenants } from '@/lib/serverTenantValidation';
 
 vi.mock('@/lib/auth', () => ({
   auth: vi.fn(),
@@ -208,97 +205,5 @@ describe('GET /api/existing-collection', () => {
     expect(response.status).toBe(500);
     const data = await response.json();
     expect(data.error).toBe('Failed to fetch collections');
-  });
-});
-
-describe('PUT /api/existing-collection', () => {
-  const mockFormData = {
-    formData: {
-      description: 'Updated description',
-      title: 'Updated title',
-    },
-  };
-
-  it('returns 401 when user is not authenticated', async () => {
-    authMock.mockResolvedValue(null);
-
-    const request = new NextRequest(
-      'http://localhost:3000/api/existing-collection',
-      {
-        method: 'PUT',
-        body: JSON.stringify(mockFormData),
-      }
-    );
-    const response = await PUT(request);
-
-    expect(response.status).toBe(401);
-    const data = await response.json();
-    expect(data.error).toBe('Authentication required');
-  });
-
-  it('returns 400 when formData is missing', async () => {
-    authMock.mockResolvedValue(mockSession);
-
-    const request = new NextRequest(
-      'http://localhost:3000/api/existing-collection',
-      {
-        method: 'PUT',
-        body: JSON.stringify({}),
-      }
-    );
-    const response = await PUT(request);
-
-    expect(response.status).toBe(400);
-    const data = await response.json();
-    expect(data.error).toBe('Missing or invalid formData');
-  });
-
-  it('successfully processes valid PUT request', async () => {
-    authMock.mockResolvedValue(mockSession);
-
-    const request = new NextRequest(
-      'http://localhost:3000/api/existing-collection',
-      {
-        method: 'PUT',
-        body: JSON.stringify(mockFormData),
-      }
-    );
-    const response = await PUT(request);
-
-    expect(response.status).toBe(200);
-    const data = await response.json();
-    expect(data.message).toBe('Existing collection updated successfully');
-  });
-
-  it('handles JSON parsing errors', async () => {
-    authMock.mockResolvedValue(mockSession);
-
-    const request = new NextRequest(
-      'http://localhost:3000/api/existing-collection',
-      {
-        method: 'PUT',
-        body: 'invalid json',
-      }
-    );
-    const response = await PUT(request);
-
-    expect(response.status).toBe(400);
-    const data = await response.json();
-    expect(data.error).toBe('Invalid JSON format');
-  });
-
-  it('handles unexpected errors gracefully', async () => {
-    authMock.mockResolvedValue(mockSession);
-
-    // Mock request.json to throw a non-syntax error
-    const request = {
-      json: vi.fn().mockRejectedValue(new Error('Unexpected error')),
-    } as unknown as NextRequest;
-
-    const response = await PUT(request);
-
-    expect(response.status).toBe(500);
-    const data = await response.json();
-    expect(data.error).toBe('Internal server error');
   });
 });
