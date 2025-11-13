@@ -6,12 +6,14 @@ import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm';
 import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
 import { Button, Card, Space, Alert, Modal, Spin } from 'antd';
 import { useCogValidation } from '@/hooks/useCogValidation';
+import { VirtualDiffViewer } from 'virtual-react-json-diff';
+import { sanitizeFormData } from '@/utils/stacSanitization';
 
 interface EditFormManagerProps {
-  formType: 'dataset' | 'collection';
-  gitRef: string;
-  filePath: string;
-  fileSha: string;
+  formType: 'dataset' | 'collection' | 'existingCollection';
+  gitRef?: string;
+  filePath?: string;
+  fileSha?: string;
   formData: Record<string, unknown>;
   setFormData: any;
   setStatus: (status: Status) => void;
@@ -34,11 +36,18 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
   const [originalFormData, setOriginalFormData] = useState<
     Record<string, unknown>
   >({});
+  const [isDiffModalVisible, setIsDiffModalVisible] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
 
   // When component mounts or formData is initially set, store it as the original state
   useEffect(() => {
     if (
+      formData &&
       Object.keys(formData).length > 0 &&
+      originalFormData &&
       Object.keys(originalFormData).length === 0
     ) {
       setOriginalFormData(JSON.parse(JSON.stringify(formData)));
@@ -47,7 +56,11 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
 
   // Compare current form data with original to determine if there are changes
   useEffect(() => {
-    if (Object.keys(originalFormData).length > 0) {
+    if (
+      formData &&
+      originalFormData &&
+      Object.keys(originalFormData).length > 0
+    ) {
       const hasChanges =
         JSON.stringify(formData) !== JSON.stringify(originalFormData);
       setDisabled(!hasChanges);
@@ -68,24 +81,71 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
       return;
     }
 
-    const isValid = await validateFormDataCog(formData, formType);
+    setPendingFormData(formData);
+    setIsDiffModalVisible(true);
+  };
+
+  const handleDiffModalConfirm = async () => {
+    setIsDiffModalVisible(false);
+
+    if (!pendingFormData) {
+      console.error('No pending form data.');
+      return;
+    }
+
+    // Proceed to COG validation
+    const isValid = await validateFormDataCog(pendingFormData, formType);
     if (!isValid) {
       showCogValidationModal();
       return;
     }
 
-    submitFormData(formData);
+    // If COG validation passes, submit immediately
+    submitFormData(pendingFormData);
+  };
+
+  const handleDiffModalCancel = () => {
+    setIsDiffModalVisible(false);
+    setPendingFormData(null);
   };
 
   const submitFormData = (formData: Record<string, unknown>) => {
     setStatus('loadingGithub');
 
-    const url = 'api/create-ingest';
-    const requestOptions = {
-      method: 'PUT',
-      body: JSON.stringify({ gitRef, fileSha, filePath, formData }),
-      headers: { 'Content-Type': 'application/json' },
-    };
+    // Sanitize the form data to ensure STAC schema compliance
+    const sanitizedFormData = sanitizeFormData(formData);
+
+    let url = 'api/create-ingest';
+    let requestOptions: RequestInit;
+
+    if (formType === 'existingCollection') {
+      const collectionId = sanitizedFormData.id as string;
+      if (!collectionId) {
+        console.error(
+          'Collection ID is required for existing collection updates'
+        );
+        setApiErrorMessage('Collection ID is missing');
+        setStatus('error');
+        return;
+      }
+      url = `/api/existing-collection/${encodeURIComponent(collectionId)}`;
+      requestOptions = {
+        method: 'PUT',
+        body: JSON.stringify(sanitizedFormData),
+        headers: { 'Content-Type': 'application/json' },
+      };
+    } else {
+      requestOptions = {
+        method: 'PUT',
+        body: JSON.stringify({
+          gitRef,
+          fileSha,
+          filePath,
+          formData: sanitizedFormData,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      };
+    }
 
     fetch(url, requestOptions)
       .then(async (response) => {
@@ -107,8 +167,8 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
 
   const handleCogValidationContinue = () => {
     hideCogValidationModal();
-    if (formData) {
-      submitFormData(formData);
+    if (pendingFormData) {
+      submitFormData(pendingFormData);
     }
   };
 
@@ -151,14 +211,47 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
           <CollectionIngestionForm {...childFormProps}>
             {formButtons}
           </CollectionIngestionForm>
+        ) : formType === 'existingCollection' ? (
+          <CollectionIngestionForm {...childFormProps}>
+            {formButtons}
+          </CollectionIngestionForm>
         ) : (
           <Alert
-            message="Invalid formType specified. Please use dataset or collection."
+            message="Invalid formType specified. Please use dataset, collection, or existingCollection."
             type="error"
             showIcon
           />
         )}
       </Card>
+
+      <Modal
+        title="Review Changes"
+        open={isDiffModalVisible}
+        onOk={handleDiffModalConfirm}
+        onCancel={handleDiffModalCancel}
+        okText="Confirm Changes"
+        cancelText="Cancel"
+        width={1200}
+        destroyOnHidden={true}
+      >
+        <div style={{ marginBottom: 16 }}>
+          <Alert
+            message="Review the changes below before submitting"
+            type="info"
+            showIcon
+          />
+        </div>
+        {pendingFormData && (
+          <VirtualDiffViewer
+            oldValue={originalFormData}
+            newValue={pendingFormData}
+            height={500}
+            showLineCount={true}
+            showObjectCountStats={false}
+            differOptions={{ showModifications: true }}
+          />
+        )}
+      </Modal>
 
       <Modal
         title="COG Validation Warning"

@@ -2,7 +2,7 @@ import { expect, test } from '@/__tests__/playwright/setup-msw';
 import { HttpResponse } from 'msw';
 
 const modifiedCollectionConfig = {
-  id: 'Playwright_TEST',
+  id: 'test-collection-1',
   title: 'MODIFIED test collection title',
   stac_version: '1.0.0',
   type: 'Collection',
@@ -65,16 +65,30 @@ const modifiedCollectionConfig = {
   },
 };
 
-test.describe('Edit Collection Page', () => {
-  test('Edit Collection does not allow renaming collection', async ({
+test.describe('Edit Existing Collection Page', () => {
+  test('Edit Existing Collection does not allow renaming collection', async ({
     page,
   }, testInfo) => {
-    await test.step('Navigate to Edit Collection Page', async () => {
-      await page.goto('/edit-collection');
+    await test.step('Navigate to Edit Existing Collection Page', async () => {
+      await page.goto('/edit-existing-collection');
     });
 
-    await test.step('wait for list of of pending requests to load and pick #1', async () => {
-      await page.getByRole('button', { name: /seeded ingest #1/i }).click();
+    await expect(
+      page.getByRole('heading', { level: 3, name: 'Edit Existing Collection' })
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole('alert')
+        .getByText(
+          /Warning: Changes here will affect the published collection\./i
+        )
+    ).toBeVisible();
+
+    await test.step('wait for list of collections to load and pick #1', async () => {
+      await page
+        .locator('.ant-card')
+        .filter({ hasText: /test-collection-1/i })
+        .click();
     });
 
     await expect(
@@ -112,12 +126,26 @@ test.describe('Edit Collection Page', () => {
   });
 
   test('Submit button enables after form changes', async ({ page }) => {
-    await test.step('Navigate to Edit Collection Page', async () => {
-      await page.goto('/edit-collection');
+    await test.step('Navigate to Edit Existing Collection Page', async () => {
+      await page.goto('/edit-existing-collection');
     });
 
-    await test.step('wait for list of pending requests to load and pick #1', async () => {
-      await page.getByRole('button', { name: /seeded ingest #1/i }).click();
+    await expect(
+      page.getByRole('heading', { level: 3, name: 'Edit Existing Collection' })
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole('alert')
+        .getByText(
+          /Warning: Changes here will affect the published collection\./i
+        )
+    ).toBeVisible();
+
+    await test.step('wait for list of collections to load and pick #1', async () => {
+      await page
+        .locator('.ant-card')
+        .filter({ hasText: /test-collection-1/i })
+        .click();
     });
     // Make a change to the form
     await test.step('modify form field', async () => {
@@ -135,25 +163,15 @@ test.describe('Edit Collection Page', () => {
     let putRequestIntercepted = false;
 
     // Intercept and validate the request payload
-    await page.route('**/api/create-ingest', async (route, request) => {
+    await page.route('**/api/existing-collection/*', async (route, request) => {
       if (request.method() === 'PUT') {
         putRequestIntercepted = true;
         const postData = request.postDataJSON();
 
-        expect(postData, 'validate filePath property exists').toHaveProperty(
-          'filePath'
-        );
-        expect(postData, 'validate fileSha property exists').toHaveProperty(
-          'fileSha'
-        );
-        expect(postData, 'validate formData property exists').toHaveProperty(
-          'formData'
-        );
-
-        // Assert that the submitted formData matches the modified config
+        // Assert that the submitted data matches the modified config
         expect(
-          postData.formData,
-          'validate formData matches modified json'
+          postData,
+          'validate request body matches modified json'
         ).toMatchObject(modifiedCollectionConfig);
 
         await route.fulfill({
@@ -164,16 +182,30 @@ test.describe('Edit Collection Page', () => {
           }),
         });
       } else {
-        await route.continue();
+        await route.fallback();
       }
     });
 
-    await test.step('Navigate to Edit Collection Page', async () => {
-      await page.goto('/edit-collection');
+    await test.step('Navigate to Edit Existing Collection Page', async () => {
+      await page.goto('/edit-existing-collection');
     });
 
-    await test.step('wait for list of of pending requests to load and pick #1', async () => {
-      await page.getByRole('button', { name: /seeded ingest #1/i }).click();
+    await expect(
+      page.getByRole('heading', { level: 3, name: 'Edit Existing Collection' })
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole('alert')
+        .getByText(
+          /Warning: Changes here will affect the published collection\./i
+        )
+    ).toBeVisible();
+
+    await test.step('wait for list of collections to load and pick #1', async () => {
+      await page
+        .locator('.ant-card')
+        .filter({ hasText: /test-collection-1/i })
+        .click();
     });
 
     await expect(
@@ -222,7 +254,8 @@ test.describe('Edit Collection Page', () => {
       // Wait for the PUT request to be made
       const requestPromise = page.waitForRequest(
         (req) =>
-          req.url().includes('/api/create-ingest') && req.method() === 'PUT'
+          req.url().includes('/api/existing-collection/') &&
+          req.method() === 'PUT'
       );
 
       await page.getByRole('button', { name: /confirm changes/i }).click();
@@ -241,28 +274,33 @@ test.describe('Edit Collection Page', () => {
   test('Edit Collection displays list of open PRs for collections', async ({
     page,
   }, testInfo) => {
-    await test.step('Navigate to Edit Collection Page', async () => {
-      await page.goto('/edit-collection');
+    await test.step('Navigate to Edit Existing Collection Page', async () => {
+      await page.goto('/edit-existing-collection');
     });
 
-    await test.step('verify list of of pending collection requests loads', async () => {
-      await expect(
-        page.getByRole('button', {
-          name: /seeded ingest #1/i,
-        })
-      ).toBeVisible();
-      await expect(
-        page.getByRole('button', {
-          name: /seeded ingest #1/i,
-        })
-      ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 3, name: 'Edit Existing Collection' })
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole('alert')
+        .getByText(
+          /Warning: Changes here will affect the published collection\./i
+        )
+    ).toBeVisible();
+
+    await test.step('wait for list of collections to load and pick #1', async () => {
+      await page
+        .locator('.ant-card')
+        .filter({ hasText: /test-collection-1/i })
+        .click();
     });
 
-    const listCollectionRequestsScreenshot = await page.screenshot({
+    const listCollectionsScreenshot = await page.screenshot({
       fullPage: true,
     });
-    testInfo.attach('filtered list of open collection PRs', {
-      body: listCollectionRequestsScreenshot,
+    testInfo.attach('filtered list of collections', {
+      body: listCollectionsScreenshot,
       contentType: 'image/png',
     });
   });
@@ -272,9 +310,9 @@ test.describe('Edit Collection Page', () => {
     http,
     worker,
   }, testInfo) => {
-    // Mock a failure for the list-ingests API endpoint
+    // Mock a failure for the existing collection API endpoint
     await worker.use(
-      http.get('/api/list-ingests', ({ request }) => {
+      http.get('/api/existing-collection', ({ request }) => {
         return HttpResponse.json(
           { error: 'something went wrong' },
           { status: 400 }
@@ -283,30 +321,30 @@ test.describe('Edit Collection Page', () => {
     );
 
     await test.step('Navigate to Edit Collection Page', async () => {
-      await page.goto('/edit-collection');
+      await page.goto('/edit-existing-collection');
     });
 
     await test.step('verify error modal loads', async () => {
       await expect(
-        page.getByRole('dialog', { name: /Failed to Load Pending Ingests/i })
+        page.getByRole('dialog', { name: /Failed to Load Collections/i })
       ).toBeVisible();
     });
 
     const unknownErrorScreenshot = await page.screenshot({ fullPage: true });
-    testInfo.attach('api error listing pending PRs', {
+    testInfo.attach('api error listing collectionss', {
       body: unknownErrorScreenshot,
       contentType: 'image/png',
     });
   });
 
-  test('Error Handling - Edit Collection gracefully handles failed /retrieve-collection call', async ({
+  test('Error Handling - Edit Existing Collection gracefully handles failed /retrieve-collection call', async ({
     page,
     http,
     worker,
   }, testInfo) => {
-    // Mock a failure for the retrieve-collection API endpoint
+    // Mock a failure for the individual collection retrieval API endpoint
     await worker.use(
-      http.get('/api/retrieve-ingest', ({ request }) => {
+      http.get('/api/existing-collection/test-collection-1', ({ request }) => {
         return HttpResponse.json(
           { error: 'something went wrong' },
           { status: 400 }
@@ -314,22 +352,31 @@ test.describe('Edit Collection Page', () => {
       })
     );
 
-    await test.step('Navigate to Edit Collection Page', async () => {
-      await page.goto('/edit-collection');
+    await test.step('Navigate to Edit Existing Collection Page', async () => {
+      await page.goto('/edit-existing-collection');
     });
 
-    await test.step('wait for list of of pending requests to load and pick #1', async () => {
-      await page.getByRole('button', { name: /seeded ingest #1/i }).click();
+    await expect(
+      page.getByRole('heading', { level: 3, name: 'Edit Existing Collection' })
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole('alert')
+        .getByText(
+          /Warning: Changes here will affect the published collection\./i
+        )
+    ).toBeVisible();
+
+    await test.step('wait for list of collections to load and pick #1', async () => {
+      await page
+        .locator('.ant-card')
+        .filter({ hasText: /test-collection-1/i })
+        .click();
     });
 
     await test.step('verify error modal loads', async () => {
       await expect(
-        page.getByRole('dialog', { name: /Something went wrong/i })
-      ).toBeVisible();
-      await expect(
-        page
-          .getByRole('dialog', { name: /Something went wrong/i })
-          .getByText('updating Ingest Request for seeded ingest #1.')
+        page.getByRole('dialog', { name: /Collection Access Error/i })
       ).toBeVisible();
     });
 

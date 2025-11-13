@@ -105,7 +105,7 @@ describe('CreatePR', () => {
       // Verify PR title uses the 'id'
       expect(mockCreatePullRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: 'Ingest Request for test-collection-id',
+          title: 'collection Ingest Request for test-collection-id',
         })
       );
 
@@ -141,7 +141,7 @@ describe('CreatePR', () => {
       // Verify PR title uses the 'collection' name
       expect(mockCreatePullRequest).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: 'Ingest Request for My Test Dataset',
+          title: 'dataset Ingest Request for My Test Dataset',
         })
       );
     });

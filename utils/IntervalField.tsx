@@ -20,13 +20,17 @@ const IntervalField: React.FC<FieldProps> = (props) => {
 
   const handleStartDateChange = (date: dayjs.Dayjs | null) => {
     const newIntervalValue = [...intervalValue];
-    newIntervalValue[0] = date ? date.toISOString() : null;
+    newIntervalValue[0] = date
+      ? date.utc().format('YYYY-MM-DD HH:mm:ss+00:00')
+      : null;
     onChange(newIntervalValue);
   };
 
   const handleEndDateChange = (date: dayjs.Dayjs | null) => {
     const newIntervalValue = [...intervalValue];
-    newIntervalValue[1] = date ? date.toISOString() : null;
+    newIntervalValue[1] = date
+      ? date.utc().format('YYYY-MM-DD HH:mm:ss+00:00')
+      : null;
     onChange(newIntervalValue);
   };
 
