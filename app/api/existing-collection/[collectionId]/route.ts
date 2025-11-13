@@ -11,7 +11,7 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
-    if (!session || !(session as any).accessToken) {
+    if (!session) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const session = await auth();
-    if (!session || !(session as any).accessToken) {
+    if (!session) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
