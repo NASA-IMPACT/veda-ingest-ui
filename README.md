@@ -34,11 +34,13 @@ https://nasa-impact.github.io/veda-ingest-ui/
 
 ```
 ├── app/                    # Next.js App Router pages
-│   ├── api/               # API routes for GitHub operations
+│   ├── api/               # API routes for GitHub operations and STAC API
 │   ├── collections/       # Collection management pages
 │   ├── datasets/          # Dataset management pages
+│   ├── edit-existing-collection/ # STAC collection editing interface
 │   └── upload/            # File upload functionality
 ├── components/            # Reusable React components
+│   ├── ingestion/        # Form components for data ingestion and editing
 │   ├── layout/           # Layout components (header, sidebar, etc.)
 │   ├── rjsf-components/  # Custom RJSF form components
 │   ├── thumbnails/       # Thumbnail upload components
@@ -53,16 +55,34 @@ https://nasa-impact.github.io/veda-ingest-ui/
 
 # Architecture
 
-The application is designed to allow users to create and edit PRs in the veda-data repository.New PRs are created with a prefix of `'Ingest Request for [collectionName]'`. The branch name and file name of the json for these new PRs is set by the Collection Name field in the form after any non-alphanumeric characters are removed from the collection name:
+The application supports two primary workflows:
+
+## 1. Data Ingestion
+
+The application allows users to create and edit PRs in the veda-data repository for data ingestion. New PRs are created with a prefix of `'[collection/dataset] Ingest Request for [collectionName]'`. The branch name and file name of the json for these new PRs is set by the Collection Name field in the form after any non-alphanumeric characters are removed from the collection name:
 
 ```
-const fileName = 'ingestion-data/staging/dataset-config/${collectionName}.json`;
+const fileName = 'ingestion-data/staging/dataset-config/${collectionName}.json';
 const branchName = `feat/${collectionName}`;
 ```
 
-All API calls require users to be authenticated via keycloak. The API then obtains a github token and makes the desired calls with the github token.
-
 Users are allowed to edit open PRs that are modifying json files in the standard filepath for each ingestion type. The existing values in the json will be loaded into a form. A user can update those values and a new commit will be added to the PR with the new values.
+
+## 2. Collection Editing
+
+The application also provides direct editing of existing STAC collections through the STAC API. User must have `stac:collection:update` scope for editing permissions.
+
+- **Collection Discovery**: Browse existing collections from `https://staging.openveda.cloud/api/stac/collections`
+- **Real-time Editing**: Modify collection metadata directly without GitHub PRs
+- **Data Sanitization**: Automatic STAC schema compliance with null-to-array/object conversion and datetime format fixes
+
+## Authentication & Authorization
+
+All API calls require users to be authenticated via Keycloak.
+
+- **GitHub Operations**: Uses GitHub token for repository operations
+- **STAC Operations**: Uses access token for STAC API calls with tenant-based permissions
+- **Tenant Filtering**: Support for multi-tenant environments with proper access controls
 
 ## Creation Component Architecture
 
@@ -200,7 +220,7 @@ To bypass the keycloak login, set the `NEXT_PUBLIC_DISABLE_AUTH` environment var
 
 ## Configuring the Validation Form
 
-The fields in the Validation Form are configured by a combination of the json schema in the [jsonschema.json file](FormSchemas/jsonschema.json) and the UI Schema in the [uischema.json file](FormSchemas/uischema.json). To modify fields in the form, a developer must update the json schema to include the proper JSON schema data fields and then modify the ui Schema to have any new or renamed fields in the desired location.
+The fields in the Validation Form are configured by a combination of the json schema in the [jsonschema.json file](FormSchemas/**/jsonschema.json) and the UI Schema in the [uischema.json file](FormSchemas/**/uischema.json). To modify fields in the form, a developer must update the json schema to include the proper JSON schema data fields and then modify the ui Schema to have any new or renamed fields in the desired location.
 
 The Form uses a 24 column grid format and the layout of each row is dictated by the "ui:grid" array in that json. Each row is defined as an object with each field allowed up to 24 columns wide. For example:
 
