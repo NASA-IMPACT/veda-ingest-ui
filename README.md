@@ -216,7 +216,33 @@ yarn dev
 
 This will start the app and make it available at <http://localhost:3000/>.
 
-To bypass the keycloak login, set the `NEXT_PUBLIC_DISABLE_AUTH` environment variable to true. This variable is als leveraged for Playwright testing.
+To bypass the keycloak login, set the `NEXT_PUBLIC_DISABLE_AUTH` environment variable to true. This variable is also leveraged for Playwright testing.
+
+## 🛠️ STAC Data Sanitization
+
+To fix incorrect, previously ingested data, the application includes a data sanitization system to ensure STAC schema compliance:
+
+### Sanitization Features
+
+- **Null Handling**: Converts `null` values to appropriate empty arrays or objects
+- **Datetime Format**: Fixes timezone and separator issues (e.g., `+00` → `+00:00`, space → `T`)
+
+### Implementation
+
+Sanitization logic is located in `utils/stacSanitization.ts` and includes:
+
+```typescript
+// Main sanitization function
+import { sanitizeFormData } from '@/utils/stacSanitization';
+
+const cleanedData = sanitizeFormData(formData);
+```
+
+### Field Type Rules
+
+- **Arrays**: `stac_extensions`, `keywords`, `providers`, `links`
+- **Objects**: `assets`, `item_assets`, `summaries`
+- **Datetime Strings**: Temporal extent fields with format fixes
 
 ## Configuring the Validation Form
 
