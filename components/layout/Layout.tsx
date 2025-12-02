@@ -46,7 +46,26 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
             height={32}
           />
           {!collapsed && (
-            <span style={{ marginLeft: '12px' }}>VEDA Ingest UI</span>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                textAlign: 'left',
+                marginLeft: '12px',
+              }}
+            >
+              <span>VEDA Ingest UI</span>
+              {process.env.NEXT_PUBLIC_ADDITIONAL_LOGO === 'disaster' && (
+                <Image
+                  src="/Disasters_Wordmark_White.svg"
+                  alt="Disasters Wordmark"
+                  width={120}
+                  height={24}
+                  style={{ marginTop: 8, marginLeft: -12 }}
+                />
+              )}
+            </div>
           )}
         </div>
         {!collapsed &&

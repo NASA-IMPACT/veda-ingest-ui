@@ -60,7 +60,7 @@ const fileName = 'ingestion-data/staging/dataset-config/${collectionName}.json`;
 const branchName = `feat/${collectionName}`;
 ```
 
-All API calls require users to be authenticated via AWS Cognito. The API then obtains a github token and makes the desired calls with the github token.
+All API calls require users to be authenticated via keycloak. The API then obtains a github token and makes the desired calls with the github token.
 
 Users are allowed to edit open PRs that are modifying json files in the standard filepath for each ingestion type. The existing values in the json will be loaded into a form. A user can update those values and a new commit will be added to the PR with the new values.
 
@@ -196,7 +196,7 @@ yarn dev
 
 This will start the app and make it available at <http://localhost:3000/>.
 
-To bypass the cognito login, set the `NEXT_PUBLIC_DISABLE_AUTH` environment variable to true. This variable is als leveraged for Playwright testing.
+To bypass the keycloak login, set the `NEXT_PUBLIC_DISABLE_AUTH` environment variable to true. This variable is als leveraged for Playwright testing.
 
 ## Configuring the Validation Form
 
@@ -232,17 +232,6 @@ the new first row has 4 fields with a combined width of 24. Nested objects in th
     ]
   },
 ```
-
-## Cognito Configuration
-
-To set up a Cognito App Client for login, visit the AWS Cognito dashboard:
-
-1. Select your desired User Pool
-2. Copy the `User pool ID` from the top of the Overview page for that User Pool and save it as the `NEXT_PUBLIC_USER_POOL_ID` env variable
-3. From the left sidebar, select "App clients".
-4. Create a new app client with the `Single-page application (SPA)` Application type.
-5. For allowed callback URLs, enter `http://localhost`
-6. copy the `Client ID` and save it as `NEXT_PUBLIC_USER_POOL_CLIENT_ID` env variable.
 
 ## Github Destination Repo Configuration
 
