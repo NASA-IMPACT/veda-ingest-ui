@@ -1,11 +1,10 @@
 'use client';
 
 import React, { ReactNode, useState } from 'react';
-import { Divider, Layout } from 'antd';
-import Image from 'next/image';
-import { AlertFilled } from '@ant-design/icons/';
+import { Layout } from 'antd';
 
 import MenuBar from '@/components/layout/MenuBar';
+import SidebarLogo from '@/components/layout/SidebarLogo';
 import dynamic from 'next/dynamic';
 
 const LogoutButton = dynamic(() => import('@/components/ui/LogoutButton'), {
@@ -26,78 +25,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
         width={220}
         collapsedWidth={100}
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            padding: '20px',
-            height: '74px',
-            fontSize: '1.2em',
-            textAlign: 'center',
-            transition: 'all 0.2s',
-          }}
-        >
-          <Image
-            src="/icon.svg"
-            alt="VEDA Ingest UI Logo"
-            width={32}
-            height={32}
-          />
-          {!collapsed && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                textAlign: 'left',
-                marginLeft: '12px',
-              }}
-            >
-              <span>VEDA Ingest UI</span>
-              {process.env.NEXT_PUBLIC_ADDITIONAL_LOGO === 'disaster' && (
-                <Image
-                  src="/Disasters_Wordmark_White.svg"
-                  alt="Disasters Wordmark"
-                  width={120}
-                  height={24}
-                  style={{ marginTop: 8, marginLeft: -12 }}
-                />
-              )}
-            </div>
-          )}
-        </div>
-        {!collapsed &&
-          (process.env.NEXT_PUBLIC_MOCK_TENANTS ||
-            process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true') && (
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                marginLeft: '12px',
-                color: '#faad14',
-              }}
-            >
-              <AlertFilled style={{ marginRight: 8 }} />
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  flexDirection: 'column',
-                }}
-              >
-                {process.env.NEXT_PUBLIC_MOCK_TENANTS && (
-                  <div>
-                    Mocking Tenants: {process.env.NEXT_PUBLIC_MOCK_TENANTS}
-                  </div>
-                )}
-                {process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true' && (
-                  <div>Mocking Auth</div>
-                )}
-              </div>
-            </div>
-          )}
+        <SidebarLogo collapsed={collapsed} />
         <MenuBar />
         <LogoutButton collapsed={collapsed} />
       </Sider>
