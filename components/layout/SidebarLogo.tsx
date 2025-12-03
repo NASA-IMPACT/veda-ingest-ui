@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { AlertFilled } from '@ant-design/icons/';
+import { cfg } from '@/config/env';
 
 interface SidebarLogoProps {
   collapsed: boolean;
@@ -41,7 +42,7 @@ const SidebarLogo = ({ collapsed }: SidebarLogoProps) => {
             }}
           >
             <span>VEDA Ingest UI</span>
-            {process.env.NEXT_PUBLIC_ADDITIONAL_LOGO === 'disasters' && (
+            {cfg.ADDITIONAL_LOGO === 'disasters' && (
               <Image
                 src="/Disasters_Wordmark_White.svg"
                 alt="Disasters Wordmark"

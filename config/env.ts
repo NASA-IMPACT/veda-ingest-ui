@@ -9,6 +9,7 @@ interface EnvConfig {
   TARGET_BRANCH: string;
   AWS_REGION: string;
   NEXT_PUBLIC_AWS_S3_BUCKET_NAME: string;
+  ADDITIONAL_LOGO: string;
 }
 
 const profiles: Record<AppEnv, EnvConfig> = {
@@ -18,6 +19,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     TARGET_BRANCH: 'main',
     AWS_REGION: 'us-west-2',
     NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'veda-thumbnails',
+    ADDITIONAL_LOGO: '',
   },
   veda: {
     OWNER: 'nasa-impact',
@@ -25,6 +27,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     TARGET_BRANCH: 'main',
     AWS_REGION: 'us-west-2',
     NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'veda-thumbnails',
+    ADDITIONAL_LOGO: '',
   },
   disasters: {
     OWNER: 'nasa-impact',
@@ -32,6 +35,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     TARGET_BRANCH: 'main',
     AWS_REGION: 'us-west-2',
     NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'veda-thumbnails',
+    ADDITIONAL_LOGO: 'disasters',
   },
 };
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
-import { describe, it, expect, afterEach, beforeEach } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
 import SidebarLogo from '@/components/layout/SidebarLogo';
 
 describe('SidebarLogo', () => {
@@ -33,8 +33,11 @@ describe('SidebarLogo', () => {
     expect(screen.queryByText(/Mocking Auth/i)).toBeNull();
   });
 
-  it('shows disaster logo when NEXT_PUBLIC_ADDITIONAL_LOGO=disasters', () => {
-    process.env.NEXT_PUBLIC_ADDITIONAL_LOGO = 'disasters';
+  it('shows disaster logo when cfg.ADDITIONAL_LOGO=disasters', async () => {
+    vi.resetModules();
+    vi.mock('../../config/env', () => ({
+      cfg: { ADDITIONAL_LOGO: 'disasters' },
+    }));
     render(<SidebarLogo collapsed={false} />);
     const disasterLogo = screen.getByAltText('Disasters Wordmark');
     expect(disasterLogo).toBeInTheDocument();
