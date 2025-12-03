@@ -4,8 +4,9 @@ import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 type IngestionType = 'collection' | 'dataset';
 
 const RetrieveJSON = async (ref: string, ingestionType: IngestionType) => {
-  const owner = process.env.OWNER;
-  const repo = process.env.REPO;
+  const { OWNER: owner, REPO: repo } = await import('@/config/env').then(
+    (m) => m.cfg
+  );
 
   if (!owner || !repo) {
     throw new Error('Missing required environment variables: OWNER or REPO');

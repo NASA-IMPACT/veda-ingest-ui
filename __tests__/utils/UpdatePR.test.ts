@@ -1,4 +1,14 @@
 import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
+vi.mock('@/config/env', () => ({
+  cfg: {
+    OWNER: 'mockOwner',
+    REPO: 'mockRepo',
+    TARGET_BRANCH: 'main',
+    AWS_REGION: 'us-west-2',
+    NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'mock-bucket',
+  },
+}));
+
 import UpdatePR from '@/utils/githubUtils/UpdatePR';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 import { Octokit } from '@octokit/rest';
@@ -13,11 +23,18 @@ describe('UpdatePR', () => {
   const mockCreateOrUpdateFileContents = vi.fn();
 
   beforeEach(() => {
+    vi.resetModules();
+    // Restore default env cfg mock for each test run
+    vi.doMock('@/config/env', () => ({
+      cfg: {
+        OWNER: 'mockOwner',
+        REPO: 'mockRepo',
+        TARGET_BRANCH: 'main',
+        AWS_REGION: 'us-west-2',
+        NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'mock-bucket',
+      },
+    }));
     vi.clearAllMocks();
-
-    // Mock environment variables
-    process.env.OWNER = 'mockOwner';
-    process.env.REPO = 'mockRepo';
 
     // Mock GetGithubToken
     (GetGithubToken as Mock).mockResolvedValue('mockToken');
@@ -61,7 +78,19 @@ describe('UpdatePR', () => {
   });
 
   it('throws an error when environment variables are missing', async () => {
-    delete process.env.OWNER;
+    // Re-mock cfg to simulate missing OWNER
+    vi.doMock('@/config/env', () => ({
+      cfg: {
+        OWNER: '',
+        REPO: 'mockRepo',
+        TARGET_BRANCH: 'main',
+        AWS_REGION: 'us-west-2',
+        NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'mock-bucket',
+      },
+    }));
+    // Re-import UpdatePR so it picks up new mock
+    const UpdatePRMissing = (await import('@/utils/githubUtils/UpdatePR'))
+      .default;
 
     const mockRef = 'feat/mock-branch';
     const mockFileSha = 'mockSha';
@@ -69,7 +98,7 @@ describe('UpdatePR', () => {
     const mockFormData = { key: 'value' };
 
     await expect(
-      UpdatePR(mockRef, mockFileSha, mockFilePath, mockFormData)
+      UpdatePRMissing(mockRef, mockFileSha, mockFilePath, mockFormData)
     ).rejects.toThrow('Missing required environment variables: OWNER or REPO');
 
     expect(GetGithubToken).not.toHaveBeenCalled();
@@ -77,6 +106,9 @@ describe('UpdatePR', () => {
   });
 
   it('throws an error when GetGithubToken fails', async () => {
+    // Ensure default cfg is active for this test
+    const UpdatePRDefault = (await import('@/utils/githubUtils/UpdatePR'))
+      .default;
     (GetGithubToken as Mock).mockRejectedValue(
       new Error('Token retrieval failed')
     );
@@ -92,7 +124,7 @@ describe('UpdatePR', () => {
       .mockImplementation(() => {});
 
     await expect(
-      UpdatePR(mockRef, mockFileSha, mockFilePath, mockFormData)
+      UpdatePRDefault(mockRef, mockFileSha, mockFilePath, mockFormData)
     ).rejects.toThrow('Token retrieval failed');
 
     expect(GetGithubToken).toHaveBeenCalled();
@@ -102,6 +134,8 @@ describe('UpdatePR', () => {
   });
 
   it('throws an error when Octokit API call fails', async () => {
+    const UpdatePRDefault = (await import('@/utils/githubUtils/UpdatePR'))
+      .default;
     const mockRef = 'feat/mock-branch';
     const mockFileSha = 'mockSha';
     const mockFilePath = 'path/to/file.json';
@@ -115,7 +149,7 @@ describe('UpdatePR', () => {
     mockCreateOrUpdateFileContents.mockRejectedValue(new Error('API error'));
 
     await expect(
-      UpdatePR(mockRef, mockFileSha, mockFilePath, mockFormData)
+      UpdatePRDefault(mockRef, mockFileSha, mockFilePath, mockFormData)
     ).rejects.toThrow('API error');
 
     expect(GetGithubToken).toHaveBeenCalled();
