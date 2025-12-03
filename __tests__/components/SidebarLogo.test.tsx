@@ -8,7 +8,6 @@ describe('SidebarLogo', () => {
 
   beforeEach(() => {
     process.env = { ...ORIGINAL_ENV };
-    delete process.env.NEXT_PUBLIC_ADDITIONAL_LOGO;
     delete process.env.NEXT_PUBLIC_MOCK_TENANTS;
     delete process.env.NEXT_PUBLIC_MOCK_SCOPES;
     delete process.env.NEXT_PUBLIC_DISABLE_AUTH;
