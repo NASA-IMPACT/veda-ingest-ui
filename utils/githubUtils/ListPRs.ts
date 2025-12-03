@@ -3,9 +3,10 @@ import { Endpoints } from '@octokit/types';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 import { IngestPullRequest } from '@/types/ingest';
 
-const base = process.env.TARGET_BRANCH || 'main';
-const owner = process.env.OWNER || '';
-const repo = process.env.REPO || '';
+import { cfg } from '@/config/env';
+const base = cfg.TARGET_BRANCH || 'main';
+const owner = cfg.OWNER || '';
+const repo = cfg.REPO || '';
 
 const TARGET_PATHS = {
   collection: 'ingestion-data/staging/collections/',

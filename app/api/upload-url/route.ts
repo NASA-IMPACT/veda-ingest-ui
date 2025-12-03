@@ -6,7 +6,8 @@ const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png'];
 
 export async function POST(req: NextRequest) {
   try {
-    const bucketName = process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME!;
+    const { NEXT_PUBLIC_AWS_S3_BUCKET_NAME: bucketName, AWS_REGION } =
+      await import('@/config/env').then((m) => m.cfg);
 
     const { filename, filetype } = await req.json();
 
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       uploadUrl: signedUrl,
-      fileUrl: `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${filename}`,
+      fileUrl: `https://${bucketName}.s3.${AWS_REGION}.amazonaws.com/${filename}`,
       fileExists,
     });
   } catch (error) {

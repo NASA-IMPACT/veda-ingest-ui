@@ -41,7 +41,7 @@ const SidebarLogo = ({ collapsed }: SidebarLogoProps) => {
             }}
           >
             <span>VEDA Ingest UI</span>
-            {process.env.NEXT_PUBLIC_ADDITIONAL_LOGO === 'disaster' && (
+            {process.env.NEXT_PUBLIC_ADDITIONAL_LOGO === 'disasters' && (
               <Image
                 src="/Disasters_Wordmark_White.svg"
                 alt="Disasters Wordmark"

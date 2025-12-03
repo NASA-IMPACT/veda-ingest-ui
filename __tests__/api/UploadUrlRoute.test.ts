@@ -55,7 +55,7 @@ describe('POST /api/upload-url', () => {
     expect(res.status).toBe(200);
     expect(json).toEqual({
       uploadUrl: 'https://signed-url.com',
-      fileUrl: 'https://test-bucket.s3.us-east-1.amazonaws.com/newfile.png',
+      fileUrl: 'https://veda-thumbnails.s3.us-west-2.amazonaws.com/newfile.png',
       fileExists: false,
     });
   });
@@ -77,7 +77,7 @@ describe('POST /api/upload-url', () => {
     expect(json).toEqual({
       uploadUrl: 'https://signed-url.com',
       fileUrl:
-        'https://test-bucket.s3.us-east-1.amazonaws.com/existingfile.png',
+        'https://veda-thumbnails.s3.us-west-2.amazonaws.com/existingfile.png',
       fileExists: true,
     });
   });

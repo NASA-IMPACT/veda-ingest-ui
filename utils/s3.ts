@@ -6,8 +6,9 @@ import { parseUrl } from '@smithy/url-parser';
 import { formatUrl } from '@aws-sdk/util-format-url';
 import { Hash } from '@smithy/hash-node';
 
-const bucketName = process.env.NEXT_PUBLIC_AWS_S3_BUCKET_NAME!;
-const region = process.env.AWS_REGION || 'us-west-2';
+import { cfg } from '@/config/env';
+const bucketName = cfg.NEXT_PUBLIC_AWS_S3_BUCKET_NAME;
+const region = cfg.AWS_REGION;
 const RoleArn = process.env.ASSUME_ROLE_ARN;
 const ExternalId = process.env.INGEST_UI_EXTERNAL_ID;
 const timestamp = Date.now();
@@ -80,7 +81,7 @@ export async function generateSignedUrl(
 ): Promise<string> {
   const presigner = await createPresigner();
   const url = parseUrl(
-    `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${filename}`
+    `https://${bucketName}.s3.${region}.amazonaws.com/${filename}`
   );
 
   const signedUrlObject = await presigner.presign(
@@ -102,7 +103,7 @@ export async function getSignedUrlForGetObject(
   try {
     const presigner = await createPresigner();
     const url = parseUrl(
-      `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`
+      `https://${bucketName}.s3.${region}.amazonaws.com/${key}`
     );
 
     const signedUrlObject = await presigner.presign(

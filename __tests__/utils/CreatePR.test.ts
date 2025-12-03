@@ -9,6 +9,16 @@ import {
   afterAll,
   beforeAll,
 } from 'vitest';
+vi.mock('@/config/env', () => ({
+  cfg: {
+    OWNER: 'mockOwner',
+    REPO: 'mockRepo',
+    TARGET_BRANCH: 'my_branch',
+    AWS_REGION: 'us-west-2',
+    NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'mock-bucket',
+  },
+}));
+
 import CreatePR from '@/utils/githubUtils/CreatePR';
 import { createOctokit } from '@/utils/githubUtils/OctokitFactory';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
@@ -33,9 +43,16 @@ describe('CreatePR', () => {
 
   // Reset mocks and environment before each test
   beforeEach(() => {
-    vi.stubEnv('TARGET_BRANCH', 'my_branch');
-    vi.stubEnv('OWNER', 'mockOwner');
-    vi.stubEnv('REPO', 'mockRepo');
+    vi.resetModules();
+    vi.doMock('@/config/env', () => ({
+      cfg: {
+        OWNER: 'mockOwner',
+        REPO: 'mockRepo',
+        TARGET_BRANCH: 'my_branch',
+        AWS_REGION: 'us-west-2',
+        NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'mock-bucket',
+      },
+    }));
     vi.clearAllMocks();
 
     (GetGithubToken as Mock).mockResolvedValue('mockToken');
@@ -193,9 +210,23 @@ describe('CreatePR', () => {
     });
 
     it('throws an error when required environment variables are missing', async () => {
-      delete process.env.OWNER;
+      // Re-mock cfg to simulate missing OWNER
+      vi.doMock('@/config/env', () => ({
+        cfg: {
+          OWNER: '',
+          REPO: 'mockRepo',
+          TARGET_BRANCH: 'my_branch',
+          AWS_REGION: 'us-west-2',
+          NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'mock-bucket',
+        },
+      }));
+      const CreatePRMissing = (await import('@/utils/githubUtils/CreatePR'))
+        .default;
       await expect(
-        CreatePR({ collection: 'Test Collection', id: 'test-id' }, 'collection')
+        CreatePRMissing(
+          { collection: 'Test Collection', id: 'test-id' },
+          'collection'
+        )
       ).rejects.toThrow(
         'Missing required environment variables: OWNER or REPO'
       );
@@ -203,8 +234,10 @@ describe('CreatePR', () => {
 
     it('throws an error for an invalid ingestionType', async () => {
       const mockData = { collection: 'Test Collection' };
+      const CreatePRDefault = (await import('@/utils/githubUtils/CreatePR'))
+        .default;
       // @ts-expect-error - Intentionally passing an invalid type for testing
-      await expect(CreatePR(mockData, 'invalidType')).rejects.toThrow(
+      await expect(CreatePRDefault(mockData, 'invalidType')).rejects.toThrow(
         'Invalid ingestionType: invalidType'
       );
     });

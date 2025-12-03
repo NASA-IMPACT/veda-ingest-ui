@@ -33,8 +33,8 @@ describe('SidebarLogo', () => {
     expect(screen.queryByText(/Mocking Auth/i)).toBeNull();
   });
 
-  it('shows disaster logo when NEXT_PUBLIC_ADDITIONAL_LOGO=disaster', () => {
-    process.env.NEXT_PUBLIC_ADDITIONAL_LOGO = 'disaster';
+  it('shows disaster logo when NEXT_PUBLIC_ADDITIONAL_LOGO=disasters', () => {
+    process.env.NEXT_PUBLIC_ADDITIONAL_LOGO = 'disasters';
     render(<SidebarLogo collapsed={false} />);
     const disasterLogo = screen.getByAltText('Disasters Wordmark');
     expect(disasterLogo).toBeInTheDocument();

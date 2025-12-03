@@ -12,8 +12,9 @@ const UpdatePR = async (
   const stringContent = CleanAndPrettifyJSON(formData);
   const content = btoa(stringContent);
 
-  const owner = process.env.OWNER;
-  const repo = process.env.REPO;
+  const { OWNER: owner, REPO: repo } = await import('@/config/env').then(
+    (m) => m.cfg
+  );
 
   if (!owner || !repo) {
     throw new Error('Missing required environment variables: OWNER or REPO');

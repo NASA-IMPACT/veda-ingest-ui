@@ -8,6 +8,16 @@ import {
   afterAll,
   beforeAll,
 } from 'vitest';
+vi.mock('@/config/env', () => ({
+  cfg: {
+    OWNER: 'mockOwner',
+    REPO: 'mockRepo',
+    TARGET_BRANCH: 'main',
+    AWS_REGION: 'us-west-2',
+    NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'mock-bucket',
+  },
+}));
+
 import RetrieveJSON from '@/utils/githubUtils/RetrieveJSON';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 import { Octokit } from '@octokit/rest';
@@ -28,11 +38,17 @@ describe('RetrieveJSON', () => {
   const mockGetContent = vi.fn();
 
   beforeEach(() => {
+    vi.resetModules();
+    vi.doMock('@/config/env', () => ({
+      cfg: {
+        OWNER: 'mockOwner',
+        REPO: 'mockRepo',
+        TARGET_BRANCH: 'main',
+        AWS_REGION: 'us-west-2',
+        NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'mock-bucket',
+      },
+    }));
     vi.clearAllMocks();
-
-    // Mock environment variables
-    process.env.OWNER = 'mockOwner';
-    process.env.REPO = 'mockRepo';
 
     (GetGithubToken as Mock).mockResolvedValue('mockToken');
 
@@ -146,8 +162,19 @@ describe('RetrieveJSON', () => {
     });
 
     it('throws an error when environment variables are missing', async () => {
-      delete process.env.OWNER;
-      await expect(RetrieveJSON('ref', 'dataset')).rejects.toThrow(
+      vi.doMock('@/config/env', () => ({
+        cfg: {
+          OWNER: '',
+          REPO: 'mockRepo',
+          TARGET_BRANCH: 'main',
+          AWS_REGION: 'us-west-2',
+          NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'mock-bucket',
+        },
+      }));
+      const RetrieveJSONMissing = (
+        await import('@/utils/githubUtils/RetrieveJSON')
+      ).default;
+      await expect(RetrieveJSONMissing('ref', 'dataset')).rejects.toThrow(
         'Missing required environment variables: OWNER or REPO'
       );
     });
@@ -158,7 +185,10 @@ describe('RetrieveJSON', () => {
         .spyOn(console, 'error')
         .mockImplementation(() => {});
 
-      await expect(RetrieveJSON('ref', 'dataset')).rejects.toThrow(
+      const RetrieveJSONDefault = (
+        await import('@/utils/githubUtils/RetrieveJSON')
+      ).default;
+      await expect(RetrieveJSONDefault('ref', 'dataset')).rejects.toThrow(
         'GitHub API Error'
       );
 

@@ -1,4 +1,14 @@
 import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
+vi.mock('@/config/env', () => ({
+  cfg: {
+    OWNER: 'test-owner',
+    REPO: 'test-repo',
+    TARGET_BRANCH: 'main',
+    AWS_REGION: 'us-west-2',
+    NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'mock-bucket',
+  },
+}));
+
 import { Octokit } from '@octokit/rest';
 import ListPRs from '@/utils/githubUtils/ListPRs';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
@@ -32,9 +42,6 @@ describe('ListPRs Utility', () => {
     vi.clearAllMocks();
     (GetGithubToken as any).mockResolvedValue('mocked-github-token');
     (Octokit as any).mockImplementation(() => mockOctokitInstance);
-    process.env.OWNER = 'test-owner';
-    process.env.REPO = 'test-repo';
-    process.env.TARGET_BRANCH = 'main';
   });
 
   beforeAll(() => {

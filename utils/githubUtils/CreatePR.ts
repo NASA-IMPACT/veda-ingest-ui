@@ -18,9 +18,11 @@ const CreatePR = async (
   ingestionType: IngestionType,
   userComment?: string
 ): Promise<string> => {
-  const targetBranch = process.env.TARGET_BRANCH || 'main';
-  const owner = process.env.OWNER;
-  const repo = process.env.REPO;
+  const {
+    TARGET_BRANCH: targetBranch,
+    OWNER: owner,
+    REPO: repo,
+  } = await import('@/config/env').then((m) => m.cfg);
 
   if (!owner || !repo) {
     throw new Error('Missing required environment variables: OWNER or REPO');
