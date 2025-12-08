@@ -105,7 +105,10 @@ test.describe('COG Viewer Drawer', () => {
         .getByRole('button', { name: 'View Rendering Options' })
         .click();
       await expect(
-        page.getByRole('dialog', { name: /COG Rendering Options/i })
+        page
+          .getByRole('dialog')
+          .locator('.ant-drawer-title')
+          .getByText(/COG Rendering Options/i)
       ).toBeVisible();
       await expect(
         page.getByText('COG Rendering Options{ "bidx').getByRole('textbox')
@@ -181,7 +184,10 @@ test.describe('COG Viewer Drawer', () => {
         .getByRole('button', { name: 'View Rendering Options' })
         .click();
       await expect(
-        page.getByRole('dialog', { name: /COG Rendering Options/i })
+        page
+          .getByRole('dialog')
+          .locator('.ant-drawer-title')
+          .getByText(/COG Rendering Options/i)
       ).toBeVisible();
       await expect(
         page.getByText('COG Rendering Options{ "bidx').getByRole('textbox')
@@ -238,7 +244,10 @@ test.describe('COG Viewer Drawer', () => {
         .getByRole('button', { name: 'View Rendering Options' })
         .click();
       await expect(
-        page.getByRole('dialog', { name: /COG Rendering Options/i })
+        page
+          .getByRole('dialog')
+          .locator('.ant-drawer-title')
+          .getByText(/COG Rendering Options/i)
       ).toBeVisible();
       await expect(
         page.getByText('COG Rendering Options{ "bidx').getByRole('textbox')
@@ -302,7 +311,10 @@ test.describe('COG Viewer Drawer', () => {
           .getByRole('button', { name: 'View Rendering Options' })
           .click();
         await expect(
-          page.getByRole('dialog', { name: /COG Rendering Options/i })
+          page
+            .getByRole('dialog')
+            .locator('.ant-drawer-title')
+            .getByText(/COG Rendering Options/i)
         ).toBeVisible();
         await expect(
           page.getByText('COG Rendering Options{ "bidx').getByRole('textbox')
@@ -323,7 +335,7 @@ test.describe('COG Viewer Drawer', () => {
       });
       await test.step('close COG Rendering Options Modal', async () => {
         await page
-          .getByLabel('COG Rendering Options')
+          .getByLabel('Selected COG Rendering Options')
           .getByRole('button', { name: 'Cancel' })
           .click();
       });
