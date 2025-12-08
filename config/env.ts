@@ -30,7 +30,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     ADDITIONAL_LOGO: '',
   },
   disasters: {
-    OWNER: 'nasa-impact',
+    OWNER: 'Disasters-Learning-Portal',
     REPO: 'disaster-data',
     TARGET_BRANCH: 'main',
     AWS_REGION: 'us-west-2',
