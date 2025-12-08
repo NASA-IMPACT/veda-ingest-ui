@@ -38,7 +38,7 @@
     "@uiw/react-textarea-code-editor": "^3.1.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
-    "antd": "^5.22.3",
+    "antd": "5.29.1",
     "aws-amplify": "^6.10.2",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",

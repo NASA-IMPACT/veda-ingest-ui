@@ -135,7 +135,9 @@ test.describe('Thumbnail Uploader Page', () => {
 
     await test.step('confirm overwrite', async () => {
       await expect(
-        page.locator('.ant-modal-content').getByText('File Already Exists')
+        page.getByText(
+          'A file with the name "thumbnail.jpg" already exists. Do you want to overwrite it?'
+        )
       ).toBeVisible();
 
       const overwriteConfirmModalScreenshot = await page.screenshot({
