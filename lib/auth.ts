@@ -5,7 +5,6 @@ import { NextResponse } from 'next/server';
 
 const authDisabled = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
-// Helper function to get mock tenants from environment variable
 const getMockTenants = (): string[] => {
   const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
   if (mockTenants && mockTenants.trim() !== '') {
@@ -14,18 +13,31 @@ const getMockTenants = (): string[] => {
       .map((tenant) => tenant.trim())
       .filter(Boolean);
   }
-  // Default fallback tenants if none specified
   return [''];
+};
+
+const getMockScopes = (): string[] => {
+  const mockScopes = process.env.NEXT_PUBLIC_MOCK_SCOPES;
+  if (mockScopes && mockScopes.trim() !== '') {
+    return mockScopes
+      .split(',')
+      .map((scope) => scope.trim())
+      .filter(Boolean);
+  }
+  return [];
 };
 
 let auth: any, handlers: any, signIn: any, signOut: any;
 
 if (authDisabled) {
-  // --- MOCKED AUTH FOR TESTING --- 🎭
-  console.log('🎭 Auth is disabled. Using mock session.');
+  // --- MOCKED AUTH FOR TESTING ---
+  console.log('Auth is disabled. Using mock session.');
 
   const mockTenants = getMockTenants();
-  console.log('🎭 Mock tenants:', mockTenants);
+  console.log('🎭Mock tenants:', mockTenants);
+
+  const mockScopes = getMockScopes();
+  console.log('Mock scopes:', mockScopes);
 
   const mockSession: Session = {
     user: {
@@ -34,6 +46,7 @@ if (authDisabled) {
     },
     expires: '2099-12-31T23:59:59.999Z',
     tenants: mockTenants,
+    scopes: mockScopes,
   };
 
   // The `auth` function is used by middleware and server components
@@ -87,7 +100,10 @@ if (authDisabled) {
       },
       async session({ session, token }) {
         const customToken = token as JWT;
-        const customSession = session as Session & { tenants?: string[] };
+        const customSession = session as Session & {
+          tenants?: string[];
+          accessToken?: string;
+        };
 
         // Check if we should use mock tenants instead of real ones
         const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
@@ -100,6 +116,13 @@ if (authDisabled) {
           customSession.tenants = tenants;
         } else {
           customSession.tenants = customToken.tenants;
+        }
+
+        if (
+          customToken.accessToken &&
+          typeof customToken.accessToken === 'string'
+        ) {
+          customSession.accessToken = customToken.accessToken as string;
         }
 
         return customSession;
