@@ -26,6 +26,7 @@ export async function middleware(request: NextRequest) {
     '/api/retrieve-ingest',
     '/api/create-ingest',
     '/api/upload-url',
+    '/api/allowed-tenants',
   ];
 
   // Allow access all authenticated users
@@ -85,5 +86,6 @@ export const config = {
     '/api/retrieve-ingest',
     '/api/create-ingest',
     '/api/upload-url',
+    '/api/allowed-tenants',
   ],
 };
