@@ -82,7 +82,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       await expect(
         page.getByRole('heading', {
           level: 3,
-          name: /Pending Ingest Requests/i,
+          name: /Edit Pending Ingest Requests/i,
         }),
         'Pending Ingest header is visible'
       ).toBeVisible();
@@ -129,10 +129,13 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
 
   test('Edit Collection preserves existing tenants in form mode', async ({
     page,
-  }) => {
-    // Intercept and block the request
+  }, testInfo) => {
+    let putRequestIntercepted = false;
+
+    // Intercept and validate the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'PUT') {
+        putRequestIntercepted = true;
         const putData = request.postDataJSON();
 
         expect(putData.formData.tenant).toEqual('tenant1');
@@ -175,16 +178,51 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       await page.keyboard.press('Escape');
     });
 
+    await page.getByRole('button', { name: /submit/i }).click();
+
+    await test.step('review changes in diff modal', async () => {
+      await expect(
+        page.getByRole('dialog', { name: /review changes/i })
+      ).toBeVisible();
+
+      const diffModalScreenshot = await page.screenshot({
+        animations: 'disabled',
+      });
+      testInfo.attach('Diff Modal with Tenant Changes', {
+        body: diffModalScreenshot,
+        contentType: 'image/png',
+      });
+    });
+
     await test.step('submit form and verify tenant changes', async () => {
-      await page.getByRole('button', { name: /submit/i }).click();
-      // Verify the request includes the modified tenants
+      // Wait for the PUT request to be made
+      const requestPromise = page.waitForRequest(
+        (req) =>
+          req.url().includes('/api/create-ingest') && req.method() === 'PUT'
+      );
+
+      await page.getByRole('button', { name: /confirm changes/i }).click();
+
+      // Ensure the request was actually made
+      await requestPromise;
+
+      // Verify our route handler was called
+      expect(
+        putRequestIntercepted,
+        'PUT request should have been intercepted'
+      ).toBe(true);
     });
   });
 
-  test('Edit Collection handles tenants in JSON mode', async ({ page }) => {
-    // Intercept and block the request
+  test('Edit Collection handles tenants in JSON mode', async ({
+    page,
+  }, testInfo) => {
+    let putRequestIntercepted = false;
+
+    // Intercept and validate the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'PUT') {
+        putRequestIntercepted = true;
         const putData = request.postDataJSON();
 
         expect(putData.formData.tenant).toEqual('tenant3');
@@ -233,9 +271,42 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       ).toBeVisible();
     });
 
+    await page.getByRole('button', { name: /submit/i }).click();
+
+    await test.step('review changes in diff modal', async () => {
+      await expect(
+        page.getByRole('dialog', { name: /review changes/i })
+      ).toBeVisible();
+
+      const diffModalScreenshot = await page.screenshot({
+        animations: 'disabled',
+      });
+      testInfo.attach('Diff Modal with Tenant Changes', {
+        body: diffModalScreenshot,
+        contentType: 'image/png',
+      });
+    });
+
     await test.step('submit form and verify tenant changes', async () => {
-      await page.getByRole('button', { name: /submit/i }).click();
-      // Verify the request includes the modified tenants
+      // Wait for the PUT request to be made
+      const requestPromise = page.waitForRequest(
+        (req) =>
+          req.url().includes('/api/create-ingest') && req.method() === 'PUT'
+      );
+
+      await page
+        .getByRole('dialog', { name: /review changes/i })
+        .getByRole('button', { name: /confirm/i })
+        .click();
+
+      // Ensure the request was actually made
+      await requestPromise;
+
+      // Verify our route handler was called
+      expect(
+        putRequestIntercepted,
+        'PUT request should have been intercepted'
+      ).toBe(true);
     });
   });
 
