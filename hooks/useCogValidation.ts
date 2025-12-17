@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { VEDA_BACKEND_URL } from '@/config/env';
 
 interface UseCogValidationReturn {
   isCogValidationModalVisible: boolean;
@@ -21,7 +20,7 @@ export const useCogValidation = (): UseCogValidationReturn => {
     if (!url) return true; // Skip validation if no URL provided
 
     const encodedUrl = encodeURIComponent(url);
-    const validationApiUrl = `${VEDA_BACKEND_URL}/raster/cog/validate?strict=false&url=${encodedUrl}`;
+    const validationApiUrl = `https://staging.openveda.cloud/api/raster/cog/validate?strict=false&url=${encodedUrl}`;
 
     try {
       const response = await fetch(validationApiUrl);

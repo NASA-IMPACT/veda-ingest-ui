@@ -10,7 +10,6 @@ interface EnvConfig {
   AWS_REGION: string;
   NEXT_PUBLIC_AWS_S3_BUCKET_NAME: string;
   ADDITIONAL_LOGO: string;
-  VEDA_BACKEND_URL: string;
 }
 
 const profiles: Record<AppEnv, EnvConfig> = {
@@ -21,7 +20,6 @@ const profiles: Record<AppEnv, EnvConfig> = {
     AWS_REGION: 'us-west-2',
     NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'veda-thumbnails',
     ADDITIONAL_LOGO: '',
-    VEDA_BACKEND_URL: 'https://staging.openveda.cloud/api',
   },
   veda: {
     OWNER: 'nasa-impact',
@@ -30,7 +28,6 @@ const profiles: Record<AppEnv, EnvConfig> = {
     AWS_REGION: 'us-west-2',
     NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'veda-thumbnails',
     ADDITIONAL_LOGO: '',
-    VEDA_BACKEND_URL: 'https://staging.openveda.cloud/api',
   },
   disasters: {
     OWNER: 'Disasters-Learning-Portal',
@@ -39,7 +36,6 @@ const profiles: Record<AppEnv, EnvConfig> = {
     AWS_REGION: 'us-west-2',
     NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'veda-thumbnails',
     ADDITIONAL_LOGO: 'disasters',
-    VEDA_BACKEND_URL: 'https://staging.openveda.cloud/api',
   },
 };
 
@@ -50,4 +46,3 @@ const getAppEnv = (): AppEnv => {
 };
 
 export const cfg: EnvConfig = profiles[getAppEnv()];
-export const VEDA_BACKEND_URL = cfg.VEDA_BACKEND_URL;

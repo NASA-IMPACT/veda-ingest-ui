@@ -96,8 +96,9 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
 
   const getColorMaps = async () => {
     try {
-      const { VEDA_BACKEND_URL } = await import('@/config/env');
-      const response = await fetch(`${VEDA_BACKEND_URL}/raster/colorMaps`);
+      const response = await fetch(
+        'https://staging.openveda.cloud/api/raster/colorMaps'
+      );
       const data = await response.json();
       setColorMapsList(['Internal', ...data.colorMaps]);
     } catch (error) {

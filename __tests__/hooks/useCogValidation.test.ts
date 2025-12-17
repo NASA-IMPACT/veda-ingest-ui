@@ -95,9 +95,8 @@ describe('useCogValidation', () => {
       });
 
       expect(isValid!).toBe(true);
-      const { VEDA_BACKEND_URL } = await import('@/config/env');
       expect(global.fetch).toHaveBeenCalledWith(
-        `${VEDA_BACKEND_URL}/raster/cog/validate?strict=false&url=http%3A%2F%2Fexample.com%2Ffile.tif`
+        'https://staging.openveda.cloud/api/raster/cog/validate?strict=false&url=http%3A%2F%2Fexample.com%2Ffile.tif'
       );
     });
 
@@ -118,9 +117,8 @@ describe('useCogValidation', () => {
       });
 
       expect(isValid!).toBe(true);
-      const { VEDA_BACKEND_URL } = await import('@/config/env');
       expect(global.fetch).toHaveBeenCalledWith(
-        `${VEDA_BACKEND_URL}/raster/cog/validate?strict=false&url=http%3A%2F%2Fexample.com%2Ffile1.tif`
+        'https://staging.openveda.cloud/api/raster/cog/validate?strict=false&url=http%3A%2F%2Fexample.com%2Ffile1.tif'
       );
     });
 

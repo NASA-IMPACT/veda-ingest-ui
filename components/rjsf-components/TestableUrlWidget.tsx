@@ -1,5 +1,4 @@
 import { WidgetProps } from '@rjsf/utils';
-import { VEDA_BACKEND_URL } from '@/config/env';
 import Input from 'antd/lib/input';
 import Button from 'antd/lib/button';
 import Typography from 'antd/lib/typography';
@@ -41,7 +40,7 @@ export const TestableUrlWidget = ({
 
     setValidationState('loading');
     const encodedUrl = encodeURIComponent(inputValue);
-    const validationApiUrl = `${VEDA_BACKEND_URL}/raster/cog/validate?strict=false&url=${encodedUrl}`;
+    const validationApiUrl = `https://staging.openveda.cloud/api/raster/cog/validate?strict=false&url=${encodedUrl}`;
 
     try {
       const response = await fetch(validationApiUrl);
