@@ -19,12 +19,29 @@ describe('MenuBar', () => {
       user: { name: 'Test User', email: 'test@example.com' },
     };
     renderWithSession(session);
-    // Create Collection and Edit Collection should not be in the DOM
-    expect(screen.queryByText('Create Collection')).toBeNull();
-    expect(screen.queryByText('Edit Collection')).toBeNull();
-    // Create Dataset and Edit Dataset should not be in the DOM
-    expect(screen.queryByText('Create Dataset')).toBeNull();
-    expect(screen.queryByText('Edit Dataset')).toBeNull();
+    // Create Collection and Edit Collection should be present but disabled
+    expect(screen.getByText('Create Collection')).toBeInTheDocument();
+    expect(screen.getByText('Edit Collection')).toBeInTheDocument();
+    // Create Dataset and Edit Dataset should be present but disabled
+    expect(screen.getByText('Create Dataset')).toBeInTheDocument();
+    expect(screen.getByText('Edit Dataset')).toBeInTheDocument();
+    // Check that the menu items have disabled class or aria-disabled
+    const createCollectionItem = screen
+      .getByText('Create Collection')
+      .closest('[role="menuitem"]');
+    const editCollectionItem = screen
+      .getByText('Edit Collection')
+      .closest('[role="menuitem"]');
+    const createDatasetItem = screen
+      .getByText('Create Dataset')
+      .closest('[role="menuitem"]');
+    const editDatasetItem = screen
+      .getByText('Edit Dataset')
+      .closest('[role="menuitem"]');
+    expect(createCollectionItem).toHaveClass('ant-menu-item-disabled');
+    expect(editCollectionItem).toHaveClass('ant-menu-item-disabled');
+    expect(createDatasetItem).toHaveClass('ant-menu-item-disabled');
+    expect(editDatasetItem).toHaveClass('ant-menu-item-disabled');
   });
 
   it('shows create/edit menu items as links for users with edit permission', () => {
@@ -50,5 +67,32 @@ describe('MenuBar', () => {
       'href',
       '/edit-dataset'
     );
+  });
+
+  it('disables edit menu items for users without edit permission', () => {
+    const session = {
+      expires: '1',
+      scopes: [], // No scopes, so no edit permission
+      user: { name: 'Test', email: 'test@example.com' },
+    };
+    renderWithSession(session);
+    // Create items should be enabled
+    const createCollectionItem = screen
+      .getByText('Create Collection')
+      .closest('[role="menuitem"]');
+    const createDatasetItem = screen
+      .getByText('Create Dataset')
+      .closest('[role="menuitem"]');
+    expect(createCollectionItem).not.toHaveClass('ant-menu-item-disabled');
+    expect(createDatasetItem).not.toHaveClass('ant-menu-item-disabled');
+    // Edit items should be disabled
+    const editCollectionItem = screen
+      .getByText('Edit Collection')
+      .closest('[role="menuitem"]');
+    const editDatasetItem = screen
+      .getByText('Edit Dataset')
+      .closest('[role="menuitem"]');
+    expect(editCollectionItem).toHaveClass('ant-menu-item-disabled');
+    expect(editDatasetItem).toHaveClass('ant-menu-item-disabled');
   });
 });

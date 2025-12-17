@@ -23,13 +23,14 @@ export async function middleware(request: NextRequest) {
 
   // Block limited access users from create/edit collection/dataset pages and APIs
   if (
-    hasLimitedAccess &&
-    (pathname.startsWith('/create-collection') ||
-      pathname.startsWith('/edit-collection') ||
-      pathname.startsWith('/create-dataset') ||
-      pathname.startsWith('/edit-dataset') ||
-      pathname.startsWith('/api/create-ingest') ||
-      pathname.startsWith('/api/upload-url'))
+    (hasLimitedAccess &&
+      (pathname.startsWith('/create-collection') ||
+        pathname.startsWith('/edit-collection') ||
+        pathname.startsWith('/create-dataset') ||
+        pathname.startsWith('/upload'))) ||
+    pathname.startsWith('/edit-dataset') ||
+    pathname.startsWith('/api/create-ingest') ||
+    pathname.startsWith('/api/upload-url')
   ) {
     if (pathname.startsWith('/api/')) {
       return new NextResponse('Forbidden', { status: 403 });

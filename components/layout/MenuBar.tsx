@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
-import { Menu, MenuProps } from 'antd';
+import { Menu, MenuProps, Tooltip } from 'antd';
 import Link from 'next/link';
 import {
   HomeOutlined,
@@ -32,27 +32,41 @@ const MenuBar = () => {
       key: 'g1',
       type: 'group',
       children: [
-        // Only render create/edit if NOT limited access
-        ...(!hasLimitedAccess
-          ? [
-              {
-                key: '/create-collection',
-                label: <Link href="/create-collection">Create Collection</Link>,
-                icon: <PlusCircleOutlined />,
-              },
-              ...(hasEditIngestPermission
-                ? [
-                    {
-                      key: '/edit-collection',
-                      label: (
-                        <Link href="/edit-collection">Edit Collection</Link>
-                      ),
-                      icon: <EditOutlined />,
-                    },
-                  ]
-                : []),
-            ]
-          : []),
+        {
+          key: '/create-collection',
+          label: hasLimitedAccess ? (
+            <Tooltip
+              title="Contact the VEDA Data Services team for access"
+              placement="right"
+            >
+              <span style={{ cursor: 'not-allowed' }}>
+                <Link href="/create-collection">Create Collection</Link>
+              </span>
+            </Tooltip>
+          ) : (
+            <Link href="/create-collection">Create Collection</Link>
+          ),
+          icon: <PlusCircleOutlined />,
+          disabled: hasLimitedAccess,
+        },
+        {
+          key: '/edit-collection',
+          label:
+            hasLimitedAccess || !hasEditIngestPermission ? (
+              <Tooltip
+                title="Contact the VEDA Data Services team for access"
+                placement="right"
+              >
+                <span style={{ cursor: 'not-allowed' }}>
+                  <Link href="/edit-collection">Edit Collection</Link>
+                </span>
+              </Tooltip>
+            ) : (
+              <Link href="/edit-collection">Edit Collection</Link>
+            ),
+          icon: <EditOutlined />,
+          disabled: hasLimitedAccess || !hasEditIngestPermission,
+        },
       ],
     },
     {
@@ -60,25 +74,41 @@ const MenuBar = () => {
       key: 'g2',
       type: 'group',
       children: [
-        // Only render create/edit if NOT limited access
-        ...(!hasLimitedAccess
-          ? [
-              {
-                key: '/create-dataset',
-                label: <Link href="/create-dataset">Create Dataset</Link>,
-                icon: <PlusCircleOutlined />,
-              },
-              ...(hasEditIngestPermission
-                ? [
-                    {
-                      key: '/edit-dataset',
-                      label: <Link href="/edit-dataset">Edit Dataset</Link>,
-                      icon: <EditOutlined />,
-                    },
-                  ]
-                : []),
-            ]
-          : []),
+        {
+          key: '/create-dataset',
+          label: hasLimitedAccess ? (
+            <Tooltip
+              title="Contact the VEDA Data Services team for access"
+              placement="right"
+            >
+              <span style={{ cursor: 'not-allowed' }}>
+                <Link href="/create-dataset">Create Dataset</Link>
+              </span>
+            </Tooltip>
+          ) : (
+            <Link href="/create-dataset">Create Dataset</Link>
+          ),
+          icon: <PlusCircleOutlined />,
+          disabled: hasLimitedAccess,
+        },
+        {
+          key: '/edit-dataset',
+          label:
+            hasLimitedAccess || !hasEditIngestPermission ? (
+              <Tooltip
+                title="Contact the VEDA Data Services team for access"
+                placement="right"
+              >
+                <span style={{ cursor: 'not-allowed' }}>
+                  <Link href="/edit-dataset">Edit Dataset</Link>
+                </span>
+              </Tooltip>
+            ) : (
+              <Link href="/edit-dataset">Edit Dataset</Link>
+            ),
+          icon: <EditOutlined />,
+          disabled: hasLimitedAccess || !hasEditIngestPermission,
+        },
       ],
     },
     {
@@ -92,9 +122,21 @@ const MenuBar = () => {
           icon: <GlobalOutlined />,
         },
         {
-          label: <Link href="/upload">Thumbnail Uploader</Link>,
+          label: hasLimitedAccess ? (
+            <Tooltip
+              title="Contact the VEDA Data Services team for access"
+              placement="right"
+            >
+              <span style={{ cursor: 'not-allowed' }}>
+                <Link href="/upload">Thumbnail Uploader</Link>
+              </span>
+            </Tooltip>
+          ) : (
+            <Link href="/upload">Thumbnail Uploader</Link>
+          ),
           key: '/upload',
           icon: <CloudUploadOutlined />,
+          disabled: hasLimitedAccess,
         },
       ],
     },
