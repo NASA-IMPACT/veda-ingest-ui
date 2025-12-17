@@ -3,6 +3,66 @@ import { NextResponse, NextRequest } from 'next/server';
 
 const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
+// Define route permissions in a declarative way
+const routeConfig = {
+  // Routes that require authentication but no special permissions
+  limited: ['/collections', '/datasets', '/cog-viewer'],
+
+  // Routes that require create permissions (blocked for limited access)
+  createAccess: ['/create-collection', '/create-dataset', '/upload'],
+
+  // Routes that require edit permissions (blocked for limited access + need dataset:update)
+  editAccess: ['/edit-collection', '/edit-dataset'],
+
+  // API routes that require authentication
+  apiRoutes: [
+    '/api/list-ingests',
+    '/api/retrieve-ingest',
+    '/api/create-ingest',
+    '/api/upload-url',
+  ],
+};
+
+function getUserPermissionLevel(session: any) {
+  if (!session) return 'guest';
+  if (session.scopes?.includes('dataset:limited-access')) return 'limited';
+  if (session.scopes?.includes('dataset:update')) return 'edit';
+  if (session.scopes?.includes('dataset:create')) return 'create';
+  return 'guest';
+}
+
+function isRouteAllowed(pathname: string, permissionLevel: string) {
+  // Check if route starts with any of the configured paths
+  const matchesRoute = (routes: string[]) =>
+    routes.some((route) => pathname.startsWith(route));
+
+  switch (permissionLevel) {
+    case 'guest':
+      // Guests have no access - should be redirected to login
+      return false;
+
+    case 'limited':
+      // Limited users can access authenticated routes, but not create/edit
+      return matchesRoute(routeConfig.limited);
+
+    case 'create':
+      return matchesRoute([
+        ...routeConfig.limited,
+        ...routeConfig.createAccess,
+      ]);
+
+    case 'edit':
+      return matchesRoute([
+        ...routeConfig.limited,
+        ...routeConfig.createAccess,
+        ...routeConfig.editAccess,
+      ]);
+
+    default:
+      return false;
+  }
+}
+
 export async function middleware(request: NextRequest) {
   // Security: Ensure auth is never disabled in production
   if (DISABLE_AUTH && process.env.NODE_ENV === 'production') {
@@ -14,76 +74,25 @@ export async function middleware(request: NextRequest) {
 
   if (DISABLE_AUTH) {
     console.warn('WARNING: Authentication is disabled for development');
-    return NextResponse.next(); // Bypass authentication
+    return NextResponse.next();
   }
 
   const session = await auth();
   const pathname = request.nextUrl.pathname;
-  const hasLimitedAccess = session?.scopes?.includes('dataset:limited-access');
+  const permissionLevel = getUserPermissionLevel(session);
 
-  // Block limited access users from create/edit collection/dataset pages and APIs
-  if (
-    (hasLimitedAccess &&
-      (pathname.startsWith('/create-collection') ||
-        pathname.startsWith('/edit-collection') ||
-        pathname.startsWith('/create-dataset') ||
-        pathname.startsWith('/upload'))) ||
-    pathname.startsWith('/edit-dataset') ||
-    pathname.startsWith('/api/create-ingest') ||
-    pathname.startsWith('/api/upload-url')
-  ) {
+  // Check if the route is allowed for this permission level
+  if (!isRouteAllowed(pathname, permissionLevel)) {
     if (pathname.startsWith('/api/')) {
-      return new NextResponse('Forbidden', { status: 403 });
+      const status = permissionLevel === 'guest' ? 401 : 403;
+      return new NextResponse(
+        permissionLevel === 'guest' ? 'Unauthorized' : 'Forbidden',
+        { status }
+      );
     } else {
-      return NextResponse.redirect(new URL('/unauthorized', request.url));
-    }
-  }
-
-  const protectedRoutes = [
-    '/create-dataset',
-    '/api/list-ingests',
-    '/api/retrieve-ingest',
-    '/api/create-ingest',
-    '/api/upload-url',
-  ];
-
-  // Allow access all authenticated users
-  if (
-    (pathname.startsWith('/collections') ||
-      pathname.startsWith('/create-collection') ||
-      pathname.startsWith('/edit-collection') ||
-      pathname.startsWith('/datasets') ||
-      pathname.startsWith('/create-dataset') ||
-      pathname.startsWith('/edit-dataset') ||
-      pathname.startsWith('/upload') ||
-      pathname.startsWith('/cog-viewer')) &&
-    session
-  ) {
-    return NextResponse.next();
-  }
-
-  if (
-    pathname.startsWith('/edit-dataset') ||
-    pathname.startsWith('/edit-collection')
-  ) {
-    if (!session?.scopes?.includes('dataset:update')) {
-      if (pathname.startsWith('/api/')) {
-        return new NextResponse('Unauthorized', { status: 401 });
-      } else {
-        return NextResponse.redirect(new URL('/unauthorized', request.url));
-      }
-    }
-    return NextResponse.next();
-  }
-
-  // Authentication check for other protected routes
-  if (!session && protectedRoutes.some((path) => pathname.startsWith(path))) {
-    if (pathname.startsWith('/api/')) {
-      // For API routes, return a 401 Unauthorized response
-      return new NextResponse('Unauthorized', { status: 401 });
-    } else {
-      // For page routes, redirect to the login page
-      return NextResponse.redirect(new URL('/login', request.url));
+      const redirectUrl =
+        permissionLevel === 'guest' ? '/login' : '/unauthorized';
+      return NextResponse.redirect(new URL(redirectUrl, request.url));
     }
   }
 
