@@ -38,17 +38,6 @@ if (authDisabled) {
 
   const mockScopes = getMockScopes();
   console.log('Mock scopes:', mockScopes);
-
-  // Inject mock scopes from env if present
-  let mockScopes: string[] = [];
-  if (
-    process.env.NEXT_PUBLIC_MOCK_SCOPES &&
-    process.env.NEXT_PUBLIC_MOCK_SCOPES.trim() !== ''
-  ) {
-    mockScopes =
-      process.env.NEXT_PUBLIC_MOCK_SCOPES.split(/[ ,]+/).filter(Boolean);
-    console.log('🎭 Mock scopes:', mockScopes);
-  }
   const mockSession: Session & { scopes?: string[] } = {
     user: {
       name: 'Mock User',
