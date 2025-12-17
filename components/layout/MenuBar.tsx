@@ -17,6 +17,7 @@ import {
 const MenuBar = () => {
   const { data: session } = useSession();
   const hasEditIngestPermission = session?.scopes?.includes('dataset:update');
+  const hasLimitedAccess = session?.scopes?.includes('dataset:limited-access');
   const pathname = usePathname();
   const [activeLink, setActiveLink] = useState(pathname);
 
@@ -31,18 +32,25 @@ const MenuBar = () => {
       key: 'g1',
       type: 'group',
       children: [
-        {
-          key: '/create-collection',
-          label: <Link href="/create-collection">Create Collection</Link>,
-          icon: <PlusCircleOutlined />,
-        },
-        ...(hasEditIngestPermission
+        // Only render create/edit if NOT limited access
+        ...(!hasLimitedAccess
           ? [
               {
-                key: '/edit-collection',
-                label: <Link href="/edit-collection">Edit Collection</Link>,
-                icon: <EditOutlined />,
+                key: '/create-collection',
+                label: <Link href="/create-collection">Create Collection</Link>,
+                icon: <PlusCircleOutlined />,
               },
+              ...(hasEditIngestPermission
+                ? [
+                    {
+                      key: '/edit-collection',
+                      label: (
+                        <Link href="/edit-collection">Edit Collection</Link>
+                      ),
+                      icon: <EditOutlined />,
+                    },
+                  ]
+                : []),
             ]
           : []),
       ],
@@ -52,19 +60,23 @@ const MenuBar = () => {
       key: 'g2',
       type: 'group',
       children: [
-        {
-          key: '/create-dataset',
-          label: <Link href="/create-dataset">Create Dataset</Link>,
-          icon: <PlusCircleOutlined />,
-        },
-        // Conditionally add 'Edit Dataset'
-        ...(hasEditIngestPermission
+        // Only render create/edit if NOT limited access
+        ...(!hasLimitedAccess
           ? [
               {
-                key: '/edit-dataset',
-                label: <Link href="/edit-dataset">Edit Dataset</Link>,
-                icon: <EditOutlined />,
+                key: '/create-dataset',
+                label: <Link href="/create-dataset">Create Dataset</Link>,
+                icon: <PlusCircleOutlined />,
               },
+              ...(hasEditIngestPermission
+                ? [
+                    {
+                      key: '/edit-dataset',
+                      label: <Link href="/edit-dataset">Edit Dataset</Link>,
+                      icon: <EditOutlined />,
+                    },
+                  ]
+                : []),
             ]
           : []),
       ],
