@@ -39,14 +39,24 @@ if (authDisabled) {
   const mockScopes = getMockScopes();
   console.log('Mock scopes:', mockScopes);
 
-  const mockSession: Session = {
+  // Inject mock scopes from env if present
+  let mockScopes: string[] = [];
+  if (
+    process.env.NEXT_PUBLIC_MOCK_SCOPES &&
+    process.env.NEXT_PUBLIC_MOCK_SCOPES.trim() !== ''
+  ) {
+    mockScopes =
+      process.env.NEXT_PUBLIC_MOCK_SCOPES.split(/[ ,]+/).filter(Boolean);
+    console.log('🎭 Mock scopes:', mockScopes);
+  }
+  const mockSession: Session & { scopes?: string[] } = {
     user: {
       name: 'Mock User',
       email: 'test@example.com',
     },
     expires: '2099-12-31T23:59:59.999Z',
     tenants: mockTenants,
-    scopes: mockScopes,
+    ...(mockScopes.length > 0 ? { scopes: mockScopes } : {}),
   };
 
   // The `auth` function is used by middleware and server components
@@ -102,7 +112,7 @@ if (authDisabled) {
         const customToken = token as JWT;
         const customSession = session as Session & {
           tenants?: string[];
-          accessToken?: string;
+          scopes?: string[];
         };
 
         // Check if we should use mock tenants instead of real ones
@@ -118,11 +128,14 @@ if (authDisabled) {
           customSession.tenants = customToken.tenants;
         }
 
-        if (
-          customToken.accessToken &&
-          typeof customToken.accessToken === 'string'
-        ) {
-          customSession.accessToken = customToken.accessToken as string;
+        // Inject mock scopes from env if present
+        const mockScopes = process.env.NEXT_PUBLIC_MOCK_SCOPES;
+        if (mockScopes && mockScopes.trim() !== '') {
+          const scopes = mockScopes.split(/[ ,]+/).filter(Boolean);
+          console.log('🎭 Overriding real scopes with mock scopes:', scopes);
+          customSession.scopes = scopes;
+        } else if (customToken.scopes) {
+          customSession.scopes = customToken.scopes as string[];
         }
 
         return customSession;
