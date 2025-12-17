@@ -1,12 +1,88 @@
 'use client';
 import AppLayout from '@/components/layout/Layout';
-import { Card, Col, Row } from 'antd';
+import { Card, Col, Row, Tooltip, theme } from 'antd';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
-const IngestClient = function IngestClient() {
+const CollectionsClient = function CollectionsClient() {
+  const { useToken } = theme;
+  const { token } = useToken();
+  const { data: session } = useSession();
+  const hasLimitedAccess = session?.scopes?.includes('dataset:limited-access');
+  const hasEditIngestPermission = session?.scopes?.includes('dataset:update');
+
+  if (hasLimitedAccess) {
+    return (
+      <AppLayout>
+        <h2>Ingestion Requests</h2>
+        <Row gutter={16} style={{ marginTop: 16 }}>
+          <Col span={12}>
+            <Tooltip
+              title="Contact the VEDA Data Services team for access"
+              placement="topLeft"
+              color={token.colorBgElevated}
+              styles={{
+                body: {
+                  color: token.colorText,
+                  backgroundColor: token.colorBgElevated,
+                  border: `1px solid ${token.colorBorder}`,
+                },
+              }}
+            >
+              <Card
+                title="Create New Collection Ingest Request"
+                variant="outlined"
+                style={{
+                  opacity: 0.6,
+                  cursor: 'not-allowed',
+                  pointerEvents: 'auto',
+                  backgroundColor: token.colorBgContainerDisabled,
+                  borderColor: token.colorBorder,
+                  color: token.colorTextDisabled,
+                }}
+              >
+                Initiate a new Collection Ingestion
+              </Card>
+            </Tooltip>
+          </Col>
+          <Col span={12}>
+            <Tooltip
+              title="Contact the VEDA Data Services team for access"
+              placement="topLeft"
+              color={token.colorBgElevated}
+              styles={{
+                body: {
+                  color: token.colorText,
+                  backgroundColor: token.colorBgElevated,
+                  border: `1px solid ${token.colorBorder}`,
+                },
+              }}
+            >
+              <Card
+                title="Edit Collection Ingest Request"
+                variant="outlined"
+                style={{
+                  opacity: 0.6,
+                  cursor: 'not-allowed',
+                  pointerEvents: 'auto',
+                  backgroundColor: token.colorBgContainerDisabled,
+                  borderColor: token.colorBorder,
+                  color: token.colorTextDisabled,
+                }}
+              >
+                View and Edit existing dataset Ingest Requests
+              </Card>
+            </Tooltip>
+          </Col>
+        </Row>
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout>
-      <Row gutter={16}>
+      <h2>Ingestion Requests</h2>
+      <Row gutter={16} style={{ marginTop: 16 }}>
         <Col span={12}>
           <Link href="/create-collection">
             <Card
@@ -19,19 +95,49 @@ const IngestClient = function IngestClient() {
           </Link>
         </Col>
         <Col span={12}>
-          <Link href="/edit-collection">
-            <Card
-              title="Edit Collection Ingest Request"
-              variant="outlined"
-              hoverable={true}
+          {hasEditIngestPermission ? (
+            <Link href="/edit-collection">
+              <Card
+                title="Edit Collection Ingest Request"
+                variant="outlined"
+                hoverable={true}
+              >
+                View and Edit existing dataset Ingest Requests
+              </Card>
+            </Link>
+          ) : (
+            <Tooltip
+              title="Contact the Data Services Team if you need access to editing Ingest Requests"
+              placement="topLeft"
+              color={token.colorBgElevated}
+              styles={{
+                body: {
+                  color: token.colorText,
+                  backgroundColor: token.colorBgElevated,
+                  border: `1px solid ${token.colorBorder}`,
+                },
+              }}
             >
-              View and Edit existing dataset Ingest Requests
-            </Card>
-          </Link>
+              <Card
+                title="Edit Collection Ingest Request"
+                variant="outlined"
+                style={{
+                  opacity: 0.6,
+                  cursor: 'not-allowed',
+                  pointerEvents: 'auto',
+                  backgroundColor: token.colorBgContainerDisabled,
+                  borderColor: token.colorBorder,
+                  color: token.colorTextDisabled,
+                }}
+              >
+                View and Edit existing dataset Ingest Requests
+              </Card>
+            </Tooltip>
+          )}
         </Col>
       </Row>
     </AppLayout>
   );
 };
 
-export default IngestClient;
+export default CollectionsClient;
