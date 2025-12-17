@@ -1,0 +1,550 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7] [cursor=pointer]:
+      - img [ref=e8] [cursor=pointer]
+    - generic [ref=e11] [cursor=pointer]:
+      - button "Open issues overlay" [ref=e12] [cursor=pointer]:
+        - generic [ref=e13] [cursor=pointer]:
+          - generic [ref=e14] [cursor=pointer]: "4"
+          - generic [ref=e15] [cursor=pointer]: "5"
+        - generic [ref=e16] [cursor=pointer]:
+          - text: Issue
+          - generic [ref=e17] [cursor=pointer]: s
+      - button "Collapse issues badge" [ref=e18] [cursor=pointer]:
+        - img [ref=e19] [cursor=pointer]
+  - alert [ref=e21]
+  - generic [ref=e22]:
+    - complementary [ref=e23]:
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e26]:
+            - img "VEDA Ingest UI Logo" [ref=e27]
+            - generic [ref=e29]: VEDA Ingest UI
+          - generic [ref=e30]:
+            - img "alert" [ref=e31]:
+              - img [ref=e32]
+            - generic [ref=e35]: Mocking Auth
+        - menu [ref=e36]:
+          - menuitem "home Home" [ref=e37] [cursor=pointer]:
+            - img "home" [ref=e38] [cursor=pointer]:
+              - img [ref=e39] [cursor=pointer]
+            - link "Home" [ref=e42] [cursor=pointer]:
+              - /url: /
+          - link "Collections" [ref=e43] [cursor=pointer]:
+            - /url: /collections
+          - group [ref=e44]:
+            - menuitem "plus-circle Create Collection" [ref=e45] [cursor=pointer]:
+              - img "plus-circle" [ref=e46] [cursor=pointer]:
+                - img [ref=e47] [cursor=pointer]
+              - link "Create Collection" [ref=e51] [cursor=pointer]:
+                - /url: /create-collection
+            - menuitem "edit Edit Collection" [ref=e52] [cursor=pointer]:
+              - img "edit" [ref=e53] [cursor=pointer]:
+                - img [ref=e54] [cursor=pointer]
+              - link "Edit Collection" [ref=e57] [cursor=pointer]:
+                - /url: /edit-collection
+          - link "Datasets" [ref=e58] [cursor=pointer]:
+            - /url: /datasets
+          - group [ref=e59]:
+            - menuitem "plus-circle Create Dataset" [ref=e60] [cursor=pointer]:
+              - img "plus-circle" [ref=e61] [cursor=pointer]:
+                - img [ref=e62] [cursor=pointer]
+              - link "Create Dataset" [ref=e66] [cursor=pointer]:
+                - /url: /create-dataset
+            - menuitem "edit Edit Dataset" [ref=e67] [cursor=pointer]:
+              - img "edit" [ref=e68] [cursor=pointer]:
+                - img [ref=e69] [cursor=pointer]
+              - link "Edit Dataset" [ref=e72] [cursor=pointer]:
+                - /url: /edit-dataset
+          - text: Tools
+          - group [ref=e73]:
+            - menuitem "global COG Viewer" [ref=e74] [cursor=pointer]:
+              - img "global" [ref=e75] [cursor=pointer]:
+                - img [ref=e76] [cursor=pointer]
+              - link "COG Viewer" [ref=e79] [cursor=pointer]:
+                - /url: /cog-viewer
+            - menuitem "cloud-upload Thumbnail Uploader" [ref=e80] [cursor=pointer]:
+              - img "cloud-upload" [ref=e81] [cursor=pointer]:
+                - img [ref=e82] [cursor=pointer]
+              - link "Thumbnail Uploader" [ref=e86] [cursor=pointer]:
+                - /url: /upload
+        - button "logout Sign out" [ref=e87] [cursor=pointer]:
+          - img "logout" [ref=e89] [cursor=pointer]:
+            - img [ref=e90] [cursor=pointer]
+          - generic [ref=e92] [cursor=pointer]: Sign out
+      - img "left" [ref=e94] [cursor=pointer]:
+        - img [ref=e95] [cursor=pointer]
+    - main [ref=e98]:
+      - generic [ref=e101]:
+        - heading "Create New Dataset" [level=2] [ref=e102]
+        - generic [ref=e103]:
+          - tablist [ref=e104]:
+            - generic [ref=e106]:
+              - tab "Form" [selected] [ref=e108] [cursor=pointer]
+              - tab "Manual JSON Edit" [ref=e110] [cursor=pointer]
+          - tabpanel "Form" [ref=e113]:
+            - generic [ref=e114]:
+              - group [ref=e121]:
+                - generic [ref=e122]:
+                  - generic [ref=e129]:
+                    - generic [ref=e132] [cursor=pointer]:
+                      - combobox "Tenants" [ref=e136] [cursor=pointer]
+                      - generic:
+                        - img:
+                          - img
+                    - paragraph [ref=e140]: Optional tenant allowed to access this item.
+                  - generic [ref=e144]:
+                    - generic "Collection" [ref=e146]: "* Collection"
+                    - textbox "* Collection" [ref=e151]
+                  - generic [ref=e155]:
+                    - generic "Title" [ref=e157]: "* Title"
+                    - textbox "* Title" [ref=e162]
+                  - generic [ref=e166]:
+                    - generic "Data Type" [ref=e168]: "* Data Type"
+                    - textbox "* Data Type" [ref=e173]: cog
+                  - textbox "STAC Version" [ref=e184]: 1.0.0
+                  - generic [ref=e188]:
+                    - generic "License" [ref=e190]: "* License"
+                    - textbox "* License" [ref=e195]: CC0-1.0
+                  - generic [ref=e203] [cursor=pointer]:
+                    - checkbox "Is Periodic?" [ref=e205] [cursor=pointer]
+                    - generic [ref=e207] [cursor=pointer]: Is Periodic?
+                  - generic [ref=e217] [cursor=pointer]:
+                    - combobox "Time Density" [ref=e221] [cursor=pointer]
+                    - generic:
+                      - img:
+                        - img
+                  - textbox "Time Interval" [ref=e232]
+                  - generic [ref=e236]:
+                    - generic "Description" [ref=e238]: "* Description"
+                    - generic [ref=e239]:
+                      - textbox "* Description" [ref=e243]
+                      - generic [ref=e246]: This describes the dataset.
+                  - group [ref=e254]:
+                    - generic [ref=e255]:
+                      - generic "Spatial Extent" [ref=e257]: "* Spatial Extent"
+                      - generic [ref=e268]:
+                        - generic:
+                          - button "Increase Value" [ref=e269] [cursor=pointer]:
+                            - img "up" [ref=e270] [cursor=pointer]:
+                              - img [ref=e271] [cursor=pointer]
+                          - button "Decrease Value" [ref=e273] [cursor=pointer]:
+                            - img "down" [ref=e274] [cursor=pointer]:
+                              - img [ref=e275] [cursor=pointer]
+                        - spinbutton "xmin" [ref=e278]: "-180"
+                      - generic [ref=e289]:
+                        - generic:
+                          - button "Increase Value" [ref=e290] [cursor=pointer]:
+                            - img "up" [ref=e291] [cursor=pointer]:
+                              - img [ref=e292] [cursor=pointer]
+                          - button "Decrease Value" [ref=e294] [cursor=pointer]:
+                            - img "down" [ref=e295] [cursor=pointer]:
+                              - img [ref=e296] [cursor=pointer]
+                        - spinbutton "ymin" [ref=e299]: "-90"
+                      - generic [ref=e310]:
+                        - generic:
+                          - button "Increase Value" [ref=e311] [cursor=pointer]:
+                            - img "up" [ref=e312] [cursor=pointer]:
+                              - img [ref=e313] [cursor=pointer]
+                          - button "Decrease Value" [ref=e315] [cursor=pointer]:
+                            - img "down" [ref=e316] [cursor=pointer]:
+                              - img [ref=e317] [cursor=pointer]
+                        - spinbutton "xmax" [ref=e320]: "180"
+                      - generic [ref=e331]:
+                        - generic:
+                          - button "Increase Value" [ref=e332] [cursor=pointer]:
+                            - img "up" [ref=e333] [cursor=pointer]:
+                              - img [ref=e334] [cursor=pointer]
+                          - button "Decrease Value" [ref=e336] [cursor=pointer]:
+                            - img "down" [ref=e337] [cursor=pointer]:
+                              - img [ref=e338] [cursor=pointer]
+                        - spinbutton "ymax" [ref=e341]: "90"
+                  - group [ref=e349]:
+                    - generic [ref=e350]:
+                      - generic "Temporal Extent" [ref=e352]: "* Temporal Extent"
+                      - textbox "Start Date" [ref=e363]: 2025-12-17T00:00:00.000Z
+                      - textbox "End Date" [ref=e374]: 2025-12-17T23:59:59.000Z
+                  - group [ref=e382]:
+                    - generic [ref=e383]:
+                      - generic "Discovery Items" [ref=e385]: "* Discovery Items"
+                      - generic [ref=e387]:
+                        - generic [ref=e394]:
+                          - generic [ref=e395]:
+                            - generic [ref=e405] [cursor=pointer]:
+                              - combobox "Discovery" [ref=e409] [cursor=pointer]
+                              - generic:
+                                - img:
+                                  - img
+                            - generic [ref=e413]:
+                              - generic "Prefix" [ref=e415]: "* Prefix"
+                              - textbox "* Prefix" [ref=e420]
+                            - generic [ref=e424]:
+                              - generic "Bucket" [ref=e426]: "* Bucket"
+                              - textbox "* Bucket" [ref=e431]
+                          - textbox "Filename Regex" [ref=e443]: "[\\s\\S]*"
+                          - button "collapsed More Options" [ref=e446] [cursor=pointer]:
+                            - img "collapsed" [ref=e448] [cursor=pointer]:
+                              - img [ref=e449] [cursor=pointer]
+                            - generic [ref=e451] [cursor=pointer]: More Options
+                        - button "delete" [ref=e454] [cursor=pointer]:
+                          - img "delete" [ref=e456] [cursor=pointer]:
+                            - img [ref=e457] [cursor=pointer]
+                      - button "plus-circle" [ref=e462] [cursor=pointer]:
+                        - img "plus-circle" [ref=e464] [cursor=pointer]:
+                          - img [ref=e465] [cursor=pointer]
+                  - group [ref=e475]:
+                    - generic [ref=e476]:
+                      - generic "Sample Files" [ref=e478]: "* Sample Files"
+                      - generic [ref=e480]:
+                        - generic [ref=e484]:
+                          - generic "Sample Files-1" [ref=e486]: "* Sample Files-1"
+                          - generic [ref=e491]:
+                            - textbox "* Sample Files-1" [ref=e492]: s3://test.com
+                            - button "Validate" [ref=e493] [cursor=pointer]:
+                              - generic [ref=e494] [cursor=pointer]: Validate
+                        - button "delete" [ref=e497] [cursor=pointer]:
+                          - img "delete" [ref=e499] [cursor=pointer]:
+                            - img [ref=e500] [cursor=pointer]
+                      - button "plus-circle" [ref=e505] [cursor=pointer]:
+                        - img "plus-circle" [ref=e507] [cursor=pointer]:
+                          - img [ref=e508] [cursor=pointer]
+                  - group [ref=e518]:
+                    - generic [ref=e519]:
+                      - generic "Renders" [ref=e521]: "* Renders"
+                      - generic [ref=e523]:
+                        - generic [ref=e526]:
+                          - generic "Dashboard" [ref=e528]: "* Dashboard"
+                          - generic [ref=e532]:
+                            - textbox [ref=e533]: "{ \"resampling\": \"nearest\", \"bidx\": [ 1 ], \"colormap_name\": \"rdbu\", \"assets\": [ \"cog_default\" ], \"rescale\": [ [ -1, 1 ] ], \"color_formula\": \"test123\", \"nodata\": 255, \"title\": \"VEDA Dashboard Render Parameters\" }"
+                            - code [ref=e536]:
+                              - generic [ref=e538]: "{"
+                              - generic [ref=e539]:
+                                - generic [ref=e540]: "\"resampling\""
+                                - generic [ref=e541]: ":"
+                                - generic [ref=e542]: "\"nearest\""
+                                - generic [ref=e543]: ","
+                              - generic [ref=e544]:
+                                - generic [ref=e545]: "\"bidx\""
+                                - generic [ref=e546]: ":"
+                                - generic [ref=e547]: "["
+                              - generic [ref=e549]: "1"
+                              - generic [ref=e550]:
+                                - generic [ref=e551]: "]"
+                                - generic [ref=e552]: ","
+                              - generic [ref=e553]:
+                                - generic [ref=e554]: "\"colormap_name\""
+                                - generic [ref=e555]: ":"
+                                - generic [ref=e556]: "\"rdbu\""
+                                - generic [ref=e557]: ","
+                              - generic [ref=e558]:
+                                - generic [ref=e559]: "\"assets\""
+                                - generic [ref=e560]: ":"
+                                - generic [ref=e561]: "["
+                              - generic [ref=e563]: "\"cog_default\""
+                              - generic [ref=e564]:
+                                - generic [ref=e565]: "]"
+                                - generic [ref=e566]: ","
+                              - generic [ref=e567]:
+                                - generic [ref=e568]: "\"rescale\""
+                                - generic [ref=e569]: ":"
+                                - generic [ref=e570]: "["
+                              - generic [ref=e572]: "["
+                              - generic [ref=e573]:
+                                - generic [ref=e574]: "-1"
+                                - generic [ref=e575]: ","
+                              - generic [ref=e577]: "1"
+                              - generic [ref=e579]: "]"
+                              - generic [ref=e580]:
+                                - generic [ref=e581]: "]"
+                                - generic [ref=e582]: ","
+                              - generic [ref=e583]:
+                                - generic [ref=e584]: "\"color_formula\""
+                                - generic [ref=e585]: ":"
+                                - generic [ref=e586]: "\"test123\""
+                                - generic [ref=e587]: ","
+                              - generic [ref=e588]:
+                                - generic [ref=e589]: "\"nodata\""
+                                - generic [ref=e590]: ":"
+                                - generic [ref=e591]: "255"
+                                - generic [ref=e592]: ","
+                              - generic [ref=e593]:
+                                - generic [ref=e594]: "\"title\""
+                                - generic [ref=e595]: ":"
+                                - generic [ref=e596]: "\"VEDA Dashboard Render Parameters\""
+                              - generic [ref=e598]: "}"
+                        - button "import Generate Renders Object From Sample File" [ref=e599] [cursor=pointer]:
+                          - img "import" [ref=e601] [cursor=pointer]:
+                            - img [ref=e602] [cursor=pointer]
+                          - generic [ref=e604] [cursor=pointer]: Generate Renders Object From Sample File
+                  - group [ref=e612]:
+                    - generic [ref=e613]:
+                      - generic [ref=e616]:
+                        - generic [ref=e617]:
+                          - generic [ref=e621]:
+                            - generic "STAC Extensions-1" [ref=e623]: "* STAC Extensions-1"
+                            - textbox "* STAC Extensions-1" [ref=e628]: https://stac-extensions.github.io/render/v1.0.0/schema.json
+                          - generic [ref=e630]:
+                            - button "arrow-up" [disabled] [ref=e631]:
+                              - generic:
+                                - img "arrow-up":
+                                  - img
+                            - button "arrow-down" [ref=e632] [cursor=pointer]:
+                              - img "arrow-down" [ref=e634] [cursor=pointer]:
+                                - img [ref=e635] [cursor=pointer]
+                            - button "delete" [ref=e637] [cursor=pointer]:
+                              - img "delete" [ref=e639] [cursor=pointer]:
+                                - img [ref=e640] [cursor=pointer]
+                        - generic [ref=e642]:
+                          - generic [ref=e646]:
+                            - generic "STAC Extensions-2" [ref=e648]: "* STAC Extensions-2"
+                            - textbox "* STAC Extensions-2" [ref=e653]: https://stac-extensions.github.io/item-assets/v1.0.0/schema.json
+                          - generic [ref=e655]:
+                            - button "arrow-up" [ref=e656] [cursor=pointer]:
+                              - img "arrow-up" [ref=e658] [cursor=pointer]:
+                                - img [ref=e659] [cursor=pointer]
+                            - button "arrow-down" [disabled] [ref=e661]:
+                              - generic:
+                                - img "arrow-down":
+                                  - img
+                            - button "delete" [ref=e662] [cursor=pointer]:
+                              - img "delete" [ref=e664] [cursor=pointer]:
+                                - img [ref=e665] [cursor=pointer]
+                      - button "plus-circle" [ref=e670] [cursor=pointer]:
+                        - img "plus-circle" [ref=e672] [cursor=pointer]:
+                          - img [ref=e673] [cursor=pointer]
+                  - group [ref=e683]:
+                    - button "plus-circle" [ref=e691] [cursor=pointer]:
+                      - img "plus-circle" [ref=e693] [cursor=pointer]:
+                        - img [ref=e694] [cursor=pointer]
+                  - group [ref=e704]:
+                    - group [ref=e715]:
+                      - generic [ref=e716]:
+                        - textbox "title" [ref=e729]: Default COG Layer
+                        - textbox "type" [ref=e740]: image/tiff; application=geotiff; profile=cloud-optimized
+                        - textbox "description" [ref=e751]: Cloud optimized default layer to display on map
+                        - group [ref=e759]:
+                          - generic [ref=e760]:
+                            - generic [ref=e763]:
+                              - generic [ref=e764]:
+                                - generic [ref=e768]:
+                                  - generic "roles-1" [ref=e770]: "* roles-1"
+                                  - textbox "* roles-1" [ref=e775]: data
+                                - generic [ref=e777]:
+                                  - button "arrow-up" [disabled] [ref=e778]:
+                                    - generic:
+                                      - img "arrow-up":
+                                        - img
+                                  - button "arrow-down" [ref=e779] [cursor=pointer]:
+                                    - img "arrow-down" [ref=e781] [cursor=pointer]:
+                                      - img [ref=e782] [cursor=pointer]
+                                  - button "delete" [ref=e784] [cursor=pointer]:
+                                    - img "delete" [ref=e786] [cursor=pointer]:
+                                      - img [ref=e787] [cursor=pointer]
+                              - generic [ref=e789]:
+                                - generic [ref=e793]:
+                                  - generic "roles-2" [ref=e795]: "* roles-2"
+                                  - textbox "* roles-2" [ref=e800]: layer
+                                - generic [ref=e802]:
+                                  - button "arrow-up" [ref=e803] [cursor=pointer]:
+                                    - img "arrow-up" [ref=e805] [cursor=pointer]:
+                                      - img [ref=e806] [cursor=pointer]
+                                  - button "arrow-down" [disabled] [ref=e808]:
+                                    - generic:
+                                      - img "arrow-down":
+                                        - img
+                                  - button "delete" [ref=e809] [cursor=pointer]:
+                                    - img "delete" [ref=e811] [cursor=pointer]:
+                                      - img [ref=e812] [cursor=pointer]
+                            - button "plus-circle" [ref=e817] [cursor=pointer]:
+                              - img "plus-circle" [ref=e819] [cursor=pointer]:
+                                - img [ref=e820] [cursor=pointer]
+                  - group [ref=e830]:
+                    - generic [ref=e831]:
+                      - generic "Providers" [ref=e833]: "* Providers"
+                      - generic [ref=e835]:
+                        - group [ref=e843]:
+                          - generic [ref=e844]:
+                            - generic "Providers-1" [ref=e846]: "* Providers-1"
+                            - generic [ref=e850]:
+                              - generic "Organization name" [ref=e852]: "* Organization name"
+                              - textbox "* Organization name" [ref=e857]: NASA VEDA
+                            - textbox "Organization description" [ref=e868]
+                            - group [ref=e876]:
+                              - generic [ref=e877]:
+                                - generic [ref=e881]:
+                                  - generic [ref=e885]:
+                                    - generic "Organization roles-1" [ref=e887]: "* Organization roles-1"
+                                    - generic [ref=e891] [cursor=pointer]:
+                                      - combobox "* Organization roles-1" [ref=e895] [cursor=pointer]
+                                      - generic:
+                                        - img:
+                                          - img
+                                  - button "delete" [ref=e899] [cursor=pointer]:
+                                    - img "delete" [ref=e901] [cursor=pointer]:
+                                      - img [ref=e902] [cursor=pointer]
+                                - button "plus-circle" [ref=e907] [cursor=pointer]:
+                                  - img "plus-circle" [ref=e909] [cursor=pointer]:
+                                    - img [ref=e910] [cursor=pointer]
+                            - textbox "Organization homepage" [ref=e923]: https://www.earthdata.nasa.gov/dashboard/
+                        - button "delete" [ref=e926] [cursor=pointer]:
+                          - img "delete" [ref=e928] [cursor=pointer]:
+                            - img [ref=e929] [cursor=pointer]
+                      - button "plus-circle" [ref=e934] [cursor=pointer]:
+                        - img "plus-circle" [ref=e936] [cursor=pointer]:
+                          - img [ref=e937] [cursor=pointer]
+                  - group [ref=e947]:
+                    - group [ref=e958]:
+                      - generic [ref=e959]:
+                        - generic [ref=e965]:
+                          - generic "title" [ref=e967]: "* title"
+                          - textbox "* title" [ref=e972]: Thumbnail
+                        - generic [ref=e974]:
+                          - generic [ref=e977]:
+                            - generic "href" [ref=e979]: "* href"
+                            - textbox "* href" [ref=e984]
+                          - button "cloud-upload Upload Thumbnail" [ref=e985] [cursor=pointer]:
+                            - img "cloud-upload" [ref=e987] [cursor=pointer]:
+                              - img [ref=e988] [cursor=pointer]
+                            - generic [ref=e991] [cursor=pointer]: Upload Thumbnail
+                        - generic [ref=e995]:
+                          - generic "type" [ref=e997]: "* type"
+                          - textbox "* type" [ref=e1002]: image/jpeg
+                        - generic [ref=e1006]:
+                          - generic "description" [ref=e1008]: "* description"
+                          - generic [ref=e1009]:
+                            - textbox "* description" [ref=e1013]
+                            - generic [ref=e1016]: Thumbnail description should also include source attribution.
+                        - group [ref=e1024]:
+                          - generic [ref=e1025]:
+                            - generic "roles" [ref=e1027]: "* roles"
+                            - generic [ref=e1029]:
+                              - generic [ref=e1033]:
+                                - generic "roles-1" [ref=e1035]: "* roles-1"
+                                - textbox "* roles-1" [ref=e1040]: thumbnail
+                              - button "delete" [ref=e1043] [cursor=pointer]:
+                                - img "delete" [ref=e1045] [cursor=pointer]:
+                                  - img [ref=e1046] [cursor=pointer]
+                            - button "plus-circle" [ref=e1051] [cursor=pointer]:
+                              - img "plus-circle" [ref=e1053] [cursor=pointer]:
+                                - img [ref=e1054] [cursor=pointer]
+              - button "Submit" [ref=e1057] [cursor=pointer]:
+                - generic [ref=e1058] [cursor=pointer]: Submit
+  - dialog "COG Rendering Options" [ref=e1060]:
+    - generic [ref=e1062]:
+      - button "Close" [ref=e1063] [cursor=pointer]:
+        - img "close" [ref=e1064] [cursor=pointer]:
+          - img [ref=e1065] [cursor=pointer]
+      - generic [ref=e1067]: COG Rendering Options
+    - generic [ref=e1068]:
+      - generic [ref=e1069]:
+        - generic [ref=e1070]:
+          - generic [ref=e1079] [cursor=pointer]:
+            - combobox "Band (R)" [ref=e1083] [cursor=pointer]
+            - generic:
+              - img:
+                - img
+          - generic [ref=e1093] [cursor=pointer]:
+            - combobox "Band (G)" [ref=e1097] [cursor=pointer]
+            - generic:
+              - img:
+                - img
+          - generic [ref=e1107] [cursor=pointer]:
+            - combobox "Band (B)" [ref=e1111] [cursor=pointer]
+            - generic:
+              - img:
+                - img
+        - generic [ref=e1122]:
+          - generic [ref=e1125]: Band 1
+          - generic [ref=e1126]:
+            - generic [ref=e1127]:
+              - generic:
+                - button "Increase Value" [ref=e1128] [cursor=pointer]:
+                  - img "up" [ref=e1129] [cursor=pointer]:
+                    - img [ref=e1130] [cursor=pointer]
+                - button "Decrease Value" [ref=e1132] [cursor=pointer]:
+                  - img "down" [ref=e1133] [cursor=pointer]:
+                    - img [ref=e1134] [cursor=pointer]
+              - spinbutton "Min" [ref=e1137]: "-1"
+            - generic [ref=e1138]:
+              - generic:
+                - button "Increase Value" [ref=e1139] [cursor=pointer]:
+                  - img "up" [ref=e1140] [cursor=pointer]:
+                    - img [ref=e1141] [cursor=pointer]
+                - button "Decrease Value" [ref=e1143] [cursor=pointer]:
+                  - img "down" [ref=e1144] [cursor=pointer]:
+                    - img [ref=e1145] [cursor=pointer]
+              - spinbutton "Max" [ref=e1148]: "1"
+        - generic [ref=e1149]:
+          - generic [ref=e1158] [cursor=pointer]:
+            - combobox "Colormap" [ref=e1162]
+            - generic:
+              - img:
+                - img
+          - textbox "Color Formula" [ref=e1172]: test123
+        - generic [ref=e1173]:
+          - generic [ref=e1182] [cursor=pointer]:
+            - combobox "Resampling" [ref=e1186]
+            - generic:
+              - img:
+                - img
+            - img [ref=e1189] [cursor=pointer]:
+              - img [ref=e1190] [cursor=pointer]
+          - generic [ref=e1200]:
+            - generic:
+              - button "Increase Value" [ref=e1201] [cursor=pointer]:
+                - img "up" [ref=e1202] [cursor=pointer]:
+                  - img [ref=e1203] [cursor=pointer]
+              - button "Decrease Value" [ref=e1205] [cursor=pointer]:
+                - img "down" [ref=e1206] [cursor=pointer]:
+                  - img [ref=e1207] [cursor=pointer]
+            - spinbutton "Nodata Value" [ref=e1210]: "255"
+        - generic [ref=e1211]:
+          - button "Update Tile Layer" [disabled] [ref=e1213]:
+            - generic: Update Tile Layer
+          - button "View Rendering Options" [active] [ref=e1215] [cursor=pointer]:
+            - generic [ref=e1216] [cursor=pointer]: View Rendering Options
+        - separator [ref=e1217]
+      - generic [ref=e1219]:
+        - generic:
+          - generic [ref=e1220]:
+            - button "Zoom in" [ref=e1221] [cursor=pointer]:
+              - generic [ref=e1222] [cursor=pointer]: +
+            - button "Zoom out" [ref=e1223] [cursor=pointer]:
+              - generic [ref=e1224] [cursor=pointer]: −
+          - generic [ref=e1225]:
+            - link "Leaflet" [ref=e1226] [cursor=pointer]:
+              - /url: https://leafletjs.com
+              - img [ref=e1227] [cursor=pointer]
+              - text: Leaflet
+            - generic [ref=e1231]: "|"
+            - text: © OpenStreetMap contributors, © Your COG Data
+    - generic [ref=e1233]:
+      - button "Cancel" [ref=e1234] [cursor=pointer]:
+        - generic [ref=e1235] [cursor=pointer]: Cancel
+      - button "Accept Render Options" [ref=e1236] [cursor=pointer]:
+        - generic [ref=e1237] [cursor=pointer]: Accept Render Options
+  - generic:
+    - generic [ref=e1239]:
+      - img "check-circle" [ref=e1240]:
+        - img [ref=e1241]
+      - generic [ref=e1243]: COG metadata loaded successfully!
+    - generic [ref=e1245]:
+      - img "check-circle" [ref=e1246]:
+        - img [ref=e1247]
+      - generic [ref=e1249]: COG tile layer loaded successfully!
+  - generic [ref=e1250]:
+    - dialog "Selected COG Rendering Options":
+      - generic [ref=e1251]:
+        - button "Close" [ref=e1252] [cursor=pointer]:
+          - img "close" [ref=e1254] [cursor=pointer]:
+            - img [ref=e1255] [cursor=pointer]
+        - generic [ref=e1258]: Selected COG Rendering Options
+        - generic [ref=e1259]:
+          - button "Copy" [ref=e1260] [cursor=pointer]:
+            - generic [ref=e1261] [cursor=pointer]: Copy
+          - button "Cancel" [ref=e1262] [cursor=pointer]:
+            - generic [ref=e1263] [cursor=pointer]: Cancel
+```
