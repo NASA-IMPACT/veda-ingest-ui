@@ -45,14 +45,9 @@ const RjsfCodeEditorWidget: FC<WidgetProps> = ({
   }, [value]);
 
   const handleOnChange = (newValue: string) => {
-    try {
-      // Try to parse as JSON, if successful pass as object, otherwise pass as string
-      const parsedValue = JSON.parse(newValue);
-      onChange(parsedValue);
-    } catch {
-      // If parsing fails, pass the raw string (user might still be typing)
-      onChange(newValue);
-    }
+    // Always pass the raw string value to the form state.
+    // RJSF will handle validation against the schema.
+    onChange(newValue);
   };
 
   return (

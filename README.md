@@ -198,7 +198,7 @@ cp .env.example .env
 
 ### Github Access
 
-A Github access to the veda-data repo is handled by installing the veda-ingest-api app in the veda-data repo's settings and saving the following values as environment variables:
+Github access to the veda-data repo is handled by installing the veda-ingest-api app in the veda-data repo's settings and saving the following values as environment variables:
 
 ```
 INSTALLATION_ID
@@ -287,4 +287,4 @@ To allow the veda-ingest-ui to open PRs in a repo, a Github app must be installe
 2. Ensure the app has `Read and Write` permissions to `Contents` and `Pull Requests`.
 3. Create and save a Private Key to place in your env variables.
 4. Copy the `App ID` and `Client ID` from the new github app's overview.
-5. Copy the Installation ID from the repo's list of Installed GitHub Apps. The Installation ID is found in the URL for that application. For example, `https://github.com/settings/installations/[Installation ID]`.
+5. Copy the Installation ID from the repo's list of Installed GitHub Apps. The Installation ID is found in the URL for that application. For example, `https://github.com/settings/installations/[Installation ID]` or `https://github.com/organizations/[ORGANIZATION]/settings/installations/[Installation ID]`

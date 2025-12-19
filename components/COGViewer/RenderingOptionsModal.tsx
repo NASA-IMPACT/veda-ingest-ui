@@ -72,7 +72,7 @@ const RenderingOptionsModal: React.FC<RenderingOptionsModalProps> = ({
 
   return (
     <Modal
-      title="COG Rendering Options"
+      title="Selected COG Rendering Options"
       open={visible}
       onCancel={handleClose}
       footer={
