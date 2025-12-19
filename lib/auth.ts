@@ -5,7 +5,6 @@ import { NextResponse } from 'next/server';
 
 const authDisabled = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
-// Helper function to get mock tenants from environment variable
 const getMockTenants = (): string[] => {
   const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
   if (mockTenants && mockTenants.trim() !== '') {
@@ -14,29 +13,31 @@ const getMockTenants = (): string[] => {
       .map((tenant) => tenant.trim())
       .filter(Boolean);
   }
-  // Default fallback tenants if none specified
   return [''];
+};
+
+const getMockScopes = (): string[] => {
+  const mockScopes = process.env.NEXT_PUBLIC_MOCK_SCOPES;
+  if (mockScopes && mockScopes.trim() !== '') {
+    return mockScopes
+      .split(',')
+      .map((scope) => scope.trim())
+      .filter(Boolean);
+  }
+  return [];
 };
 
 let auth: any, handlers: any, signIn: any, signOut: any;
 
 if (authDisabled) {
-  // --- MOCKED AUTH FOR TESTING --- 🎭
-  console.log('🎭 Auth is disabled. Using mock session.');
+  // --- MOCKED AUTH FOR TESTING ---
+  console.log('Auth is disabled. Using mock session.');
 
   const mockTenants = getMockTenants();
-  console.log('🎭 Mock tenants:', mockTenants);
+  console.log('🎭Mock tenants:', mockTenants);
 
-  // Inject mock scopes from env if present
-  let mockScopes: string[] = [];
-  if (
-    process.env.NEXT_PUBLIC_MOCK_SCOPES &&
-    process.env.NEXT_PUBLIC_MOCK_SCOPES.trim() !== ''
-  ) {
-    mockScopes =
-      process.env.NEXT_PUBLIC_MOCK_SCOPES.split(/[ ,]+/).filter(Boolean);
-    console.log('🎭 Mock scopes:', mockScopes);
-  }
+  const mockScopes = getMockScopes();
+  console.log('Mock scopes:', mockScopes);
   const mockSession: Session & { scopes?: string[] } = {
     user: {
       name: 'Mock User',

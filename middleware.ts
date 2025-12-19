@@ -113,5 +113,6 @@ export const config = {
     '/api/retrieve-ingest',
     '/api/create-ingest',
     '/api/upload-url',
+    '/api/allowed-tenants',
   ],
 };
