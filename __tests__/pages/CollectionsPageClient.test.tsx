@@ -80,87 +80,133 @@ describe('CollectionsClient Component', () => {
     ).toBeInTheDocument();
   });
 
-  it('always shows the create collection card as clickable', () => {
-    const mockSession = createMockSession();
-    render(<CollectionsClient />, {
-      wrapper: ({ children }) => (
-        <AllProviders session={mockSession}>{children}</AllProviders>
-      ),
-    });
-
-    const createCard = screen.getByText('Create New Collection Ingest Request');
-    expect(createCard).toBeInTheDocument();
-    expect(createCard.closest('a')).toHaveAttribute(
-      'href',
-      '/create-collection'
-    );
-  });
-
-  describe('with dataset:update permission', () => {
-    it('shows edit collection ingest card as clickable link', () => {
-      const mockSession = createMockSession(['dataset:update']);
+  describe('with dataset:limited-access scope', () => {
+    it('shows all cards as disabled with tooltips', () => {
+      const mockSession = createMockSession(['dataset:limited-access']);
       render(<CollectionsClient />, {
         wrapper: ({ children }) => (
           <AllProviders session={mockSession}>{children}</AllProviders>
         ),
       });
 
+      // All cards should be present but not clickable
+      const createCard = screen.getByText(
+        'Create New Collection Ingest Request'
+      );
       const editCard = screen.getByText('Edit Collection Ingest Request');
-      expect(editCard).toBeInTheDocument();
-      expect(editCard.closest('a')).toHaveAttribute('href', '/edit-collection');
-    });
-
-    it('shows edit existing collection card as disabled', () => {
-      const mockSession = createMockSession(['dataset:update']);
-      render(<CollectionsClient />, {
-        wrapper: ({ children }) => (
-          <AllProviders session={mockSession}>{children}</AllProviders>
-        ),
-      });
-
       const editExistingCard = screen.getByText('Edit Existing Collection');
-      expect(editExistingCard).toBeInTheDocument();
-      expect(editExistingCard.closest('a')).toBeNull();
-      expect(editExistingCard.closest('.ant-card')).toHaveStyle({
-        opacity: '0.6',
-      });
-    });
-  });
 
-  describe('without dataset:update permission', () => {
-    it('shows edit collection ingest card as disabled with tooltip', () => {
-      const mockSession = createMockSession();
-      render(<CollectionsClient />, {
-        wrapper: ({ children }) => (
-          <AllProviders session={mockSession}>{children}</AllProviders>
-        ),
-      });
-
-      const editCard = screen.getByText('Edit Collection Ingest Request');
+      expect(createCard).toBeInTheDocument();
       expect(editCard).toBeInTheDocument();
+      expect(editExistingCard).toBeInTheDocument();
+
+      // Cards should not be wrapped in links
+      expect(createCard.closest('a')).toBeNull();
       expect(editCard.closest('a')).toBeNull();
+      expect(editExistingCard.closest('a')).toBeNull();
+
+      // Cards should have disabled styling
+      expect(createCard.closest('.ant-card')).toHaveStyle({ opacity: '0.6' });
       expect(editCard.closest('.ant-card')).toHaveStyle({ opacity: '0.6' });
+      expect(editExistingCard.closest('.ant-card')).toHaveStyle({
+        opacity: '0.6',
+      });
     });
 
-    it('shows edit existing collection card as disabled with tooltip', () => {
-      const mockSession = createMockSession();
+    it('shows cards with tooltip configuration for limited access users', () => {
+      const mockSession = createMockSession(['dataset:limited-access']);
       render(<CollectionsClient />, {
         wrapper: ({ children }) => (
           <AllProviders session={mockSession}>{children}</AllProviders>
         ),
       });
 
+      // Check that all cards exist and have disabled styling
+      const createCard = screen.getByText(
+        'Create New Collection Ingest Request'
+      );
+      const editCard = screen.getByText('Edit Collection Ingest Request');
       const editExistingCard = screen.getByText('Edit Existing Collection');
+
+      expect(createCard).toBeInTheDocument();
+      expect(editCard).toBeInTheDocument();
       expect(editExistingCard).toBeInTheDocument();
+
+      // Check that cards have aria-describedby attributes (indicates tooltip is configured)
+      const createCardElement = createCard.closest('.ant-card');
+      const editCardElement = editCard.closest('.ant-card');
+      const editExistingCardElement = editExistingCard.closest('.ant-card');
+
+      expect(createCardElement).toHaveAttribute('aria-describedby');
+      expect(editCardElement).toHaveAttribute('aria-describedby');
+      expect(editExistingCardElement).toHaveAttribute('aria-describedby');
+
+      // Verify disabled styling
+      expect(createCardElement).toHaveStyle({ opacity: '0.6' });
+      expect(editCardElement).toHaveStyle({ opacity: '0.6' });
+      expect(editExistingCardElement).toHaveStyle({ opacity: '0.6' });
+    });
+  });
+
+  describe('without dataset:limited-access scope', () => {
+    it('shows create card as clickable, edit cards disabled when no permissions', () => {
+      const mockSession = createMockSession(['dataset:create']);
+      render(<CollectionsClient />, {
+        wrapper: ({ children }) => (
+          <AllProviders session={mockSession}>{children}</AllProviders>
+        ),
+      });
+
+      const createCard = screen.getByText(
+        'Create New Collection Ingest Request'
+      );
+      const editCard = screen.getByText('Edit Collection Ingest Request');
+      const editExistingCard = screen.getByText('Edit Existing Collection');
+
+      // Create card should be clickable
+      expect(createCard.closest('a')).toHaveAttribute(
+        'href',
+        '/create-collection'
+      );
+
+      // Edit cards should be disabled
+      expect(editCard.closest('a')).toBeNull();
+      expect(editExistingCard.closest('a')).toBeNull();
+      expect(editCard.closest('.ant-card')).toHaveStyle({ opacity: '0.6' });
+      expect(editExistingCard.closest('.ant-card')).toHaveStyle({
+        opacity: '0.6',
+      });
+    });
+
+    it('shows create and edit ingest cards as clickable with dataset:update permission', () => {
+      const mockSession = createMockSession(['dataset:update']);
+      render(<CollectionsClient />, {
+        wrapper: ({ children }) => (
+          <AllProviders session={mockSession}>{children}</AllProviders>
+        ),
+      });
+
+      const createCard = screen.getByText(
+        'Create New Collection Ingest Request'
+      );
+      const editCard = screen.getByText('Edit Collection Ingest Request');
+      const editExistingCard = screen.getByText('Edit Existing Collection');
+
+      // Create and edit ingest cards should be clickable
+      expect(createCard.closest('a')).toHaveAttribute(
+        'href',
+        '/create-collection'
+      );
+      expect(editCard.closest('a')).toHaveAttribute('href', '/edit-collection');
+
+      // Edit existing should still be disabled (needs stac:collection:update)
       expect(editExistingCard.closest('a')).toBeNull();
       expect(editExistingCard.closest('.ant-card')).toHaveStyle({
         opacity: '0.6',
       });
     });
-  });
 
-  describe('with stac:collection:update permission', () => {
-    it('shows edit collection ingest card as disabled', () => {
+    it('shows create and edit existing cards as clickable with stac:collection:update permission', () => {
       const mockSession = createMockSession(['stac:collection:update']);
       render(<CollectionsClient />, {
         wrapper: ({ children }) => (
@@ -168,28 +214,54 @@ describe('CollectionsClient Component', () => {
         ),
       });
 
+      const createCard = screen.getByText(
+        'Create New Collection Ingest Request'
+      );
       const editCard = screen.getByText('Edit Collection Ingest Request');
-      expect(editCard).toBeInTheDocument();
-      //Should not be wrapped in a link
+      const editExistingCard = screen.getByText('Edit Existing Collection');
+
+      // Create and edit existing cards should be clickable
+      expect(createCard.closest('a')).toHaveAttribute(
+        'href',
+        '/create-collection'
+      );
+      expect(editExistingCard.closest('a')).toHaveAttribute(
+        'href',
+        '/edit-existing-collection'
+      );
+
+      // Edit ingest should be disabled (needs dataset:update)
       expect(editCard.closest('a')).toBeNull();
-      // Should have disabled styling
       expect(editCard.closest('.ant-card')).toHaveStyle({ opacity: '0.6' });
     });
-  });
 
-  it('shows edit existing collection card as clickable link', () => {
-    const mockSession = createMockSession(['stac:collection:update']);
-    render(<CollectionsClient />, {
-      wrapper: ({ children }) => (
-        <AllProviders session={mockSession}>{children}</AllProviders>
-      ),
+    it('shows all cards as clickable with both dataset:update and stac:collection:update permissions', () => {
+      const mockSession = createMockSession([
+        'dataset:update',
+        'stac:collection:update',
+      ]);
+      render(<CollectionsClient />, {
+        wrapper: ({ children }) => (
+          <AllProviders session={mockSession}>{children}</AllProviders>
+        ),
+      });
+
+      const createCard = screen.getByText(
+        'Create New Collection Ingest Request'
+      );
+      const editCard = screen.getByText('Edit Collection Ingest Request');
+      const editExistingCard = screen.getByText('Edit Existing Collection');
+
+      // All cards should be clickable
+      expect(createCard.closest('a')).toHaveAttribute(
+        'href',
+        '/create-collection'
+      );
+      expect(editCard.closest('a')).toHaveAttribute('href', '/edit-collection');
+      expect(editExistingCard.closest('a')).toHaveAttribute(
+        'href',
+        '/edit-existing-collection'
+      );
     });
-
-    const editExistingCard = screen.getByText('Edit Existing Collection');
-    expect(editExistingCard).toBeInTheDocument();
-    expect(editExistingCard.closest('a')).toHaveAttribute(
-      'href',
-      '/edit-existing-collection'
-    );
   });
 });

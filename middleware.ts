@@ -14,20 +14,33 @@ const routeConfig = {
   // Routes that require edit permissions (blocked for limited access + need dataset:update)
   editAccess: ['/edit-collection', '/edit-dataset'],
 
+  editStacCollectionAccess: ['/edit-existing-collection'],
+
   // API routes that require authentication
   apiRoutes: [
-    '/api/list-ingests',
-    '/api/retrieve-ingest',
-    '/api/create-ingest',
-    '/api/upload-url',
+    '/list-ingests',
+    '/retrieve-ingest',
+    '/create-ingest',
+    '/upload-url',
+    '/existing-collection',
   ],
 };
 
 function getUserPermissionLevel(session: any) {
   if (!session) return 'guest';
   if (session.scopes?.includes('dataset:limited-access')) return 'limited';
-  if (session.scopes?.includes('dataset:update')) return 'edit';
-  if (session.scopes?.includes('dataset:create')) return 'create';
+
+  const hasDatasetUpdate = session.scopes?.includes('dataset:update');
+  const hasStacCollectionUpdate = session.scopes?.includes(
+    'stac:collection:update'
+  );
+  const hasDatasetCreate = session.scopes?.includes('dataset:create');
+
+  if (hasDatasetUpdate && hasStacCollectionUpdate) return 'full-edit';
+  if (hasDatasetUpdate) return 'edit';
+  if (hasStacCollectionUpdate) return 'edit-existing';
+  if (hasDatasetCreate) return 'create';
+
   return 'guest';
 }
 
@@ -56,6 +69,21 @@ function isRouteAllowed(pathname: string, permissionLevel: string) {
         ...routeConfig.limited,
         ...routeConfig.createAccess,
         ...routeConfig.editAccess,
+      ]);
+
+    case 'edit-existing':
+      return matchesRoute([
+        ...routeConfig.limited,
+        ...routeConfig.createAccess,
+        ...routeConfig.editStacCollectionAccess,
+      ]);
+
+    case 'full-edit':
+      return matchesRoute([
+        ...routeConfig.limited,
+        ...routeConfig.createAccess,
+        ...routeConfig.editAccess,
+        ...routeConfig.editStacCollectionAccess,
       ]);
 
     default:
@@ -107,11 +135,13 @@ export const config = {
     '/edit-dataset',
     '/create-collection',
     '/edit-collection',
+    '/edit-existing-collection',
     '/upload',
     '/cog-viewer',
-    '/api/list-ingests',
-    '/api/retrieve-ingest',
-    '/api/create-ingest',
-    '/api/upload-url',
+    '/list-ingests',
+    '/retrieve-ingest',
+    '/create-ingest',
+    '/upload-url',
+    '/existing-collection',
   ],
 };

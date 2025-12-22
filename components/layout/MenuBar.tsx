@@ -8,10 +8,11 @@ import { Menu, MenuProps, Tooltip } from 'antd';
 import Link from 'next/link';
 import {
   HomeOutlined,
-  PlusCircleOutlined,
-  EditOutlined,
   GlobalOutlined,
   CloudUploadOutlined,
+  FileAddOutlined,
+  FormOutlined,
+  DatabaseOutlined,
 } from '@ant-design/icons';
 
 const MenuBar = () => {
@@ -32,7 +33,7 @@ const MenuBar = () => {
       icon: <HomeOutlined />,
     },
     {
-      label: <Link href="/collections">Collections</Link>,
+      label: <Link href="/collections">Collections Management</Link>,
       key: 'g1',
       type: 'group',
       children: [
@@ -50,7 +51,7 @@ const MenuBar = () => {
           ) : (
             <Link href="/create-collection">Create Collection</Link>
           ),
-          icon: <PlusCircleOutlined />,
+          icon: <FileAddOutlined />,
           disabled: hasLimitedAccess,
         },
         {
@@ -68,13 +69,35 @@ const MenuBar = () => {
             ) : (
               <Link href="/edit-collection">Edit Collection</Link>
             ),
-          icon: <EditOutlined />,
+          icon: <FormOutlined />,
           disabled: hasLimitedAccess || !hasEditIngestPermission,
+        },
+        {
+          key: '/edit-existing-collection',
+          label:
+            hasLimitedAccess || !hasEditStacCollectionPermission ? (
+              <Tooltip
+                title="Contact the VEDA Data Services team for access"
+                placement="right"
+              >
+                <span style={{ cursor: 'not-allowed' }}>
+                  <Link href="/edit-existing-collection">
+                    Edit Existing Collection
+                  </Link>
+                </span>
+              </Tooltip>
+            ) : (
+              <Link href="/edit-existing-collection">
+                Edit Existing Collection
+              </Link>
+            ),
+          icon: <DatabaseOutlined />,
+          disabled: hasLimitedAccess || !hasEditStacCollectionPermission,
         },
       ],
     },
     {
-      label: <Link href="/datasets">Datasets</Link>,
+      label: <Link href="/datasets">Dataset Management</Link>,
       key: 'g2',
       type: 'group',
       children: [
@@ -92,7 +115,7 @@ const MenuBar = () => {
           ) : (
             <Link href="/create-dataset">Create Dataset</Link>
           ),
-          icon: <PlusCircleOutlined />,
+          icon: <FileAddOutlined />,
           disabled: hasLimitedAccess,
         },
         {
@@ -110,29 +133,7 @@ const MenuBar = () => {
             ) : (
               <Link href="/edit-dataset">Edit Dataset</Link>
             ),
-          icon: <EditOutlined />,
-          disabled: hasLimitedAccess || !hasEditIngestPermission,
-        },
-        {
-          key: '/edit-existing-collection',
-          label:
-            hasLimitedAccess || !hasEditIngestPermission ? (
-              <Tooltip
-                title="Contact the VEDA Data Services team for access"
-                placement="right"
-              >
-                <span style={{ cursor: 'not-allowed' }}>
-                  <Link href="/edit-existing-collection">
-                    Edit Existing Collection
-                  </Link>
-                </span>
-              </Tooltip>
-            ) : (
-              <Link href="/edit-existing-collection">
-                Edit Existing Collection
-              </Link>
-            ),
-          icon: <EditOutlined />,
+          icon: <FormOutlined />,
           disabled: hasLimitedAccess || !hasEditIngestPermission,
         },
       ],
