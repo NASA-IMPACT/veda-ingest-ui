@@ -54,7 +54,7 @@ describe('DatasetsClient Component', () => {
     expect(screen.getByTestId('app-layout')).toBeInTheDocument();
   });
 
-  it('renders the "Ingestion Requests" header', () => {
+  it('renders the "Datasets Management" header', () => {
     const mockSession = createMockSession();
     render(<DatasetsClient />, {
       wrapper: ({ children }) => (
@@ -63,7 +63,7 @@ describe('DatasetsClient Component', () => {
     });
 
     expect(
-      screen.getByRole('heading', { name: /ingestion requests/i })
+      screen.getByRole('heading', { name: /datasets management/i })
     ).toBeInTheDocument();
   });
 
