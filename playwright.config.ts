@@ -6,7 +6,8 @@ dotenv.config();
 export default defineConfig({
   testDir: './__tests__/playwright',
   webServer: {
-    command: 'NEXT_PUBLIC_DISABLE_AUTH=true yarn dev',
+    command:
+      'NEXT_PUBLIC_DISABLE_AUTH=true NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" yarn dev',
     port: 3000,
   },
   use: {
