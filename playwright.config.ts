@@ -7,7 +7,7 @@ export default defineConfig({
   testDir: './__tests__/playwright',
   webServer: {
     command:
-      'NEXT_PUBLIC_DISABLE_AUTH=true NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" yarn dev',
+      'NEXT_PUBLIC_DISABLE_AUTH=true NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" ENABLE_EXISTING_COLLECTION_EDIT=true yarn dev',
     port: 3000,
   },
   use: {

@@ -10,6 +10,14 @@ interface RouteParams {
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    // Check if the Edit Existing Collection feature is enabled
+    if (process.env.ENABLE_EXISTING_COLLECTION_EDIT !== 'true') {
+      return NextResponse.json(
+        { error: 'Edit Existing Collection feature is disabled' },
+        { status: 403 }
+      );
+    }
+
     const session = await auth();
     if (!session) {
       return NextResponse.json(
@@ -70,6 +78,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    // Check if the Edit Existing Collection feature is enabled
+    if (process.env.ENABLE_EXISTING_COLLECTION_EDIT !== 'true') {
+      return NextResponse.json(
+        { error: 'Edit Existing Collection feature is disabled' },
+        { status: 403 }
+      );
+    }
+
     const session = await auth();
     if (!session) {
       return NextResponse.json(
