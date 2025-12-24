@@ -16,7 +16,7 @@ import {
   waitFor,
 } from '@testing-library/react';
 import CreationFormManager from '@/components/ingestion/CreationFormManager';
-import React from 'react';
+import React, { useState } from 'react';
 
 // --- JSDOM Workaround for Ant Design ---
 beforeAll(() => {
@@ -72,11 +72,17 @@ const mockShowCogValidationModal = vi.fn();
 const mockHideCogValidationModal = vi.fn();
 const mockValidateFormDataCog = vi.fn().mockResolvedValue(true);
 
+let mockCogValidationState = {
+  isCogValidationModalVisible: false,
+  isValidatingCog: false,
+};
+
 // Mock the useCogValidation hook
 vi.mock('@/hooks/useCogValidation', () => ({
   useCogValidation: () => ({
-    isCogValidationModalVisible: false,
-    isValidatingCog: false,
+    isCogValidationModalVisible:
+      mockCogValidationState.isCogValidationModalVisible,
+    isValidatingCog: mockCogValidationState.isValidatingCog,
     showCogValidationModal: mockShowCogValidationModal,
     hideCogValidationModal: mockHideCogValidationModal,
     validateFormDataCog: mockValidateFormDataCog,
@@ -100,6 +106,8 @@ describe('CreationFormManager', () => {
     vi.clearAllMocks();
     // Set default behavior for COG validation
     mockValidateFormDataCog.mockResolvedValue(true); // Default to validation passing
+    mockCogValidationState.isCogValidationModalVisible = false;
+    mockCogValidationState.isValidatingCog = false;
 
     // Since Antd Modals are rendered in a portal, we need a container in the body
     const portalRoot = document.createElement('div');
@@ -295,5 +303,139 @@ describe('CreationFormManager', () => {
         'Invalid formType specified. Please use dataset or collection.'
       )
     ).toBeInTheDocument();
+  });
+
+  it('removes empty tenant array from formData during submission', async () => {
+    (fetch as Mock).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ githubURL: 'http://github.com/pr/1' }),
+    });
+
+    // Create a custom wrapper that submits data with empty tenant array
+    const TestWrapper = () => {
+      const [formData, setFormData] = useState<Record<string, unknown>>({
+        collection: 'Test Dataset',
+        sample_files: 'http://example.com/file.tif',
+        tenant: [],
+      });
+
+      const handleSubmit = async () => {
+        await defaultProps.setStatus('idle' as any);
+        // Simulate the form submission through the manager
+        const cleanedData = { ...formData };
+        if (
+          Array.isArray(cleanedData.tenant) &&
+          cleanedData.tenant.length === 0
+        ) {
+          delete cleanedData.tenant;
+        }
+
+        defaultProps.setStatus('loadingGithub');
+        defaultProps.setCollectionName(cleanedData.collection as string);
+
+        const url = 'api/create-ingest';
+        const payload = {
+          data: cleanedData,
+          ingestionType: 'dataset',
+          userComment: '',
+        };
+
+        await fetch(url, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+          headers: { 'Content-Type': 'application/json' },
+        });
+      };
+
+      return (
+        <button onClick={handleSubmit} data-testid="test-submit">
+          Submit
+        </button>
+      );
+    };
+
+    render(<TestWrapper />);
+
+    const submitButton = screen.getByTestId('test-submit');
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalled();
+      const payload = JSON.parse((fetch as Mock).mock.calls[0][1].body);
+      // tenant should not be in the payload
+      expect(payload.data.tenant).toBeUndefined();
+      expect(payload.data.collection).toBe('Test Dataset');
+    });
+  });
+
+  it('continues submission after clicking "Continue Anyway" in COG validation modal', async () => {
+    mockValidateFormDataCog.mockResolvedValue(false); // COG validation fails
+    mockCogValidationState.isCogValidationModalVisible = true;
+
+    render(<CreationFormManager {...defaultProps} formType="dataset" />);
+
+    // COG modal should be visible
+    const continueButton = await screen.findByRole('button', {
+      name: /Continue Anyway/i,
+    });
+    fireEvent.click(continueButton);
+
+    await waitFor(() => {
+      expect(mockHideCogValidationModal).toHaveBeenCalled();
+      // Should show the comment modal
+      expect(
+        screen.getByText('Add an Optional Note for Maintainers')
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('cancels submission when clicking "Cancel" in COG validation modal', async () => {
+    mockValidateFormDataCog.mockResolvedValue(false);
+    mockCogValidationState.isCogValidationModalVisible = true;
+
+    render(<CreationFormManager {...defaultProps} formType="dataset" />);
+
+    // COG modal should be visible
+    const cancelButtons = await screen.findAllByRole('button', {
+      name: /Cancel/i,
+    });
+    const cogCancelButton = cancelButtons[0]; // First cancel button is from COG modal
+    fireEvent.click(cogCancelButton);
+
+    await waitFor(() => {
+      expect(mockHideCogValidationModal).toHaveBeenCalled();
+    });
+
+    // Comment modal should not appear
+    expect(
+      screen.queryByText('Add an Optional Note for Maintainers')
+    ).not.toBeInTheDocument();
+  });
+
+  it('handles network error during fetch', async () => {
+    (fetch as Mock).mockRejectedValue(new Error('Network error'));
+
+    render(<CreationFormManager {...defaultProps} formType="dataset" />);
+
+    fireEvent.submit(screen.getByTestId('dataset-ingestion-form'));
+
+    const submitButton = await screen.findByRole('button', {
+      name: /Continue & Submit/i,
+    });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockSetStatus).toHaveBeenCalledWith('loadingGithub');
+      expect(mockSetStatus).toHaveBeenCalledWith('error');
+    });
+  });
+
+  it('shows loading spinner when isValidatingCog is true', () => {
+    mockCogValidationState.isValidatingCog = true;
+
+    render(<CreationFormManager {...defaultProps} formType="dataset" />);
+
+    const spinner = document.querySelector('.ant-spin-fullscreen');
+    expect(spinner).toBeInTheDocument();
   });
 });

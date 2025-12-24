@@ -8,7 +8,7 @@ interface UseCogValidationReturn {
   hideCogValidationModal: () => void;
   validateFormDataCog: (
     formData: Record<string, unknown>,
-    formType: 'dataset' | 'collection'
+    formType: 'dataset' | 'collection' | 'existingCollection'
   ) => Promise<boolean>;
 }
 
@@ -34,7 +34,7 @@ export const useCogValidation = (): UseCogValidationReturn => {
 
   const validateFormDataCog = async (
     formData: Record<string, unknown>,
-    formType: 'dataset' | 'collection'
+    formType: 'dataset' | 'collection' | 'existingCollection'
   ): Promise<boolean> => {
     if (formType !== 'dataset' || !formData.sample_files) {
       return true;
