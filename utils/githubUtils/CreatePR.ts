@@ -109,7 +109,7 @@ const CreatePR = async (
       repo,
       head: branchName,
       base: targetBranch,
-      title: `Ingest Request for ${fileNameSource}`,
+      title: `${ingestionType} Ingest Request for ${fileNameSource}`,
       body: userComment || '',
     });
 

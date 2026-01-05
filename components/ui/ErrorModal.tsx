@@ -2,13 +2,19 @@ import React, { useState } from 'react';
 import { Modal } from 'antd';
 
 interface ErrorModalProps {
-  collectionName: string;
+  collectionName?: string;
   apiErrorMessage?: string;
+  context?:
+    | 'collection-update'
+    | 'collections-fetch'
+    | 'ingests-fetch'
+    | 'collection-select';
 }
 
 export default function ErrorModal({
   collectionName,
   apiErrorMessage,
+  context = 'collection-update',
 }: ErrorModalProps) {
   const [isModalOpen, setIsModalOpen] = useState(true);
 
@@ -47,13 +53,45 @@ export default function ErrorModal({
       </>
     );
   } else {
-    title = 'Something Went Wrong';
+    const getContextualErrorMessage = () => {
+      switch (context) {
+        case 'collections-fetch':
+          return {
+            title: 'Failed to Load Collections',
+            message:
+              'Unable to fetch the list of collections. Please try again.',
+          };
+        case 'ingests-fetch':
+          return {
+            title: 'Failed to Load Pending Ingests',
+            message: 'Unable to fetch pending ingest requests.',
+          };
+        case 'collection-select':
+          return {
+            title: 'Collection Access Error',
+            message:
+              'Unable to access the selected collection. You may not have permission or the collection may no longer exist.',
+          };
+        case 'collection-update':
+        default:
+          if (collectionName) {
+            return {
+              title: 'Something Went Wrong',
+              message: `Something went wrong with updating ${collectionName}.`,
+            };
+          }
+          return {
+            title: 'Something Went Wrong',
+            message: 'An unexpected error occurred.',
+          };
+      }
+    };
+
+    const contextualError = getContextualErrorMessage();
+    title = contextualError.title;
     content = (
       <>
-        <strong>
-          Something went wrong
-          {collectionName ? ` with updating ${collectionName}` : ''}.
-        </strong>
+        <strong>{contextualError.message}</strong>
         <p>Please try again.</p>
       </>
     );
