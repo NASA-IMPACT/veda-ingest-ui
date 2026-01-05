@@ -24,6 +24,11 @@ vi.mock('@/lib/serverTenantValidation', () => ({
 const authMock = auth as Mock;
 const validateTenantAccessMock = validateTenantAccess as Mock;
 
+// Helper function to create mock params with Promise wrapper
+const createMockParams = (collectionId: string) => ({
+  params: Promise.resolve({ collectionId }),
+});
+
 // Mock fetch globally
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
@@ -54,7 +59,7 @@ const mockCollectionResponse = {
 };
 
 describe('GET /api/existing-collection/[collectionId]', () => {
-  const mockParams = { params: { collectionId: 'test-collection' } };
+  const mockParams = createMockParams('test-collection');
 
   it('returns 401 when user is not authenticated', async () => {
     authMock.mockResolvedValue(null);
@@ -189,9 +194,10 @@ describe('GET /api/existing-collection/[collectionId]', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/existing-collection/nonexistent-collection'
     );
-    const response = await GET(request, {
-      params: { collectionId: 'nonexistent-collection' },
-    });
+    const response = await GET(
+      request,
+      createMockParams('nonexistent-collection')
+    );
 
     expect(response.status).toBe(404);
     expect(mockFetch).toHaveBeenCalledWith(
@@ -254,9 +260,10 @@ describe('GET /api/existing-collection/[collectionId]', () => {
     const request = new NextRequest(
       `http://localhost:3000/api/existing-collection/${encodedId}`
     );
-    const response = await GET(request, {
-      params: { collectionId: 'collection with spaces' },
-    });
+    const response = await GET(
+      request,
+      createMockParams('collection with spaces')
+    );
 
     expect(response.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledWith(
@@ -343,9 +350,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       }),
     });
 
-    const response = await PUT(request, {
-      params: { collectionId: 'test-collection' },
-    });
+    const response = await PUT(request, createMockParams('test-collection'));
 
     expect(response.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledTimes(2);
@@ -394,9 +399,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
 
     authMock.mockResolvedValue(null);
 
-    const response = await PUT(request, {
-      params: { collectionId: 'test-collection' },
-    });
+    const response = await PUT(request, createMockParams('test-collection'));
 
     expect(response.status).toBe(401);
     expect(mockFetch).not.toHaveBeenCalled();
@@ -423,9 +426,10 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       status: 404,
     });
 
-    const response = await PUT(request, {
-      params: { collectionId: 'nonexistent-collection' },
-    });
+    const response = await PUT(
+      request,
+      createMockParams('nonexistent-collection')
+    );
 
     expect(response.status).toBe(404);
     expect(mockFetch).toHaveBeenCalledWith(
@@ -464,9 +468,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       }),
     });
 
-    const response = await PUT(request, {
-      params: { collectionId: 'test-collection' },
-    });
+    const response = await PUT(request, createMockParams('test-collection'));
 
     expect(response.status).toBe(403);
     expect(validateTenantAccessMock).toHaveBeenCalledWith('restricted-tenant', {
@@ -510,9 +512,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       }),
     });
 
-    const response = await PUT(request, {
-      params: { collectionId: 'public-collection' },
-    });
+    const response = await PUT(request, createMockParams('public-collection'));
 
     expect(response.status).toBe(200);
     expect(validateTenantAccessMock).not.toHaveBeenCalled();
@@ -552,9 +552,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       text: async () => 'Invalid collection data',
     });
 
-    const response = await PUT(request, {
-      params: { collectionId: 'test-collection' },
-    });
+    const response = await PUT(request, createMockParams('test-collection'));
 
     expect(response.status).toBe(400);
     const data = await response.json();
@@ -581,9 +579,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
 
     mockFetch.mockRejectedValue(new Error('Network error'));
 
-    const response = await PUT(request, {
-      params: { collectionId: 'test-collection' },
-    });
+    const response = await PUT(request, createMockParams('test-collection'));
 
     expect(response.status).toBe(500);
     const data = await response.json();
