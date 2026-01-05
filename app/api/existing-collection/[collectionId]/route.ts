@@ -3,9 +3,9 @@ import { auth } from '@/lib/auth';
 import { validateTenantAccess } from '@/lib/serverTenantValidation';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     collectionId: string;
-  };
+  }>;
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
