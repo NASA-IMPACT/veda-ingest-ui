@@ -27,7 +27,7 @@ const routeConfig = {
 };
 
 function getUserPermissionLevel(session: any) {
-  if (!session) return 'guest';
+  if (!session) return 'unauthenticated';
   if (session.scopes?.includes('dataset:limited-access')) return 'limited';
 
   const hasDatasetUpdate = session.scopes?.includes('dataset:update');
@@ -41,7 +41,8 @@ function getUserPermissionLevel(session: any) {
   if (hasStacCollectionUpdate) return 'edit-existing';
   if (hasDatasetCreate) return 'create';
 
-  return 'guest';
+  // Authenticated user but no application-specific permissions
+  return 'authenticated-guest';
 }
 
 function isRouteAllowed(pathname: string, permissionLevel: string) {
@@ -50,8 +51,12 @@ function isRouteAllowed(pathname: string, permissionLevel: string) {
     routes.some((route) => pathname.startsWith(route));
 
   switch (permissionLevel) {
-    case 'guest':
-      // Guests have no access - should be redirected to login
+    case 'unauthenticated':
+      // Unauthenticated users have no access - should be redirected to login
+      return false;
+
+    case 'authenticated-guest':
+      // Authenticated users without app permissions - should be redirected to unauthorized
       return false;
 
     case 'limited':
@@ -112,14 +117,14 @@ export async function middleware(request: NextRequest) {
   // Check if the route is allowed for this permission level
   if (!isRouteAllowed(pathname, permissionLevel)) {
     if (pathname.startsWith('/api/')) {
-      const status = permissionLevel === 'guest' ? 401 : 403;
+      const status = permissionLevel === 'unauthenticated' ? 401 : 403;
       return new NextResponse(
-        permissionLevel === 'guest' ? 'Unauthorized' : 'Forbidden',
+        permissionLevel === 'unauthenticated' ? 'Unauthorized' : 'Forbidden',
         { status }
       );
     } else {
       const redirectUrl =
-        permissionLevel === 'guest' ? '/login' : '/unauthorized';
+        permissionLevel === 'unauthenticated' ? '/login' : '/unauthorized';
       return NextResponse.redirect(new URL(redirectUrl, request.url));
     }
   }
