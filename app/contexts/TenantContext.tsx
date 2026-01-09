@@ -1,6 +1,12 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  ReactNode,
+  useEffect,
+  useState,
+} from 'react';
 import { Spin } from 'antd';
 import { useSession } from 'next-auth/react';
 
@@ -15,10 +21,28 @@ export const TenantContext = createContext<TenantContextType | undefined>(
 
 export const TenantProvider = ({ children }: { children: ReactNode }) => {
   const { data: session, status } = useSession();
+  const [allowedTenants, setAllowedTenants] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const isLoading = status === 'loading';
+  useEffect(() => {
+    if (status === 'loading') {
+      setIsLoading(true);
+      return;
+    }
 
-  const allowedTenants = session?.tenants || [];
+    setIsLoading(false);
+
+    if (!session) {
+      setAllowedTenants([]);
+      return;
+    }
+
+    const sessionAllowedTenants = (session as any)?.allowedTenants;
+    const tenants = Array.isArray(sessionAllowedTenants)
+      ? sessionAllowedTenants
+      : [];
+    setAllowedTenants(tenants);
+  }, [session, status]);
 
   if (isLoading) {
     return <Spin fullscreen />;
