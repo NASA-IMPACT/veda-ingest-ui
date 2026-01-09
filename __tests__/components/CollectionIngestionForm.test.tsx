@@ -325,4 +325,65 @@ describe('CollectionIngestionForm', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith(initialData);
     });
   });
+
+  it('validates required extension fields and shows errors', async () => {
+    const mockExtensionData = {
+      'http://example.com/datacube.json': {
+        title: 'Datacube',
+        fields: [{ name: 'cube:dimensions', required: true }],
+      },
+    };
+    render(
+      <TestWrapper
+        initialFormData={{ title: 'Test' }}
+        mockExtensionFields={mockExtensionData}
+      >
+        <button type="submit">Submit</button>
+      </TestWrapper>
+    );
+
+    const submitButton = screen.getByRole('button', { name: 'Submit' });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Validation Errors')).toBeVisible();
+      expect(
+        screen.getByText(
+          /Field 'cube:dimensions' is required and cannot be empty/
+        )
+      ).toBeVisible();
+    });
+
+    // onSubmit should not be called when validation fails
+    expect(mockOnSubmit).not.toHaveBeenCalled();
+  });
+
+  it('uses locked UI schema in edit mode', () => {
+    const TestWrapperEditMode = () => {
+      const [formData, setFormData] = useState<Record<string, any>>({
+        id: 'test-id',
+        title: 'Test',
+      });
+
+      (useStacExtensions as any).mockReturnValue({
+        extensionFields: {},
+        addExtension: mockAddExtension,
+        removeExtension: mockRemoveExtension,
+        isLoading: false,
+      });
+
+      return (
+        <CollectionIngestionForm
+          formData={formData}
+          setFormData={setFormData}
+          onSubmit={mockOnSubmit}
+          isEditMode={true}
+        />
+      );
+    };
+
+    render(<TestWrapperEditMode />);
+
+    expect(screen.getByTestId('rjsf-form')).toBeVisible();
+  });
 });

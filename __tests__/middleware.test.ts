@@ -40,12 +40,12 @@ describe('Middleware', () => {
     } as NextRequest;
   };
 
-  describe('Guest (unauthenticated) users', () => {
+  describe('Unauthenticated users', () => {
     beforeEach(() => {
       vi.mocked(auth).mockResolvedValue(null);
     });
 
-    it('redirects guests to login for any protected route', async () => {
+    it('redirects unauthenticated users to login for any protected route', async () => {
       const testRoutes = [
         '/collections',
         '/create-dataset',
@@ -64,6 +64,39 @@ describe('Middleware', () => {
 
         expect(vi.mocked(NextResponse.redirect)).toHaveBeenCalledWith(
           new URL('/login', request.url)
+        );
+      }
+    });
+  });
+
+  describe('Authenticated users with basic scopes only', () => {
+    const authenticatedGuestSession = {
+      user: { name: 'Stephen Kilbourn', email: 'skilbourn@element84.com' },
+      expires: '2026-02-04T23:40:16.341Z',
+      tenants: [],
+      scopes: ['openid', 'profile', 'email'],
+    };
+
+    beforeEach(() => {
+      vi.mocked(auth).mockResolvedValue(authenticatedGuestSession);
+    });
+
+    it('redirects authenticated users without app permissions to unauthorized', async () => {
+      const testRoutes = [
+        '/collections',
+        '/datasets',
+        '/create-dataset',
+        '/edit-dataset',
+        '/upload',
+      ];
+
+      for (const pathname of testRoutes) {
+        vi.clearAllMocks();
+        const request = createMockRequest(pathname);
+        await middleware(request);
+
+        expect(vi.mocked(NextResponse.redirect)).toHaveBeenCalledWith(
+          new URL('/unauthorized', request.url)
         );
       }
     });
@@ -222,7 +255,12 @@ describe('Middleware', () => {
   describe('Permission level detection', () => {
     it('correctly identifies permission levels', async () => {
       const testCases = [
-        { scopes: null, expectedRedirect: '/login' },
+        { scopes: null, expectedRedirect: '/login' }, // unauthenticated
+        {
+          scopes: ['openid', 'profile', 'email'], // Authenticated but no app permissions
+          route: '/collections',
+          expectedRedirect: '/unauthorized',
+        },
         {
           scopes: ['dataset:limited-access'],
           route: '/create-dataset',

@@ -73,7 +73,7 @@ export class APIErrorBoundary extends Component<Props, State> {
 
   private getErrorMessage = (error: Error): string => {
     if (error.message.includes('fetch')) {
-      return 'Network connection error. Please check your internet connection.';
+      return 'Network connection error.';
     }
     if (
       error.message.includes('401') ||

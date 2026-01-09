@@ -4,6 +4,8 @@ import { githubResponse } from './githubResponse';
 import { retrieveIngestResponse } from './retrieveIngestResponse';
 import { collectionIngestResponse } from './collectionIngestResponse';
 import { extensionSchemaResponse } from './extensionSchemaResponse';
+import { stacCollectionsResponse } from './stacCollectionsResponse';
+import { stacCollectionResponse } from './stacCollectionResponse';
 // --- Placeholder Tile Logic ---
 const MOCK_TILE_BASE64 =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
@@ -34,7 +36,7 @@ const mockSession = {
     email: 'test.user@example.com',
     image: null,
   },
-  scopes: ['dataset:update'],
+  scopes: ['dataset:update', 'stac:collection:update'],
   allowedTenants: ['tenant1', 'tenant2', 'tenant3'],
   accessToken: 'mock-access-token',
   expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
@@ -230,5 +232,34 @@ export const handlers = [
   ),
   http.get('https://staging.openveda.cloud/api/raster/cog/validate', () => {
     return HttpResponse.json({ COG: true });
+  }),
+
+  http.get('/api/existing-collection', ({ request }) => {
+    const url = new URL(request.url);
+    const tenant = url.searchParams.get('tenant');
+
+    let filteredResponse = { ...stacCollectionsResponse };
+
+    // Filter by tenant if specified
+    if (tenant) {
+      filteredResponse.collections = stacCollectionsResponse.collections.filter(
+        (collection: any) => {
+          if (tenant === 'Public') {
+            return !collection.tenant || collection.tenant === '';
+          }
+          return collection.tenant === tenant;
+        }
+      );
+    }
+
+    return HttpResponse.json(filteredResponse);
+  }),
+
+  http.get('/api/existing-collection/:collectionId', ({ params }) => {
+    // Return the same mock collection response for any collection ID
+    return HttpResponse.json({
+      ...stacCollectionResponse,
+      id: params.collectionId,
+    });
   }),
 ];

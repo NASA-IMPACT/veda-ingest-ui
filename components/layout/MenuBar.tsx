@@ -8,16 +8,23 @@ import { Menu, MenuProps, Tooltip } from 'antd';
 import Link from 'next/link';
 import {
   HomeOutlined,
-  PlusCircleOutlined,
-  EditOutlined,
   GlobalOutlined,
   CloudUploadOutlined,
+  FileAddOutlined,
+  FormOutlined,
+  DatabaseOutlined,
 } from '@ant-design/icons';
 
 const MenuBar = () => {
   const { data: session } = useSession();
   const hasEditIngestPermission = session?.scopes?.includes('dataset:update');
   const hasLimitedAccess = session?.scopes?.includes('dataset:limited-access');
+  const hasEditStacCollectionPermission = session?.scopes?.includes(
+    'stac:collection:update'
+  );
+  const isEditExistingCollectionEnabled =
+    process.env.NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT === 'true';
+
   const pathname = usePathname();
   const [activeLink, setActiveLink] = useState(pathname);
 
@@ -28,7 +35,7 @@ const MenuBar = () => {
       icon: <HomeOutlined />,
     },
     {
-      label: <Link href="/collections">Collections</Link>,
+      label: <Link href="/collections">Collections Management</Link>,
       key: 'g1',
       type: 'group',
       children: [
@@ -46,7 +53,7 @@ const MenuBar = () => {
           ) : (
             <Link href="/create-collection">Create Collection</Link>
           ),
-          icon: <PlusCircleOutlined />,
+          icon: <FileAddOutlined />,
           disabled: hasLimitedAccess,
         },
         {
@@ -64,13 +71,39 @@ const MenuBar = () => {
             ) : (
               <Link href="/edit-collection">Edit Collection</Link>
             ),
-          icon: <EditOutlined />,
+          icon: <FormOutlined />,
           disabled: hasLimitedAccess || !hasEditIngestPermission,
         },
+        ...(isEditExistingCollectionEnabled
+          ? [
+              {
+                key: '/edit-existing-collection',
+                label:
+                  hasLimitedAccess || !hasEditStacCollectionPermission ? (
+                    <Tooltip
+                      title="Contact the VEDA Data Services team for access"
+                      placement="right"
+                    >
+                      <span style={{ cursor: 'not-allowed' }}>
+                        <Link href="/edit-existing-collection">
+                          Edit Existing Collection
+                        </Link>
+                      </span>
+                    </Tooltip>
+                  ) : (
+                    <Link href="/edit-existing-collection">
+                      Edit Existing Collection
+                    </Link>
+                  ),
+                icon: <DatabaseOutlined />,
+                disabled: hasLimitedAccess || !hasEditStacCollectionPermission,
+              },
+            ]
+          : []),
       ],
     },
     {
-      label: <Link href="/datasets">Datasets</Link>,
+      label: <Link href="/datasets">Dataset Management</Link>,
       key: 'g2',
       type: 'group',
       children: [
@@ -88,7 +121,7 @@ const MenuBar = () => {
           ) : (
             <Link href="/create-dataset">Create Dataset</Link>
           ),
-          icon: <PlusCircleOutlined />,
+          icon: <FileAddOutlined />,
           disabled: hasLimitedAccess,
         },
         {
@@ -106,7 +139,7 @@ const MenuBar = () => {
             ) : (
               <Link href="/edit-dataset">Edit Dataset</Link>
             ),
-          icon: <EditOutlined />,
+          icon: <FormOutlined />,
           disabled: hasLimitedAccess || !hasEditIngestPermission,
         },
       ],

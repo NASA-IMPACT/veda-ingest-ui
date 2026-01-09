@@ -14,21 +14,35 @@ const routeConfig = {
   // Routes that require edit permissions (blocked for limited access + need dataset:update)
   editAccess: ['/edit-collection', '/edit-dataset'],
 
+  editStacCollectionAccess: ['/edit-existing-collection'],
+
   // API routes that require authentication
   apiRoutes: [
-    '/api/list-ingests',
-    '/api/retrieve-ingest',
-    '/api/create-ingest',
-    '/api/upload-url',
+    '/list-ingests',
+    '/retrieve-ingest',
+    '/create-ingest',
+    '/upload-url',
+    '/existing-collection',
   ],
 };
 
 function getUserPermissionLevel(session: any) {
-  if (!session) return 'guest';
+  if (!session) return 'unauthenticated';
   if (session.scopes?.includes('dataset:limited-access')) return 'limited';
-  if (session.scopes?.includes('dataset:update')) return 'edit';
-  if (session.scopes?.includes('dataset:create')) return 'create';
-  return 'guest';
+
+  const hasDatasetUpdate = session.scopes?.includes('dataset:update');
+  const hasStacCollectionUpdate = session.scopes?.includes(
+    'stac:collection:update'
+  );
+  const hasDatasetCreate = session.scopes?.includes('dataset:create');
+
+  if (hasDatasetUpdate && hasStacCollectionUpdate) return 'full-edit';
+  if (hasDatasetUpdate) return 'edit';
+  if (hasStacCollectionUpdate) return 'edit-existing';
+  if (hasDatasetCreate) return 'create';
+
+  // Authenticated user but no application-specific permissions
+  return 'authenticated-guest';
 }
 
 function isRouteAllowed(pathname: string, permissionLevel: string) {
@@ -37,8 +51,12 @@ function isRouteAllowed(pathname: string, permissionLevel: string) {
     routes.some((route) => pathname.startsWith(route));
 
   switch (permissionLevel) {
-    case 'guest':
-      // Guests have no access - should be redirected to login
+    case 'unauthenticated':
+      // Unauthenticated users have no access - should be redirected to login
+      return false;
+
+    case 'authenticated-guest':
+      // Authenticated users without app permissions - should be redirected to unauthorized
       return false;
 
     case 'limited':
@@ -56,6 +74,21 @@ function isRouteAllowed(pathname: string, permissionLevel: string) {
         ...routeConfig.limited,
         ...routeConfig.createAccess,
         ...routeConfig.editAccess,
+      ]);
+
+    case 'edit-existing':
+      return matchesRoute([
+        ...routeConfig.limited,
+        ...routeConfig.createAccess,
+        ...routeConfig.editStacCollectionAccess,
+      ]);
+
+    case 'full-edit':
+      return matchesRoute([
+        ...routeConfig.limited,
+        ...routeConfig.createAccess,
+        ...routeConfig.editAccess,
+        ...routeConfig.editStacCollectionAccess,
       ]);
 
     default:
@@ -84,14 +117,14 @@ export async function middleware(request: NextRequest) {
   // Check if the route is allowed for this permission level
   if (!isRouteAllowed(pathname, permissionLevel)) {
     if (pathname.startsWith('/api/')) {
-      const status = permissionLevel === 'guest' ? 401 : 403;
+      const status = permissionLevel === 'unauthenticated' ? 401 : 403;
       return new NextResponse(
-        permissionLevel === 'guest' ? 'Unauthorized' : 'Forbidden',
+        permissionLevel === 'unauthenticated' ? 'Unauthorized' : 'Forbidden',
         { status }
       );
     } else {
       const redirectUrl =
-        permissionLevel === 'guest' ? '/login' : '/unauthorized';
+        permissionLevel === 'unauthenticated' ? '/login' : '/unauthorized';
       return NextResponse.redirect(new URL(redirectUrl, request.url));
     }
   }
@@ -107,6 +140,7 @@ export const config = {
     '/edit-dataset',
     '/create-collection',
     '/edit-collection',
+    '/edit-existing-collection',
     '/upload',
     '/cog-viewer',
     '/api/list-ingests',

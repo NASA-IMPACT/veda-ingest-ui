@@ -45,7 +45,7 @@ vi.mock('@/components/ingestion/CollectionIngestionForm', () => ({
       data-testid="collection-ingestion-form"
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit({ mockData: 'collection' });
+        onSubmit({ id: 'test-collection-id', mockData: 'collection' });
       }}
     >
       {children}
@@ -134,6 +134,17 @@ describe('EditFormManager', () => {
 
     fireEvent.submit(form);
 
+    // Should show diff modal first
+    await waitFor(() => {
+      expect(screen.getByText('Review Changes')).toBeInTheDocument();
+    });
+
+    // Confirm the changes in the diff modal
+    const confirmButton = screen.getByRole('button', {
+      name: 'Confirm Changes',
+    });
+    await userEvent.click(confirmButton);
+
     await waitFor(() => {
       expect(mockSetStatus).toHaveBeenCalledWith('loadingGithub');
     });
@@ -169,6 +180,17 @@ describe('EditFormManager', () => {
     const form = screen.getByTestId('dataset-ingestion-form');
     fireEvent.submit(form);
 
+    // Should show diff modal first
+    await waitFor(() => {
+      expect(screen.getByText('Review Changes')).toBeInTheDocument();
+    });
+
+    // Confirm the changes in the diff modal
+    const confirmButton = screen.getByRole('button', {
+      name: 'Confirm Changes',
+    });
+    await userEvent.click(confirmButton);
+
     await waitFor(() => {
       expect(mockSetStatus).toHaveBeenCalledWith('loadingGithub');
     });
@@ -187,6 +209,17 @@ describe('EditFormManager', () => {
 
     const form = screen.getByTestId('dataset-ingestion-form');
     fireEvent.submit(form);
+
+    // Should show diff modal first
+    await waitFor(() => {
+      expect(screen.getByText('Review Changes')).toBeInTheDocument();
+    });
+
+    // Confirm the changes in the diff modal
+    const confirmButton = screen.getByRole('button', {
+      name: 'Confirm Changes',
+    });
+    await userEvent.click(confirmButton);
 
     await waitFor(() => {
       expect(mockSetStatus).toHaveBeenCalledWith('loadingGithub');
@@ -225,6 +258,17 @@ describe('EditFormManager', () => {
     const form = screen.getByTestId('dataset-ingestion-form');
     fireEvent.submit(form);
 
+    // Should show diff modal first
+    await waitFor(() => {
+      expect(screen.getByText('Review Changes')).toBeInTheDocument();
+    });
+
+    // Confirm the changes in the diff modal
+    const confirmButton = screen.getByRole('button', {
+      name: 'Confirm Changes',
+    });
+    await userEvent.click(confirmButton);
+
     await waitFor(() => {
       expect(mockValidateFormDataCog).toHaveBeenCalledWith(
         { mockData: 'dataset', sample_files: 'http://example.com/file.tif' },
@@ -252,6 +296,17 @@ describe('EditFormManager', () => {
     const form = screen.getByTestId('dataset-ingestion-form');
     fireEvent.submit(form);
 
+    // Should show diff modal first
+    await waitFor(() => {
+      expect(screen.getByText('Review Changes')).toBeInTheDocument();
+    });
+
+    // Confirm the changes in the diff modal
+    const confirmButton = screen.getByRole('button', {
+      name: 'Confirm Changes',
+    });
+    await userEvent.click(confirmButton);
+
     await waitFor(() => {
       expect(mockValidateFormDataCog).toHaveBeenCalled();
     });
@@ -274,13 +329,123 @@ describe('EditFormManager', () => {
     });
   });
 
+  it('cancels submission when diff modal is cancelled', async () => {
+    render(<EditFormManager {...defaultProps} formType="dataset" />);
+
+    const form = screen.getByTestId('dataset-ingestion-form');
+    fireEvent.submit(form);
+
+    // Should show diff modal first
+    await waitFor(() => {
+      expect(screen.getByText('Review Changes')).toBeInTheDocument();
+    });
+
+    // Cancel the diff modal
+    const cancelButton = screen.getAllByRole('button', { name: 'Cancel' })[0];
+    await userEvent.click(cancelButton);
+
+    // Should not proceed with validation or submission
+    expect(mockValidateFormDataCog).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+    expect(mockSetStatus).not.toHaveBeenCalledWith('loadingGithub');
+  });
+
+  it('renders CollectionIngestionForm when formType is "existingCollection"', () => {
+    render(<EditFormManager {...defaultProps} formType="existingCollection" />);
+    expect(screen.getByTestId('collection-ingestion-form')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('dataset-ingestion-form')
+    ).not.toBeInTheDocument();
+  });
+
+  it('uses correct API endpoint for existingCollection formType', async () => {
+    (fetch as Mock).mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve('Success'),
+    });
+
+    render(<EditFormManager {...defaultProps} formType="existingCollection" />);
+
+    const form = screen.getByTestId('collection-ingestion-form');
+    fireEvent.submit(form);
+
+    // Should show diff modal first
+    await waitFor(() => {
+      expect(screen.getByText('Review Changes')).toBeInTheDocument();
+    });
+
+    // Confirm the changes in the diff modal
+    const confirmButton = screen.getByRole('button', {
+      name: 'Confirm Changes',
+    });
+    await userEvent.click(confirmButton);
+
+    await waitFor(() => {
+      expect(mockSetStatus).toHaveBeenCalledWith('loadingGithub');
+    });
+
+    await waitFor(() => {
+      // Should use /api/existing-collection/[collectionId] endpoint
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/existing-collection/test-collection-id',
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            id: 'test-collection-id',
+            mockData: 'collection',
+          }),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+      expect(mockSetStatus).toHaveBeenCalledWith('success');
+      expect(mockSetFormData).toHaveBeenCalledWith({});
+    });
+  });
+
+  it('does not include gitRef, fileSha, or filePath for existingCollection', async () => {
+    (fetch as Mock).mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve('Success'),
+    });
+
+    render(<EditFormManager {...defaultProps} formType="existingCollection" />);
+
+    const form = screen.getByTestId('collection-ingestion-form');
+    fireEvent.submit(form);
+
+    // Should show diff modal first
+    await waitFor(() => {
+      expect(screen.getByText('Review Changes')).toBeInTheDocument();
+    });
+
+    // Confirm the changes in the diff modal
+    const confirmButton = screen.getByRole('button', {
+      name: 'Confirm Changes',
+    });
+    await userEvent.click(confirmButton);
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalled();
+    });
+
+    // Verify the request body does NOT include gitRef, fileSha, or filePath
+    const fetchCall = (fetch as Mock).mock.calls[0];
+    const requestBody = JSON.parse(fetchCall[1].body);
+
+    expect(requestBody).not.toHaveProperty('gitRef');
+    expect(requestBody).not.toHaveProperty('fileSha');
+    expect(requestBody).not.toHaveProperty('filePath');
+    expect(requestBody).toHaveProperty('id');
+    expect(requestBody).toHaveProperty('mockData');
+  });
+
   it('renders an error message for an invalid formType', () => {
     // @ts-expect-error - Intentionally passing invalid prop for testing
     render(<EditFormManager {...defaultProps} formType="invalid-type" />);
 
     expect(
       screen.getByText(
-        'Invalid formType specified. Please use dataset or collection.'
+        'Invalid formType specified. Please use dataset, collection, or existingCollection.'
       )
     ).toBeInTheDocument();
     expect(
