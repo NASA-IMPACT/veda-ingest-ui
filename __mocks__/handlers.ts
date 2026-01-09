@@ -35,6 +35,8 @@ const mockSession = {
     image: null,
   },
   scopes: ['dataset:update'],
+  allowedTenants: ['tenant1', 'tenant2', 'tenant3'],
+  accessToken: 'mock-access-token',
   expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
 };
 

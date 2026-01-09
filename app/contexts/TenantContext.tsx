@@ -25,34 +25,23 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTenants = async () => {
-      if (status === 'loading') {
-        return;
-      }
-      if (!session) {
-        setAllowedTenants([]);
-        setIsLoading(false);
-        return;
-      }
+    if (status === 'loading') {
+      setIsLoading(true);
+      return;
+    }
 
-      try {
-        setIsLoading(true);
-        const res = await fetch('/api/allowed-tenants');
-        if (res.ok) {
-          const data = (await res.json()) as { tenants?: string[] };
-          const tenants = Array.isArray(data.tenants) ? data.tenants : [];
-          setAllowedTenants(tenants);
-        } else {
-          setAllowedTenants([]);
-        }
-      } catch {
-        setAllowedTenants([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    setIsLoading(false);
 
-    fetchTenants();
+    if (!session) {
+      setAllowedTenants([]);
+      return;
+    }
+
+    const sessionAllowedTenants = (session as any)?.allowedTenants;
+    const tenants = Array.isArray(sessionAllowedTenants)
+      ? sessionAllowedTenants
+      : [];
+    setAllowedTenants(tenants);
   }, [session, status]);
 
   if (isLoading) {

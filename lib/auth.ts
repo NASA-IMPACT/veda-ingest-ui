@@ -38,13 +38,18 @@ if (authDisabled) {
 
   const mockScopes = getMockScopes();
   console.log('Mock scopes:', mockScopes);
-  const mockSession: Session & { scopes?: string[] } = {
+  const mockSession: Session & {
+    scopes?: string[];
+    accessToken?: string;
+    allowedTenants?: string[];
+  } = {
     user: {
       name: 'Mock User',
       email: 'test@example.com',
     },
     expires: '2099-12-31T23:59:59.999Z',
-    tenants: mockTenants,
+    allowedTenants: mockTenants,
+    accessToken: 'mock-access-token-for-development',
     ...(mockScopes.length > 0 ? { scopes: mockScopes } : {}),
   };
 
@@ -94,6 +99,52 @@ if (authDisabled) {
           } else if (typeof rawScopes === 'string') {
             (token as JWT).scopes = rawScopes.split(' ');
           }
+
+          try {
+            if (process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true') {
+              console.log(
+                'Skipping external tenants fetch in test environment'
+              );
+              const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
+              if (mockTenants && mockTenants.trim() !== '') {
+                (token as JWT).allowedTenants = mockTenants
+                  .split(',')
+                  .map((tenant) => tenant.trim())
+                  .filter(Boolean);
+              }
+            } else {
+              const allowedTenantsResponse = await fetch(
+                'https://dev.openveda.cloud/api/ingest/auth/tenants/writable',
+                {
+                  method: 'GET',
+                  headers: {
+                    Authorization: `Bearer ${account.access_token}`,
+                    Accept: 'application/json',
+                  },
+                }
+              );
+              console.log({ allowedTenantsResponse });
+
+              if (allowedTenantsResponse.ok) {
+                const allowedTenantsData = await allowedTenantsResponse.json();
+                console.log(
+                  'Fetched allowed tenants during auth:',
+                  allowedTenantsData.tenants
+                );
+                (token as JWT).allowedTenants =
+                  allowedTenantsData.tenants || [];
+              } else {
+                console.warn(
+                  'Failed to fetch allowed tenants during auth:',
+                  allowedTenantsResponse.status
+                );
+                (token as JWT).allowedTenants = [];
+              }
+            }
+          } catch (error) {
+            console.error('Error fetching allowed tenants during auth:', error);
+            (token as JWT).allowedTenants = [];
+          }
         }
         return token;
       },
@@ -102,7 +153,17 @@ if (authDisabled) {
         const customSession = session as Session & {
           tenants?: string[];
           scopes?: string[];
+          accessToken?: string;
+          allowedTenants?: string[];
         };
+
+        if (customToken.accessToken) {
+          (customSession as any).accessToken = customToken.accessToken;
+        }
+
+        if (customToken.allowedTenants) {
+          customSession.allowedTenants = customToken.allowedTenants as string[];
+        }
 
         // Check if we should use mock tenants instead of real ones
         const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
