@@ -19,8 +19,9 @@ const getMockTenants = (): string[] => {
 const getMockScopes = (): string[] => {
   const mockScopes = process.env.NEXT_PUBLIC_MOCK_SCOPES;
   if (mockScopes && mockScopes.trim() !== '') {
+    // Handle both comma and space separated scopes
     return mockScopes
-      .split(',')
+      .split(/[,\s]+/)
       .map((scope) => scope.trim())
       .filter(Boolean);
   }
