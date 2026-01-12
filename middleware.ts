@@ -153,7 +153,6 @@ export const config = {
     '/retrieve-ingest',
     '/create-ingest',
     '/upload-url',
-    '/allowed-tenants',
     '/existing-collection',
   ],
 };
