@@ -2,6 +2,7 @@ import NextAuth, { type NextAuthConfig, Session } from 'next-auth';
 import KeycloakProvider from 'next-auth/providers/keycloak';
 import { JWT } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
+import { VEDA_BACKEND_URL } from '@/config/env';
 
 const authDisabled = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
@@ -115,7 +116,7 @@ if (authDisabled) {
               }
             } else {
               const allowedTenantsResponse = await fetch(
-                'https://dev.openveda.cloud/api/ingest/auth/tenants/writable',
+                `${VEDA_BACKEND_URL}/ingest/auth/tenants/writable`,
                 {
                   method: 'GET',
                   headers: {
