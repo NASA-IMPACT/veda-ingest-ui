@@ -13,9 +13,7 @@ vi.mock('@/components/layout/AppLayout', () => ({
 }));
 
 const AllProviders = ({ children }: { children: ReactNode }) => {
-  const mockSession = {
-    expires: '1',
-  };
+  const mockSession = null;
 
   const mockTenantContext = {
     allowedTenants: ['test-tenant-1', 'test-tenant-2'],
@@ -23,11 +21,9 @@ const AllProviders = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <SessionProvider session={mockSession}>
-      <TenantContext.Provider value={mockTenantContext}>
-        {children}
-      </TenantContext.Provider>
-    </SessionProvider>
+    <TenantContext.Provider value={mockTenantContext}>
+      {children}
+    </TenantContext.Provider>
   );
 };
 
