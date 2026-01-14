@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth';
+import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import EditExistingCollectionClient from './_components/EditExistingCollectionClient';
 

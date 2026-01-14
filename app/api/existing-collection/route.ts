@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { auth } from '@/auth';
 import { getUserTenants } from '@/lib/serverTenantValidation';
 
 export async function GET(request: NextRequest) {

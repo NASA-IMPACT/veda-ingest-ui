@@ -10,10 +10,10 @@ import {
 } from 'vitest';
 import { GET, PUT } from '@/app/api/existing-collection/[collectionId]/route';
 import { NextRequest } from 'next/server';
-import { auth } from '@/lib/auth';
+import { auth } from '@/auth';
 import { validateTenantAccess } from '@/lib/serverTenantValidation';
 
-vi.mock('@/lib/auth', () => ({
+vi.mock('@/auth', () => ({
   auth: vi.fn(),
 }));
 
