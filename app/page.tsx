@@ -1,7 +1,7 @@
 import '@ant-design/v5-patch-for-react-19';
 import AppLayout from '@/components/layout/Layout';
 import { redirect } from 'next/navigation';
-import { auth } from '@/lib/auth';
+import { auth } from '@/auth';
 
 async function Home() {
   const session = await auth();

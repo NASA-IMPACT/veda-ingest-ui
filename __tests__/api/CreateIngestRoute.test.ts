@@ -12,11 +12,11 @@ import { POST, PUT } from '@/app/api/create-ingest/route';
 import { NextRequest } from 'next/server';
 import UpdatePR from '@/utils/githubUtils/UpdatePR';
 import CreatePR from '@/utils/githubUtils/CreatePR';
-import { auth } from '@/lib/auth';
+import { auth } from '@/auth';
 
 vi.mock('@/utils/githubUtils/UpdatePR');
 vi.mock('@/utils/githubUtils/CreatePR');
-vi.mock('@/lib/auth', () => ({
+vi.mock('@/auth', () => ({
   auth: vi.fn(),
 }));
 

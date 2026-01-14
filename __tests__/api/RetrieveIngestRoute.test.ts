@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeEach, Mock } from 'vitest';
 import { GET } from '@/app/api/retrieve-ingest/route';
 import RetrieveJSON from '@/utils/githubUtils/RetrieveJSON';
 import { NextRequest } from 'next/server';
-import { auth } from '@/lib/auth';
+import { auth } from '@/auth';
 
 vi.mock('@/utils/githubUtils/RetrieveJSON', () => {
   return {
@@ -10,7 +10,7 @@ vi.mock('@/utils/githubUtils/RetrieveJSON', () => {
   };
 });
 
-vi.mock('@/lib/auth', () => ({
+vi.mock('@/auth', () => ({
   auth: vi.fn(),
 }));
 

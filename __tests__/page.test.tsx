@@ -9,7 +9,7 @@ import {
   type Mock,
 } from 'vitest';
 
-vi.mock('@/lib/auth', () => ({
+vi.mock('@/auth', () => ({
   auth: vi.fn(),
 }));
 
@@ -50,7 +50,7 @@ describe('Home component', () => {
   it('redirects to /login if auth is enabled and no session exists', async () => {
     process.env.NEXT_PUBLIC_DISABLE_AUTH = 'false';
 
-    const { auth } = await import('@/lib/auth');
+    const { auth } = await import('@/auth');
     const { redirect } = await import('next/navigation');
 
     (vi.mocked(auth, true) as unknown as Mock).mockResolvedValue(null);
@@ -63,7 +63,7 @@ describe('Home component', () => {
   it('renders content when auth is enabled and session exists', async () => {
     process.env.NEXT_PUBLIC_DISABLE_AUTH = 'false';
 
-    const { auth } = await import('@/lib/auth');
+    const { auth } = await import('@/auth');
     (vi.mocked(auth, true) as unknown as Mock).mockResolvedValue({
       user: 'test-user',
     });
