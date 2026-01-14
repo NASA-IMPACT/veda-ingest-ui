@@ -13,11 +13,11 @@ import {
 } from '@/lib/serverTenantValidation';
 
 // Mock the auth module
-vi.mock('@/lib/auth', () => ({
+vi.mock('@/auth', () => ({
   auth: vi.fn(),
 }));
 
-import { auth } from '@/lib/auth';
+import { auth } from '@/auth';
 
 beforeAll(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
