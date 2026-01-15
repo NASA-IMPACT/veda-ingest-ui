@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { middleware } from '@/middleware';
 
-vi.mock('@/lib/auth', () => ({
+vi.mock('@/auth', () => ({
   auth: vi.fn(),
 }));
 
@@ -23,7 +23,7 @@ vi.mock('next/server', async () => {
   };
 });
 
-import { auth } from '@/lib/auth';
+import { auth } from '@/auth';
 import { NextResponse } from 'next/server';
 
 describe('Middleware', () => {

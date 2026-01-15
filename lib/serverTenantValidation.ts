@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth';
+import { auth } from '@/auth';
 import { NextRequest } from 'next/server';
 
 export interface TenantValidationResult {
