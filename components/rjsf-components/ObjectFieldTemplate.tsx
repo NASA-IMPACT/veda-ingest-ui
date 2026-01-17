@@ -1,6 +1,5 @@
 'use client';
 
-import '@ant-design/v5-patch-for-react-19';
 import React, { useState } from 'react';
 import classNames from 'classnames';
 
@@ -268,7 +267,7 @@ export default function ObjectFieldTemplate<
                                   <div key={errorMessage}>
                                     {' '}
                                     <Alert
-                                      message={errorMessage}
+                                      title={errorMessage}
                                       type="error"
                                       showIcon
                                       style={{ marginBottom: '10px' }}

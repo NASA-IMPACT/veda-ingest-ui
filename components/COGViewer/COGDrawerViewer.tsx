@@ -81,7 +81,6 @@ const COGDrawerViewer: React.FC<COGDrawerViewerProps> = ({
       size="large"
       onClose={onClose}
       open={drawerOpen}
-      width={'80%'}
       footer={
         <div style={{ textAlign: 'center' }}>
           <Button onClick={onClose} style={{ marginRight: 8 }}>

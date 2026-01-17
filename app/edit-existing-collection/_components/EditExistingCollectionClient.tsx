@@ -44,7 +44,7 @@ const EditExistingCollectionClient = () => {
             role="alert"
           >
             <Alert
-              message="Warning: Changes here will affect the published collection."
+              title="Warning: Changes here will affect the published collection."
               type="warning"
               showIcon
               banner

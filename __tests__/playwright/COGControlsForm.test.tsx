@@ -132,9 +132,10 @@ test.describe('COGControlsForm inputs update tile parameters ⚙️', () => {
       ).toBeDisabled();
 
       await test.step(`Open the ${band} Band dropdown and select "Band 4"`, async () => {
-        const bandRDropdown = page.locator(
-          `[data-testid="band-${band}"] .ant-select-selector`
-        );
+        const bandRDropdown = page.getByRole('combobox', {
+          name: `Band (${band})`,
+        });
+        // getByRole('combobox', { name: `Band (${band})` })
         await expect(
           bandRDropdown,
           `Wait for the ${band} Band dropdown to load`
@@ -180,9 +181,7 @@ test.describe('COGControlsForm inputs update tile parameters ⚙️', () => {
 
     //
     await test.step('Change the Colormap dropdown selection to cfastie', async () => {
-      const colormapDropdown = page.locator(
-        '[data-testid="colormap"] .ant-select-selector'
-      );
+      const colormapDropdown = page.getByRole('combobox', { name: 'Colormap' });
       await expect(
         colormapDropdown,
         'Wait for the Colormap dropdown to load'
@@ -272,9 +271,9 @@ test.describe('COGControlsForm inputs update tile parameters ⚙️', () => {
         'update tile layer button should be disabled by default'
       ).toBeDisabled();
 
-      const resamplingDropdown = page.locator(
-        '[data-testid="resampling"] .ant-select-selector'
-      );
+      const resamplingDropdown = page.getByRole('combobox', {
+        name: 'Resampling',
+      });
       await expect(
         resamplingDropdown,
         'Wait for the dropdown to load'

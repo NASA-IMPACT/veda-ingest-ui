@@ -27,7 +27,7 @@ const DatasetsClient = function DatasetsClient() {
               placement="topLeft"
               color={token.colorBgElevated}
               styles={{
-                body: {
+                container: {
                   color: token.colorText,
                   backgroundColor: token.colorBgElevated,
                   border: `1px solid ${token.colorBorder}`,
@@ -78,7 +78,7 @@ const DatasetsClient = function DatasetsClient() {
               placement="topLeft"
               color={token.colorBgElevated}
               styles={{
-                body: {
+                container: {
                   color: token.colorText,
                   backgroundColor: token.colorBgElevated,
                   border: `1px solid ${token.colorBorder}`,

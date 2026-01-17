@@ -1,7 +1,5 @@
 'use client';
 
-import '@ant-design/v5-patch-for-react-19';
-
 import { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Button,
@@ -318,7 +316,7 @@ function CollectionIngestionForm({
 
                 {validationErrors.length > 0 && (
                   <Alert
-                    message="Validation Errors"
+                    title="Validation Errors"
                     description={
                       <ul>
                         {validationErrors.map((error, i) => (

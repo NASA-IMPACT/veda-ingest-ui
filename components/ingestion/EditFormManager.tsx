@@ -217,7 +217,7 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
           </CollectionIngestionForm>
         ) : (
           <Alert
-            message="Invalid formType specified. Please use dataset, collection, or existingCollection."
+            title="Invalid formType specified. Please use dataset, collection, or existingCollection."
             type="error"
             showIcon
           />
@@ -232,11 +232,11 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
         okText="Confirm Changes"
         cancelText="Cancel"
         width={1200}
-        destroyOnHidden={true}
+        destroyOnClose={true}
       >
         <div style={{ marginBottom: 16 }}>
           <Alert
-            message="Review the changes below before submitting"
+            title="Review the changes below before submitting"
             type="info"
             showIcon
           />
@@ -260,7 +260,7 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
         onCancel={handleCogValidationCancel}
         okText="Continue Anyway"
         cancelText="Cancel"
-        destroyOnHidden={true}
+        destroyOnClose={true}
       >
         <p>
           Sample File COG Validation failed. The COG defined at the sample file

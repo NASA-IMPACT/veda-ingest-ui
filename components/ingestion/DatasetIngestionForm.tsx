@@ -1,7 +1,5 @@
 'use client';
 
-import '@ant-design/v5-patch-for-react-19';
-
 import React, { useEffect, useState, FC } from 'react';
 import { Button, Tabs, Spin } from 'antd';
 import { withTheme } from '@rjsf/core';

@@ -167,7 +167,7 @@ const SummariesManager: React.FC<SummariesManagerProps> = ({
         title="Add New Summary"
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
-        destroyOnHidden
+        destroyOnClose
         footer={null} // The form now has its own buttons
       >
         {isModalVisible && (

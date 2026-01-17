@@ -36,7 +36,7 @@ const CollectionsClient = function CollectionsClient() {
               placement="topLeft"
               color={token.colorBgElevated}
               styles={{
-                body: {
+                container: {
                   color: token.colorText,
                   backgroundColor: token.colorBgElevated,
                   border: `1px solid ${token.colorBorder}`,
@@ -70,7 +70,7 @@ const CollectionsClient = function CollectionsClient() {
               placement="topLeft"
               color={token.colorBgElevated}
               styles={{
-                body: {
+                container: {
                   color: token.colorText,
                   backgroundColor: token.colorBgElevated,
                   border: `1px solid ${token.colorBorder}`,
@@ -111,7 +111,7 @@ const CollectionsClient = function CollectionsClient() {
                   placement="topLeft"
                   color={token.colorBgElevated}
                   styles={{
-                    body: {
+                    container: {
                       color: token.colorText,
                       backgroundColor: token.colorBgElevated,
                       border: `1px solid ${token.colorBorder}`,
@@ -191,7 +191,7 @@ const CollectionsClient = function CollectionsClient() {
               placement="topLeft"
               color={token.colorBgElevated}
               styles={{
-                body: {
+                container: {
                   color: token.colorText,
                   backgroundColor: token.colorBgElevated,
                   border: `1px solid ${token.colorBorder}`,
@@ -249,7 +249,7 @@ const CollectionsClient = function CollectionsClient() {
                   placement="topLeft"
                   color={token.colorBgElevated}
                   styles={{
-                    body: {
+                    container: {
                       color: token.colorText,
                       backgroundColor: token.colorBgElevated,
                       border: `1px solid ${token.colorBorder}`,

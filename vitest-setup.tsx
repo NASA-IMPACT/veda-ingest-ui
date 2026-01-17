@@ -3,6 +3,18 @@ import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
 import React from 'react';
 
+// Mock ResizeObserver
+class ResizeObserverMock {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
+
+global.ResizeObserver = ResizeObserverMock as any;
+
+// Also ensure it's available on window
+(window as any).ResizeObserver = ResizeObserverMock;
+
 // Mock AppLayout
 vi.mock('@/components/layout/Layout', () => ({
   __esModule: true,

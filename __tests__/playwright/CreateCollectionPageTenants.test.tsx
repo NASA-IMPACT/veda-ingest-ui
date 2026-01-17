@@ -130,7 +130,7 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
 
       // Verify selection
       await expect(
-        page.locator('.ant-select-selection-item', { hasText: /tenant2/i })
+        page.locator('.ant-select-content-value', { hasText: /tenant2/i })
       ).toBeVisible();
     });
 

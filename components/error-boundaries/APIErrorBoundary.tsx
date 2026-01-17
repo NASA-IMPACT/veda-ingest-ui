@@ -105,7 +105,7 @@ export class APIErrorBoundary extends Component<Props, State> {
       if (this.state.isRetrying) {
         return (
           <Alert
-            message="Retrying..."
+            title="Retrying..."
             description="Please wait while we attempt to recover."
             type="info"
             showIcon
@@ -116,7 +116,7 @@ export class APIErrorBoundary extends Component<Props, State> {
 
       return (
         <Alert
-          message="Operation Failed"
+          title="Operation Failed"
           description={
             <Space direction="vertical" size="middle" style={{ width: '100%' }}>
               <div>{this.getErrorMessage(this.state.error!)}</div>

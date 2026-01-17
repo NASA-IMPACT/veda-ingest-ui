@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 
@@ -97,8 +97,13 @@ describe('SummariesManager', () => {
     // Click the main add button to trigger the modal
     await user.click(screen.getByRole('button', { name: /Add Summary/i }));
 
-    // // Assert that our mocked form is now rendered
-    expect(await screen.findByTestId('add-summary-form')).toBeVisible();
+    // Wait for the modal to open and render content
+    await waitFor(() => {
+      expect(screen.getByTestId('add-summary-form')).toBeInTheDocument();
+    });
+
+    // Assert that our mocked form is now rendered and visible
+    expect(screen.getByTestId('add-summary-form')).toBeVisible();
   });
 
   it('calls onChange with new data when the child form "adds" a summary', async () => {

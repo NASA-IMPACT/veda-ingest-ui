@@ -152,7 +152,7 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
           <CollectionIngestionForm {...childFormProps} />
         ) : (
           <Alert
-            message="Invalid formType specified. Please use dataset or collection."
+            title="Invalid formType specified. Please use dataset or collection."
             type="error"
             showIcon
           />
@@ -166,7 +166,7 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
         onCancel={handleCogValidationCancel}
         okText="Continue Anyway"
         cancelText="Cancel"
-        destroyOnHidden={true}
+        destroyOnClose={true}
       >
         <p>
           Sample File COG Validation failed. The COG defined at the sample file
@@ -182,7 +182,7 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
         onCancel={handleCancel}
         okText="Continue & Submit"
         cancelText="Cancel"
-        destroyOnHidden={true}
+        destroyOnClose={true}
       >
         <p style={{ marginBottom: 8 }}>
           You can add additional information for the Data Services Team to help
@@ -191,7 +191,9 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
         <TextArea
           rows={4}
           value={userComment}
-          onChange={(e) => setUserComment(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            setUserComment(e.target.value)
+          }
           placeholder="e.g., This is a new data type."
           data-testid="user-comment-textarea"
         />

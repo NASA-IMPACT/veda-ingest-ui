@@ -82,7 +82,7 @@ export class TenantErrorBoundary extends Component<Props, State> {
       return (
         <div style={{ padding: '24px', maxWidth: '600px', margin: '0 auto' }}>
           <Alert
-            message={
+            title={
               isAuthError
                 ? 'Authentication Error'
                 : isTenantError
@@ -91,7 +91,7 @@ export class TenantErrorBoundary extends Component<Props, State> {
             }
             description={
               <Space
-                direction="vertical"
+                orientation="vertical"
                 size="large"
                 style={{ width: '100%' }}
               >

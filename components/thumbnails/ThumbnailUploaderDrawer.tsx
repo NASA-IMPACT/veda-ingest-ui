@@ -18,7 +18,7 @@ const ThumbnailUploaderDrawer: React.FC<ThumbnailUploaderDrawerProps> = ({
       placement="right"
       onClose={onClose}
       open={open}
-      width={'80%'}
+      size={'large'}
     >
       <ThumbnailUploader insideDrawer onUploadSuccess={onUploadSuccess} />
     </Drawer>

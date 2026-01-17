@@ -34,7 +34,7 @@ const EditCollectionView: React.FC<EditCollectionViewProps> = ({
   }
 
   if (!formData || Object.keys(formData).length === 0) {
-    return <Alert type="error" message="No collection data found." showIcon />;
+    return <Alert type="error" title="No collection data found." showIcon />;
   }
 
   return (

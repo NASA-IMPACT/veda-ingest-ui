@@ -42,30 +42,43 @@ test.describe('Thumbnail Uploader Page', () => {
     ).toBeVisible();
 
     await test.step('validated image width is shown', async () => {
-      const widthStatistic = page.locator('.ant-statistic').getByText('Width');
+      // Find the Width statistic container and verify its value
+      const widthStatistic = page
+        .locator('.ant-statistic')
+        .filter({ hasText: 'Width' });
       await expect(widthStatistic).toBeVisible();
-      await expect(widthStatistic.locator('..')).toContainText('2,000px');
+      await expect(
+        widthStatistic.locator('.ant-statistic-content-value-int')
+      ).toHaveText('2,000');
     });
 
     await test.step('validated image height is shown', async () => {
       const heightStatistic = page
         .locator('.ant-statistic')
-        .getByText('Height');
+        .filter({ hasText: 'Height' });
       await expect(heightStatistic).toBeVisible();
-      await expect(heightStatistic.locator('..')).toContainText('1,000px');
+      await expect(
+        heightStatistic.locator('.ant-statistic-content-value-int')
+      ).toHaveText('1,000');
     });
 
     await test.step('validated image aspect ratio is shown', async () => {
       const aspectRatioStatistic = page
         .locator('.ant-statistic')
-        .getByText('Aspect Ratio');
+        .filter({ hasText: 'Aspect Ratio' });
       await expect(aspectRatioStatistic).toBeVisible();
-      await expect(aspectRatioStatistic.locator('..')).toContainText('2.00');
+      await expect(
+        aspectRatioStatistic.locator('.ant-statistic-content-value-int')
+      ).toHaveText('2');
     });
     await test.step('validated image file size is shown', async () => {
-      const sizeStatistic = page.locator('.ant-statistic').getByText('Size');
+      const sizeStatistic = page
+        .locator('.ant-statistic')
+        .filter({ hasText: 'Size' });
       await expect(sizeStatistic).toBeVisible();
-      await expect(sizeStatistic.locator('..')).toContainText('412KB');
+      await expect(
+        sizeStatistic.locator('.ant-statistic-content-value-int')
+      ).toHaveText('412');
     });
     await expect(
       page.getByText(
@@ -157,30 +170,42 @@ test.describe('Thumbnail Uploader Page', () => {
     ).toBeVisible();
 
     await test.step('validated image width is shown', async () => {
-      const widthStatistic = page.locator('.ant-statistic').getByText('Width');
+      const widthStatistic = page
+        .locator('.ant-statistic')
+        .filter({ hasText: 'Width' });
       await expect(widthStatistic).toBeVisible();
-      await expect(widthStatistic.locator('..')).toContainText('2,000px');
+      await expect(
+        widthStatistic.locator('.ant-statistic-content-value-int')
+      ).toHaveText('2,000');
     });
 
     await test.step('validated image height is shown', async () => {
       const heightStatistic = page
         .locator('.ant-statistic')
-        .getByText('Height');
+        .filter({ hasText: 'Height' });
       await expect(heightStatistic).toBeVisible();
-      await expect(heightStatistic.locator('..')).toContainText('1,000px');
+      await expect(
+        heightStatistic.locator('.ant-statistic-content-value-int')
+      ).toHaveText('1,000');
     });
 
     await test.step('validated image aspect ratio is shown', async () => {
       const aspectRatioStatistic = page
         .locator('.ant-statistic')
-        .getByText('Aspect Ratio');
+        .filter({ hasText: 'Aspect Ratio' });
       await expect(aspectRatioStatistic).toBeVisible();
-      await expect(aspectRatioStatistic.locator('..')).toContainText('2.00');
+      await expect(
+        aspectRatioStatistic.locator('.ant-statistic-content-value-int')
+      ).toHaveText('2');
     });
     await test.step('validated image file size is shown', async () => {
-      const sizeStatistic = page.locator('.ant-statistic').getByText('Size');
+      const sizeStatistic = page
+        .locator('.ant-statistic')
+        .filter({ hasText: 'Size' });
       await expect(sizeStatistic).toBeVisible();
-      await expect(sizeStatistic.locator('..')).toContainText('412KB');
+      await expect(
+        sizeStatistic.locator('.ant-statistic-content-value-int')
+      ).toHaveText('412');
     });
     await expect(
       page.getByText(
@@ -240,30 +265,43 @@ test.describe('Thumbnail Uploader Page', () => {
     ).toBeVisible();
 
     await test.step('validated image width is shown', async () => {
-      const widthStatistic = page.locator('.ant-statistic').getByText('Width');
+      const widthStatistic = page
+        .locator('.ant-statistic')
+        .filter({ hasText: 'Width' });
+
       await expect(widthStatistic).toBeVisible();
-      await expect(widthStatistic.locator('..')).toContainText('1,280px');
+      await expect(
+        widthStatistic.locator('.ant-statistic-content-value-int')
+      ).toHaveText('1,280');
     });
 
     await test.step('validated image height is shown', async () => {
       const heightStatistic = page
         .locator('.ant-statistic')
-        .getByText('Height');
+        .filter({ hasText: 'Height' });
       await expect(heightStatistic).toBeVisible();
-      await expect(heightStatistic.locator('..')).toContainText('853px');
+      await expect(
+        heightStatistic.locator('.ant-statistic-content-value-int')
+      ).toHaveText('853');
     });
 
     await test.step('validated image aspect ratio is shown', async () => {
       const aspectRatioStatistic = page
         .locator('.ant-statistic')
-        .getByText('Aspect Ratio');
+        .filter({ hasText: 'Aspect Ratio' });
       await expect(aspectRatioStatistic).toBeVisible();
-      await expect(aspectRatioStatistic.locator('..')).toContainText('1.50');
+      await expect(
+        aspectRatioStatistic.locator('.ant-statistic-content-value-int')
+      ).toHaveText('1');
     });
     await test.step('validated image file size is shown', async () => {
-      const sizeStatistic = page.locator('.ant-statistic').getByText('Size');
+      const sizeStatistic = page
+        .locator('.ant-statistic')
+        .filter({ hasText: 'Size' });
       await expect(sizeStatistic).toBeVisible();
-      await expect(sizeStatistic.locator('..')).toContainText('209KB');
+      await expect(
+        sizeStatistic.locator('.ant-statistic-content-value-int')
+      ).toHaveText('209');
     });
     await expect(
       page.getByText(

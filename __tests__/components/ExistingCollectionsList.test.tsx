@@ -205,7 +205,7 @@ describe('ExistingCollectionsList', () => {
 
     // Select nasa tenant - find by closest Select to "Select Tenant" heading
     const tenantSection = screen.getByText('Select Tenant').closest('div');
-    const tenantSelect = tenantSection!.querySelector('.ant-select-selector');
+    const tenantSelect = tenantSection!.querySelector('.ant-select');
     await user.click(tenantSelect!);
 
     // Find nasa option in the dropdown (not in cards)
@@ -300,9 +300,7 @@ describe('ExistingCollectionsList', () => {
     const collectionSection = screen
       .getByText('Select Collection')
       .closest('div');
-    const collectionSelect = collectionSection!.querySelector(
-      '.ant-select-selector'
-    );
+    const collectionSelect = collectionSection!.querySelector('.ant-select');
     await user.click(collectionSelect!);
 
     // Find the option in the dropdown (not the card)
@@ -351,7 +349,7 @@ describe('ExistingCollectionsList', () => {
       .getByText('Select Collection')
       .closest('div');
     const searchInput = collectionSection!.querySelector(
-      '.ant-select-selection-search-input'
+      '.ant-select-input'
     ) as HTMLInputElement;
     await user.click(searchInput);
     await user.type(searchInput, 'Public');
@@ -404,7 +402,7 @@ describe('ExistingCollectionsList', () => {
     });
 
     const tenantSection = screen.getByText('Select Tenant').closest('div');
-    const tenantSelect = tenantSection!.querySelector('.ant-select-selector');
+    const tenantSelect = tenantSection!.querySelector('.ant-select');
     await user.click(tenantSelect!);
 
     await waitFor(() => {
