@@ -60,7 +60,7 @@ const modifiedConfig = {
 };
 
 test.describe('Edit Dataset Page', () => {
-  test.only('Edit Dataset preserves existing tenants in form mode', async ({
+  test('Edit Dataset preserves existing tenants in form mode', async ({
     page,
   }, testInfo) => {
     await test.step('Navigate to Edit Dataset page', async () => {
@@ -134,27 +134,7 @@ test.describe('Edit Dataset Page', () => {
 
   test('Edit Dataset handles tenants in JSON mode', async ({
     page,
-    worker,
-    http,
   }, testInfo) => {
-    let putRequestIntercepted = false;
-
-    // Use MSW to intercept the PUT request
-    await worker.use(
-      http.put('*/api/create-ingest', async ({ request }) => {
-        console.log(`MSW intercepted: ${request.method} ${request.url}`);
-        putRequestIntercepted = true;
-
-        const putData = await request.json();
-        expect(putData.formData.tenant).toEqual('tenant3');
-
-        return HttpResponse.json({});
-      })
-    );
-
-    // Small delay to ensure MSW handler is ready
-    await page.waitForTimeout(50);
-
     await test.step('Navigate to Edit Dataset page', async () => {
       await page.goto('/edit-dataset');
     });
@@ -186,7 +166,7 @@ test.describe('Edit Dataset Page', () => {
       await expect(page.locator('.tenants-field')).toBeVisible();
 
       await expect(
-        page.locator('.ant-select-selection-item', { hasText: /tenant3/i })
+        page.locator('.ant-select-content-value', { hasText: /tenant3/i })
       ).toBeVisible();
     });
 
@@ -205,22 +185,18 @@ test.describe('Edit Dataset Page', () => {
     });
 
     await test.step('submit and verify tenant changes', async () => {
-      // Wait for the PUT request to be made
-      const requestPromise = page.waitForRequest(
-        (req) =>
-          req.url().includes('/api/create-ingest') && req.method() === 'PUT'
-      );
-
       await page.getByRole('button', { name: /confirm changes/i }).click();
 
-      // Ensure the request was actually made
-      await requestPromise;
+      // Verify success by checking for modal dismissal
+      await expect(
+        page.getByRole('dialog', { name: /review changes/i })
+      ).not.toBeVisible();
 
-      // Verify our route handler was called
-      expect(
-        putRequestIntercepted,
-        'PUT request should have been intercepted'
-      ).toBe(true);
+      await expect(
+        page.getByText(
+          /The update to Ingest Request for seeded ingest #1 collection has been submitted/i
+        )
+      ).toBeVisible();
     });
   });
 

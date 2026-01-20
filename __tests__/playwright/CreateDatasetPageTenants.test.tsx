@@ -197,7 +197,7 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
 
       // Verify selections
       await expect(
-        page.locator('.ant-select-selection-item', { hasText: /tenant1/i })
+        page.locator('.ant-select-content-value', { hasText: /tenant1/i })
       ).toBeVisible();
 
       const selectedTenantScreenshot = await page.screenshot({

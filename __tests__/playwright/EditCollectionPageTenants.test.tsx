@@ -267,7 +267,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       await expect(page.locator('.tenants-field')).toBeVisible();
 
       await expect(
-        page.locator('.ant-select-selection-item', { hasText: /tenant3/i })
+        page.locator('.ant-select-content-value', { hasText: /tenant3/i })
       ).toBeVisible();
     });
 
