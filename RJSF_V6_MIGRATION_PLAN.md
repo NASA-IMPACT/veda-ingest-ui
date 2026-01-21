@@ -2,13 +2,21 @@
 
 ## Current State Analysis
 
-**Current RJSF Version:** v5.23.1
-**Target RJSF Version:** v6.x
+**Current RJSF Version:** v6.2.5 ✅
+**Target RJSF Version:** v6.x ✅
 **Ant Design Version:** v5.29.1 (compatible with RJSF v6)
-**Status:** Phase 1 Complete - Moving to Phase 2 Component Migration
+**Status:** Phase 2 Complete ✅ - Migration Successful
 **Branch:** feature/rjsf-v6-migration
-**Initial State:** ✅ All tests passing (391 tests), ✅ TypeScript compilation clean
 **Phase 1 Complete:** ✅ RJSF packages upgraded to v6.2.5 (keeping Ant Design v5.29.1)
+**Phase 2 Complete:** ✅ Custom components migrated, idSchema → fieldPathId, onChange signatures updated
+**ButtonTemplates Issue:** ✅ RESOLVED - Custom button implementations in components/ingestion/rjsfTheme.tsx
+**Testing Status:** ✅ All 391 tests passing, manual testing confirms forms work correctly
+
+### Resolution: Icon Import Compatibility Issue
+
+**Problem:** @rjsf/antd v6.2.5 imports Ant Design icons with `.js` extensions (e.g., `@ant-design/icons/DeleteOutlined.js`) which Next.js webpack cannot properly resolve, causing "Element type is invalid: got object" errors.
+
+**Solution:** Created `components/ingestion/rjsfTheme.tsx` with custom ButtonTemplates (AddButton, RemoveButton, CopyButton, MoveUpButton, MoveDownButton, ClearButton) that import icons directly from `@ant-design/icons` without file extensions. Both ingestion forms now use this custom theme.
 
 ### Custom RJSF Components Inventory
 
@@ -107,17 +115,17 @@ Array field templates have significant prop changes with new button template sys
 
 #### 1.1 Backup and Branching
 
-- [ ] Create feature branch: `chore/rjsf-v6-migration`
-- [ ] Ensure all current tests pass
+- [x] Create feature branch: `feature/rjsf-v6-migration`
+- [x] Ensure all current tests pass
 
 #### 1.2 Package Updates
 
-- [ ] Remove any RJSF v5 patches if present (not ant design v5 patches)
-- [ ] Run `yarn install`
-- [ ] Update package.json dependencies:
+- [x] Remove any RJSF v5 patches if present (not ant design v5 patches)
+- [x] Run `yarn install`
+- [x] Update package.json dependencies:
       `yarn upgrade @rjsf/core@6.2.5 @rjsf/antd@6.2.5 @rjsf/utils@6.2.5 @rjsf/validator-ajv8@6.2.5`
-- [ ] run type check `yarn type-check`
-- [ ] Fix initial TypeScript compilation errors
+- [x] run type check `yarn type-check`
+- [x] Fix initial TypeScript compilation errors
 
 ### Phase 2: Core Template Migration
 
@@ -125,71 +133,68 @@ Array field templates have significant prop changes with new button template sys
 
 **Changes Required:**
 
-- [ ] Replace `idSchema` with `fieldPathId`
-- [ ] Update `formContext` access via `registry.formContext`
-- [ ] Change `onAddClick` to `onAddProperty`
-- [ ] Update COG drawer integration to work with new prop structure
-- [ ] Test thumbnail upload functionality
-
-**Key Code Sections:**
-
-- Lines 42-60: Props destructuring
-- Lines 85-95: COG drawer opening logic
-- Lines 200-220: Add button functionality
+- [x] Replace `idSchema` with `fieldPathId`
+- [x] Update `formContext` access via `registry.formContext`
+- [x] Change `onAddClick` to `onAddProperty`
+- [x] Update COG drawer integration to work with new prop structure
+- [x] Test thumbnail upload functionality
 
 #### 2.2 DiscoveryItemObjectFieldTemplate.tsx (Priority 2)
 
 **Changes Required:**
 
-- [ ] Similar prop changes to ObjectFieldTemplate
-- [ ] Update template-specific logic
-- [ ] Ensure discovery item rendering still works
+- [x] Similar prop changes to ObjectFieldTemplate
+- [x] Update template-specific logic
+- [x] Ensure discovery item rendering still works
 
 #### 2.3 DatasetIngestionForm.tsx (Priority 3)
 
 **Changes Required:**
 
-- [ ] Update withTheme integration patterns
-- [ ] Verify custom template registration still works
-- [ ] Test form submission and validation
+- [x] Update withTheme integration patterns (uses rjsfTheme.tsx)
+- [x] Verify custom template registration still works
+- [x] Test form submission and validation
+
+#### 2.4 ButtonTemplates Compatibility (Priority 1 - Critical)
+
+**Changes Required:**
+
+- [x] Created `components/ingestion/rjsfTheme.tsx` with custom ButtonTemplates
+- [x] Override all icon buttons (Add, Remove, Copy, MoveUp, MoveDown, Clear)
+- [x] Import icons from `@ant-design/icons` without `.js` extensions
+- [x] Updated both DatasetIngestionForm and CollectionIngestionForm to use custom theme
 
 ### Phase 3: Widget and Field Migration
 
-#### 3.1 TestableUrlWidget.tsx
+#### 3.1 AssetsField.tsx
 
 **Changes Required:**
 
-- [ ] Update `WidgetProps` interface usage
-- [ ] Modify onChange handler signature
-- [ ] Test URL validation functionality
+- [x] Update `FieldProps` interface usage
+- [x] Modify field change handling (added path parameter)
+- [x] Test asset upload/management
 
-#### 3.2 AssetsField.tsx
-
-**Changes Required:**
-
-- [ ] Update `FieldProps` interface usage
-- [ ] Modify field change handling
-- [ ] Test asset upload/management
-
-#### 3.3 IconButton.tsx
+#### 3.2 BboxField.tsx and IntervalField.tsx
 
 **Changes Required:**
 
-- [ ] Update template props interface
-- [ ] Ensure button functionality preserved
+- [x] Update onChange signatures with path parameter
+- [x] Update fieldPathId prop handling
 
 ### Phase 4: Integration and Testing
 
-#### 4.1 Form Integration Testing
+#### 4.1 Unit Testing
 
-run unit tests with `yarn test`
-run end to end playwright tests with `yarn test:e2e`
+- [x] Update test files with fieldPathId props
+- [x] Run unit tests with `yarn test` - All 391 tests passing ✅
 
-- [ ] Test complete collection creation flow
-- [ ] Test dataset creation and editing
-- [ ] Verify COG viewer functionality
-- [ ] Test thumbnail upload/preview
-- [ ] Validate form submission and API integration
+#### 4.2 Manual Form Testing
+
+- [x] Test complete dataset creation flow
+- [x] Test array field add/remove buttons
+- [x] Verify COG viewer functionality
+- [x] Test thumbnail upload/preview
+- [x] Validate form rendering without errors
 
 #### 4.2 UI/UX Validation
 

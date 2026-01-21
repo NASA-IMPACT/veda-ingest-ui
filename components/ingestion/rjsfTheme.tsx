@@ -43,7 +43,14 @@ function IconButton<
   S extends RJSFSchema = RJSFSchema,
   F extends GenericObjectType = any,
 >(props: IconButtonProps<T, S, F>) {
-  const { iconType = 'default', icon, onClick, ...otherProps } = props;
+  const {
+    iconType = 'default',
+    icon,
+    onClick,
+    uiSchema,
+    registry,
+    ...otherProps
+  } = props;
 
   return (
     <Button
