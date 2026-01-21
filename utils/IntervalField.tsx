@@ -9,7 +9,7 @@ dayjs.extend(require('dayjs/plugin/utc'));
 dayjs.extend(require('dayjs/plugin/timezone'));
 
 const IntervalField: React.FC<FieldProps> = (props) => {
-  const { formData, onChange, disabled, readonly, idSchema } = props;
+  const { formData, onChange, disabled, readonly, fieldPathId } = props;
 
   // Ensure formData is an array, default to [null, null] if undefined
   const intervalValue =
@@ -23,7 +23,7 @@ const IntervalField: React.FC<FieldProps> = (props) => {
     newIntervalValue[0] = date
       ? date.utc().format('YYYY-MM-DD HH:mm:ss+00:00')
       : null;
-    onChange(newIntervalValue);
+    onChange(newIntervalValue, fieldPathId.path);
   };
 
   const handleEndDateChange = (date: dayjs.Dayjs | null) => {
@@ -31,13 +31,13 @@ const IntervalField: React.FC<FieldProps> = (props) => {
     newIntervalValue[1] = date
       ? date.utc().format('YYYY-MM-DD HH:mm:ss+00:00')
       : null;
-    onChange(newIntervalValue);
+    onChange(newIntervalValue, fieldPathId.path);
   };
 
   const displayFormat = 'YYYY-MM-DD HH:mm:ss';
 
   return (
-    <div id={idSchema.$id}>
+    <div id={fieldPathId.$id}>
       <Row gutter={[8, 8]}>
         <Col span={24}>
           <Row gutter={[8, 8]}>
