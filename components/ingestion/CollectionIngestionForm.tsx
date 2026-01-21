@@ -15,8 +15,6 @@ import {
   Space,
   Spin,
 } from 'antd';
-import { withTheme } from '@rjsf/core';
-import { Theme as AntDTheme } from '@rjsf/antd';
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
 
@@ -37,8 +35,7 @@ import SummariesManager from '@/components/rjsf-components/SummariesManager';
 
 import staticBaseSchema from '@/FormSchemas/collections/collectionSchema.json';
 import uiSchema from '@/FormSchemas/collections/uischema.json';
-
-const Form = withTheme(AntDTheme);
+import { Form } from './rjsfTheme';
 
 const customFields = {
   BboxField: BboxField,
