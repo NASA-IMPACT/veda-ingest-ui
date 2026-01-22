@@ -19,7 +19,7 @@
 import React from 'react';
 import { withTheme } from '@rjsf/core';
 import { Theme as AntDTheme } from '@rjsf/antd';
-import { Button } from 'antd';
+import { Alert, Button, List, Space } from 'antd';
 import {
   ArrowDownOutlined,
   ArrowUpOutlined,
@@ -27,8 +27,10 @@ import {
   DeleteOutlined,
   PlusCircleOutlined,
   CloseOutlined,
+  ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import {
+  ErrorListProps,
   IconButtonProps,
   RJSFSchema,
   TemplatesType,
@@ -176,6 +178,38 @@ function ClearButton<
   );
 }
 
+// Custom ErrorList with correct icon imports for Next.js
+function ErrorList<
+  T = any,
+  S extends RJSFSchema = RJSFSchema,
+  F extends GenericObjectType = any,
+>(props: ErrorListProps<T, S, F>) {
+  const { errors, registry } = props;
+  const { translateString } = registry;
+
+  const renderErrors = () => (
+    <List className="list-group" size="small">
+      {errors.map((error, index) => (
+        <List.Item key={index}>
+          <Space>
+            <ExclamationCircleOutlined />
+            {error.stack}
+          </Space>
+        </List.Item>
+      ))}
+    </List>
+  );
+
+  return (
+    <Alert
+      className="panel panel-danger errors"
+      description={renderErrors()}
+      message={translateString(TranslatableString.ErrorsLabel)}
+      type="error"
+    />
+  );
+}
+
 const baseTemplates = (AntDTheme.templates ?? {}) as TemplatesType<
   any,
   RJSFSchema,
@@ -195,6 +229,7 @@ const FixedAntDTheme = {
       SubmitButton: baseTemplates.ButtonTemplates?.SubmitButton,
       ClearButton,
     },
+    ErrorListTemplate: ErrorList,
   } as TemplatesType<any, RJSFSchema, any>,
 };
 
