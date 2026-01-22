@@ -43,10 +43,9 @@ export default function ObjectFieldTemplate<
   const {
     description,
     disabled,
-    formContext,
     formData,
-    idSchema,
-    onAddClick,
+    fieldPathId,
+    onAddProperty,
     properties,
     readonly,
     required,
@@ -55,6 +54,7 @@ export default function ObjectFieldTemplate<
     title,
     uiSchema,
   } = props;
+  const formContext = registry.formContext;
 
   const [errorMessage, setErrorMessage] = useState('');
   const [cogDrawerOpen, setCOGDrawerOpen] = useState(false);
@@ -163,9 +163,9 @@ export default function ObjectFieldTemplate<
 
   const isDashboardField = (element: ObjectFieldTemplatePropertyType) =>
     element.name === 'dashboard' &&
-    element.content?.props?.idSchema?.$id.includes('renders');
+    element.content?.props?.fieldPathId?.$id.includes('renders');
   const isDiscoveryItem =
-    idSchema.$id.startsWith('root_discovery_items_') &&
+    fieldPathId.$id.startsWith('root_discovery_items_') &&
     schema.type === 'object';
 
   if (isDiscoveryItem) {
@@ -185,12 +185,12 @@ export default function ObjectFieldTemplate<
 
         return (
           <>
-            <fieldset id={idSchema.$id}>
+            <fieldset id={fieldPathId.$id}>
               <Row gutter={rowGutter}>
                 {title && (
                   <Col className={labelColClassName} span={24}>
                     <TitleFieldTemplate
-                      id={titleId<T>(idSchema)}
+                      id={titleId(fieldPathId)}
                       title={title}
                       required={required}
                       schema={schema}
@@ -202,7 +202,7 @@ export default function ObjectFieldTemplate<
                 {description && (
                   <Col span={24} style={DESCRIPTION_COL_STYLE}>
                     <DescriptionFieldTemplate
-                      id={descriptionId<T>(idSchema)}
+                      id={descriptionId(fieldPathId)}
                       description={description}
                       schema={schema}
                       uiSchema={uiSchema}
@@ -217,10 +217,11 @@ export default function ObjectFieldTemplate<
                           (p) => p.name === row_item
                         );
                         if (element) {
+                          const fieldId =
+                            element.content?.props?.fieldPathId?.$id;
                           const isAssetsThumbnailHrefField =
                             element.name === 'href' &&
-                            element.content?.props?.idSchema?.$id ===
-                              'root_assets_thumbnail_href';
+                            fieldId === 'root_assets_thumbnail';
                           return (
                             <Col key={element.name} span={ui_row[row_item]}>
                               {isAssetsThumbnailHrefField ? (
@@ -298,7 +299,7 @@ export default function ObjectFieldTemplate<
                       <AddButton
                         className="object-property-expand"
                         disabled={disabled || readonly}
-                        onClick={onAddClick(schema)}
+                        onClick={onAddProperty}
                         uiSchema={uiSchema}
                         registry={registry}
                       />

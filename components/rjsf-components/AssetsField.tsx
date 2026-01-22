@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { FieldProps, RJSFSchema, IdSchema } from '@rjsf/utils';
+import { FieldProps, RJSFSchema, FieldPathId } from '@rjsf/utils';
 import { Button, Row, Col, Card, Tooltip } from 'antd';
 import { PlusCircleOutlined } from '@ant-design/icons';
 import EditableAssetRow from './EditableAssetRow';
@@ -9,15 +9,15 @@ const AssetsField: React.FC<FieldProps> = (props) => {
     onChange,
     schema,
     uiSchema,
-    idSchema,
+    fieldPathId,
     registry,
     disabled,
     readonly,
-    formContext,
     title,
     required,
     description,
   } = props;
+  const formContext = registry.formContext;
 
   const { SchemaField } = registry.fields;
   const { TitleFieldTemplate, DescriptionFieldTemplate } = registry.templates;
@@ -64,16 +64,16 @@ const AssetsField: React.FC<FieldProps> = (props) => {
     }
 
     newFormData[newKey] = newAssetValue;
-    onChange(newFormData);
-  }, [formData, onChange, generateUniqueKey, schema]);
+    onChange(newFormData, fieldPathId.path);
+  }, [formData, onChange, generateUniqueKey, schema, fieldPathId]);
 
   const handleRemoveAsset = useCallback(
     (keyToRemove: string) => () => {
       const newFormData = { ...formData };
       delete newFormData[keyToRemove];
-      onChange(newFormData);
+      onChange(newFormData, fieldPathId.path);
     },
-    [formData, onChange]
+    [formData, onChange, fieldPathId]
   );
 
   const handleKeyNameChange = useCallback(
@@ -82,7 +82,7 @@ const AssetsField: React.FC<FieldProps> = (props) => {
         !newKey.trim() ||
         (newKey !== oldKey && formData && formData.hasOwnProperty(newKey))
       ) {
-        onChange({ ...formData });
+        onChange({ ...formData }, fieldPathId.path);
         return;
       }
       if (oldKey === newKey) return;
@@ -93,9 +93,9 @@ const AssetsField: React.FC<FieldProps> = (props) => {
         return acc;
       }, {} as any);
 
-      onChange(newFormData);
+      onChange(newFormData, fieldPathId.path);
     },
-    [formData, onChange]
+    [formData, onChange, fieldPathId]
   );
 
   const assetDetailsSchema: RJSFSchema =
@@ -104,9 +104,9 @@ const AssetsField: React.FC<FieldProps> = (props) => {
       : {};
 
   return (
-    <div id={idSchema.$id}>
+    <div id={fieldPathId.$id}>
       <TitleFieldTemplate
-        id={idSchema.$id + '__title'}
+        id={fieldPathId.$id + '__title'}
         title={title ?? schema.title ?? ''}
         required={required}
         schema={schema}
@@ -114,7 +114,7 @@ const AssetsField: React.FC<FieldProps> = (props) => {
         registry={registry}
       />
       <DescriptionFieldTemplate
-        id={idSchema.$id + '__description'}
+        id={fieldPathId.$id + '__description'}
         description={description ?? schema.description}
         schema={schema}
         uiSchema={uiSchema}
@@ -122,9 +122,9 @@ const AssetsField: React.FC<FieldProps> = (props) => {
       />
 
       {orderedAssetKeys.map((key: string, index: number) => {
-        const assetIdSchema: IdSchema = {
-          ...(idSchema as any)[key],
-          $id: `${idSchema.$id}_${key}`,
+        const assetIdSchema: FieldPathId = {
+          $id: `${fieldPathId.$id}_${key}`,
+          path: [...fieldPathId.path, key],
         };
         const assetFormData = formData?.[key] ?? {};
 
@@ -143,10 +143,13 @@ const AssetsField: React.FC<FieldProps> = (props) => {
                 {...props}
                 schema={assetDetailsSchema}
                 uiSchema={uiSchema?.[key] || {}}
-                idSchema={assetIdSchema}
+                fieldPathId={assetIdSchema}
                 formData={assetFormData}
                 onChange={(newAssetValue) => {
-                  onChange({ ...formData, [key]: newAssetValue });
+                  onChange(
+                    { ...formData, [key]: newAssetValue },
+                    fieldPathId.path
+                  );
                 }}
                 name={key}
               />

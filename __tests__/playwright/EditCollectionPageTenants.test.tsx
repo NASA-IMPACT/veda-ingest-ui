@@ -250,7 +250,9 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
         tenant: 'tenant3',
       };
 
-      await expect(page.locator('.tenants-field')).toBeVisible();
+      await expect(
+        page.getByRole('combobox', { name: 'Tenants' })
+      ).toBeVisible();
 
       await page.getByRole('tab', { name: /manual json edit/i }).click();
 
@@ -264,7 +266,9 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
     });
 
     await test.step('verify tenant changes in form view', async () => {
-      await expect(page.locator('.tenants-field')).toBeVisible();
+      await expect(
+        page.getByRole('combobox', { name: 'Tenants' })
+      ).toBeVisible();
 
       await expect(
         page.locator('.ant-select-selection-item', { hasText: /tenant3/i })
