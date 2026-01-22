@@ -114,7 +114,7 @@ test.describe('Edit Dataset Page', () => {
       await page.keyboard.press('Escape');
     });
 
-    page.getByRole('button', { name: /submit/i }).click();
+    await page.getByRole('button', { name: /submit/i }).click();
 
     await test.step('review changes in diff modal', async () => {
       await expect(
@@ -209,7 +209,7 @@ test.describe('Edit Dataset Page', () => {
       ).toBeVisible();
     });
 
-    page.getByRole('button', { name: /submit/i }).click();
+    await page.getByRole('button', { name: /submit/i }).click();
 
     await test.step('review changes in diff modal', async () => {
       await expect(
