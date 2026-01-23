@@ -195,7 +195,7 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
       // Close dropdown
       await page.keyboard.press('Escape');
 
-      // Verify selections (Ant Design select renders value in .ant-select-selection-item)
+      // Verify selections
       await expect(
         page
           .locator('.ant-select', {
