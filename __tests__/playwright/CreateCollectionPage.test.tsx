@@ -203,6 +203,115 @@ test.describe('Create Collection Page', () => {
     ).toBeVisible();
   });
 
+  test.only('Create Collection handles manually entered assets', async ({
+    page,
+  }, testInfo) => {
+    const userComment = 'This comment was entered in the VEDA Ingest UI';
+    // Intercept the POST request to validate its payload
+    await page.route('**/create-dataset', async (route, request) => {
+      if (request.method() === 'POST') {
+        const postData = request.postDataJSON();
+
+        expect(
+          postData.ingestionType,
+          'Ingestion Type is included in POST data'
+        ).toBe('collection');
+        expect(
+          postData.data,
+          `Collection cofig data is included in POST data`
+        ).toEqual(expect.objectContaining(requiredCollectionConfig));
+
+        expect(
+          postData.userComment,
+          'user comment is included in POST data'
+        ).toBe(userComment);
+
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ githubURL: MOCK_GITHUB_URL }),
+        });
+      } else {
+        await route.continue();
+      }
+    });
+
+    await test.step('Navigate to the Create Collection page', async () => {
+      await page.goto('/create-collection');
+    });
+
+    await test.step('switch to manual json edit tab', async () => {
+      await page.getByRole('tab', { name: /manual json edit/i }).click();
+    });
+
+    await expect(
+      page.getByRole('button', { name: /apply changes/i }),
+      'Apply Changes should be disabled if no changes are made'
+    ).toBeDisabled();
+
+    await test.step('paste a JSON with valid collection config', async () => {
+      const { assets, ...configWithoutAssets } = requiredCollectionConfig;
+      await page
+        .getByTestId('json-editor')
+        .fill(JSON.stringify(configWithoutAssets));
+
+      await page.getByRole('button', { name: /apply changes/i }).click();
+    });
+
+    await test.step('manually add asset via form', async () => {
+      // Switch to form tab
+      await page.getByRole('tab', { name: /^form$/i }).click();
+
+      // Click the "Add Asset" button
+      await page.getByRole('button', { name: /add asset/i }).click();
+
+      // Rename the asset from "new_asset" to "thumbnail"
+      const assetKeyInput = page.getByRole('textbox', {
+        name: 'Asset key (e.g., thumbnail)',
+      });
+      await assetKeyInput.clear();
+      await assetKeyInput.fill('thumbnail');
+      await assetKeyInput.blur();
+
+      // Fill in asset properties
+      await page
+        .getByRole('textbox', { name: /Asset reference/i })
+        .fill(requiredCollectionConfig.assets.thumbnail.href);
+      await page
+        .getByRole('textbox', { name: /Asset title/i })
+        .fill(requiredCollectionConfig.assets.thumbnail.title);
+      await page
+        .getByRole('textbox', { name: /Asset description/i })
+        .fill(requiredCollectionConfig.assets.thumbnail.description);
+      await page
+        .getByRole('textbox', { name: /Asset type/i })
+        .fill(requiredCollectionConfig.assets.thumbnail.type);
+
+      // Add role by clicking "Add Item" button for roles array
+      await page.locator('#root_assets_thumbnail_roles__add').click();
+
+      // Fill in the role value
+      const roleInput = page.getByRole('textbox', { name: /Asset roles-/i });
+      await roleInput.fill(requiredCollectionConfig.assets.thumbnail.roles[0]);
+    });
+
+    await test.step('validate that form tab displays with pasted json values now populated in form', async () => {
+      await validateCollectionFormFields(page, requiredCollectionConfig);
+    });
+
+    await test.step('submit form and validate that POST body values match pasted config values', async () => {
+      await page.getByRole('button', { name: /submit/i }).click();
+    });
+    await test.step('add comment and continue', async () => {
+      await page.getByTestId('user-comment-textarea').fill(userComment);
+      await page.getByRole('button', { name: /continue & submit/i }).click();
+    });
+
+    await expect(
+      page.getByRole('dialog', { name: /Ingestion Request Submitted/i })
+    ).toBeVisible();
+  });
+
   test('Create Collection allows extra fields with toggle enabled', async ({
     page,
   }, testInfo) => {
