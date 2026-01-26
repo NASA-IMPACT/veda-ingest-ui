@@ -156,9 +156,11 @@ describe('AssetsField', () => {
     fireEvent.click(updateButtons[0]);
 
     expect(mockOnChange).toHaveBeenCalledTimes(1);
-    const updatedFormData = mockOnChange.mock.calls[0][0];
+    const updatedAsset = mockOnChange.mock.calls[0][0];
+    const updatedPath = mockOnChange.mock.calls[0][1];
 
-    expect(updatedFormData.thumbnail.title).toBe('Updated Title');
+    expect(updatedAsset.title).toBe('Updated Title');
+    expect(updatedPath).toEqual(['assets', 'thumbnail']);
   });
 
   it('should handle adding more than one new asset', () => {

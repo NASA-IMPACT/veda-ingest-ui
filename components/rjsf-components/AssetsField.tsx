@@ -145,13 +145,11 @@ const AssetsField: React.FC<FieldProps> = (props) => {
                 uiSchema={uiSchema?.[key] || {}}
                 fieldPathId={assetIdSchema}
                 formData={assetFormData}
-                onChange={(newAssetValue) => {
-                  onChange(
-                    { ...formData, [key]: newAssetValue },
-                    fieldPathId.path
-                  );
+                onChange={(newAssetValue, childPath) => {
+                  onChange(newAssetValue, childPath || assetIdSchema.path);
                 }}
                 name={key}
+                required={false}
               />
             </div>
           </Card>
