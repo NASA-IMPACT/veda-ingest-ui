@@ -235,8 +235,12 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
     await test.step('verify tenants persist when switching back to form', async () => {
       await page.getByRole('tab', { name: /form/i }).click();
       await expect(
-        page.locator('.tenants-field').getByText('tenant3')
-      ).toBeVisible();
+        page
+          .locator('.ant-select', {
+            has: page.getByRole('combobox', { name: /tenant/i }),
+          })
+          .locator('.ant-select-selection-item')
+      ).toHaveText(/tenant3/i);
     });
 
     await test.step('submit and verify tenants in request', async () => {

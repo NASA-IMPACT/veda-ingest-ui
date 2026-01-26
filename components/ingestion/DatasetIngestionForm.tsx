@@ -4,8 +4,6 @@ import '@ant-design/v5-patch-for-react-19';
 
 import React, { useEffect, useState, FC } from 'react';
 import { Button, Tabs, Spin } from 'antd';
-import { withTheme } from '@rjsf/core';
-import { Theme as AntDTheme } from '@rjsf/antd';
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
 import { WidgetProps } from '@rjsf/utils';
@@ -22,8 +20,7 @@ import uiSchema from '@/FormSchemas/datasets/uischema.json';
 import { TestableUrlWidget } from '@/components/rjsf-components/TestableUrlWidget';
 
 import { useTenants } from '@/hooks/useTenants';
-
-const Form = withTheme(AntDTheme);
+import { Form } from './rjsfTheme';
 
 // --- Adapter Component ---
 // This component accepts RJSF's props and translates them to what CodeEditorWidget expects.

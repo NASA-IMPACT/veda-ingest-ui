@@ -114,7 +114,7 @@ test.describe('Edit Dataset Page', () => {
       await page.keyboard.press('Escape');
     });
 
-    page.getByRole('button', { name: /submit/i }).click();
+    await page.getByRole('button', { name: /submit/i }).click();
 
     await test.step('review changes in diff modal', async () => {
       await expect(
@@ -184,7 +184,9 @@ test.describe('Edit Dataset Page', () => {
         tenant: 'tenant3',
       };
 
-      await expect(page.locator('.tenants-field')).toBeVisible();
+      await expect(
+        page.getByRole('combobox', { name: 'Tenants' })
+      ).toBeVisible();
 
       await page.getByRole('tab', { name: /manual json edit/i }).click();
 
@@ -198,14 +200,16 @@ test.describe('Edit Dataset Page', () => {
     });
 
     await test.step('verify tenant changes in form view', async () => {
-      await expect(page.locator('.tenants-field')).toBeVisible();
+      await expect(
+        page.getByRole('combobox', { name: 'Tenants' })
+      ).toBeVisible();
 
       await expect(
         page.locator('.ant-select-selection-item', { hasText: /tenant3/i })
       ).toBeVisible();
     });
 
-    page.getByRole('button', { name: /submit/i }).click();
+    await page.getByRole('button', { name: /submit/i }).click();
 
     await test.step('review changes in diff modal', async () => {
       await expect(

@@ -3,7 +3,7 @@ import { FieldProps } from '@rjsf/utils';
 import { InputNumber, Row, Col } from 'antd';
 
 const BboxField: React.FC<FieldProps> = (props) => {
-  const { formData, onChange, disabled, readonly, idSchema } = props;
+  const { formData, onChange, disabled, readonly, fieldPathId } = props;
 
   const bboxValue =
     Array.isArray(formData) && formData.length === 4
@@ -20,13 +20,13 @@ const BboxField: React.FC<FieldProps> = (props) => {
       const newBboxValue = [...currentFormData];
       newBboxValue[index] = newValue;
 
-      onChange(newBboxValue);
+      onChange(newBboxValue, fieldPathId.path);
     },
-    [props.formData, onChange, idSchema.$id]
+    [props.formData, onChange, fieldPathId]
   );
 
   return (
-    <div id={idSchema.$id} style={{ marginBottom: '16px' }}>
+    <div id={fieldPathId.$id} style={{ marginBottom: '16px' }}>
       <Row gutter={[8, 8]} style={{ marginTop: '8px' }}>
         {/* Column for X values (xmin, xmax) */}
         <Col span={12}>

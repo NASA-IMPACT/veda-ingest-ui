@@ -39,16 +39,14 @@ export async function validateIngestFormFields(
     expectedValues.temporal_extent.enddate
   );
 
-  const DiscoveryField = page.locator('.form-group.field.field-string', {
-    hasText: 'Discovery',
-  });
-
   await expect(
-    DiscoveryField.getByText(expectedValues.discovery_items[0].discovery, {
-      exact: true,
-    }),
+    page
+      .locator('.ant-select', {
+        has: page.getByRole('combobox', { name: 'Discovery' }),
+      })
+      .locator('.ant-select-selection-item'),
     'Discovery dropdown should have correct value'
-  ).toBeVisible();
+  ).toHaveText(expectedValues.discovery_items[0].discovery);
 
   await expect(page.getByLabel('Prefix')).toHaveValue(
     expectedValues.discovery_items[0].prefix
