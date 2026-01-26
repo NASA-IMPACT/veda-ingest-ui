@@ -23,10 +23,20 @@ if (missingEnvVars.length > 0 && process.env.NODE_ENV !== 'test') {
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: false,
+  webpack: (config) => {
+    // Ensure @rjsf/antd icons are properly resolved
+    config.resolve = config.resolve || {};
+    config.resolve.extensionAlias = {
+      ...config.resolve.extensionAlias,
+      '.js': ['.js', '.ts', '.tsx'],
+    };
+    return config;
+  },
 };
 
 const removeImports = require('next-remove-imports')();
 module.exports = removeImports({
+  ...nextConfig,
   experimental: { esmExternals: true },
 });
 

@@ -197,8 +197,12 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
 
       // Verify selections
       await expect(
-        page.locator('.ant-select-selection-item', { hasText: /tenant1/i })
-      ).toBeVisible();
+        page
+          .locator('.ant-select', {
+            has: page.getByRole('combobox', { name: /tenant/i }),
+          })
+          .locator('.ant-select-selection-item')
+      ).toHaveText(/tenant1/i);
 
       const selectedTenantScreenshot = await page.screenshot({
         animations: 'disabled',
@@ -300,10 +304,13 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
     });
 
     await test.step('verify tenants persist when switching back to form', async () => {
-      await page.getByRole('tab', { name: /form/i }).click();
       await expect(
-        page.locator('.tenants-field').getByText('tenant2')
-      ).toBeVisible();
+        page
+          .locator('.ant-select', {
+            has: page.getByRole('combobox', { name: /tenant/i }),
+          })
+          .locator('.ant-select-selection-item')
+      ).toHaveText(/tenant2/i);
     });
 
     await test.step('submit and verify tenants in request', async () => {

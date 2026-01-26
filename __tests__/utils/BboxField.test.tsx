@@ -45,7 +45,7 @@ describe('BboxField', () => {
       onChange: mockOnChange,
       onBlur: mockOnBlur,
       onFocus: mockOnFocus,
-      idSchema: { $id: 'root_bbox' },
+      fieldPathId: { $id: 'root_bbox', path: ['bbox'] },
       schema: {},
       name: 'bbox',
       uiSchema: {},
@@ -80,7 +80,10 @@ describe('BboxField', () => {
     fireEvent.change(xminInput, { target: { value: '-105.5' } });
 
     expect(mockOnChange).toHaveBeenCalledTimes(1);
-    expect(mockOnChange).toHaveBeenCalledWith([-105.5, 40.0, -104.0, 41.0]);
+    expect(mockOnChange).toHaveBeenCalledWith(
+      [-105.5, 40.0, -104.0, 41.0],
+      ['bbox']
+    );
   });
 
   it('should call onChange with the updated array when ymin changes', () => {
@@ -89,7 +92,10 @@ describe('BboxField', () => {
     fireEvent.change(yminInput, { target: { value: '39.5' } });
 
     expect(mockOnChange).toHaveBeenCalledTimes(1);
-    expect(mockOnChange).toHaveBeenCalledWith([-105.0, 39.5, -104.0, 41.0]);
+    expect(mockOnChange).toHaveBeenCalledWith(
+      [-105.0, 39.5, -104.0, 41.0],
+      ['bbox']
+    );
   });
 
   it('should call onChange with the updated array when xmax changes', () => {
@@ -98,7 +104,10 @@ describe('BboxField', () => {
     fireEvent.change(xmaxInput, { target: { value: '-103.5' } });
 
     expect(mockOnChange).toHaveBeenCalledTimes(1);
-    expect(mockOnChange).toHaveBeenCalledWith([-105.0, 40.0, -103.5, 41.0]);
+    expect(mockOnChange).toHaveBeenCalledWith(
+      [-105.0, 40.0, -103.5, 41.0],
+      ['bbox']
+    );
   });
 
   it('should call onChange with the updated array when ymax changes', () => {
@@ -107,7 +116,10 @@ describe('BboxField', () => {
     fireEvent.change(ymaxInput, { target: { value: '41.5' } });
 
     expect(mockOnChange).toHaveBeenCalledTimes(1);
-    expect(mockOnChange).toHaveBeenCalledWith([-105.0, 40.0, -104.0, 41.5]);
+    expect(mockOnChange).toHaveBeenCalledWith(
+      [-105.0, 40.0, -104.0, 41.5],
+      ['bbox']
+    );
   });
 
   it('should disable all inputs when the disabled prop is true', () => {

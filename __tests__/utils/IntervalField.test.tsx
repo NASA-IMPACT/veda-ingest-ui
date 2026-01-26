@@ -58,13 +58,12 @@ describe('IntervalField', () => {
       onChange: mockOnChange,
       onBlur: mockOnBlur,
       onFocus: mockOnFocus,
-      idSchema: { $id: 'root_interval' },
+      fieldPathId: { $id: 'root_interval', path: ['interval'] },
       schema: {},
       name: 'interval',
       uiSchema: {},
       disabled: false,
       readonly: false,
-      formContext: {},
       registry: {} as any,
     };
   });
@@ -97,10 +96,10 @@ describe('IntervalField', () => {
 
     expect(mockOnChange).toHaveBeenCalledTimes(1);
     // The component should convert to STAC-compliant datetime format
-    expect(mockOnChange).toHaveBeenCalledWith([
-      '2025-08-01 00:00:00+00:00',
-      initialEndDate,
-    ]);
+    expect(mockOnChange).toHaveBeenCalledWith(
+      ['2025-08-01 00:00:00+00:00', initialEndDate],
+      ['interval']
+    );
   });
 
   it('should call onChange with the updated end date in STAC format', () => {
@@ -112,10 +111,10 @@ describe('IntervalField', () => {
 
     expect(mockOnChange).toHaveBeenCalledTimes(1);
     // The component should convert to STAC-compliant datetime format
-    expect(mockOnChange).toHaveBeenCalledWith([
-      initialStartDate,
-      '2025-09-15 00:00:00+00:00',
-    ]);
+    expect(mockOnChange).toHaveBeenCalledWith(
+      [initialStartDate, '2025-09-15 00:00:00+00:00'],
+      ['interval']
+    );
   });
 
   it('should disable both inputs when the disabled prop is true', () => {

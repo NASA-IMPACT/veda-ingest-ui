@@ -9,10 +9,14 @@ import AssetsField from '@/components/rjsf-components/AssetsField';
 // We still need to mock the RJSF-provided fields/templates.
 
 const MockSchemaField = vi.fn(
-  ({ formData, onChange }: FieldProps<Record<string, any>>) => (
+  ({ formData, onChange, fieldPathId }: FieldProps<Record<string, any>>) => (
     <div>
       {/* Simulate a change within the asset's form */}
-      <button onClick={() => onChange({ ...formData, title: 'Updated Title' })}>
+      <button
+        onClick={() =>
+          onChange({ ...formData, title: 'Updated Title' }, fieldPathId.path)
+        }
+      >
         Update Asset
       </button>
     </div>
@@ -57,12 +61,11 @@ describe('AssetsField', () => {
           DescriptionFieldTemplate: MockDescriptionField,
         },
       },
-      idSchema: { $id: 'root_assets' },
+      fieldPathId: { $id: 'root_assets', path: ['assets'] },
       name: 'assets',
       uiSchema: {},
       disabled: false,
       readonly: false,
-      formContext: {},
     } as unknown as FieldProps;
   });
 
@@ -140,7 +143,7 @@ describe('AssetsField', () => {
 
     expect(mockOnChange).toHaveBeenCalledTimes(1);
     // The component should call onChange with the *original* data, effectively cancelling the rename
-    expect(mockOnChange).toHaveBeenCalledWith(baseProps.formData);
+    expect(mockOnChange).toHaveBeenCalledWith(baseProps.formData, ['assets']);
   });
 
   it('should update an asset’s value when its SchemaField changes', () => {
@@ -153,9 +156,11 @@ describe('AssetsField', () => {
     fireEvent.click(updateButtons[0]);
 
     expect(mockOnChange).toHaveBeenCalledTimes(1);
-    const updatedFormData = mockOnChange.mock.calls[0][0];
+    const updatedAsset = mockOnChange.mock.calls[0][0];
+    const updatedPath = mockOnChange.mock.calls[0][1];
 
-    expect(updatedFormData.thumbnail.title).toBe('Updated Title');
+    expect(updatedAsset.title).toBe('Updated Title');
+    expect(updatedPath).toEqual(['assets', 'thumbnail']);
   });
 
   it('should handle adding more than one new asset', () => {
