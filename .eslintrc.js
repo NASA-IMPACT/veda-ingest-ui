@@ -5,4 +5,10 @@ module.exports = {
     ecmaVersion: 2021,
     sourceType: 'module',
   },
+  overrides: [
+    {
+      files: ['__tests__/playwright/**'],
+      extends: ['plugin:playwright/recommended'],
+    },
+  ],
 };
