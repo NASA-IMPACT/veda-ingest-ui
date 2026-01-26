@@ -75,6 +75,7 @@
     "eslint-config-next": "15.0.3",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-playwright": "^2.5.1",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-unused-imports": "^4.1.4",
     "husky": "^9.1.7",
