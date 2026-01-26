@@ -6,22 +6,26 @@ const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 // Define route permissions in a declarative way
 const routeConfig = {
   // Routes that require authentication but no special permissions
-  limited: ['/collections', '/datasets', '/cog-viewer'],
+  limited: ['/collections', '/datasets', '/cog-viewer', '/upload-url'],
 
   // Routes that require create permissions (blocked for limited access)
-  createAccess: ['/create-collection', '/create-dataset', '/upload'],
+  createAccess: [
+    '/create-collection',
+    '/create-dataset',
+    '/upload',
+    '/create-ingest',
+  ],
 
   // Routes that require edit permissions (blocked for limited access + need dataset:update)
-  editAccess: ['/edit-collection', '/edit-dataset'],
-
-  editStacCollectionAccess: ['/edit-existing-collection'],
-
-  // API routes that require authentication
-  apiRoutes: [
+  editAccess: [
+    '/edit-collection',
+    '/edit-dataset',
     '/list-ingests',
     '/retrieve-ingest',
-    '/create-ingest',
-    '/upload-url',
+  ],
+
+  editStacCollectionAccess: [
+    '/edit-existing-collection',
     '/existing-collection',
   ],
 };
@@ -60,8 +64,8 @@ function isRouteAllowed(pathname: string, permissionLevel: string) {
       return false;
 
     case 'limited':
-      // Limited users can access authenticated routes, but not create/edit
-      return matchesRoute(routeConfig.limited);
+      // Limited users can access authenticated routes and upload-url, but not create/edit
+      return matchesRoute([...routeConfig.limited]);
 
     case 'create':
       return matchesRoute([
@@ -106,7 +110,9 @@ export async function middleware(request: NextRequest) {
   }
 
   if (DISABLE_AUTH) {
-    console.warn('WARNING: Authentication is disabled for development');
+    console.warn(
+      'WARNING: Authentication is disabled for development - middleware skipping auth checks'
+    );
     return NextResponse.next();
   }
 

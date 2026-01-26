@@ -37,7 +37,8 @@ const mockSession = {
     image: null,
   },
   scopes: ['dataset:update', 'stac:collection:update'],
-  tenants: ['tenant1', 'tenant2', 'tenant3'],
+  allowedTenants: ['tenant1', 'tenant2', 'tenant3'],
+  accessToken: 'mock-access-token',
   expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
 };
 
@@ -176,6 +177,12 @@ export const handlers = [
 
   http.get('/api/auth/session', ({ request }) => {
     return HttpResponse.json(mockSession);
+  }),
+
+  http.get('/api/allowed-tenants', ({ request }) => {
+    return HttpResponse.json({
+      tenants: ['tenant1', 'tenant2', 'tenant3'],
+    });
   }),
 
   http.get(
