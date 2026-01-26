@@ -203,7 +203,7 @@ test.describe('Create Collection Page', () => {
     ).toBeVisible();
   });
 
-  test.only('Create Collection handles manually entered assets', async ({
+  test('Create Collection handles manually entered assets', async ({
     page,
   }, testInfo) => {
     const userComment = 'This comment was entered in the VEDA Ingest UI';
