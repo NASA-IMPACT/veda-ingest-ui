@@ -51,6 +51,15 @@ const SidebarLogo = ({ collapsed }: SidebarLogoProps) => {
                 style={{ marginTop: 8, marginLeft: -10 }}
               />
             )}
+            {cfg.ADDITIONAL_LOGO === 'eic' && (
+              <Image
+                src="/Earth_Information_Center.svg"
+                alt="Earth Information Center Wordmark"
+                width={120}
+                height={48}
+                style={{ marginTop: 8, marginLeft: 0 }}
+              />
+            )}
           </div>
         )}
       </div>
