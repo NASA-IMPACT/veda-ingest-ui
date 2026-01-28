@@ -219,7 +219,6 @@ describe('JSONEditor', () => {
       updateEditorValue(textarea, JSON.stringify(newFormData, null, 2));
       await userEvent.click(applyButton);
 
-      await waitFor(() => {});
       expect(mockOnChange).not.toHaveBeenCalled();
     });
 
@@ -249,7 +248,6 @@ describe('JSONEditor', () => {
       updateEditorValue(textarea, JSON.stringify(newFormData, null, 2));
       await userEvent.click(applyButton);
 
-      await waitFor(() => {});
       expect(mockOnChange).not.toHaveBeenCalled();
     });
   });
