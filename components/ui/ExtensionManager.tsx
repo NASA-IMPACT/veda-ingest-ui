@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Input, Divider, Typography, Space, Tag, message } from 'antd';
+import { Card, Input, Divider, Typography, Space, Tag, App } from 'antd';
 
 interface ExtensionManagerProps {
   extensionFields: Record<string, { title: string }>;
@@ -14,6 +14,7 @@ const ExtensionManager: React.FC<ExtensionManagerProps> = ({
   onRemoveExtension,
   isLoading,
 }) => {
+  const { message } = App.useApp();
   const [searchUrl, setSearchUrl] = useState<string>('');
 
   const handleSearch = (value: string) => {

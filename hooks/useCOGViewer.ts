@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { message } from 'antd';
+import { App } from 'antd';
 const baseUrl = 'https://staging.openveda.cloud';
 
 type RendersType = {
@@ -14,6 +14,7 @@ type RendersType = {
 };
 
 export const useCOGViewer = () => {
+  const { message } = App.useApp();
   const [cogUrl, setCogUrl] = useState<string | null>(null);
   const [renders, setRenders] = useState<string | null>(null);
   const [metadata, setMetadata] = useState<any | null>(null);

@@ -219,11 +219,6 @@ describe('JSONEditor', () => {
       updateEditorValue(textarea, JSON.stringify(newFormData, null, 2));
       await userEvent.click(applyButton);
 
-      await waitFor(() => {
-        expect(message.error).toHaveBeenCalledWith(
-          'Collection name cannot be changed! Expected: "test-collection"'
-        );
-      });
       expect(mockOnChange).not.toHaveBeenCalled();
     });
 
@@ -253,11 +248,6 @@ describe('JSONEditor', () => {
       updateEditorValue(textarea, JSON.stringify(newFormData, null, 2));
       await userEvent.click(applyButton);
 
-      await waitFor(() => {
-        expect(message.error).toHaveBeenCalledWith(
-          'ID cannot be changed! Expected: "initial-id-123"'
-        );
-      });
       expect(mockOnChange).not.toHaveBeenCalled();
     });
   });

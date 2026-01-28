@@ -147,6 +147,7 @@ test.describe('Edit Existing Collection Page', () => {
         .filter({ hasText: /test-collection-1/i })
         .click();
     });
+
     // Make a change to the form
     await test.step('modify form field', async () => {
       await page.getByLabel('Title').first().click();

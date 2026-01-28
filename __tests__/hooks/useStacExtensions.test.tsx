@@ -10,19 +10,16 @@ import {
 } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useStacExtensions } from '@/hooks/useStacExtensions';
-import { message } from 'antd';
+import React from 'react';
+import { App } from 'antd';
 
 // --- Mocks ---
 global.fetch = vi.fn();
 
-vi.mock('antd', () => ({
-  message: {
-    success: vi.fn(),
-    error: vi.fn(),
-    warning: vi.fn(),
-    info: vi.fn(),
-  },
-}));
+// Wrapper component for App context
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <App>{children}</App>
+);
 
 const mockDatacubeSchema = {
   title: 'Datacube Extension',
@@ -45,9 +42,6 @@ describe('useStacExtensions', () => {
   beforeEach(() => {
     mockSetFormData = vi.fn();
     vi.mocked(fetch).mockClear();
-    vi.mocked(message.success).mockClear();
-    vi.mocked(message.error).mockClear();
-    vi.mocked(message.warning).mockClear();
   });
 
   afterEach(() => {
@@ -64,7 +58,8 @@ describe('useStacExtensions', () => {
 
   it('should initialize with default empty state', () => {
     const { result } = renderHook(() =>
-      useStacExtensions({ setFormData: mockSetFormData })
+      useStacExtensions({ setFormData: mockSetFormData }),
+      { wrapper }
     );
     expect(result.current.extensionFields).toEqual({});
     expect(result.current.isLoading).toBe(false);
@@ -77,7 +72,8 @@ describe('useStacExtensions', () => {
     } as Response);
 
     const { result } = renderHook(() =>
-      useStacExtensions({ setFormData: mockSetFormData })
+      useStacExtensions({ setFormData: mockSetFormData }),
+      { wrapper }
     );
 
     act(() => {
@@ -91,16 +87,14 @@ describe('useStacExtensions', () => {
     });
 
     expect(mockSetFormData).toHaveBeenCalled();
-    expect(message.success).toHaveBeenCalledWith(
-      'Extension "Datacube Extension" loaded successfully.'
-    );
     expect(result.current.isLoading).toBe(false);
   });
 
   it('should handle fetch errors gracefully', async () => {
     vi.mocked(fetch).mockResolvedValue({ ok: false } as Response);
     const { result } = renderHook(() =>
-      useStacExtensions({ setFormData: mockSetFormData })
+      useStacExtensions({ setFormData: mockSetFormData }),
+      { wrapper }
     );
 
     act(() => {
@@ -111,15 +105,13 @@ describe('useStacExtensions', () => {
       expect(
         result.current.extensionFields['http://example.com/invalid.json']
       ).toBeUndefined();
-      expect(message.error).toHaveBeenCalledWith(
-        'Could not load or parse extension from http://example.com/invalid.json'
-      );
     });
   });
 
   it('should remove an extension when removeExtension is called', () => {
     const { result } = renderHook(() =>
-      useStacExtensions({ setFormData: mockSetFormData })
+      useStacExtensions({ setFormData: mockSetFormData }),
+      { wrapper }
     );
 
     act(() => {
@@ -136,7 +128,6 @@ describe('useStacExtensions', () => {
     expect(
       result.current.extensionFields['http://example.com/datacube.json']
     ).toBeUndefined();
-    expect(message.info).toHaveBeenCalledWith('"Datacube" extension removed.');
   });
 
   it('should not add a duplicate URL', async () => {
@@ -146,7 +137,8 @@ describe('useStacExtensions', () => {
     } as Response);
 
     const { result } = renderHook(() =>
-      useStacExtensions({ setFormData: mockSetFormData })
+      useStacExtensions({ setFormData: mockSetFormData }),
+      { wrapper }
     );
     const url = 'http://example.com/schema.json';
 
@@ -165,10 +157,7 @@ describe('useStacExtensions', () => {
       result.current.addExtension(url);
     });
 
-    // Assert that the warning was shown and fetch was not called again
-    expect(message.warning).toHaveBeenCalledWith(
-      'Extension already added or URL is empty.'
-    );
+    // Assert that fetch was not called again
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 });

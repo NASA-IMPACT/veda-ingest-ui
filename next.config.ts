@@ -23,6 +23,11 @@ if (missingEnvVars.length > 0 && process.env.NODE_ENV !== 'test') {
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: false,
+  turbopack: {
+    resolveAlias: {
+      '@': './src',
+    },
+  },
   webpack: (config) => {
     // Ensure @rjsf/antd icons are properly resolved
     config.resolve = config.resolve || {};

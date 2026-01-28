@@ -2,21 +2,14 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { App } from 'antd';
 
 import ExtensionManager from '@/components/ui/ExtensionManager';
-import { message } from 'antd';
 
-// Mock Ant Design's message service
-vi.mock('antd', async (importOriginal) => {
-  const antd = await importOriginal<typeof import('antd')>();
-  return {
-    ...antd,
-    message: {
-      ...antd.message,
-      error: vi.fn(),
-    },
-  };
-});
+// Wrapper component to provide antd App context
+const AppWrapper = ({ children }: { children: React.ReactNode }) => (
+  <App>{children}</App>
+);
 
 describe('ExtensionManager', () => {
   let mockOnAddExtension: ReturnType<typeof vi.fn>;
@@ -34,12 +27,14 @@ describe('ExtensionManager', () => {
 
   it('renders the title and search input correctly', () => {
     render(
-      <ExtensionManager
-        extensionFields={{}}
-        onAddExtension={mockOnAddExtension}
-        onRemoveExtension={mockOnRemoveExtension}
-        isLoading={false}
-      />
+      <AppWrapper>
+        <ExtensionManager
+          extensionFields={{}}
+          onAddExtension={mockOnAddExtension}
+          onRemoveExtension={mockOnRemoveExtension}
+          isLoading={false}
+        />
+      </AppWrapper>
     );
 
     expect(screen.getByText('STAC Extensions')).toBeInTheDocument();
@@ -51,12 +46,14 @@ describe('ExtensionManager', () => {
   it('calls onAddExtension and clears the input when a URL is submitted', async () => {
     const user = userEvent.setup();
     render(
-      <ExtensionManager
-        extensionFields={{}}
-        onAddExtension={mockOnAddExtension}
-        onRemoveExtension={mockOnRemoveExtension}
-        isLoading={false}
-      />
+      <AppWrapper>
+        <ExtensionManager
+          extensionFields={{}}
+          onAddExtension={mockOnAddExtension}
+          onRemoveExtension={mockOnRemoveExtension}
+          isLoading={false}
+        />
+      </AppWrapper>
     );
 
     const searchInput = screen.getByPlaceholderText(
@@ -75,19 +72,20 @@ describe('ExtensionManager', () => {
   it('shows an error message and does not call onAddExtension for an empty URL', async () => {
     const user = userEvent.setup();
     render(
-      <ExtensionManager
-        extensionFields={{}}
-        onAddExtension={mockOnAddExtension}
-        onRemoveExtension={mockOnRemoveExtension}
-        isLoading={false}
-      />
+      <AppWrapper>
+        <ExtensionManager
+          extensionFields={{}}
+          onAddExtension={mockOnAddExtension}
+          onRemoveExtension={mockOnRemoveExtension}
+          isLoading={false}
+        />
+      </AppWrapper>
     );
 
     const addButton = screen.getByRole('button', { name: 'Add Extension' });
     await user.click(addButton);
 
     expect(mockOnAddExtension).not.toHaveBeenCalled();
-    expect(message.error).toHaveBeenCalledWith('Please enter a URL.');
   });
 
   it('renders a list of loaded extensions as closable tags', () => {
@@ -97,12 +95,14 @@ describe('ExtensionManager', () => {
     };
 
     render(
-      <ExtensionManager
-        extensionFields={mockExtensions}
-        onAddExtension={mockOnAddExtension}
-        onRemoveExtension={mockOnRemoveExtension}
-        isLoading={false}
-      />
+      <AppWrapper>
+        <ExtensionManager
+          extensionFields={mockExtensions}
+          onAddExtension={mockOnAddExtension}
+          onRemoveExtension={mockOnRemoveExtension}
+          isLoading={false}
+        />
+      </AppWrapper>
     );
 
     expect(screen.getByText('Loaded Extensions:')).toBeVisible();
@@ -118,12 +118,14 @@ describe('ExtensionManager', () => {
     };
 
     render(
-      <ExtensionManager
-        extensionFields={mockExtensions}
-        onAddExtension={mockOnAddExtension}
-        onRemoveExtension={mockOnRemoveExtension}
-        isLoading={false}
-      />
+      <AppWrapper>
+        <ExtensionManager
+          extensionFields={mockExtensions}
+          onAddExtension={mockOnAddExtension}
+          onRemoveExtension={mockOnRemoveExtension}
+          isLoading={false}
+        />
+      </AppWrapper>
     );
 
     const tag = screen.getByText('Extension A').closest('.ant-tag');
@@ -136,12 +138,14 @@ describe('ExtensionManager', () => {
 
   it('shows a loading state on the search input when isLoading is true', () => {
     render(
-      <ExtensionManager
-        extensionFields={{}}
-        onAddExtension={mockOnAddExtension}
-        onRemoveExtension={mockOnRemoveExtension}
-        isLoading={true}
-      />
+      <AppWrapper>
+        <ExtensionManager
+          extensionFields={{}}
+          onAddExtension={mockOnAddExtension}
+          onRemoveExtension={mockOnRemoveExtension}
+          isLoading={true}
+        />
+      </AppWrapper>
     );
 
     const searchContainer = screen

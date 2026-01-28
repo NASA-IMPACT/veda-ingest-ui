@@ -100,7 +100,7 @@ function isRouteAllowed(pathname: string, permissionLevel: string) {
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Security: Ensure auth is never disabled in production
   if (DISABLE_AUTH && process.env.NODE_ENV === 'production') {
     console.error(
