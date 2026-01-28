@@ -1,7 +1,7 @@
 'use client';
 
 import AppLayout from '@/components/layout/Layout';
-import { Input, message } from 'antd';
+import { Input, App } from 'antd';
 import { useCOGViewer } from '@/hooks/useCOGViewer';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
@@ -15,6 +15,7 @@ const COGViewerContent = dynamic(
 );
 
 const CogViewerClient = function CogViewerClient() {
+  const { message } = App.useApp();
   const cogViewer = useCOGViewer();
 
   return (

@@ -163,7 +163,7 @@ export default function ObjectFieldTemplate<
 
   const isDashboardField = (element: ObjectFieldTemplatePropertyType) =>
     element.name === 'dashboard' &&
-    element.content?.props?.fieldPathId?.$id.includes('renders');
+    (element.content?.props as any)?.fieldPathId?.$id.includes('renders');
   const isDiscoveryItem =
     fieldPathId.$id.startsWith('root_discovery_items_') &&
     schema.type === 'object';
@@ -217,8 +217,8 @@ export default function ObjectFieldTemplate<
                           (p) => p.name === row_item
                         );
                         if (element) {
-                          const fieldId =
-                            element.content?.props?.fieldPathId?.$id;
+                          const fieldId = (element.content?.props as any)
+                            ?.fieldPathId?.$id;
                           const isAssetsThumbnailHrefField =
                             element.name === 'href' &&
                             fieldId === 'root_assets_thumbnail';
