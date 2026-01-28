@@ -86,7 +86,6 @@ describe('ExtensionManager', () => {
     await user.click(addButton);
 
     expect(mockOnAddExtension).not.toHaveBeenCalled();
-    // Message is shown but we can't easily test it without mocking
   });
 
   it('renders a list of loaded extensions as closable tags', () => {
