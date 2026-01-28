@@ -2,7 +2,7 @@ import { expect, test } from '@/__tests__/playwright/setup-msw';
 import { HttpResponse } from 'msw';
 
 test.describe('COG Viewer Page', () => {
-  test('COG Viewer loads single band COG ', async ({
+  test('COG Viewer loads single band COG', async ({
     page,
     http,
     worker,
@@ -14,6 +14,7 @@ test.describe('COG Viewer Page', () => {
         });
       })
     );
+
     //
     await test.step('Navigate to the page with COG Viewer Page', async () => {
       await page.goto('/cog-viewer');
@@ -23,6 +24,7 @@ test.describe('COG Viewer Page', () => {
       await page.getByPlaceholder(/Enter COG URL/i).fill('s3://test.com');
       await page.getByRole('button', { name: /load/i }).click();
     });
+
     await test.step('Validate Band Name Header is visible for single band COG', async () => {
       await expect(page.getByText('Band: Band 1 (Index: 1)')).toBeVisible();
     });
@@ -32,6 +34,7 @@ test.describe('COG Viewer Page', () => {
       await expect(page.getByLabel('Band (G)')).toBeHidden();
       await expect(page.getByLabel('Band (B)')).toBeHidden();
     });
+
     const singleBandCOGControlsScreenshot = await page.screenshot();
     testInfo.attach(
       'Default state of COG Viewer Form Controls for single band COG',
@@ -42,7 +45,7 @@ test.describe('COG Viewer Page', () => {
     );
   });
 
-  test('COG Viewer loads multi band COG ', async ({ page }) => {
+  test('COG Viewer loads multi band COG', async ({ page }) => {
     await page.goto('/cog-viewer');
 
     await page.getByPlaceholder('Enter COG URL').fill('s3://test.com');

@@ -63,6 +63,7 @@ const modifiedCollectionConfig = {
     'eo:bands': ['B1', 'B2'],
   },
 };
+
 test.describe('Tenant Functionality - Edit Collection Page', () => {
   test('Edit Collection displays list of open PRs ordered by tenants', async ({
     page,
@@ -235,6 +236,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
         await route.continue();
       }
     });
+
     await test.step('Navigate to Edit Collection Page', async () => {
       await page.goto('/edit-collection');
     });

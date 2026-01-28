@@ -75,11 +75,13 @@ test.describe('Thumbnail Uploader Drawer', () => {
       await expect(aspectRatioStatistic).toBeVisible();
       await expect(aspectRatioStatistic.locator('..')).toContainText('2.00');
     });
+
     await test.step('validated image file size is shown', async () => {
       const sizeStatistic = page.locator('.ant-statistic').getByText('Size');
       await expect(sizeStatistic).toBeVisible();
       await expect(sizeStatistic.locator('..')).toContainText('412KB');
     });
+
     await expect(
       page.getByText(
         'URL: https://s3bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg'

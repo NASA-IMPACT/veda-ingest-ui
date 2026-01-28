@@ -112,8 +112,11 @@ test.describe('Create Collection Page', () => {
       .getByRole('link', { name: /github/i });
     await expect(githubLink).toBeVisible();
 
-    const href = await githubLink.getAttribute('href');
-    expect(href, 'href from github should be correct').toBe(MOCK_GITHUB_URL);
+    const href = githubLink;
+    await expect(href, 'href from github should be correct').toHaveAttribute(
+      'href',
+      MOCK_GITHUB_URL
+    );
 
     const successScreenshot = await page.screenshot();
     testInfo.attach('success modal with github link', {
@@ -193,6 +196,7 @@ test.describe('Create Collection Page', () => {
     await test.step('submit form and validate that POST body values match pasted config values', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
+
     await test.step('add comment and continue', async () => {
       await page.getByTestId('user-comment-textarea').fill(userComment);
       await page.getByRole('button', { name: /continue & submit/i }).click();
@@ -302,6 +306,7 @@ test.describe('Create Collection Page', () => {
     await test.step('submit form and validate that POST body values match pasted config values', async () => {
       await page.getByRole('button', { name: /submit/i }).click();
     });
+
     await test.step('add comment and continue', async () => {
       await page.getByTestId('user-comment-textarea').fill(userComment);
       await page.getByRole('button', { name: /continue & submit/i }).click();

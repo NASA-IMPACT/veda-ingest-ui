@@ -64,6 +64,7 @@ test.describe('COG Viewer Drawer', () => {
       page.getByText('Band: Band 1 (Index: 1)'),
       'multi-band COGs should not have Band Name Header'
     ).toBeHidden();
+
     await test.step('validate that RGB Band Dropdowns are visible and populated with first 3 bands', async () => {
       await expect(page.getByLabel('Band (R)')).toBeVisible();
       await expect(page.locator('[data-testid="band-R"]')).toContainText(
@@ -204,6 +205,7 @@ test.describe('COG Viewer Drawer', () => {
       );
     });
   });
+
   test('COG Viewer loads with error in renders object presets', async ({
     page,
   }) => {
@@ -333,6 +335,7 @@ test.describe('COG Viewer Drawer', () => {
           )
         );
       });
+
       await test.step('close COG Rendering Options Modal', async () => {
         await page
           .getByLabel('Selected COG Rendering Options')
@@ -388,6 +391,7 @@ test.describe('COG Viewer Drawer', () => {
         title: 'VEDA Dashboard Render Parameters',
       });
     });
+
     await test.step('click button to open COG Viewer Drawer', async () => {
       await page
         .getByRole('button', {
@@ -395,6 +399,7 @@ test.describe('COG Viewer Drawer', () => {
         })
         .click();
     });
+
     await expect(
       page.getByText(/Sample File URL is required/i),
       'verify error message appears'

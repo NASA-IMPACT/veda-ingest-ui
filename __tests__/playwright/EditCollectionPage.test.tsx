@@ -119,6 +119,7 @@ test.describe('Edit Collection Page', () => {
     await test.step('wait for list of pending requests to load and pick #1', async () => {
       await page.getByRole('button', { name: /seeded ingest #1/i }).click();
     });
+
     // Make a change to the form
     await test.step('modify form field', async () => {
       await page.getByLabel('Title').first().click();

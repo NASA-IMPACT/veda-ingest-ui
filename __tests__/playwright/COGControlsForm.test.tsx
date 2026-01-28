@@ -2,6 +2,7 @@ import { expect, test } from '@/__tests__/playwright/setup-msw';
 import { HttpResponse } from 'msw';
 
 const testBands = ['R', 'G', 'B'];
+
 test.describe('COGControlsForm Layout 🎨', () => {
   test('only render the band name, not the individual test band dropdowns for single band COG', async ({
     page,
@@ -15,6 +16,7 @@ test.describe('COGControlsForm Layout 🎨', () => {
         });
       })
     );
+
     // Navigate to the page with COGControlsForm
     await test.step('navigate to Cog Viewer Page', async () => {
       await page.goto('/cog-viewer');
