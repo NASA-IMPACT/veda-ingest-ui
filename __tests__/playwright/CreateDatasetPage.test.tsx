@@ -116,8 +116,8 @@ test.describe('Create Dataset Page', () => {
     const githubLink = page.getByRole('link', { name: /github/i }).first();
     await expect(githubLink).toBeVisible();
 
-    const href = await githubLink.getAttribute('href');
-    expect(href).toBe(MOCK_GITHUB_URL);
+    const href = githubLink;
+    await expect(href).toHaveAttribute('href', MOCK_GITHUB_URL);
 
     const successScreenshot = await page.screenshot();
     testInfo.attach('success modal with github link', {
@@ -307,6 +307,7 @@ test.describe('Create Dataset Page', () => {
     await test.step('switch to manual json edit tab', async () => {
       await page.getByRole('tab', { name: /manual json edit/i }).click();
     });
+
     await expect(
       page.getByRole('button', { name: /apply changes/i }),
       'Apply Changes should be disabled if no changes are made'
@@ -515,6 +516,7 @@ test.describe('Create Dataset Page', () => {
       body: collapsedScreenshot,
       contentType: 'image/png',
     });
+
     await test.step('click more option button', async () => {
       await page
         .getByRole('button', { name: /more options/i, expanded: false })

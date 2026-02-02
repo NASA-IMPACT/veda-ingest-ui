@@ -340,8 +340,8 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
 
     await test.step('verify tenant field is not present in form view', async () => {
       // The tenant field should not be visible in the form
-      await expect(page.getByLabel('Tenant')).not.toBeVisible();
-      await expect(page.locator('.tenants-field')).not.toBeVisible();
+      await expect(page.getByLabel('Tenant')).toBeHidden();
+      await expect(page.locator('.tenants-field')).toBeHidden();
 
       const formViewScreenshot = await page.screenshot({
         animations: 'disabled',

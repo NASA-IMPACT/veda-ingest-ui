@@ -150,6 +150,7 @@ test.describe('Extensions and Additional Properties', () => {
         .fill(invalidTestExtensionUrl);
       await page.getByRole('button', { name: /add extension/i }).click();
     });
+
     await expect(
       page.getByText(/Could not load or parse extension/i),
       'error message should appear'

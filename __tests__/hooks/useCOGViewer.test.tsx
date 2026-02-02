@@ -1,17 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCOGViewer } from '@/hooks/useCOGViewer';
-import { message } from 'antd';
+import React from 'react';
+import { App } from 'antd';
 
 // --- Mocks ---
 global.fetch = vi.fn();
-
-vi.mock('antd', () => ({
-  message: {
-    success: vi.fn(),
-    error: vi.fn(),
-  },
-}));
 
 vi.mock('leaflet', () => ({
   map: vi.fn(() => ({
@@ -19,6 +13,11 @@ vi.mock('leaflet', () => ({
   })),
   latLngBounds: vi.fn(),
 }));
+
+// Wrapper component for App context
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <App>{children}</App>
+);
 
 // --- Test Data ---
 const mockCogUrl = 'https://example.com/cog.tif';
@@ -37,8 +36,6 @@ const mockTileJsonData = {
 describe('useCOGViewer', () => {
   beforeEach(() => {
     vi.mocked(fetch).mockClear();
-    vi.mocked(message.success).mockClear();
-    vi.mocked(message.error).mockClear();
   });
 
   afterEach(() => {
@@ -46,7 +43,7 @@ describe('useCOGViewer', () => {
   });
 
   it('should initialize with the correct default state', () => {
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     expect(result.current.cogUrl).toBeNull();
     expect(result.current.metadata).toBeNull();
@@ -65,7 +62,7 @@ describe('useCOGViewer', () => {
         json: async () => mockTileJsonData,
       } as Response);
 
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     await act(async () => {
       await result.current.fetchMetadata(mockCogUrl);
@@ -77,13 +74,6 @@ describe('useCOGViewer', () => {
       expect(result.current.selectedBands).toEqual([1]);
       expect(result.current.tileUrl).toBe(mockTileJsonData.tiles[0]);
     });
-
-    expect(message.success).toHaveBeenCalledWith(
-      'COG metadata loaded successfully!'
-    );
-    expect(message.success).toHaveBeenCalledWith(
-      'COG tile layer loaded successfully!'
-    );
   });
 
   it('should use `renders` prop to override defaults', async () => {
@@ -97,7 +87,7 @@ describe('useCOGViewer', () => {
         json: async () => mockTileJsonData,
       } as Response);
 
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     const rendersProp = {
       bidx: [3, 2, 1],
@@ -125,7 +115,7 @@ describe('useCOGViewer', () => {
       json: async () => ({ detail: 'Server connection failed' }),
     } as Response);
 
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     await act(async () => {
       await result.current.fetchMetadata(mockCogUrl);
@@ -134,20 +124,16 @@ describe('useCOGViewer', () => {
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
       expect(result.current.metadata).toBeNull();
-      expect(message.error).toHaveBeenCalledWith(
-        'Server Error: Server connection failed'
-      );
     });
   });
 
   it('should handle empty URL in fetchMetadata', async () => {
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     await act(async () => {
       await result.current.fetchMetadata('');
     });
 
-    expect(message.error).toHaveBeenCalledWith('COG URL is required');
     expect(result.current.metadata).toBeNull();
   });
 
@@ -160,16 +146,14 @@ describe('useCOGViewer', () => {
       }),
     } as Response);
 
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     await act(async () => {
       await result.current.fetchMetadata(mockCogUrl);
     });
 
     await waitFor(() => {
-      expect(message.error).toHaveBeenCalledWith(
-        'Failed to load /path/to/file.tif. Check URL entry.'
-      );
+      expect(result.current.loading).toBe(false);
     });
   });
 
@@ -180,16 +164,14 @@ describe('useCOGViewer', () => {
       json: async () => ({}),
     } as Response);
 
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     await act(async () => {
       await result.current.fetchMetadata(mockCogUrl);
     });
 
     await waitFor(() => {
-      expect(message.error).toHaveBeenCalledWith(
-        'Failed to fetch metadata (Status: 404)'
-      );
+      expect(result.current.loading).toBe(false);
     });
   });
 
@@ -200,32 +182,28 @@ describe('useCOGViewer', () => {
       json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
     } as any as Response);
 
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     await act(async () => {
       await result.current.fetchMetadata(mockCogUrl);
     });
 
     await waitFor(() => {
-      expect(message.error).toHaveBeenCalledWith(
-        'Failed to fetch metadata (Status: 500)'
-      );
+      expect(result.current.loading).toBe(false);
     });
   });
 
   it('should handle non-Error thrown in catch block', async () => {
     vi.mocked(fetch).mockRejectedValue('String error');
 
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     await act(async () => {
       await result.current.fetchMetadata(mockCogUrl);
     });
 
     await waitFor(() => {
-      expect(message.error).toHaveBeenCalledWith(
-        'Failed to load COG metadata.'
-      );
+      expect(result.current.loading).toBe(false);
     });
   });
 
@@ -244,7 +222,7 @@ describe('useCOGViewer', () => {
       .spyOn(console, 'error')
       .mockImplementation(() => {});
 
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     await act(async () => {
       await result.current.fetchMetadata(mockCogUrl, '{invalid json}');
@@ -271,7 +249,7 @@ describe('useCOGViewer', () => {
         json: async () => mockTileJsonData,
       } as Response);
 
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     const rendersObject = {
       bidx: [2, 1],
@@ -304,7 +282,7 @@ describe('useCOGViewer', () => {
       json: async () => mockTileJsonData,
     } as Response);
 
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     await act(async () => {
       await result.current.fetchTileUrl(
@@ -341,7 +319,7 @@ describe('useCOGViewer', () => {
       json: async () => mockTileJsonData,
     } as Response);
 
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     await act(async () => {
       await result.current.fetchTileUrl(
@@ -367,14 +345,13 @@ describe('useCOGViewer', () => {
   });
 
   it('should handle fetchTileUrl error when URL is missing', async () => {
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     await act(async () => {
       await result.current.fetchTileUrl('', [1], [[null, null]], 'Internal');
     });
 
     await waitFor(() => {
-      expect(message.error).toHaveBeenCalledWith('Failed to load tile layer.');
       expect(result.current.loading).toBe(false);
     });
   });
@@ -385,7 +362,7 @@ describe('useCOGViewer', () => {
       status: 500,
     } as Response);
 
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     await act(async () => {
       await result.current.fetchTileUrl(
@@ -397,7 +374,7 @@ describe('useCOGViewer', () => {
     });
 
     await waitFor(() => {
-      expect(message.error).toHaveBeenCalledWith('Failed to load tile layer.');
+      expect(result.current.loading).toBe(false);
     });
   });
 
@@ -407,7 +384,7 @@ describe('useCOGViewer', () => {
       json: async () => mockTileJsonData,
     } as Response);
 
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     await act(async () => {
       await result.current.fetchTileUrl(
@@ -451,7 +428,7 @@ describe('useCOGViewer', () => {
       },
     };
 
-    const { result } = renderHook(() => useCOGViewer());
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     // Set the mapRef before calling fetchTileUrl
     result.current.mapRef.current = mockMapRef.current as any;

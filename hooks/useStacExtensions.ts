@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { message } from 'antd';
+import { App } from 'antd';
 import { JSONSchema7 } from 'json-schema';
 
 export interface ExtensionField {
@@ -17,6 +17,7 @@ interface UseStacExtensionsProps {
 }
 
 export function useStacExtensions({ setFormData }: UseStacExtensionsProps) {
+  const { message } = App.useApp();
   const [extensionFields, setExtensionFields] = useState<
     Record<string, Extension>
   >({});

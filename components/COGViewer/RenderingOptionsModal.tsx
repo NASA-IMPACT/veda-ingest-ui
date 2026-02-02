@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, message, Modal } from 'antd';
+import { Button, Modal, App } from 'antd';
 import dynamic from 'next/dynamic';
 import '@uiw/react-textarea-code-editor/dist.css';
 
@@ -26,6 +26,7 @@ const RenderingOptionsModal: React.FC<RenderingOptionsModalProps> = ({
   options,
   onClose,
 }) => {
+  const { message } = App.useApp();
   const [copied, setCopied] = useState(false);
 
   const { bidx, rescale, colormap_name, color_formula, resampling, nodata } =

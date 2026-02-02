@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Button, Typography, Checkbox, Flex, message, Modal } from 'antd';
+import { Button, Typography, Checkbox, Flex, Modal, App } from 'antd';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
@@ -66,6 +66,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
   additionalProperties,
   setAdditionalProperties,
 }) => {
+  const { message } = App.useApp();
   const [editorValue, setEditorValue] = useState<string>(
     JSON.stringify(value, null, 2)
   );

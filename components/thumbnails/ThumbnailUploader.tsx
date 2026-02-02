@@ -5,13 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Button,
   List,
-  message,
   Upload,
   Image,
   Statistic,
   Typography,
   Divider,
-  Modal,
+  App,
 } from 'antd';
 import {
   CloudUploadOutlined,
@@ -20,7 +19,6 @@ import {
 } from '@ant-design/icons';
 
 const { Title, Paragraph, Link } = Typography;
-const { confirm } = Modal;
 
 import { cfg } from '@/config/env';
 const bucketName = cfg.NEXT_PUBLIC_AWS_S3_BUCKET_NAME;
@@ -54,6 +52,7 @@ function ThumbnailUploader({
   insideDrawer = false,
   onUploadSuccess,
 }: ThumbnailUploaderProps) {
+  const { message, modal } = App.useApp();
   const [uploadingFile, setUploadingFile] = useState<UploadingFile | null>(
     null
   );
@@ -144,7 +143,7 @@ function ThumbnailUploader({
       loadingMessage();
 
       if (fileExists) {
-        confirm({
+        modal.confirm({
           title: 'File Already Exists',
           icon: <ExclamationCircleOutlined />,
           content: `A file with the name "${file.name}" already exists. Do you want to overwrite it?`,
