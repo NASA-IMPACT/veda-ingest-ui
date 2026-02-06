@@ -1,13 +1,8 @@
-import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
 import CogViewerClient from './_components/CogViewerClient';
 
-export default async function CogViewerPage() {
-  const session = await auth();
+// Force static generation - authentication is handled by middleware
+export const dynamic = 'force-static';
 
-  if (!session) {
-    redirect('/login');
-  }
-
+export default function CogViewerPage() {
   return <CogViewerClient />;
 }

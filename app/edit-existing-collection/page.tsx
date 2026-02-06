@@ -1,17 +1,8 @@
-import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
 import EditExistingCollectionClient from './_components/EditExistingCollectionClient';
 
-export default async function EditExistingCollectionPage() {
-  const session = await auth();
+// Force static generation - authentication and authorization handled by middleware
+export const dynamic = 'force-static';
 
-  if (!session) {
-    redirect('/login');
-  }
-
-  if (!session.scopes?.includes('stac:collection:update')) {
-    redirect('/unauthorized');
-  }
-
+export default function EditExistingCollectionPage() {
   return <EditExistingCollectionClient />;
 }

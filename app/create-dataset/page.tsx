@@ -1,13 +1,8 @@
-import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
 import CreateIngestClient from './_components/CreateIngestClient';
 
-export default async function CreateIngestPage() {
-  const session = await auth();
+// Force static generation - authentication is handled by middleware
+export const dynamic = 'force-static';
 
-  if (!session) {
-    redirect('/login');
-  }
-
+export default function CreateIngestPage() {
   return <CreateIngestClient />;
 }

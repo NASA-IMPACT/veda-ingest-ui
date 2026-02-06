@@ -1,11 +1,8 @@
-import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
 import UploadClient from './_components/UploadClient';
 
-export default async function UploadPage() {
-  const session = await auth();
-  if (!session) {
-    redirect('/login');
-  }
+// Force static generation - authentication is handled by middleware
+export const dynamic = 'force-static';
+
+export default function UploadPage() {
   return <UploadClient />;
 }

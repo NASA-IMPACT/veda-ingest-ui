@@ -1,13 +1,8 @@
-import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
 import CreateCollectionClient from './_components/CreateCollectionClient';
 
-export default async function CreateCollectionPage() {
-  const session = await auth();
+// Force static generation - authentication is handled by middleware
+export const dynamic = 'force-static';
 
-  if (!session) {
-    redirect('/login');
-  }
-
+export default function CreateCollectionPage() {
   return <CreateCollectionClient />;
 }

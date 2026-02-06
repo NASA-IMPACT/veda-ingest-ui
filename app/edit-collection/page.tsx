@@ -1,17 +1,8 @@
-import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
 import EditCollectionClient from './_components/EditCollectionClient';
 
-export default async function EditIngestPage() {
-  const session = await auth();
+// Force static generation - authentication and authorization handled by middleware
+export const dynamic = 'force-static';
 
-  if (!session) {
-    redirect('/login');
-  }
-
-  if (!session.scopes?.includes('dataset:update')) {
-    redirect('/unauthorized');
-  }
-
+export default function EditIngestPage() {
   return <EditCollectionClient />;
 }
