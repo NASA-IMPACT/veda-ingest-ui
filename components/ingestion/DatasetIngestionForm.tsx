@@ -2,7 +2,7 @@
 
 import '@ant-design/v5-patch-for-react-19';
 
-import React, { useEffect, useState, FC } from 'react';
+import React, { useEffect, useState, FC, memo, useCallback } from 'react';
 import { Button, Tabs, Spin } from 'antd';
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
@@ -188,30 +188,39 @@ function DatasetIngestionForm({
     }
   }, [defaultTemporalExtent, setFormData]);
 
-  const onFormDataChanged = (formState: { formData?: object }) => {
-    setFormData((formState.formData as Record<string, unknown>) ?? {});
-    if (setDisabled) {
-      setDisabled(false);
-    }
-  };
+  const onFormDataChanged = useCallback(
+    (formState: { formData?: object }) => {
+      setFormData((formState.formData as Record<string, unknown>) ?? {});
+      if (setDisabled) {
+        setDisabled(false);
+      }
+    },
+    [setFormData, setDisabled]
+  );
 
-  const handleJsonEditorChange = (updatedData: JSONEditorValue) => {
-    setFormData(updatedData);
-    setForceRenderKey((prev) => prev + 1);
-    setActiveTab('form');
-    setHasJSONChanges(false);
-    if (setDisabled) {
-      setDisabled(false);
-    }
-  };
+  const handleJsonEditorChange = useCallback(
+    (updatedData: JSONEditorValue) => {
+      setFormData(updatedData);
+      setForceRenderKey((prev) => prev + 1);
+      setActiveTab('form');
+      setHasJSONChanges(false);
+      if (setDisabled) {
+        setDisabled(false);
+      }
+    },
+    [setFormData, setDisabled]
+  );
 
-  const handleFormSubmit = (rjsfData: { formData?: object }) => {
-    const finalFormData = {
-      ...rjsfData.formData,
-      ...additionalProperties,
-    };
-    onSubmit(finalFormData);
-  };
+  const handleFormSubmit = useCallback(
+    (rjsfData: { formData?: object }) => {
+      const finalFormData = {
+        ...rjsfData.formData,
+        ...additionalProperties,
+      };
+      onSubmit(finalFormData);
+    },
+    [additionalProperties, onSubmit]
+  );
 
   const widgets = {
     'renders.dashboard': RjsfCodeEditorWidget,
@@ -305,4 +314,4 @@ function DatasetIngestionForm({
   );
 }
 
-export default DatasetIngestionForm;
+export default memo(DatasetIngestionForm);
