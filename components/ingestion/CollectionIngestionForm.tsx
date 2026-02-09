@@ -2,7 +2,16 @@
 
 import '@ant-design/v5-patch-for-react-19';
 
-import { useState, useMemo, useEffect, useRef, memo, useCallback } from 'react';
+import {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  memo,
+  useCallback,
+  lazy,
+  Suspense,
+} from 'react';
 import {
   Button,
   Col,
@@ -24,7 +33,6 @@ import { useTenants } from '@/hooks/useTenants';
 import ExtensionManager from '@/components/ui/ExtensionManager';
 import ObjectFieldTemplate from '@/components/rjsf-components/ObjectFieldTemplate';
 import { customValidate } from '@/utils/CustomValidation';
-import JSONEditor from '@/components/ui/JSONEditor';
 import { JSONEditorValue } from '@/components/ui/JSONEditor';
 import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 import BboxField from '@/utils/BboxField';
@@ -36,6 +44,9 @@ import SummariesManager from '@/components/rjsf-components/SummariesManager';
 import staticBaseSchema from '@/FormSchemas/collections/collectionSchema.json';
 import uiSchema from '@/FormSchemas/collections/uischema.json';
 import { Form } from './rjsfTheme';
+
+// Lazy load JSONEditor - only needed when JSON tab is active
+const JSONEditor = lazy(() => import('@/components/ui/JSONEditor'));
 
 const customFields = {
   BboxField: BboxField,
@@ -358,16 +369,29 @@ function CollectionIngestionForm({
             key: 'json',
             label: 'Manual JSON Edit',
             children: (
-              <JSONEditor
-                value={formData || {}}
-                jsonSchema={dynamicSchema}
-                onChange={handleJsonEditorChange}
-                disableIdChange={isEditMode}
-                hasJSONChanges={hasJSONChanges}
-                setHasJSONChanges={setHasJSONChanges}
-                setAdditionalProperties={() => {}}
-                additionalProperties={additionalProperties}
-              />
+              <Suspense
+                fallback={
+                  <Spin
+                    size="large"
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      marginTop: '40px',
+                    }}
+                  />
+                }
+              >
+                <JSONEditor
+                  value={formData || {}}
+                  jsonSchema={dynamicSchema}
+                  onChange={handleJsonEditorChange}
+                  disableIdChange={isEditMode}
+                  hasJSONChanges={hasJSONChanges}
+                  setHasJSONChanges={setHasJSONChanges}
+                  setAdditionalProperties={() => {}}
+                  additionalProperties={additionalProperties}
+                />
+              </Suspense>
             ),
           },
         ]}
