@@ -3,10 +3,12 @@ import { LoadingOutlined } from '@ant-design/icons';
 
 interface SkeletonLoadingProps {
   allowedTenants?: string[];
+  bannerMessage: string;
 }
 
 export const SkeletonLoading: React.FC<SkeletonLoadingProps> = ({
   allowedTenants,
+  bannerMessage,
 }) => {
   const hasAllowedTenants = allowedTenants && allowedTenants.length > 0;
 
@@ -26,9 +28,7 @@ export const SkeletonLoading: React.FC<SkeletonLoadingProps> = ({
         }}
       >
         <LoadingOutlined style={{ fontSize: 16, color: '#0969da' }} />
-        <span style={{ color: '#0969da' }}>
-          Checking with GitHub for pending ingests...
-        </span>
+        <span style={{ color: '#0969da' }}>{bannerMessage}</span>
       </div>
 
       <Row gutter={[16, 16]}>

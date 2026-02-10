@@ -75,7 +75,10 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
         <Title level={3} style={{ marginBottom: 24 }}>
           Edit Pending Ingest Requests
         </Title>
-        <SkeletonLoading allowedTenants={allowedTenants} />
+        <SkeletonLoading
+          allowedTenants={allowedTenants}
+          bannerMessage="Checking with GitHub for pending ingests..."
+        />
       </>
     );
   }
