@@ -1,25 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  Button,
-  List,
-  Spin,
-  Card,
-  Row,
-  Col,
-  Typography,
-  Empty,
-  Tooltip,
-  Alert,
-} from 'antd';
+import { Row, Typography } from 'antd';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import ErrorModal from '@/components/ui/ErrorModal';
 
 import { IngestPullRequest } from '@/types/ingest';
-
 import { useUserTenants } from '@/app/contexts/TenantContext';
+import { IngestColumn } from './_components/IngestColumn';
+import { SkeletonLoading } from './_components/SkeletonLoading';
 
 const { Title } = Typography;
 
@@ -80,7 +70,14 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
     }
   }, [apiError]);
   if (sessionStatus === 'loading' || isLoading) {
-    return <Spin fullscreen />;
+    return (
+      <>
+        <Title level={3} style={{ marginBottom: 24 }}>
+          Edit Pending Ingest Requests
+        </Title>
+        <SkeletonLoading allowedTenants={allowedTenants} />
+      </>
+    );
   }
 
   const publicIngests = allIngests.filter(
@@ -93,115 +90,33 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
         Edit Pending Ingest Requests
       </Title>
 
-      {!apiError && allIngests.length === 0 && (
-        <Empty description="No pending ingests found." />
-      )}
+      <Row gutter={[16, 16]}>
+        {allowedTenants?.map((tenant: string) => {
+          const tenantIngests: IngestPullRequest[] = allIngests.filter(
+            (ingest: IngestPullRequest) => ingest.tenant === tenant
+          );
 
-      {allIngests.length > 0 && (
-        <Row gutter={[16, 16]}>
-          {allowedTenants?.map((tenant: string) => {
-            const tenantIngests: IngestPullRequest[] = allIngests.filter(
-              (ingest: IngestPullRequest) => ingest.tenant === tenant
-            );
+          return (
+            <IngestColumn
+              key={tenant}
+              title={`Tenant: ${tenant}`}
+              ingests={tenantIngests}
+              onIngestSelect={onIngestSelect}
+              testId={`tenant-column-${tenant}`}
+            />
+          );
+        })}
 
-            return (
-              <Col
-                key={tenant}
-                xs={24}
-                sm={12}
-                md={8}
-                lg={6}
-                data-testid={`tenant-column-${tenant}`}
-              >
-                <Card
-                  title={`Tenant: ${tenant}`}
-                  style={{
-                    marginBottom: 24,
-                    borderRadius: 8,
-                    boxShadow: '0 2px 8px #f0f1f2',
-                  }}
-                >
-                  <List
-                    dataSource={tenantIngests}
-                    renderItem={(item: IngestPullRequest) => (
-                      <List.Item>
-                        <Tooltip title={item.pr.title} placement="topLeft">
-                          <Button
-                            onClick={() =>
-                              onIngestSelect(item.pr.head.ref, item.pr.title)
-                            }
-                            block
-                          >
-                            <span
-                              style={{
-                                display: 'block',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                              }}
-                            >
-                              {item.pr.title.replace('Ingest Request for ', '')}
-                            </span>
-                          </Button>
-                        </Tooltip>
-                      </List.Item>
-                    )}
-                    locale={{ emptyText: 'No pending ingests' }}
-                  />
-                </Card>
-              </Col>
-            );
-          })}
-
-          {publicIngests.length > 0 && (
-            <Col
-              key="public"
-              xs={24}
-              sm={12}
-              md={8}
-              lg={6}
-              data-testid="tenant-column-public"
-            >
-              <Card
-                title="Public"
-                style={{
-                  marginBottom: 24,
-                  borderRadius: 8,
-                  boxShadow: '0 2px 8px #f0f1f2',
-                }}
-              >
-                <List
-                  dataSource={publicIngests}
-                  renderItem={(item: IngestPullRequest) => (
-                    <List.Item>
-                      <Tooltip title={item.pr.title} placement="topLeft">
-                        <Button
-                          onClick={() =>
-                            onIngestSelect(item.pr.head.ref, item.pr.title)
-                          }
-                          block
-                        >
-                          <span
-                            style={{
-                              display: 'block',
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                            }}
-                          >
-                            {item.pr.title.replace('Ingest Request for ', '')}
-                          </span>
-                        </Button>
-                      </Tooltip>
-                    </List.Item>
-                  )}
-                  locale={{ emptyText: 'No pending ingests' }}
-                />
-              </Card>
-            </Col>
-          )}
-        </Row>
-      )}
+        {publicIngests.length > 0 && (
+          <IngestColumn
+            key="public"
+            title="Public"
+            ingests={publicIngests}
+            onIngestSelect={onIngestSelect}
+            testId="tenant-column-public"
+          />
+        )}
+      </Row>
 
       {apiError && (
         <ErrorModal context="ingests-fetch" apiErrorMessage={apiError} />
