@@ -13,7 +13,7 @@
     "format:check": "prettier --check .",
     "prepare": "husky",
     "test": "vitest",
-    "test:e2e": "yarn playwright test",
+    "test:e2e": "yarn build && yarn playwright test",
     "test:coverage": "vitest run --coverage",
     "test:coverage:threshold": "vitest run --coverage --reporter=verbose",
     "type-check": "tsc --noEmit",

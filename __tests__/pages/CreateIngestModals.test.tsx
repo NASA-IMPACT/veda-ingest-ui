@@ -1,6 +1,6 @@
 import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import CreateIngestClient from '@/app/create-dataset/_components/CreateIngestClient';
+import CreateIngestClient from '@/app/(pages)/create-dataset/_components/CreateIngestClient';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // Mock `CreationFormManager`

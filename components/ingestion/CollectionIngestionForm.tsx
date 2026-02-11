@@ -2,7 +2,16 @@
 
 import '@ant-design/v5-patch-for-react-19';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  memo,
+  useCallback,
+  lazy,
+  Suspense,
+} from 'react';
 import {
   Button,
   Col,
@@ -24,7 +33,6 @@ import { useTenants } from '@/hooks/useTenants';
 import ExtensionManager from '@/components/ui/ExtensionManager';
 import ObjectFieldTemplate from '@/components/rjsf-components/ObjectFieldTemplate';
 import { customValidate } from '@/utils/CustomValidation';
-import JSONEditor from '@/components/ui/JSONEditor';
 import { JSONEditorValue } from '@/components/ui/JSONEditor';
 import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 import BboxField from '@/utils/BboxField';
@@ -36,6 +44,9 @@ import SummariesManager from '@/components/rjsf-components/SummariesManager';
 import staticBaseSchema from '@/FormSchemas/collections/collectionSchema.json';
 import uiSchema from '@/FormSchemas/collections/uischema.json';
 import { Form } from './rjsfTheme';
+
+// Lazy load JSONEditor - only needed when JSON tab is active
+const JSONEditor = lazy(() => import('@/components/ui/JSONEditor'));
 
 const customFields = {
   BboxField: BboxField,
@@ -102,36 +113,35 @@ function CollectionIngestionForm({
     }
   }, [validationErrors]);
 
-  const handleExtensionValueChange = (
-    propKey: string,
-    isRequired: boolean,
-    newValue: string
-  ) => {
-    try {
-      if (newValue.trim() === '""' && !isRequired) {
-        setFormData((prev) => {
-          const newFormData = { ...prev };
-          delete newFormData[propKey];
-          return newFormData;
-        });
-        return;
+  const handleExtensionValueChange = useCallback(
+    (propKey: string, isRequired: boolean, newValue: string) => {
+      try {
+        if (newValue.trim() === '""' && !isRequired) {
+          setFormData((prev) => {
+            const newFormData = { ...prev };
+            delete newFormData[propKey];
+            return newFormData;
+          });
+          return;
+        }
+        const parsedValue = JSON.parse(newValue);
+        if (parsedValue === '' && !isRequired) {
+          setFormData((prev) => {
+            const newFormData = { ...prev };
+            delete newFormData[propKey];
+            return newFormData;
+          });
+          return;
+        }
+        setFormData((prev) => ({ ...prev, [propKey]: parsedValue }));
+      } catch (e) {
+        setFormData((prev) => ({ ...prev, [propKey]: newValue }));
       }
-      const parsedValue = JSON.parse(newValue);
-      if (parsedValue === '' && !isRequired) {
-        setFormData((prev) => {
-          const newFormData = { ...prev };
-          delete newFormData[propKey];
-          return newFormData;
-        });
-        return;
-      }
-      setFormData((prev) => ({ ...prev, [propKey]: parsedValue }));
-    } catch (e) {
-      setFormData((prev) => ({ ...prev, [propKey]: newValue }));
-    }
-  };
+    },
+    [setFormData]
+  );
 
-  const validateExtensionFields = (): boolean => {
+  const validateExtensionFields = useCallback((): boolean => {
     const errors: string[] = [];
     Object.values(extensionFields).forEach(({ fields }) => {
       fields.forEach(({ name, required }) => {
@@ -146,7 +156,7 @@ function CollectionIngestionForm({
     });
     setValidationErrors(errors);
     return errors.length === 0;
-  };
+  }, [extensionFields, formData]);
 
   const { rjsfFormData, additionalProperties } = useMemo(() => {
     const baseKeys = new Set(Object.keys(dynamicSchema.properties || {}));
@@ -170,7 +180,7 @@ function CollectionIngestionForm({
       }
     }
     return { rjsfFormData: rjsfData, additionalProperties: additional };
-  }, [formData, extensionFields]);
+  }, [formData, extensionFields, dynamicSchema]);
 
   const [summariesData, setSummariesData] = useState(
     rjsfFormData.summaries || {}
@@ -184,32 +194,41 @@ function CollectionIngestionForm({
     return newSchema;
   }, [dynamicSchema]);
 
-  const onRJSFDataChanged = (formState: { formData?: object }) => {
-    const updatedRjsfData =
-      (formState.formData as Record<string, unknown>) ?? {};
-    setFormData((prev) => ({ ...prev, ...updatedRjsfData }));
-  };
+  const onRJSFDataChanged = useCallback(
+    (formState: { formData?: object }) => {
+      const updatedRjsfData =
+        (formState.formData as Record<string, unknown>) ?? {};
+      setFormData((prev) => ({ ...prev, ...updatedRjsfData }));
+    },
+    [setFormData]
+  );
 
-  const handleSummariesChange = (newSummaries: Record<string, unknown>) => {
-    setSummariesData(newSummaries);
-    setFormData((prev) => ({ ...prev, summaries: newSummaries }));
-  };
+  const handleSummariesChange = useCallback(
+    (newSummaries: Record<string, unknown>) => {
+      setSummariesData(newSummaries);
+      setFormData((prev) => ({ ...prev, summaries: newSummaries }));
+    },
+    [setFormData]
+  );
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = useCallback(() => {
     if (!validateExtensionFields()) {
       return;
     }
     onSubmit({ ...formData, summaries: summariesData });
-  };
+  }, [validateExtensionFields, formData, summariesData, onSubmit]);
 
-  const handleJsonEditorChange = (updatedData: JSONEditorValue) => {
-    setFormData(updatedData);
-    // When JSON is edited, also update the separated summaries state
-    setSummariesData(updatedData.summaries || {});
-    setForceRenderKey((prev) => prev + 1);
-    setActiveTab('form');
-    setHasJSONChanges(false);
-  };
+  const handleJsonEditorChange = useCallback(
+    (updatedData: JSONEditorValue) => {
+      setFormData(updatedData);
+      // When JSON is edited, also update the separated summaries state
+      setSummariesData(updatedData.summaries || {});
+      setForceRenderKey((prev) => prev + 1);
+      setActiveTab('form');
+      setHasJSONChanges(false);
+    },
+    [setFormData]
+  );
 
   if (isTenantsLoading) {
     return (
@@ -350,16 +369,29 @@ function CollectionIngestionForm({
             key: 'json',
             label: 'Manual JSON Edit',
             children: (
-              <JSONEditor
-                value={formData || {}}
-                jsonSchema={dynamicSchema}
-                onChange={handleJsonEditorChange}
-                disableIdChange={isEditMode}
-                hasJSONChanges={hasJSONChanges}
-                setHasJSONChanges={setHasJSONChanges}
-                setAdditionalProperties={() => {}}
-                additionalProperties={additionalProperties}
-              />
+              <Suspense
+                fallback={
+                  <Spin
+                    size="large"
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      marginTop: '40px',
+                    }}
+                  />
+                }
+              >
+                <JSONEditor
+                  value={formData || {}}
+                  jsonSchema={dynamicSchema}
+                  onChange={handleJsonEditorChange}
+                  disableIdChange={isEditMode}
+                  hasJSONChanges={hasJSONChanges}
+                  setHasJSONChanges={setHasJSONChanges}
+                  setAdditionalProperties={() => {}}
+                  additionalProperties={additionalProperties}
+                />
+              </Suspense>
             ),
           },
         ]}
@@ -368,4 +400,4 @@ function CollectionIngestionForm({
   );
 }
 
-export default CollectionIngestionForm;
+export default memo(CollectionIngestionForm);

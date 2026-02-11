@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Select, Card, Spin, Typography, Empty } from 'antd';
+import { Select, Card, Typography, Empty } from 'antd';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useUserTenants } from '@/app/contexts/TenantContext';
 import { truncateWords } from '@/utils/truncateWords';
 import ErrorModal from '@/components/ui/ErrorModal';
+import { SkeletonLoading } from './_components/SkeletonLoading';
 
 // --- Types for STAC Collections API ---
 interface StacCollection {
@@ -109,7 +110,17 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
     }));
 
   if (sessionStatus === 'loading' || isLoading) {
-    return <Spin fullscreen />;
+    return (
+      <>
+        <Title level={3} style={{ marginBottom: 24 }}>
+          Edit Existing Collection
+        </Title>
+        <SkeletonLoading
+          allowedTenants={allowedTenants}
+          bannerMessage="Loading existing collections from database..."
+        />
+      </>
+    );
   }
 
   // Fetch collection details and call onCollectionSelect

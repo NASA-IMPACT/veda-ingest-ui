@@ -80,7 +80,7 @@ describe('ExistingCollectionsList', () => {
     });
   });
 
-  it('should show fullscreen spinner when session is loading', () => {
+  it('should show skeleton loading when session is loading', () => {
     vi.mocked(useSession).mockReturnValue({
       data: null,
       status: 'loading',
@@ -91,8 +91,9 @@ describe('ExistingCollectionsList', () => {
       <ExistingCollectionsList onCollectionSelect={mockOnCollectionSelect} />
     );
 
-    const spinner = document.querySelector('.ant-spin-fullscreen');
-    expect(spinner).toBeInTheDocument();
+    expect(
+      screen.getByText('Loading existing collections from database...')
+    ).toBeInTheDocument();
   });
 
   it('should fetch and display collections when authenticated', async () => {

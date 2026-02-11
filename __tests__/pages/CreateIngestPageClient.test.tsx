@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import CreateIngestClient from '@/app/create-dataset/_components/CreateIngestClient';
+import CreateIngestClient from '@/app/(pages)/create-dataset/_components/CreateIngestClient';
 
 import { TenantContext } from '@/app/contexts/TenantContext';
 import { SessionProvider } from 'next-auth/react';

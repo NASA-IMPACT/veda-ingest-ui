@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import DatasetsClient from '@/app/datasets/_components/DatasetsClient';
+import DatasetsClient from '@/app/(pages)/datasets/_components/DatasetsClient';
 
 import { TenantContext } from '@/app/contexts/TenantContext';
 import { SessionProvider } from 'next-auth/react';
