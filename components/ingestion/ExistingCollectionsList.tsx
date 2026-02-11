@@ -147,97 +147,106 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
       <Title level={3} style={{ marginBottom: 24 }}>
         Edit Existing Collection
       </Title>
-      <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
-        <div>
-          <Title level={5} style={{ marginBottom: 8 }}>
-            Select Tenant
-          </Title>
-          <Select
-            style={{ width: 220 }}
-            options={tenantOptions}
-            placeholder="Select a tenant (optional)"
-            value={selectedTenant}
-            onSelect={setSelectedTenant}
-            onChange={setSelectedTenant}
-            allowClear
-            showSearch
-            optionLabelProp="label"
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <Title level={5} style={{ marginBottom: 8 }}>
-            Select Collection
-          </Title>
-          <Select
-            style={{ width: '100%' }}
-            showSearch
-            placeholder="Select or search a collection"
-            value={selectedCollection}
-            onChange={async (value) => {
-              setSelectedCollection(value);
-              const selected = collectionOptions.find(
-                (opt) => opt.value === value
-              );
-              if (selected) {
-                await handleCollectionSelect(
-                  selected.value,
-                  selected.title || selected.value
-                );
-              }
-            }}
-            onSearch={setSearchValue}
-            filterOption={false}
-            notFoundContent={<Empty description="No collections found" />}
-            allowClear
-            options={collectionOptions}
-          />
-        </div>
-      </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-        {collectionOptions.length === 0 ? (
-          <Empty description="No collections found" />
-        ) : (
-          collectionOptions.map((col) => {
-            const collection = collections.find((c) => c.id === col.value);
-            return (
-              <Card
-                key={col.value}
-                title={col.label}
-                style={{
-                  width: 320,
-                  borderRadius: 8,
-                  boxShadow: '0 2px 8px #f0f1f2',
+      {collections.length === 0 ? (
+        <Empty description="No collections found" />
+      ) : (
+        <>
+          <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+            <div>
+              <Title level={5} style={{ marginBottom: 8 }}>
+                Select Tenant
+              </Title>
+              <Select
+                style={{ width: 220 }}
+                options={tenantOptions}
+                placeholder="Select a tenant (optional)"
+                value={selectedTenant}
+                onSelect={setSelectedTenant}
+                onChange={setSelectedTenant}
+                allowClear
+                showSearch
+                optionLabelProp="label"
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <Title level={5} style={{ marginBottom: 8 }}>
+                Select Collection
+              </Title>
+              <Select
+                style={{ width: '100%' }}
+                showSearch
+                placeholder="Select or search a collection"
+                value={selectedCollection}
+                onChange={async (value) => {
+                  setSelectedCollection(value);
+                  const selected = collectionOptions.find(
+                    (opt) => opt.value === value
+                  );
+                  if (selected) {
+                    await handleCollectionSelect(
+                      selected.value,
+                      selected.title || selected.value
+                    );
+                  }
                 }}
-                hoverable
-                onClick={() =>
-                  handleCollectionSelect(col.value, col.title || col.value)
-                }
-              >
-                <div style={{ fontWeight: 500, marginBottom: 8 }}>
-                  ID: {col.value}
-                </div>
-                <div style={{ color: '#888', marginBottom: 8 }}>
-                  {truncateWords(collection?.description, 20)}
-                </div>
-                {collection?.tenant && (
-                  <div style={{ fontSize: 12, color: '#666' }}>
-                    Tenant: {collection.tenant}
-                  </div>
-                )}
-              </Card>
-            );
-          })
-        )}
-      </div>
+                onSearch={setSearchValue}
+                filterOption={false}
+                notFoundContent={<Empty description="No collections found" />}
+                allowClear
+                options={collectionOptions}
+              />
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+            {collectionOptions.length === 0 ? (
+              <Empty description="No collections found" />
+            ) : (
+              collectionOptions.map((col) => {
+                const collection = collections.find((c) => c.id === col.value);
+                return (
+                  <Card
+                    key={col.value}
+                    title={col.label}
+                    style={{
+                      width: 320,
+                      borderRadius: 8,
+                      boxShadow: '0 2px 8px #f0f1f2',
+                    }}
+                    hoverable
+                    onClick={() =>
+                      handleCollectionSelect(col.value, col.title || col.value)
+                    }
+                  >
+                    <div style={{ fontWeight: 500, marginBottom: 8 }}>
+                      ID: {col.value}
+                    </div>
+                    <div style={{ color: '#888', marginBottom: 8 }}>
+                      {truncateWords(collection?.description, 20)}
+                    </div>
+                    {collection?.tenant && (
+                      <div style={{ fontSize: 12, color: '#666' }}>
+                        Tenant: {collection.tenant}
+                      </div>
+                    )}
+                  </Card>
+                );
+              })
+            )}
+          </div>
 
-      {apiError && (
-        <ErrorModal context="collections-fetch" apiErrorMessage={apiError} />
-      )}
-      {collectionSelectError && (
-        <ErrorModal
-          context="collection-select"
-          apiErrorMessage={collectionSelectError}
-        />
+          {apiError && (
+            <ErrorModal
+              context="collections-fetch"
+              apiErrorMessage={apiError}
+            />
+          )}
+          {collectionSelectError && (
+            <ErrorModal
+              context="collection-select"
+              apiErrorMessage={collectionSelectError}
+            />
+          )}
+        </>
       )}
     </>
   );

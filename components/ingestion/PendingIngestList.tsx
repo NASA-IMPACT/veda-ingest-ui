@@ -94,31 +94,31 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
       </Title>
 
       <Row gutter={[16, 16]}>
-        {allowedTenants?.map((tenant: string) => {
-          const tenantIngests: IngestPullRequest[] = allIngests.filter(
-            (ingest: IngestPullRequest) => ingest.tenant === tenant
-          );
+        {allowedTenants &&
+          allowedTenants.length > 0 &&
+          allowedTenants.map((tenant: string) => {
+            const tenantIngests: IngestPullRequest[] = allIngests.filter(
+              (ingest: IngestPullRequest) => ingest.tenant === tenant
+            );
 
-          return (
-            <IngestColumn
-              key={tenant}
-              title={`Tenant: ${tenant}`}
-              ingests={tenantIngests}
-              onIngestSelect={onIngestSelect}
-              testId={`tenant-column-${tenant}`}
-            />
-          );
-        })}
+            return (
+              <IngestColumn
+                key={tenant}
+                title={`Tenant: ${tenant}`}
+                ingests={tenantIngests}
+                onIngestSelect={onIngestSelect}
+                testId={`tenant-column-${tenant}`}
+              />
+            );
+          })}
 
-        {publicIngests.length > 0 && (
-          <IngestColumn
-            key="public"
-            title="Public"
-            ingests={publicIngests}
-            onIngestSelect={onIngestSelect}
-            testId="tenant-column-public"
-          />
-        )}
+        <IngestColumn
+          key="public"
+          title="Public"
+          ingests={publicIngests}
+          onIngestSelect={onIngestSelect}
+          testId="tenant-column-public"
+        />
       </Row>
 
       {apiError && (
