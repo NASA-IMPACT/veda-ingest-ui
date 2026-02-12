@@ -43,7 +43,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
   },
   eic: {
     OWNER: 'nasa-impact',
-    REPO: 'veda-ingest-ui',
+    REPO: 'eic-data',
     TARGET_BRANCH: 'main',
     AWS_REGION: 'us-west-2',
     NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'veda-thumbnails',
