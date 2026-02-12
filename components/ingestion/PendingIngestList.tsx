@@ -112,13 +112,15 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
             );
           })}
 
-        <IngestColumn
-          key="public"
-          title="Public"
-          ingests={publicIngests}
-          onIngestSelect={onIngestSelect}
-          testId="tenant-column-public"
-        />
+        {publicIngests.length > 0 && (
+          <IngestColumn
+            key="public"
+            title="Public"
+            ingests={publicIngests}
+            onIngestSelect={onIngestSelect}
+            testId="tenant-column-public"
+          />
+        )}
       </Row>
 
       {apiError && (

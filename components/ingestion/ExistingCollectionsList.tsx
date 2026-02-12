@@ -233,20 +233,17 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
               })
             )}
           </div>
-
-          {apiError && (
-            <ErrorModal
-              context="collections-fetch"
-              apiErrorMessage={apiError}
-            />
-          )}
-          {collectionSelectError && (
-            <ErrorModal
-              context="collection-select"
-              apiErrorMessage={collectionSelectError}
-            />
-          )}
         </>
+      )}
+
+      {apiError && (
+        <ErrorModal context="collections-fetch" apiErrorMessage={apiError} />
+      )}
+      {collectionSelectError && (
+        <ErrorModal
+          context="collection-select"
+          apiErrorMessage={collectionSelectError}
+        />
       )}
     </>
   );
