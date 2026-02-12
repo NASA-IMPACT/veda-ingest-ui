@@ -2,7 +2,15 @@
 
 import '@ant-design/v5-patch-for-react-19';
 
-import React, { useEffect, useState, FC } from 'react';
+import React, {
+  useEffect,
+  useState,
+  FC,
+  memo,
+  useCallback,
+  lazy,
+  Suspense,
+} from 'react';
 import { Button, Tabs, Spin } from 'antd';
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
@@ -10,7 +18,6 @@ import { WidgetProps } from '@rjsf/utils';
 
 import ObjectFieldTemplate from '@/components/rjsf-components/ObjectFieldTemplate';
 import { customValidate } from '@/utils/CustomValidation';
-import JSONEditor from '@/components/ui/JSONEditor';
 import { JSONEditorValue } from '@/components/ui/JSONEditor';
 import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
@@ -21,6 +28,9 @@ import { TestableUrlWidget } from '@/components/rjsf-components/TestableUrlWidge
 
 import { useTenants } from '@/hooks/useTenants';
 import { Form } from './rjsfTheme';
+
+// Lazy load JSONEditor - only needed when JSON tab is active
+const JSONEditor = lazy(() => import('@/components/ui/JSONEditor'));
 
 // --- Adapter Component ---
 // This component accepts RJSF's props and translates them to what CodeEditorWidget expects.
@@ -188,30 +198,39 @@ function DatasetIngestionForm({
     }
   }, [defaultTemporalExtent, setFormData]);
 
-  const onFormDataChanged = (formState: { formData?: object }) => {
-    setFormData((formState.formData as Record<string, unknown>) ?? {});
-    if (setDisabled) {
-      setDisabled(false);
-    }
-  };
+  const onFormDataChanged = useCallback(
+    (formState: { formData?: object }) => {
+      setFormData((formState.formData as Record<string, unknown>) ?? {});
+      if (setDisabled) {
+        setDisabled(false);
+      }
+    },
+    [setFormData, setDisabled]
+  );
 
-  const handleJsonEditorChange = (updatedData: JSONEditorValue) => {
-    setFormData(updatedData);
-    setForceRenderKey((prev) => prev + 1);
-    setActiveTab('form');
-    setHasJSONChanges(false);
-    if (setDisabled) {
-      setDisabled(false);
-    }
-  };
+  const handleJsonEditorChange = useCallback(
+    (updatedData: JSONEditorValue) => {
+      setFormData(updatedData);
+      setForceRenderKey((prev) => prev + 1);
+      setActiveTab('form');
+      setHasJSONChanges(false);
+      if (setDisabled) {
+        setDisabled(false);
+      }
+    },
+    [setFormData, setDisabled]
+  );
 
-  const handleFormSubmit = (rjsfData: { formData?: object }) => {
-    const finalFormData = {
-      ...rjsfData.formData,
-      ...additionalProperties,
-    };
-    onSubmit(finalFormData);
-  };
+  const handleFormSubmit = useCallback(
+    (rjsfData: { formData?: object }) => {
+      const finalFormData = {
+        ...rjsfData.formData,
+        ...additionalProperties,
+      };
+      onSubmit(finalFormData);
+    },
+    [additionalProperties, onSubmit]
+  );
 
   const widgets = {
     'renders.dashboard': RjsfCodeEditorWidget,
@@ -288,16 +307,29 @@ function DatasetIngestionForm({
           key: 'json',
           label: 'Manual JSON Edit',
           children: (
-            <JSONEditor
-              value={formData || {}}
-              jsonSchema={dynamicSchema}
-              onChange={handleJsonEditorChange}
-              disableCollectionNameChange={disableCollectionNameChange}
-              hasJSONChanges={hasJSONChanges}
-              setHasJSONChanges={setHasJSONChanges}
-              additionalProperties={additionalProperties}
-              setAdditionalProperties={setAdditionalProperties}
-            />
+            <Suspense
+              fallback={
+                <Spin
+                  size="large"
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    marginTop: '40px',
+                  }}
+                />
+              }
+            >
+              <JSONEditor
+                value={formData || {}}
+                jsonSchema={dynamicSchema}
+                onChange={handleJsonEditorChange}
+                disableCollectionNameChange={disableCollectionNameChange}
+                hasJSONChanges={hasJSONChanges}
+                setHasJSONChanges={setHasJSONChanges}
+                additionalProperties={additionalProperties}
+                setAdditionalProperties={setAdditionalProperties}
+              />
+            </Suspense>
           ),
         },
       ]}
@@ -305,4 +337,4 @@ function DatasetIngestionForm({
   );
 }
 
-export default DatasetIngestionForm;
+export default memo(DatasetIngestionForm);

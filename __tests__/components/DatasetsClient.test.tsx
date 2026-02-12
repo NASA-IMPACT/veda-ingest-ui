@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import DatasetsClient from '@/app/datasets/_components/DatasetsClient';
+import DatasetsClient from '@/app/(pages)/datasets/_components/DatasetsClient';
 import { SessionProvider } from 'next-auth/react';
 
 function renderWithSession(session: any) {
