@@ -34,7 +34,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
   },
   veda: {
     OWNER: 'nasa-impact',
-    REPO: 'veda-ingest-ui',
+    REPO: 'veda-data',
     TARGET_BRANCH: 'main',
     AWS_REGION: 'us-west-2',
     NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'veda-thumbnails',
