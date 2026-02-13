@@ -10,8 +10,16 @@ frontend:
         - yarn install
     build:
       commands:
-        - env | grep -e APP_ID -e INSTALLATION_ID -e GITHUB_PRIVATE_KEY -e ASSUME_ROLE_ARN -e INGEST_UI_EXTERNAL_ID -e NEXT_PUBLIC_KEYCLOAK_ISSUER -e NEXTAUTH_SECRET -e KEYCLOAK_CLIENT_ID -e KEYCLOAK_CLIENT_SECRET -e NEXTAUTH_URL >> .env.production
+        # Write non-secret environment variables to .env.production
+        - env | grep -e APP_ID -e INSTALLATION_ID -e ASSUME_ROLE_ARN -e KEYCLOAK_CLIENT_ID -e NEXTAUTH_URL >> .env.production
+        # Write NEXT_PUBLIC_ variables to .env.production
         - env | grep -e NEXT_PUBLIC_ >> .env.production
+        # Write secrets to .env.production (these come from Amplify secrets manager)
+        - echo "GITHUB_PRIVATE_KEY=\"$GITHUB_PRIVATE_KEY\"" >> .env.production
+        - echo "KEYCLOAK_CLIENT_SECRET=\"$KEYCLOAK_CLIENT_SECRET\"" >> .env.production
+        - echo "NEXTAUTH_SECRET=\"$NEXTAUTH_SECRET\"" >> .env.production
+        - echo "INGEST_UI_EXTERNAL_ID=\"$INGEST_UI_EXTERNAL_ID\"" >> .env.production
+        - echo "NEXT_PUBLIC_KEYCLOAK_ISSUER=\"$NEXT_PUBLIC_KEYCLOAK_ISSUER\"" >> .env.production
         - yarn build
   artifacts:
     baseDirectory: .next
