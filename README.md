@@ -8,8 +8,9 @@ This application is to allow users to create PRs in [veda-data](https://github.c
 # Install dependencies
 yarn install
 
-# Copy environment configuration
-cp .env.example .env
+# Set up local environment (see Environment Setup below)
+cp .env.local.example .env.local
+# Edit .env.local with your credentials
 
 # Start development server
 yarn dev
@@ -185,26 +186,96 @@ yarn install
 
 ## Usage
 
-### Config files
+## 🔐 Environment Setup
 
-Configuration is done using `.env.` files.
+### Local Development
 
-Copy the `.env.example` to `.env` to add your configuration variables.
-These variables should also be set in AWS Amplify for the deployment.
+Configuration uses environment files that are **never committed** to version control for security.
 
-```sh
-cp .env.example .env
-```
+1. **Create your local environment file:**
+
+   ```bash
+   cp .env.local.example .env.local
+   ```
+
+2. **Configure required variables in `.env.local`:**
+
+   **GitHub App Configuration:**
+
+   ```bash
+   APP_ID=your-app-id                    # GitHub App ID
+   INSTALLATION_ID=your-installation-id   # GitHub App installation ID
+   GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
+   ...your private key here...
+   -----END RSA PRIVATE KEY-----"
+   ```
+
+   **AWS Configuration:**
+
+   ```bash
+   ASSUME_ROLE_ARN="arn:aws:iam::account-id:role/role-name"
+   INGEST_UI_EXTERNAL_ID="your-external-id"
+   ```
+
+   **Authentication:**
+
+   ```bash
+   NEXTAUTH_SECRET="your-secret-key"     # Generate with: openssl rand -base64 32
+   NEXTAUTH_URL="http://localhost:3000"
+   KEYCLOAK_CLIENT_ID="ingest-ui"
+   KEYCLOAK_CLIENT_SECRET="your-client-secret"
+   NEXT_PUBLIC_KEYCLOAK_ISSUER="https://your-keycloak-server/realms/veda"
+   ```
+
+   **Development Options:**
+
+   ```bash
+   NEXT_PUBLIC_APP_ENV="local"           # or "veda", "eic", "disasters"
+   NEXT_PUBLIC_DISABLE_AUTH=true         # Bypass Keycloak for local dev without keycloak scope configuration
+   NEXT_PUBLIC_MOCK_SCOPES="dataset:update,stac:collection:update"
+   # NEXT_PUBLIC_MOCK_TENANTS=tenant1,tenant2
+   ```
+
+   **Feature Flags:**
+
+   ```bash
+   ENABLE_EXISTING_COLLECTION_EDIT=true
+   NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT=true
+   ```
+
+3. **Verify `.env.local` is gitignored:**
+   ```bash
+   git check-ignore .env.local  # Should output: .env.local
+   ```
+
+### AWS Amplify Deployment
+
+For production deployments, secrets are managed through Amplify's secrets manager:
+
+1. **Navigate to:** AWS Amplify Console → Your App → App settings → Environment variables
+
+2. **Add Secrets** (use the "Secrets" tab):
+   - `GITHUB_PRIVATE_KEY` - Your GitHub App's private key
+   - `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret
+   - `NEXTAUTH_SECRET` - NextAuth session secret (generate with `openssl rand -base64 32`)
+   - `INGEST_UI_EXTERNAL_ID` - AWS STS external ID
+
+3. **Add Regular Environment Variables:**
+   - `APP_ID` - Your GitHub App ID
+   - `INSTALLATION_ID` - GitHub App installation ID
+   - `ASSUME_ROLE_ARN` - AWS IAM role ARN
+   - `KEYCLOAK_CLIENT_ID` - Keycloak client ID
+   - `NEXT_PUBLIC_KEYCLOAK_ISSUER` - Keycloak server URL
+   - `NEXT_PUBLIC_APP_ENV` - Environment profile (`eic`, `veda`, etc.)
+   - `ENABLE_EXISTING_COLLECTION_EDIT` - Feature flag
+   - `NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT` - Feature flag
+   - Any other `NEXT_PUBLIC_*` variables
+
+4. **How it works:** The `amplify.yml` build script automatically writes secrets from Amplify's secure storage into `.env.production` during build time. Secrets are never committed or exposed in logs.
 
 ### Github Access
 
-Github access to the veda-data repo is handled by installing the veda-ingest-api app in the veda-data repo's settings and saving the following values as environment variables:
-
-```
-INSTALLATION_ID
-APP_ID
-GITHUB_PRIVATE_KEY
-```
+GitHub access is handled via a GitHub App installed on the target repository. See **Github Destination Repo Configuration** section below for setup.
 
 ## Running the app
 

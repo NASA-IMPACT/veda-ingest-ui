@@ -22,7 +22,7 @@ describe('config/env.ts', () => {
     process.env.NEXT_PUBLIC_APP_ENV = 'veda';
     vi.resetModules();
     const { cfg } = await import('@/config/env');
-    expect(cfg.REPO).toBe('veda-ingest-ui');
+    expect(cfg.REPO).toBe('veda-data');
     expect(cfg.NEXT_PUBLIC_AWS_S3_BUCKET_NAME).toBe('veda-thumbnails');
   });
 
