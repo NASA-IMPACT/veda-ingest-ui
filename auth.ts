@@ -204,52 +204,6 @@ if (authDisabled) {
   signOut = nextAuthExports.signOut;
 }
 
-// Wrap handlers to add error handling
-const wrappedHandlers = {
-  GET: async (req: any, ...args: any[]) => {
-    try {
-      if (handlers.GET) {
-        return await handlers.GET(req, ...args);
-      }
-    } catch (error) {
-      console.error('Error in GET /api/auth/:', error);
-      // Return 500 with error details to help with debugging
-      return new NextResponse(
-        JSON.stringify({
-          error: 'Authentication server error',
-          message:
-            'There was a problem retrieving the session. This may indicate that the authentication server is unavailable. Please try again later.',
-        }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-  },
-  POST: async (req: any, ...args: any[]) => {
-    try {
-      if (handlers.POST) {
-        return await handlers.POST(req, ...args);
-      }
-    } catch (error) {
-      console.error('Error in POST /api/auth/[...nextauth]:', error);
-      // Return 500 with error details to help with debugging
-      return new NextResponse(
-        JSON.stringify({
-          error: 'Authentication server error',
-          message:
-            'There was a problem processing the authentication request. This may indicate that the authentication server is unavailable. Please try again later.',
-        }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-    }
-  },
-};
+export { auth, handlers, signIn, signOut };
 
-export { auth, signIn, signOut };
-
-export const { GET, POST } = !authDisabled ? wrappedHandlers : handlers;
+export const { GET, POST } = handlers;
