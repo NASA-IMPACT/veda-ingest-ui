@@ -46,7 +46,7 @@
     "json-schema": "^0.4.0",
     "leaflet": "^1.9.4",
     "lodash": "^4.17.21",
-    "next": "15.5.9",
+    "next": "15.5.10",
     "next-auth": "^5.0.0-beta.27",
     "next-remove-imports": "^1.0.12",
     "react": "19.0.0-rc-66855b96-20241106",
