@@ -86,16 +86,6 @@ if (authDisabled) {
       strategy: 'jwt',
     },
     callbacks: {
-      async authorized({ request }) {
-        // This callback runs on every request to check if the user is authorized
-        // If it throws, we catch it and return false to treat as unauthorized
-        try {
-          return true; // Let the rest of the auth flow handle it
-        } catch (error) {
-          console.error('Authorization check error:', error);
-          return false;
-        }
-      },
       async jwt({ token, account }) {
         if (account?.access_token) {
           const base64Payload = account.access_token.split('.')[1];
@@ -205,10 +195,6 @@ if (authDisabled) {
         return customSession;
       },
     },
-    pages: {
-      error: '/login',
-      signIn: '/login',
-    },
   };
 
   const nextAuthExports = NextAuth(authOptions);
@@ -218,39 +204,6 @@ if (authDisabled) {
   signOut = nextAuthExports.signOut;
 }
 
-// Wrap handlers to add error handling
-const wrappedHandlers = {
-  GET: async (req: any, ...args: any[]) => {
-    try {
-      if (handlers.GET) {
-        return await handlers.GET(req, ...args);
-      }
-    } catch (error) {
-      console.error('Error in GET /api/auth/[...nextauth]:', error);
-      // Return empty session instead of 500 to prevent hydration errors
-      // NextAuth will redirect to login page automatically
-      return new NextResponse(JSON.stringify(null), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-  },
-  POST: async (req: any, ...args: any[]) => {
-    try {
-      if (handlers.POST) {
-        return await handlers.POST(req, ...args);
-      }
-    } catch (error) {
-      console.error('Error in POST /api/auth/[...nextauth]:', error);
-      // Return empty session instead of error to prevent crashes
-      return new NextResponse(JSON.stringify(null), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-  },
-};
+export { auth, handlers, signIn, signOut };
 
-export { auth, signIn, signOut };
-
-export const { GET, POST } = !authDisabled ? wrappedHandlers : handlers;
+export const { GET, POST } = handlers;
