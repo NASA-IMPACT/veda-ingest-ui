@@ -46,7 +46,7 @@
     "framer-motion": "^12.4.7",
     "json-schema": "^0.4.0",
     "leaflet": "^1.9.4",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "next": "15.5.10",
     "next-auth": "^5.0.0-beta.30",
     "next-remove-imports": "^1.0.12",
