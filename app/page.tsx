@@ -4,7 +4,14 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 
 async function Home() {
-  const session = await auth();
+  let session;
+  try {
+    session = await auth();
+  } catch (error) {
+    console.error('Error fetching session in home page:', error);
+    // If auth fails, redirect to login
+    redirect('/login');
+  }
 
   if (!session) {
     redirect('/login');

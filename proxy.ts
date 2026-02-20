@@ -116,7 +116,20 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const session = await auth();
+  let session;
+  try {
+    session = await auth();
+  } catch (error) {
+    console.error('Error fetching session in middleware:', error);
+    // If auth fails, treat as unauthenticated and redirect to login
+    const pathname = request.nextUrl.pathname;
+    if (pathname.startsWith('/api/')) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    } else {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+
   const pathname = request.nextUrl.pathname;
   const permissionLevel = getUserPermissionLevel(session);
 
