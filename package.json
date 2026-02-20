@@ -37,7 +37,7 @@
     "@rjsf/utils": "^6.2.5",
     "@rjsf/validator-ajv8": "^6.2.5",
     "@uiw/react-textarea-code-editor": "^3.1.0",
-    "ajv": "^8.17.1",
+    "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
     "antd": "5.29.1",
     "aws-amplify": "^6.16.0",
