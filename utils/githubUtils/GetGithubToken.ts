@@ -11,8 +11,12 @@ export default async function GetGithubToken(): Promise<string> {
   const rawKey = process.env.GITHUB_PRIVATE_KEY;
 
   if (isNaN(appId) || isNaN(installationId) || !rawKey) {
+    const missing = [];
+    if (isNaN(appId)) missing.push('APP_ID');
+    if (isNaN(installationId)) missing.push('INSTALLATION_ID');
+    if (!rawKey) missing.push('GITHUB_PRIVATE_KEY');
     throw new Error(
-      'Missing or invalid environment variables for GitHub authentication'
+      `Missing or invalid environment variables for GitHub authentication: ${missing.join(', ')}`
     );
   }
 
