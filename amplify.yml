@@ -10,6 +10,9 @@ frontend:
         - yarn install
     build:
       commands:
+        # Debug: Check if secret is available (print only first 20 chars for safety)
+        - echo "GITHUB_PRIVATE_KEY length: ${#GITHUB_PRIVATE_KEY}"
+        - echo "GITHUB_PRIVATE_KEY starts with: ${GITHUB_PRIVATE_KEY:0:30}"
         # Write non-secret environment variables to .env.production
         - env | grep -e APP_ID -e INSTALLATION_ID -e ASSUME_ROLE_ARN -e KEYCLOAK_CLIENT_ID -e NEXTAUTH_URL >> .env.production
         # Write NEXT_PUBLIC_ variables to .env.production
