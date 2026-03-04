@@ -48,7 +48,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     AWS_REGION: 'us-west-2',
     NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'veda-thumbnails',
     ADDITIONAL_LOGO: 'eic',
-    VEDA_BACKEND_URL: 'https://staging.openveda.cloud/api',
+    VEDA_BACKEND_URL: 'https://eic-staging.staging.earth.gov/api',
   },
 };
 
