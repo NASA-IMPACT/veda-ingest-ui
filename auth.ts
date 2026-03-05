@@ -127,16 +127,22 @@ if (authDisabled) {
                   },
                 }
               );
-              console.log({ allowedTenantsResponse });
 
               if (allowedTenantsResponse.ok) {
                 const allowedTenantsData = await allowedTenantsResponse.json();
+                const parsedAllowedTenants = Array.isArray(allowedTenantsData)
+                  ? allowedTenantsData
+                      .filter(
+                        (tenant): tenant is string => typeof tenant === 'string'
+                      )
+                      .map((tenant) => tenant.trim())
+                      .filter(Boolean)
+                  : [];
                 console.log(
                   'Fetched allowed tenants during auth:',
-                  allowedTenantsData.tenants
+                  parsedAllowedTenants
                 );
-                (token as JWT).allowedTenants =
-                  allowedTenantsData.tenants || [];
+                (token as JWT).allowedTenants = parsedAllowedTenants;
               } else {
                 console.warn(
                   'Failed to fetch allowed tenants during auth:',
