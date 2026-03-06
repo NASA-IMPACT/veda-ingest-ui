@@ -29,7 +29,7 @@ const AllProviders = ({
   session?: any;
 }) => {
   const mockTenantContext = {
-    allowedTenants: ['test-tenant-1', 'test-tenant-2'],
+    tenants: ['test-tenant-1', 'test-tenant-2'],
     isLoading: false,
   };
 

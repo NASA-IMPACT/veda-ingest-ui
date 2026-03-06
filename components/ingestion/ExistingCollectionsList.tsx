@@ -44,11 +44,11 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
     string | undefined
   >();
 
-  const { allowedTenants } = useUserTenants();
+  const { tenants } = useUserTenants();
 
   const tenantOptions = [
     { value: undefined, label: 'All Tenants' },
-    ...allowedTenants.map((t) => ({ value: t, label: t })),
+    ...tenants.map((t) => ({ value: t, label: t })),
     { value: 'Public', label: 'Public' },
   ];
 
@@ -116,7 +116,7 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
           Edit Existing Collection
         </Title>
         <SkeletonLoading
-          allowedTenants={allowedTenants}
+          tenants={tenants}
           bannerMessage="Loading existing collections from database..."
         />
       </>

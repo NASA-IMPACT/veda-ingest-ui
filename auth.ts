@@ -45,14 +45,14 @@ if (authDisabled) {
   const mockSession: Session & {
     scopes?: string[];
     accessToken?: string;
-    allowedTenants?: string[];
+    tenants?: string[];
   } = {
     user: {
       name: 'Mock User',
       email: 'test@example.com',
     },
     expires: '2099-12-31T23:59:59.999Z',
-    allowedTenants: mockTenants,
+    tenants: mockTenants,
     accessToken: 'mock-access-token-for-development',
     ...(mockScopes.length > 0 ? { scopes: mockScopes } : {}),
   };
@@ -94,8 +94,6 @@ if (authDisabled) {
           );
 
           (token as JWT).accessToken = account.access_token;
-          const tenants = decodedPayload.groups || [];
-          (token as JWT).tenants = tenants;
 
           const rawScopes = decodedPayload.scope;
           if (Array.isArray(rawScopes)) {
@@ -111,13 +109,13 @@ if (authDisabled) {
               );
               const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
               if (mockTenants && mockTenants.trim() !== '') {
-                (token as JWT).allowedTenants = mockTenants
+                (token as JWT).tenants = mockTenants
                   .split(',')
                   .map((tenant) => tenant.trim())
                   .filter(Boolean);
               }
             } else {
-              const allowedTenantsResponse = await fetch(
+              const tenantsResponse = await fetch(
                 `${VEDA_BACKEND_URL}/ingest/auth/tenants/writable`,
                 {
                   method: 'GET',
@@ -128,32 +126,36 @@ if (authDisabled) {
                 }
               );
 
-              if (allowedTenantsResponse.ok) {
-                const allowedTenantsData = await allowedTenantsResponse.json();
-                const parsedAllowedTenants = Array.isArray(allowedTenantsData)
-                  ? allowedTenantsData
-                      .filter(
-                        (tenant): tenant is string => typeof tenant === 'string'
-                      )
-                      .map((tenant) => tenant.trim())
-                      .filter(Boolean)
-                  : [];
+              if (tenantsResponse.ok) {
+                const tenantsData = await tenantsResponse.json();
+                const rawTenants = Array.isArray(tenantsData)
+                  ? tenantsData
+                  : Array.isArray(tenantsData?.tenants)
+                    ? tenantsData.tenants
+                    : [];
+                const parsedTenants = rawTenants
+                  .filter(
+                    (tenant: unknown): tenant is string =>
+                      typeof tenant === 'string'
+                  )
+                  .map((tenant: string) => tenant.trim())
+                  .filter(Boolean);
                 console.log(
                   'Fetched allowed tenants during auth:',
-                  parsedAllowedTenants
+                  parsedTenants
                 );
-                (token as JWT).allowedTenants = parsedAllowedTenants;
+                (token as JWT).tenants = parsedTenants;
               } else {
                 console.warn(
                   'Failed to fetch allowed tenants during auth:',
-                  allowedTenantsResponse.status
+                  tenantsResponse.status
                 );
-                (token as JWT).allowedTenants = [];
+                (token as JWT).tenants = [];
               }
             }
           } catch (error) {
             console.error('Error fetching allowed tenants during auth:', error);
-            (token as JWT).allowedTenants = [];
+            (token as JWT).tenants = [];
           }
         }
         return token;
@@ -164,15 +166,14 @@ if (authDisabled) {
           tenants?: string[];
           scopes?: string[];
           accessToken?: string;
-          allowedTenants?: string[];
         };
 
         if (customToken.accessToken) {
           (customSession as any).accessToken = customToken.accessToken;
         }
 
-        if (customToken.allowedTenants) {
-          customSession.allowedTenants = customToken.allowedTenants as string[];
+        if (customToken.tenants) {
+          customSession.tenants = customToken.tenants as string[];
         }
 
         // Check if we should use mock tenants instead of real ones
@@ -184,8 +185,6 @@ if (authDisabled) {
             .filter(Boolean);
           console.log('🎭 Overriding real tenants with mock tenants:', tenants);
           customSession.tenants = tenants;
-        } else {
-          customSession.tenants = customToken.tenants;
         }
 
         // Inject mock scopes from env if present

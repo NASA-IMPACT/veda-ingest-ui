@@ -11,7 +11,7 @@ import { useUserTenants } from '@/app/contexts/TenantContext';
  * @returns An object containing the dynamically updated schema and a loading state.
  */
 export const useTenants = (baseSchema: JSONSchema7, baseUiSchema?: any) => {
-  const { allowedTenants, isLoading } = useUserTenants();
+  const { tenants, isLoading } = useUserTenants();
 
   const { dynamicSchema, dynamicUiSchema } = useMemo(() => {
     // Create deep copies to avoid mutating the original objects
@@ -20,7 +20,7 @@ export const useTenants = (baseSchema: JSONSchema7, baseUiSchema?: any) => {
       ? JSON.parse(JSON.stringify(baseUiSchema))
       : undefined;
 
-    if (!allowedTenants || allowedTenants.length === 0) {
+    if (!tenants || tenants.length === 0) {
       if (newSchema.properties?.tenant) {
         delete newSchema.properties.tenant;
       }
@@ -35,7 +35,7 @@ export const useTenants = (baseSchema: JSONSchema7, baseUiSchema?: any) => {
       if (newSchema.properties?.tenant) {
         const tenantProperty = newSchema.properties.tenant as JSONSchema7;
         tenantProperty.type = 'string';
-        tenantProperty.enum = allowedTenants;
+        tenantProperty.enum = tenants;
       }
     }
 
@@ -43,7 +43,7 @@ export const useTenants = (baseSchema: JSONSchema7, baseUiSchema?: any) => {
       dynamicSchema: newSchema,
       dynamicUiSchema: newUiSchema,
     };
-  }, [baseSchema, baseUiSchema, allowedTenants]);
+  }, [baseSchema, baseUiSchema, tenants]);
 
   return {
     schema: dynamicSchema,

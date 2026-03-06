@@ -16,7 +16,7 @@ const AllProviders = ({ children }: { children: ReactNode }) => {
   const mockSession = null;
 
   const mockTenantContext = {
-    allowedTenants: ['test-tenant-1', 'test-tenant-2'],
+    tenants: ['test-tenant-1', 'test-tenant-2'],
     isLoading: false,
   };
 
