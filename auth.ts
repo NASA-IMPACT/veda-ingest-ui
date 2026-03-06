@@ -32,6 +32,116 @@ const getMockScopes = (): string[] => {
 
 let auth: any, handlers: any, signIn: any, signOut: any;
 
+type AppJWT = JWT & {
+  accessToken?: string;
+  refreshToken?: string;
+  accessTokenExpires?: number;
+  scopes?: string[];
+  tenants?: string[];
+  error?: 'RefreshAccessTokenError' | 'NoRefreshToken';
+};
+
+const REFRESH_BUFFER_MS = 60_000;
+
+const parseScopesFromAccessToken = (accessToken: string): string[] => {
+  try {
+    const payload = accessToken.split('.')[1];
+    if (!payload) return [];
+    const decodedPayload = JSON.parse(
+      Buffer.from(payload, 'base64').toString()
+    ) as { scope?: string | string[] };
+    const rawScopes = decodedPayload.scope;
+    if (Array.isArray(rawScopes)) return rawScopes;
+    if (typeof rawScopes === 'string') return rawScopes.split(' ');
+    return [];
+  } catch {
+    return [];
+  }
+};
+
+const fetchWritableTenants = async (accessToken: string): Promise<string[]> => {
+  const tenantsResponse = await fetch(
+    `${VEDA_BACKEND_URL}/ingest/auth/tenants/writable`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json',
+      },
+    }
+  );
+
+  if (!tenantsResponse.ok) {
+    console.warn(
+      'Failed to fetch allowed tenants during auth:',
+      tenantsResponse.status
+    );
+    return [];
+  }
+
+  const tenantsData = await tenantsResponse.json();
+  const rawTenants = Array.isArray(tenantsData)
+    ? tenantsData
+    : Array.isArray(tenantsData?.tenants)
+      ? tenantsData.tenants
+      : [];
+
+  return rawTenants
+    .filter((tenant: unknown): tenant is string => typeof tenant === 'string')
+    .map((tenant: string) => tenant.trim())
+    .filter(Boolean);
+};
+
+const refreshAccessToken = async (token: AppJWT): Promise<AppJWT> => {
+  if (!token.refreshToken) {
+    return { ...token, error: 'NoRefreshToken' };
+  }
+
+  try {
+    const issuer = process.env.NEXT_PUBLIC_KEYCLOAK_ISSUER!;
+    const tokenEndpoint = `${issuer}/protocol/openid-connect/token`;
+
+    const response = await fetch(tokenEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: process.env.KEYCLOAK_CLIENT_ID!,
+        client_secret: process.env.KEYCLOAK_CLIENT_SECRET!,
+        grant_type: 'refresh_token',
+        refresh_token: token.refreshToken,
+      }),
+    });
+
+    if (!response.ok) {
+      return { ...token, error: 'RefreshAccessTokenError' };
+    }
+
+    const refreshed = (await response.json()) as {
+      access_token: string;
+      refresh_token?: string;
+      expires_in: number;
+    };
+
+    const refreshedAccessToken = refreshed.access_token;
+    const refreshedScopes = parseScopesFromAccessToken(refreshedAccessToken);
+    const refreshedTenants = await fetchWritableTenants(refreshedAccessToken);
+
+    return {
+      ...token,
+      accessToken: refreshedAccessToken,
+      refreshToken: refreshed.refresh_token ?? token.refreshToken,
+      accessTokenExpires: Date.now() + refreshed.expires_in * 1000,
+      scopes: refreshedScopes,
+      tenants: refreshedTenants,
+      error: undefined,
+    };
+  } catch {
+    return { ...token, error: 'RefreshAccessTokenError' };
+  }
+};
+
 if (authDisabled) {
   // --- MOCKED AUTH FOR TESTING --- 🎭
   console.log('🎭 Auth is disabled. Using mock session.');
@@ -87,20 +197,15 @@ if (authDisabled) {
     },
     callbacks: {
       async jwt({ token, account }) {
+        const customToken = token as AppJWT;
+
         if (account?.access_token) {
-          const base64Payload = account.access_token.split('.')[1];
-          const decodedPayload = JSON.parse(
-            Buffer.from(base64Payload, 'base64').toString()
-          );
-
-          (token as JWT).accessToken = account.access_token;
-
-          const rawScopes = decodedPayload.scope;
-          if (Array.isArray(rawScopes)) {
-            (token as JWT).scopes = rawScopes;
-          } else if (typeof rawScopes === 'string') {
-            (token as JWT).scopes = rawScopes.split(' ');
-          }
+          customToken.accessToken = account.access_token;
+          customToken.refreshToken = account.refresh_token;
+          customToken.accessTokenExpires = account.expires_at
+            ? account.expires_at * 1000
+            : Date.now() + 5 * 60 * 1000;
+          customToken.scopes = parseScopesFromAccessToken(account.access_token);
 
           try {
             if (process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true') {
@@ -109,63 +214,40 @@ if (authDisabled) {
               );
               const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
               if (mockTenants && mockTenants.trim() !== '') {
-                (token as JWT).tenants = mockTenants
+                customToken.tenants = mockTenants
                   .split(',')
                   .map((tenant) => tenant.trim())
                   .filter(Boolean);
               }
             } else {
-              const tenantsResponse = await fetch(
-                `${VEDA_BACKEND_URL}/ingest/auth/tenants/writable`,
-                {
-                  method: 'GET',
-                  headers: {
-                    Authorization: `Bearer ${account.access_token}`,
-                    Accept: 'application/json',
-                  },
-                }
+              customToken.tenants = await fetchWritableTenants(
+                account.access_token
               );
-
-              if (tenantsResponse.ok) {
-                const tenantsData = await tenantsResponse.json();
-                const rawTenants = Array.isArray(tenantsData)
-                  ? tenantsData
-                  : Array.isArray(tenantsData?.tenants)
-                    ? tenantsData.tenants
-                    : [];
-                const parsedTenants = rawTenants
-                  .filter(
-                    (tenant: unknown): tenant is string =>
-                      typeof tenant === 'string'
-                  )
-                  .map((tenant: string) => tenant.trim())
-                  .filter(Boolean);
-                console.log(
-                  'Fetched allowed tenants during auth:',
-                  parsedTenants
-                );
-                (token as JWT).tenants = parsedTenants;
-              } else {
-                console.warn(
-                  'Failed to fetch allowed tenants during auth:',
-                  tenantsResponse.status
-                );
-                (token as JWT).tenants = [];
-              }
             }
           } catch (error) {
             console.error('Error fetching allowed tenants during auth:', error);
-            (token as JWT).tenants = [];
+            customToken.tenants = [];
           }
+
+          return customToken;
         }
-        return token;
+
+        if (
+          customToken.accessTokenExpires &&
+          Date.now() < customToken.accessTokenExpires - REFRESH_BUFFER_MS
+        ) {
+          return customToken;
+        }
+
+        return refreshAccessToken(customToken);
       },
       async session({ session, token }) {
-        const customToken = token as JWT;
+        const customToken = token as AppJWT;
         const customSession = session as Session & {
           tenants?: string[];
           scopes?: string[];
           accessToken?: string;
+          error?: 'RefreshAccessTokenError' | 'NoRefreshToken';
         };
 
         if (customToken.accessToken) {
@@ -195,6 +277,10 @@ if (authDisabled) {
           customSession.scopes = scopes;
         } else if (customToken.scopes) {
           customSession.scopes = customToken.scopes as string[];
+        }
+
+        if (customToken.error) {
+          customSession.error = customToken.error;
         }
 
         return customSession;

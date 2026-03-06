@@ -6,13 +6,17 @@ declare module 'next-auth' {
     accessToken?: string;
     scopes?: string[];
     tenants?: string[];
+    error?: 'RefreshAccessTokenError' | 'NoRefreshToken';
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
     accessToken?: string;
+    refreshToken?: string;
+    accessTokenExpires?: number;
     scopes?: string[];
     tenants?: string[];
+    error?: 'RefreshAccessTokenError' | 'NoRefreshToken';
   }
 }

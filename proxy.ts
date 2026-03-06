@@ -52,7 +52,9 @@ function getUserPermissionLevel(session: any) {
 function isRouteAllowed(pathname: string, permissionLevel: string) {
   // Check if route starts with any of the configured paths
   const matchesRoute = (routes: string[]) =>
-    routes.some((route) => pathname.startsWith(route));
+    routes.some((route) =>
+      route === '/' ? pathname === '/' : pathname.startsWith(route)
+    );
 
   switch (permissionLevel) {
     case 'unauthenticated':
@@ -140,6 +142,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/',
     '/datasets',
     '/collections',
     '/create-dataset',
