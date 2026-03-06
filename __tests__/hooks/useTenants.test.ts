@@ -21,9 +21,9 @@ const baseSchema: JSONSchema7 = {
 };
 
 describe('useTenants', () => {
-  it('should remove tenant property when allowedTenants is undefined and loading', () => {
+  it('should remove tenant property when tenants is undefined and loading', () => {
     mockedUseUserTenants.mockReturnValue({
-      allowedTenants: undefined,
+      tenants: undefined,
       isLoading: true,
     });
     const { result } = renderHook(() => useTenants(baseSchema));
@@ -38,7 +38,7 @@ describe('useTenants', () => {
     const mockTenants = ['tenant-A', 'tenant-B'];
 
     const mockContextValue = {
-      allowedTenants: mockTenants,
+      tenants: mockTenants,
       isLoading: false,
     };
     mockedUseUserTenants.mockReturnValue(mockContextValue);
@@ -52,7 +52,7 @@ describe('useTenants', () => {
   it('should return the updated schema even while loading if tenants are available', () => {
     const mockTenants = ['tenant-A'];
     const mockContextValue = {
-      allowedTenants: mockTenants,
+      tenants: mockTenants,
       isLoading: true,
     };
     mockedUseUserTenants.mockReturnValue(mockContextValue);
@@ -63,9 +63,9 @@ describe('useTenants', () => {
     expect(result.current.isLoading).toBe(true);
   });
 
-  it('should remove tenant property if allowedTenants is empty', () => {
+  it('should remove tenant property if tenants is empty', () => {
     const mockContextValue = {
-      allowedTenants: [],
+      tenants: [],
       isLoading: false,
     };
     mockedUseUserTenants.mockReturnValue(mockContextValue);
@@ -88,9 +88,9 @@ describe('useTenants', () => {
     expect(result.current.schema.properties?.other).toBeDefined();
   });
 
-  it('should remove tenant from ui:grid if allowedTenants is empty', () => {
+  it('should remove tenant from ui:grid if tenants is empty', () => {
     const mockContextValue = {
-      allowedTenants: [],
+      tenants: [],
       isLoading: false,
     };
     mockedUseUserTenants.mockReturnValue(mockContextValue);
@@ -105,7 +105,7 @@ describe('useTenants', () => {
 
   it('should not mutate the original baseSchema and baseUiSchema', () => {
     const mockContextValue = {
-      allowedTenants: ['tenant-X'],
+      tenants: ['tenant-X'],
       isLoading: false,
     };
     mockedUseUserTenants.mockReturnValue(mockContextValue);

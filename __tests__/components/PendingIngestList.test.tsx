@@ -54,7 +54,7 @@ describe('PendingIngestList', () => {
 
     vi.mocked(useRouter).mockReturnValue(mockRouter as any);
     vi.mocked(useUserTenants).mockReturnValue({
-      allowedTenants: ['tenant1', 'tenant2'],
+      tenants: ['tenant1', 'tenant2'],
       isLoading: false,
     } as any);
   });

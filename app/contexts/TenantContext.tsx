@@ -11,7 +11,7 @@ import { Spin } from 'antd';
 import { useSession } from 'next-auth/react';
 
 interface TenantContextType {
-  allowedTenants: string[];
+  tenants: string[];
   isLoading: boolean;
 }
 
@@ -21,7 +21,7 @@ export const TenantContext = createContext<TenantContextType | undefined>(
 
 export const TenantProvider = ({ children }: { children: ReactNode }) => {
   const { data: session, status } = useSession();
-  const [allowedTenants, setAllowedTenants] = useState<string[]>([]);
+  const [tenants, setTenants] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -33,15 +33,13 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
 
     if (!session) {
-      setAllowedTenants([]);
+      setTenants([]);
       return;
     }
 
-    const sessionAllowedTenants = (session as any)?.allowedTenants;
-    const tenants = Array.isArray(sessionAllowedTenants)
-      ? sessionAllowedTenants
-      : [];
-    setAllowedTenants(tenants);
+    const sessionTenants = (session as any)?.tenants;
+    const tenants = Array.isArray(sessionTenants) ? sessionTenants : [];
+    setTenants(tenants);
   }, [session, status]);
 
   if (isLoading) {
@@ -49,7 +47,7 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <TenantContext.Provider value={{ allowedTenants, isLoading }}>
+    <TenantContext.Provider value={{ tenants, isLoading }}>
       {children}
     </TenantContext.Provider>
   );

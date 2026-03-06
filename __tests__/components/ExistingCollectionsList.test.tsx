@@ -55,7 +55,7 @@ describe('ExistingCollectionsList', () => {
 
     vi.mocked(useRouter).mockReturnValue(mockRouter as any);
     vi.mocked(useUserTenants).mockReturnValue({
-      allowedTenants: ['nasa', 'noaa'],
+      tenants: ['nasa', 'noaa'],
       isLoading: false,
     } as any);
   });

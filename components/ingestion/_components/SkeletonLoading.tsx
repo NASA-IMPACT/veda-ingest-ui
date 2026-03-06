@@ -2,15 +2,15 @@ import { Card, Row, Col, Skeleton, Space } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 
 interface SkeletonLoadingProps {
-  allowedTenants?: string[];
+  tenants?: string[];
   bannerMessage: string;
 }
 
 export const SkeletonLoading: React.FC<SkeletonLoadingProps> = ({
-  allowedTenants,
+  tenants,
   bannerMessage,
 }) => {
-  const hasAllowedTenants = allowedTenants && allowedTenants.length > 0;
+  const hasTenants = tenants && tenants.length > 0;
 
   return (
     <>
@@ -32,8 +32,8 @@ export const SkeletonLoading: React.FC<SkeletonLoadingProps> = ({
       </div>
 
       <Row gutter={[16, 16]}>
-        {hasAllowedTenants &&
-          allowedTenants!.map((_, index) => (
+        {hasTenants &&
+          tenants!.map((_, index) => (
             <Col key={`skeleton-${index}`} xs={24} sm={12} md={8} lg={6}>
               <Card
                 title={<Skeleton.Input size="small" style={{ width: 120 }} />}

@@ -28,7 +28,7 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [apiError, setApiError] = useState('');
 
-  const { allowedTenants } = useUserTenants();
+  const { tenants } = useUserTenants();
 
   useEffect(() => {
     if (sessionStatus === 'unauthenticated') {
@@ -76,7 +76,7 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
           Edit Pending Ingest Requests
         </Title>
         <SkeletonLoading
-          allowedTenants={allowedTenants}
+          tenants={tenants}
           bannerMessage="Checking with GitHub for pending ingests..."
         />
       </>
@@ -94,9 +94,9 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
       </Title>
 
       <Row gutter={[16, 16]}>
-        {allowedTenants &&
-          allowedTenants.length > 0 &&
-          allowedTenants.map((tenant: string) => {
+        {tenants &&
+          tenants.length > 0 &&
+          tenants.map((tenant: string) => {
             const tenantIngests: IngestPullRequest[] = allIngests.filter(
               (ingest: IngestPullRequest) => ingest.tenant === tenant
             );
