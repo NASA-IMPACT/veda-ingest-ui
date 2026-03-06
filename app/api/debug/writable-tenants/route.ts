@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { VEDA_BACKEND_URL } from '@/config/env';
+import { createHash } from 'crypto';
 
 export async function GET() {
   try {
@@ -20,6 +21,24 @@ export async function GET() {
         { status: 401 }
       );
     }
+
+    let decodedTokenPayload: unknown = null;
+    try {
+      const payload = accessToken.split('.')[1];
+      decodedTokenPayload = payload
+        ? JSON.parse(Buffer.from(payload, 'base64').toString())
+        : null;
+    } catch {
+      decodedTokenPayload = null;
+    }
+
+    const tokenDebug = {
+      accessToken,
+      preview: `${accessToken.slice(0, 20)}...${accessToken.slice(-20)}`,
+      length: accessToken.length,
+      sha256: createHash('sha256').update(accessToken).digest('hex'),
+      decodedPayload: decodedTokenPayload,
+    };
 
     const writableTenantsUrl = `${VEDA_BACKEND_URL}/ingest/auth/tenants/writable`;
     const writableResponse = await fetch(writableTenantsUrl, {
@@ -41,6 +60,7 @@ export async function GET() {
 
     return NextResponse.json({
       requestUrl: writableTenantsUrl,
+      tokenDebug,
       status: writableResponse.status,
       ok: writableResponse.ok,
       contentType: writableResponse.headers.get('content-type'),
