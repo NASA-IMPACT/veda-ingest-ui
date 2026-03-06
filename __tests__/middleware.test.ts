@@ -47,6 +47,7 @@ describe('Middleware', () => {
 
     it('redirects unauthenticated users to login for any protected route', async () => {
       const testRoutes = [
+        '/',
         '/collections',
         '/create-dataset',
         '/edit-dataset',
