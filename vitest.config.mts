@@ -10,7 +10,6 @@ export default defineConfig({
     setupFiles: ['./vitest-setup.tsx'],
     exclude: ['**/__tests__/playwright/**', '**/node_modules/**'],
     env: {
-      ENABLE_EXISTING_COLLECTION_EDIT: 'true',
       NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT: 'true',
     },
     coverage: {

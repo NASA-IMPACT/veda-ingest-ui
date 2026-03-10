@@ -1,26 +1,15 @@
-const path = require('path');
-
-const buildEslintCommand = (filenames) => {
-  // Filter out flat config files and non-TS/JS files
-  const jsFiles = filenames
-    .filter((f) => {
-      const name = path.basename(f);
-      // Exclude the flat config files (unused)
-      if (/^eslint\.config\.(js|mjs)$/.test(name)) {
-        return false;
-      }
-      return /\.(js|jsx|ts|tsx)$/.test(f);
-    })
-    .map((f) => path.relative(process.cwd(), f));
-
-  if (jsFiles.length === 0) {
-    return 'echo "No JS/TS files to lint"';
-  }
-
-  return `yarn lint:fix -- ${jsFiles.join(' ')}`;
-};
+const quote = (file) => `'${file.replace(/'/g, "'\\''")}'`;
 
 module.exports = {
-  '*.{js,jsx,ts,tsx}': [buildEslintCommand, 'prettier --write'],
-  '*.{json,md,css,scss,html}': ['prettier --write'],
+  '*.{js,jsx,ts,tsx}': (files) => {
+    const quoted = files.map(quote).join(' ');
+    return [
+      `yarn lint:fix -- ${quoted}`,
+      `prettier --write ${quoted}`,
+    ];
+  },
+  '*.{json,md,css,scss,html}': (files) => {
+    const quoted = files.map(quote).join(' ');
+    return `prettier --write ${quoted}`;
+  },
 };
