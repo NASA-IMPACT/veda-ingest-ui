@@ -60,36 +60,50 @@ const parseScopesFromAccessToken = (accessToken: string): string[] => {
 };
 
 const fetchWritableTenants = async (accessToken: string): Promise<string[]> => {
-  const tenantsResponse = await fetch(
-    `${VEDA_BACKEND_URL}/ingest/auth/tenants/writable`,
-    {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: 'application/json',
-      },
-    }
-  );
-
-  if (!tenantsResponse.ok) {
-    console.warn(
-      'Failed to fetch allowed tenants during auth:',
-      tenantsResponse.status
+  try {
+    const tenantsResponse = await fetch(
+      `${VEDA_BACKEND_URL}/ingest/auth/tenants/writable`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: 'application/json',
+        },
+      }
     );
+
+    if (!tenantsResponse.ok) {
+      console.warn(
+        'Failed to fetch allowed tenants during auth:',
+        tenantsResponse.status
+      );
+      return [];
+    }
+
+    const contentType = tenantsResponse.headers.get('content-type') || '';
+    if (!contentType.toLowerCase().includes('application/json')) {
+      console.warn(
+        'Failed to fetch allowed tenants during auth: unexpected content-type',
+        contentType
+      );
+      return [];
+    }
+
+    const tenantsData = await tenantsResponse.json();
+    const rawTenants = Array.isArray(tenantsData)
+      ? tenantsData
+      : Array.isArray(tenantsData?.tenants)
+        ? tenantsData.tenants
+        : [];
+
+    return rawTenants
+      .filter((tenant: unknown): tenant is string => typeof tenant === 'string')
+      .map((tenant: string) => tenant.trim())
+      .filter(Boolean);
+  } catch (error) {
+    console.warn('Failed to fetch allowed tenants during auth:', error);
     return [];
   }
-
-  const tenantsData = await tenantsResponse.json();
-  const rawTenants = Array.isArray(tenantsData)
-    ? tenantsData
-    : Array.isArray(tenantsData?.tenants)
-      ? tenantsData.tenants
-      : [];
-
-  return rawTenants
-    .filter((tenant: unknown): tenant is string => typeof tenant === 'string')
-    .map((tenant: string) => tenant.trim())
-    .filter(Boolean);
 };
 
 const refreshAccessToken = async (token: AppJWT): Promise<AppJWT> => {
