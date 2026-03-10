@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { validateTenantAccess } from '@/lib/serverTenantValidation';
+import { VEDA_BACKEND_URL } from '@/config/env';
+
+const isAllowedAppEnv = () => {
+  const env = process.env.NEXT_PUBLIC_APP_ENV?.toLowerCase();
+  return env === 'veda' || env === 'local';
+};
 
 interface RouteParams {
   params: Promise<{
@@ -10,8 +16,7 @@ interface RouteParams {
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    // Check if the Edit Existing Collection feature is enabled
-    if (process.env.ENABLE_EXISTING_COLLECTION_EDIT !== 'true') {
+    if (!isAllowedAppEnv()) {
       return NextResponse.json(
         { error: 'Edit Existing Collection feature is disabled' },
         { status: 403 }
@@ -28,7 +33,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     const { collectionId } = await params;
 
-    const stacUrl = `https://staging.openveda.cloud/api/stac/collections/${encodeURIComponent(collectionId)}`;
+    const stacUrl = `${VEDA_BACKEND_URL}/stac/collections/${encodeURIComponent(collectionId)}`;
     const stacResponse = await fetch(stacUrl, {
       headers: {
         Authorization: `Bearer ${(session as any).accessToken}`,
@@ -78,8 +83,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    // Check if the Edit Existing Collection feature is enabled
-    if (process.env.ENABLE_EXISTING_COLLECTION_EDIT !== 'true') {
+    // Incremental rollout: API access is allowed only for the VEDA and local environments.
+    if (!isAllowedAppEnv()) {
       return NextResponse.json(
         { error: 'Edit Existing Collection feature is disabled' },
         { status: 403 }
@@ -98,7 +103,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const formData = await request.json();
 
     // First, get the existing collection to check tenant access
-    const stacUrl = `https://staging.openveda.cloud/api/stac/collections/${encodeURIComponent(collectionId)}`;
+    const stacUrl = `${VEDA_BACKEND_URL}/stac/collections/${encodeURIComponent(collectionId)}`;
     const existingResponse = await fetch(stacUrl, {
       headers: {
         Authorization: `Bearer ${(session as any).accessToken}`,

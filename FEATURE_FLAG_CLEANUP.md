@@ -1,223 +1,49 @@
 # Edit Existing Collection Feature Flag Cleanup Guide
 
-This document outlines all the changes needed to remove the `ENABLE_EXISTING_COLLECTION_EDIT` feature flag and make the Edit Existing Collection functionality permanently available.
+This document describes the current behavior of Edit Existing Collection and the remaining cleanup work.
 
-## Overview
+## Current Rollout Behavior
 
-The feature flag was implemented to control visibility and access to the "Edit Existing Collection" feature across:
+- Direct page navigation to `/edit-existing-collection` is allowed only when `NEXT_PUBLIC_APP_ENV=veda` or `local`. Other environments redirect to `/unauthorized`.
+- Server/API access to `/api/existing-collection/*` is allowed only when `NEXT_PUBLIC_APP_ENV=veda` or `local`.
+- UI visibility (menu/card) is controlled by `NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT`.
+- Result: Page and API are AppEnv-gated, while menu/page visibility remains behind the UI feature flag.
 
-- UI components (MenuBar, CollectionsClient)
-- API endpoints (/api/existing-collection/\*)
-- Test configurations
+UI visibility for Edit Existing Collection remains feature-flag controlled in:
 
-## Files to Update
+- `components/layout/MenuBar.tsx`
+- `app/(pages)/collections/_components/CollectionsClient.tsx`
 
-### 1. Environment Configuration
+Page and API access gating is implemented in:
 
-#### `.env.example`
+- `proxy.ts` (middleware-level route protection for `/edit-existing-collection`)
+- `app/api/existing-collection/route.ts`
+- `app/api/existing-collection/[collectionId]/route.ts` (both `GET` and `PUT`)
 
-**Remove these lines:**
+## Environment Variables
 
-```env
-# Enable or disable the Edit Existing Collection feature
-# Set to 'true' to show Edit Existing Collection options and allow API access
-ENABLE_EXISTING_COLLECTION_EDIT=true
-NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT=true
-```
+### Keep
 
-### 2. Test Configuration Files
+- `NEXT_PUBLIC_APP_ENV` (must be `veda` or `local` for direct page navigation and API access)
+- `NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT` (controls menu/card visibility)
 
-#### `playwright.config.ts`
+### Removed
 
-**Remove** `ENABLE_EXISTING_COLLECTION_EDIT=true` from the command:
-
-```typescript
-// FROM:
-command: 'NEXT_PUBLIC_DISABLE_AUTH=true NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" ENABLE_EXISTING_COLLECTION_EDIT=true yarn dev',
-
-// TO:
-command: 'NEXT_PUBLIC_DISABLE_AUTH=true NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" yarn dev',
-```
-
-#### `vitest.config.mts`
-
-**Remove the env configuration:**
-
-```typescript
-// REMOVE this entire env block:
-env: {
-  ENABLE_EXISTING_COLLECTION_EDIT: 'true',
-  NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT: 'true',
-},
-```
-
-### 3. UI Components
-
-#### `components/layout/MenuBar.tsx`
-
-**Remove the environment variable check:**
-
-```typescript
-// REMOVE this line:
-const isEditExistingCollectionEnabled =
-  process.env.NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT === 'true';
-```
-
-**Simplify the menu items array:**
-
-```typescript
-// FROM conditional spread syntax:
-...(isEditExistingCollectionEnabled ? [{
-  key: '/edit-existing-collection',
-  // ... menu item definition
-}] : []),
-
-// TO permanent menu item:
-{
-  key: '/edit-existing-collection',
-  label:
-    hasLimitedAccess || !hasEditStacCollectionPermission ? (
-      <Tooltip
-        title="Contact the VEDA Data Services team for access"
-        placement="right"
-      >
-        <span style={{ cursor: 'not-allowed' }}>
-          <Link href="/edit-existing-collection">
-            Edit Existing Collection
-          </Link>
-        </span>
-      </Tooltip>
-    ) : (
-      <Link href="/edit-existing-collection">
-        Edit Existing Collection
-      </Link>
-    ),
-  icon: <DatabaseOutlined />,
-  disabled: hasLimitedAccess || !hasEditStacCollectionPermission,
-},
-```
-
-#### `app/collections/_components/CollectionsClient.tsx`
-
-**Remove the environment variable check:**
-
-```typescript
-// REMOVE this line:
-const isEditExistingCollectionEnabled =
-  process.env.NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT === 'true';
-```
-
-**Remove conditional rendering - make sections permanent:**
-
-For **Limited Access View**:
-
-```typescript
-// FROM:
-{isEditExistingCollectionEnabled && (
-  <>
-    <Title level={3} style={{ marginTop: 40 }}>
-      Existing STAC Collections
-    </Title>
-    <Row gutter={16} style={{ marginTop: 16 }}>
-      {/* ... card content */}
-    </Row>
-  </>
-)}
-
-// TO:
-<>
-  <Title level={3} style={{ marginTop: 40 }}>
-    Existing STAC Collections
-  </Title>
-  <Row gutter={16} style={{ marginTop: 16 }}>
-    {/* ... card content */}
-  </Row>
-</>
-```
-
-For **Main View**:
-
-```typescript
-// FROM:
-{isEditExistingCollectionEnabled && (
-  <>
-    <Title level={3} style={{ marginTop: 40 }}>
-      Existing STAC Collections
-    </Title>
-    <Row gutter={16} style={{ marginTop: 16 }}>
-      {/* ... card content */}
-    </Row>
-  </>
-)}
-
-// TO:
-<>
-  <Title level={3} style={{ marginTop: 40 }}>
-    Existing STAC Collections
-  </Title>
-  <Row gutter={16} style={{ marginTop: 16 }}>
-    {/* ... card content */}
-  </Row>
-</>
-```
-
-### 4. API Endpoints
-
-#### `app/api/existing-collection/route.ts`
-
-**Remove the feature flag check:**
-
-```typescript
-// REMOVE this entire block:
-// Check if the Edit Existing Collection feature is enabled
-if (process.env.ENABLE_EXISTING_COLLECTION_EDIT !== 'true') {
-  return NextResponse.json(
-    { error: 'Edit Existing Collection feature is disabled' },
-    { status: 403 }
-  );
-}
-```
-
-#### `app/api/existing-collection/[collectionId]/route.ts`
-
-**Remove the feature flag check from both GET and PUT methods:**
-
-```typescript
-// REMOVE this entire block from both functions:
-// Check if the Edit Existing Collection feature is enabled
-if (process.env.ENABLE_EXISTING_COLLECTION_EDIT !== 'true') {
-  return NextResponse.json(
-    { error: 'Edit Existing Collection feature is disabled' },
-    { status: 403 }
-  );
-}
-```
-
-## Cleanup Steps
-
-1. **Update environment files** - Remove feature flag variables
-2. **Update test configurations** - Remove env vars from test configs
-3. **Update UI components** - Remove conditional rendering logic
-4. **Update API endpoints** - Remove feature flag checks
-5. **Test thoroughly** - Ensure Edit Existing Collection works in all scenarios
-6. **Update documentation** - Remove references to the feature flag
-7. **Clean up any remaining environment variables** in production/staging configs
+- `ENABLE_EXISTING_COLLECTION_EDIT` - has been fully removed from test configs and env files
 
 ## Verification Checklist
 
-After cleanup, verify:
+- [ ] With `NEXT_PUBLIC_APP_ENV=veda` or `local`, direct navigation to `/edit-existing-collection` works
+- [ ] With `NEXT_PUBLIC_APP_ENV=veda` or `local`, `/api/existing-collection/*` routes are accessible (subject to auth/tenant checks)
+- [ ] With `NEXT_PUBLIC_APP_ENV` set to `disasters` or `eic`, `/edit-existing-collection` redirects to `/unauthorized` and `/api/existing-collection/*` returns `403`
+- [ ] Menu item and Collections page card remain hidden unless `NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT=true`
+- [ ] Existing auth and tenant checks still behave as expected for allowed environments
 
-- [ ] Edit Existing Collection appears in MenuBar for users with `stac:collection:update` scope
-- [ ] Edit Existing Collection section shows in Collections page when feature flag env vars are absent
-- [ ] API endpoints `/api/existing-collection/*` work without feature flag
-- [ ] Unit tests pass without feature flag environment variables
-- [ ] Playwright tests work without feature flag in command
-- [ ] No console errors about missing environment variables
+## Future Cleanup (Phase 2)
 
-## Notes
+When ready to fully launch in UI:
 
-- The feature flag was a **client-side and server-side** implementation
-- **Client-side**: `NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT` (visible in browser)
-- **Server-side**: `ENABLE_EXISTING_COLLECTION_EDIT` (API routes only)
-- Both must be removed for complete cleanup
-- Consider doing this cleanup in a dedicated PR for easier review and rollback if needed
+1. Remove `NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT` checks from `MenuBar` and `CollectionsClient`.
+2. Remove related test env wiring that only exists to force UI visibility.
+3. Update README and environment examples to remove UI flag references.
+4. Remove documentation references to temporary UI flag gating.

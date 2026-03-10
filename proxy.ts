@@ -2,6 +2,10 @@ import { auth } from '@/auth';
 import { NextResponse, NextRequest } from 'next/server';
 
 const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
+const isAllowedAppEnv = () => {
+  const env = process.env.NEXT_PUBLIC_APP_ENV?.toLowerCase();
+  return env === 'veda' || env === 'local';
+};
 
 // Define route permissions in a declarative way
 const routeConfig = {
@@ -120,6 +124,16 @@ export async function proxy(request: NextRequest) {
 
   const session = await auth();
   const pathname = request.nextUrl.pathname;
+
+  // Existing-collection UI routes are available only in the VEDA environment.
+  const isExistingCollectionRoute =
+    pathname.startsWith('/edit-existing-collection') ||
+    pathname.startsWith('/existing-collection');
+
+  if (isExistingCollectionRoute && !isAllowedAppEnv()) {
+    return NextResponse.redirect(new URL('/unauthorized', request.url));
+  }
+
   const permissionLevel = getUserPermissionLevel(session);
 
   // Check if the route is allowed for this permission level
