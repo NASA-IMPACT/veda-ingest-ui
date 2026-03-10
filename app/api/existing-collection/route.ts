@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getUserTenants } from '@/lib/serverTenantValidation';
 
+const isAllowedAppEnv = () => {
+  const env = process.env.NEXT_PUBLIC_APP_ENV?.toLowerCase();
+  return env === 'veda' || env === 'local';
+};
+
 export async function GET(request: NextRequest) {
   try {
-    // Check if the Edit Existing Collection feature is enabled
-    if (process.env.ENABLE_EXISTING_COLLECTION_EDIT !== 'true') {
+    // Incremental rollout: API access is allowed only for allowed environments (veda, local).
+    if (!isAllowedAppEnv()) {
       return NextResponse.json(
         { error: 'Edit Existing Collection feature is disabled' },
         { status: 403 }
