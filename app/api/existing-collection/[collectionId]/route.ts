@@ -33,7 +33,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     const { collectionId } = await params;
 
-    const stacUrl = `${VEDA_BACKEND_URL}/api/stac/collections/${encodeURIComponent(collectionId)}`;
+    const stacUrl = `${VEDA_BACKEND_URL}/stac/collections/${encodeURIComponent(collectionId)}`;
     const stacResponse = await fetch(stacUrl, {
       headers: {
         Authorization: `Bearer ${(session as any).accessToken}`,
@@ -103,7 +103,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const formData = await request.json();
 
     // First, get the existing collection to check tenant access
-    const stacUrl = `${VEDA_BACKEND_URL}/api/stac/collections/${encodeURIComponent(collectionId)}`;
+    const stacUrl = `${VEDA_BACKEND_URL}/stac/collections/${encodeURIComponent(collectionId)}`;
     const existingResponse = await fetch(stacUrl, {
       headers: {
         Authorization: `Bearer ${(session as any).accessToken}`,
