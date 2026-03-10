@@ -151,18 +151,44 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (!updateResponse.ok) {
       const errorText = await updateResponse.text();
+      console.error('Existing collection PUT failed', {
+        collectionId,
+        stacUrl,
+        status: updateResponse.status,
+        statusText: updateResponse.statusText,
+        responseBody: errorText,
+      });
       return NextResponse.json(
-        { error: `Failed to update collection: ${errorText}` },
+        {
+          error: `Failed to update collection: ${errorText}`,
+          details: {
+            collectionId,
+            downstreamUrl: stacUrl,
+            downstreamStatus: updateResponse.status,
+            downstreamStatusText: updateResponse.statusText,
+            downstreamResponseBody: errorText,
+          },
+        },
         { status: updateResponse.status }
       );
     }
 
     const updatedCollection = await updateResponse.json();
+    console.info('Existing collection PUT succeeded', {
+      collectionId,
+      stacUrl,
+      status: updateResponse.status,
+    });
     return NextResponse.json(updatedCollection);
   } catch (error) {
     console.error('Error updating collection:', error);
     return NextResponse.json(
-      { error: 'Failed to update collection' },
+      {
+        error: 'Failed to update collection',
+        details: {
+          errorMessage: error instanceof Error ? error.message : String(error),
+        },
+      },
       { status: 500 }
     );
   }
