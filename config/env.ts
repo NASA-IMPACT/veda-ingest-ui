@@ -21,7 +21,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     AWS_REGION: 'us-west-2',
     NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'veda-thumbnails',
     ADDITIONAL_LOGO: '',
-    VEDA_BACKEND_URL: 'https://staging.openveda.cloud/api',
+    VEDA_BACKEND_URL: 'https://dev.openveda.cloud/api',
   },
   disasters: {
     OWNER: 'Disasters-Learning-Portal',

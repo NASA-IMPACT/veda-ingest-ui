@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Spin, Alert, Button } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import EditFormManager from '@/components/ingestion/EditFormManager';
+import SuccessModal from '@/components/ui/SuccessModal';
+import ErrorModal from '@/components/ui/ErrorModal';
 
 interface EditCollectionViewProps {
   collectionData: any;
@@ -33,6 +35,22 @@ const EditCollectionView: React.FC<EditCollectionViewProps> = ({
     return <Spin tip="Loading collection..." />;
   }
 
+  if (status === 'success') {
+    return (
+      <SuccessModal
+        type="edit"
+        collectionName={
+          (collectionData?.title as string) ||
+          (collectionData?.id as string) ||
+          'Collection'
+        }
+        open={true}
+        onOk={onComplete}
+        onCancel={onComplete}
+      />
+    );
+  }
+
   if (!formData || Object.keys(formData).length === 0) {
     return <Alert type="error" message="No collection data found." showIcon />;
   }
@@ -56,6 +74,15 @@ const EditCollectionView: React.FC<EditCollectionViewProps> = ({
         setApiErrorMessage={setApiErrorMessage}
         handleCancel={onComplete}
       />
+      {status === 'error' && (
+        <ErrorModal
+          collectionName={
+            (collectionData?.title as string) || (collectionData?.id as string)
+          }
+          apiErrorMessage={apiErrorMessage}
+          context="collection-update"
+        />
+      )}
     </>
   );
 };
