@@ -84,7 +84,7 @@ describe('GET /api/existing-collection', () => {
 
     expect(response.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://staging.openveda.cloud/api/stac/collections'
+      'https://dev.openveda.cloud/api/stac/collections'
     );
 
     const data = await response.json();
@@ -110,7 +110,7 @@ describe('GET /api/existing-collection', () => {
 
     expect(response.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://staging.openveda.cloud/api/stac/collections?tenant=tenant1'
+      'https://dev.openveda.cloud/api/stac/collections?tenant=tenant1'
     );
   });
 
@@ -146,7 +146,7 @@ describe('GET /api/existing-collection', () => {
 
     expect(response.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://staging.openveda.cloud/api/stac/collections?tenant=Public'
+      'https://dev.openveda.cloud/api/stac/collections?tenant=Public'
     );
   });
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getUserTenants } from '@/lib/serverTenantValidation';
+import { VEDA_BACKEND_URL } from '@/config/env';
 
 const isAllowedAppEnv = () => {
   const env = process.env.NEXT_PUBLIC_APP_ENV?.toLowerCase();
@@ -43,7 +44,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let stacUrl = 'https://staging.openveda.cloud/api/stac/collections';
+    let stacUrl = `${VEDA_BACKEND_URL}/stac/collections`;
     if (tenantFilter) {
       stacUrl += `?tenant=${encodeURIComponent(tenantFilter)}`;
     }

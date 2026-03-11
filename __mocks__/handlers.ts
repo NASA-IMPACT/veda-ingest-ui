@@ -136,20 +136,20 @@ export const handlers = [
       colorMaps: ['accent', 'autumn', 'binary', 'bwr', 'cfastie'],
       links: [
         {
-          href: 'https://staging.openveda.cloud/api/raster/colorMaps',
+          href: 'https://dev.openveda.cloud/api/raster/colorMaps',
           rel: 'self',
           type: 'application/json',
           title: 'List of available colormaps',
         },
         {
-          href: 'https://staging.openveda.cloud/api/raster/colorMaps/{colorMapId}',
+          href: 'https://dev.openveda.cloud/api/raster/colorMaps/{colorMapId}',
           rel: 'data',
           type: 'application/json',
           templated: true,
           title: 'Retrieve colorMap metadata',
         },
         {
-          href: 'https://staging.openveda.cloud/api/raster/colorMaps/{colorMapId}?format=png',
+          href: 'https://dev.openveda.cloud/api/raster/colorMaps/{colorMapId}?format=png',
           rel: 'data',
           type: 'image/png',
           templated: true,
@@ -224,7 +224,7 @@ export const handlers = [
       return HttpResponse.text('Not Found', { status: 404 });
     }
   ),
-  http.get('https://staging.openveda.cloud/api/raster/cog/validate', () => {
+  http.get('https://dev.openveda.cloud/api/raster/cog/validate', () => {
     return HttpResponse.json({ COG: true });
   }),
 

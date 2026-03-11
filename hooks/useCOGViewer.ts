@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { App } from 'antd';
-const baseUrl = 'https://staging.openveda.cloud';
+import { VEDA_BACKEND_URL } from '@/config/env';
 
 type RendersType = {
   bidx?: number[];
@@ -51,7 +51,7 @@ export const useCOGViewer = () => {
 
     try {
       const response = await fetch(
-        `${baseUrl}/api/raster/cog/info?url=${encodeURIComponent(url)}`
+        `${VEDA_BACKEND_URL}/raster/cog/info?url=${encodeURIComponent(url)}`
       );
       if (!response.ok) {
         const errorMessage = await response.json().catch(() => null);
@@ -154,7 +154,7 @@ export const useCOGViewer = () => {
       const noDataParam = noData ? `&nodata=${encodeURIComponent(noData)}` : '';
 
       const response = await fetch(
-        `${baseUrl}/api/raster/cog/WebMercatorQuad/tilejson.json?url=${encodeURIComponent(
+        `${VEDA_BACKEND_URL}/raster/cog/WebMercatorQuad/tilejson.json?url=${encodeURIComponent(
           url
         )}${bidxParams}${rescaleParams}${colormapParam}${colorFormulaParam}${resamplingParam}${noDataParam}`
       );
