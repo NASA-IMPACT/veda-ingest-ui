@@ -91,7 +91,7 @@ describe('GET /api/existing-collection/[collectionId]', () => {
 
     expect(response.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://staging.openveda.cloud/api/stac/collections/test-collection',
+      'https://dev.openveda.cloud/api/stac/collections/test-collection',
       {
         headers: {
           Authorization: 'Bearer mock-access-token',
@@ -201,7 +201,7 @@ describe('GET /api/existing-collection/[collectionId]', () => {
 
     expect(response.status).toBe(404);
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://staging.openveda.cloud/api/stac/collections/nonexistent-collection',
+      'https://dev.openveda.cloud/api/stac/collections/nonexistent-collection',
       {
         headers: {
           Authorization: 'Bearer mock-access-token',
@@ -267,7 +267,7 @@ describe('GET /api/existing-collection/[collectionId]', () => {
 
     expect(response.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://staging.openveda.cloud/api/stac/collections/collection%20with%20spaces',
+      'https://dev.openveda.cloud/api/stac/collections/collection%20with%20spaces',
       {
         headers: {
           Authorization: 'Bearer mock-access-token',
@@ -358,7 +358,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
     // Verify existing collection was fetched first
     expect(mockFetch).toHaveBeenNthCalledWith(
       1,
-      'https://staging.openveda.cloud/api/stac/collections/test-collection',
+      'https://dev.openveda.cloud/api/stac/collections/test-collection',
       {
         headers: {
           Authorization: 'Bearer mock-access-token',
@@ -369,7 +369,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
     // Verify update request
     expect(mockFetch).toHaveBeenNthCalledWith(
       2,
-      'https://staging.openveda.cloud/api/stac/collections/test-collection',
+      'https://dev.openveda.cloud/api/stac/collections/test-collection',
       {
         method: 'PUT',
         headers: {
@@ -433,7 +433,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
 
     expect(response.status).toBe(404);
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://staging.openveda.cloud/api/stac/collections/nonexistent-collection',
+      'https://dev.openveda.cloud/api/stac/collections/nonexistent-collection',
       {
         headers: {
           Authorization: 'Bearer mock-access-token',
