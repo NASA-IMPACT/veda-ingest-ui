@@ -1,24 +1,26 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import MenuBar from '@/components/layout/MenuBar';
 import { SessionProvider } from 'next-auth/react';
 
-function renderWithSession(session: any) {
-  return render(
-    <SessionProvider session={session}>
-      <MenuBar />
-    </SessionProvider>
-  );
+async function renderWithSession(session: any) {
+  await act(async () => {
+    render(
+      <SessionProvider session={session}>
+        <MenuBar />
+      </SessionProvider>
+    );
+  });
 }
 
 describe('MenuBar', () => {
-  it('disables create/edit menu items for limited access users', () => {
+  it('disables create/edit menu items for limited access users', async () => {
     const session = {
       expires: '1',
       scopes: ['dataset:limited-access'],
       user: { name: 'Test User', email: 'test@example.com' },
     };
-    renderWithSession(session);
+    await renderWithSession(session);
     // Create Collection and Edit Collection should be present but disabled
     expect(screen.getByText('Create Collection')).toBeInTheDocument();
     expect(screen.getByText('Edit Collection')).toBeInTheDocument();
@@ -44,13 +46,13 @@ describe('MenuBar', () => {
     expect(editDatasetItem).toHaveClass('ant-menu-item-disabled');
   });
 
-  it('shows create/edit menu items as links for users with edit permission', () => {
+  it('shows create/edit menu items as links for users with edit permission', async () => {
     const session = {
       expires: '1',
       scopes: ['dataset:update'],
       user: { name: 'Test', email: 'test@example.com' },
     };
-    renderWithSession(session);
+    await renderWithSession(session);
     expect(screen.getByText('Create Collection').closest('a')).toHaveAttribute(
       'href',
       '/create-collection'
@@ -69,13 +71,13 @@ describe('MenuBar', () => {
     );
   });
 
-  it('disables edit menu items for users without edit permission', () => {
+  it('disables edit menu items for users without edit permission', async () => {
     const session = {
       expires: '1',
       scopes: [], // No scopes, so no edit permission
       user: { name: 'Test', email: 'test@example.com' },
     };
-    renderWithSession(session);
+    await renderWithSession(session);
     // Create items should be enabled
     const createCollectionItem = screen
       .getByText('Create Collection')
