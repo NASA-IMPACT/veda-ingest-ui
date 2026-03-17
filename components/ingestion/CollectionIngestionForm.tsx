@@ -54,17 +54,14 @@ const customFields = {
   asset: AssetField,
 };
 
-const lockedFormFields = {
-  id: {
-    'ui:readonly': true,
-  },
-};
+
 
 interface FormProps {
   formData: Record<string, unknown> | undefined;
   setFormData: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
   onSubmit: (formData: Record<string, unknown> | undefined) => void;
   isEditMode?: boolean;
+  formType?: 'dataset' | 'collection' | 'existingCollection';
   children?: React.ReactNode;
 }
 
@@ -73,6 +70,7 @@ function CollectionIngestionForm({
   setFormData,
   onSubmit,
   isEditMode,
+  formType,
   children,
 }: FormProps) {
   const {
@@ -89,6 +87,20 @@ function CollectionIngestionForm({
 
   const { extensionFields, addExtension, removeExtension, isLoading } =
     useStacExtensions({ setFormData });
+
+  const isExistingCollectionEditMode =
+    isEditMode && formType === 'existingCollection';
+
+  const lockedFormFields =
+    isExistingCollectionEditMode
+      ? {
+          id: { 'ui:readonly': true },
+          summaries: { 'ui:readonly': true },
+          links: { 'ui:readonly': true },
+        }
+      : {
+          id: { 'ui:readonly': true },
+        };
 
   const lockedUiSchema = dynamicUiSchema
     ? { ...dynamicUiSchema, ...lockedFormFields }
@@ -222,7 +234,7 @@ function CollectionIngestionForm({
     (updatedData: JSONEditorValue) => {
       setFormData(updatedData);
       // When JSON is edited, also update the separated summaries state
-      setSummariesData(updatedData.summaries || {});
+      setSummariesData((updatedData.summaries as Record<string, unknown>) || {});
       setForceRenderKey((prev) => prev + 1);
       setActiveTab('form');
       setHasJSONChanges(false);
@@ -284,6 +296,7 @@ function CollectionIngestionForm({
                 <SummariesManager
                   initialData={summariesData as Record<string, unknown>}
                   onChange={handleSummariesChange}
+                  readonly={isExistingCollectionEditMode}
                 />
 
                 {Object.values(extensionFields).map(({ title, fields }) => (
@@ -386,6 +399,20 @@ function CollectionIngestionForm({
                   jsonSchema={dynamicSchema}
                   onChange={handleJsonEditorChange}
                   disableIdChange={isEditMode}
+                  immutableFields={
+                    isExistingCollectionEditMode
+                      ? {
+                          summaries: {
+                            value: formData?.summaries,
+                            label: 'Summaries',
+                          },
+                          links: {
+                            value: formData?.links,
+                            label: 'Links',
+                          },
+                        }
+                      : undefined
+                  }
                   hasJSONChanges={hasJSONChanges}
                   setHasJSONChanges={setHasJSONChanges}
                   setAdditionalProperties={() => {}}

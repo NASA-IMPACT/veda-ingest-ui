@@ -48,11 +48,31 @@ vi.mock('@rjsf/core', () => ({
     )),
 }));
 vi.mock('@/components/ui/JSONEditor', () => ({
-  default: () => <div data-testid="json-editor" />,
+  default: ({ onChange, setHasJSONChanges, immutableFields }: any) => (
+    <div data-testid="json-editor">
+      <div data-testid="json-editor-immutable-fields">
+        {JSON.stringify(immutableFields || {})}
+      </div>
+      <button
+        onClick={() => {
+          setHasJSONChanges(true);
+          onChange({
+            id: 'test-id',
+            title: 'JSON Updated Title',
+            summaries: { mutated: true },
+            links: [{ rel: 'about', href: 'https://mutated.example.com' }],
+          });
+        }}
+      >
+        Simulate JSON Change
+      </button>
+    </div>
+  ),
 }));
 vi.mock('@/components/rjsf-components/SummariesManager', () => ({
-  default: ({ onChange }: any) => (
+  default: ({ onChange, readonly }: any) => (
     <div data-testid="summaries-manager">
+      <div data-testid="summaries-manager-readonly">{String(readonly)}</div>
       <button onClick={() => onChange({ a: 1 })}>
         Simulate Summaries Change
       </button>
@@ -385,5 +405,88 @@ describe('CollectionIngestionForm', () => {
     render(<TestWrapperEditMode />);
 
     expect(screen.getByTestId('rjsf-form')).toBeVisible();
+  });
+
+  it('sets summaries to readonly in existingCollection edit mode', () => {
+    const TestWrapperExistingCollectionEditMode = () => {
+      const [formData, setFormData] = useState<Record<string, any>>({
+        id: 'test-id',
+        title: 'Test',
+      });
+
+      (useStacExtensions as any).mockReturnValue({
+        extensionFields: {},
+        addExtension: mockAddExtension,
+        removeExtension: mockRemoveExtension,
+        isLoading: false,
+      });
+
+      return (
+        <CollectionIngestionForm
+          formData={formData}
+          setFormData={setFormData}
+          onSubmit={mockOnSubmit}
+          isEditMode={true}
+          formType="existingCollection"
+        />
+      );
+    };
+
+    render(<TestWrapperExistingCollectionEditMode />);
+
+    expect(screen.getByTestId('summaries-manager-readonly')).toHaveTextContent(
+      'true'
+    );
+  });
+
+  it('prevents summaries and links mutation via JSON editor in existingCollection edit mode', async () => {
+    const user = userEvent.setup();
+
+    const TestWrapperExistingCollectionJsonEditMode = () => {
+      const [formData, setFormData] = useState<Record<string, any>>({
+        id: 'test-id',
+        title: 'Original Title',
+        summaries: { original: 'summary' },
+        links: [{ rel: 'about', href: 'https://original.example.com' }],
+      });
+
+      (useStacExtensions as any).mockReturnValue({
+        extensionFields: {},
+        addExtension: mockAddExtension,
+        removeExtension: mockRemoveExtension,
+        isLoading: false,
+      });
+
+      return (
+        <CollectionIngestionForm
+          formData={formData}
+          setFormData={setFormData}
+          onSubmit={mockOnSubmit}
+          isEditMode={true}
+          formType="existingCollection"
+        >
+          <button type="submit">Submit</button>
+        </CollectionIngestionForm>
+      );
+    };
+
+    render(<TestWrapperExistingCollectionJsonEditMode />);
+    await user.click(screen.getByRole('tab', { name: 'Manual JSON Edit' }));
+
+    await waitFor(() => {
+      const immutableFields = JSON.parse(
+        screen.getByTestId('json-editor-immutable-fields').textContent || '{}'
+      );
+      expect(immutableFields).toMatchObject({
+        summaries: {
+          label: 'Summaries',
+          value: { original: 'summary' },
+        },
+        links: {
+          label: 'Links',
+          value: [{ rel: 'about', href: 'https://original.example.com' }],
+        },
+      });
+    });
   });
 });

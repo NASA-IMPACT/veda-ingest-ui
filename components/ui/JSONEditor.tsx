@@ -33,12 +33,18 @@ export interface JSONEditorValue {
   [key: string]: unknown; // Allows additional dynamic properties
 }
 
+interface ImmutableFieldConfig {
+  value: unknown;
+  label?: string;
+}
+
 interface JSONEditorProps {
   value: JSONEditorValue;
   jsonSchema: JSONSchema7;
   onChange: (updatedValue: JSONEditorValue) => void;
   disableCollectionNameChange?: boolean;
   disableIdChange?: boolean;
+  immutableFields?: Record<string, ImmutableFieldConfig>;
   hasJSONChanges?: boolean;
   setHasJSONChanges: (hasJSONChanges: boolean) => void;
   additionalProperties: { [key: string]: any } | null;
@@ -55,6 +61,37 @@ const codeEditorStyle = {
   borderRadius: '6px',
 };
 
+const isDeepEqual = (a: unknown, b: unknown): boolean => {
+  if (a === b) return true;
+
+  if (a === null || b === null) return a === b;
+
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    return a.every((item, index) => isDeepEqual(item, b[index]));
+  }
+
+  if (
+    typeof a === 'object' &&
+    typeof b === 'object' &&
+    !Array.isArray(a) &&
+    !Array.isArray(b)
+  ) {
+    const aObj = a as Record<string, unknown>;
+    const bObj = b as Record<string, unknown>;
+    const aKeys = Object.keys(aObj);
+    const bKeys = Object.keys(bObj);
+
+    if (aKeys.length !== bKeys.length) return false;
+
+    return aKeys.every(
+      (key) => Object.prototype.hasOwnProperty.call(bObj, key) && isDeepEqual(aObj[key], bObj[key])
+    );
+  }
+
+  return false;
+};
+
 const JSONEditor: React.FC<JSONEditorProps> = ({
   value,
   jsonSchema,
@@ -63,6 +100,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
   setHasJSONChanges,
   disableCollectionNameChange = false,
   disableIdChange = false,
+  immutableFields,
   additionalProperties,
   setAdditionalProperties,
 }) => {
@@ -240,7 +278,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
 
       if (disableCollectionNameChange && initialCollectionValue !== undefined) {
         if (parsedValue.collection !== initialCollectionValue) {
-          message.error(
+          message?.error?.(
             `Collection name cannot be changed! Expected: "${initialCollectionValue}"`
           );
           return;
@@ -249,8 +287,20 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
 
       if (disableIdChange && initialIdValue !== undefined) {
         if (parsedValue.id !== initialIdValue) {
-          message.error(`ID cannot be changed! Expected: "${initialIdValue}"`);
+          message?.error?.(`ID cannot be changed! Expected: "${initialIdValue}"`);
           return;
+        }
+      }
+
+      if (immutableFields) {
+        for (const [fieldName, config] of Object.entries(immutableFields)) {
+          if (!isDeepEqual(parsedValue[fieldName], config.value)) {
+            const fieldLabel = config.label || fieldName;
+            const errorMessage = `${fieldLabel} cannot be changed in this mode.`;
+            setJsonError(errorMessage);
+            message?.error?.(errorMessage);
+            return;
+          }
         }
       }
 

@@ -250,6 +250,38 @@ describe('JSONEditor', () => {
 
       expect(mockOnChange).not.toHaveBeenCalled();
     });
+
+    it('shows an error and blocks apply when an immutable field is changed', async () => {
+      const propsWithImmutableField = {
+        ...defaultProps,
+        value: {
+          ...defaultProps.value,
+          summaries: { original: true },
+        },
+        immutableFields: {
+          summaries: {
+            value: { original: true },
+            label: 'Summaries',
+          },
+        },
+      };
+      const textarea = await renderEditor(propsWithImmutableField);
+      const applyButton = screen.getByRole('button', {
+        name: /apply changes/i,
+      });
+      const newFormData = {
+        ...propsWithImmutableField.value,
+        summaries: { original: false },
+      };
+
+      updateEditorValue(textarea, JSON.stringify(newFormData, null, 2));
+      await userEvent.click(applyButton);
+
+      expect(mockOnChange).not.toHaveBeenCalled();
+      expect(
+        screen.getByText('Summaries cannot be changed in this mode.')
+      ).toBeInTheDocument();
+    });
   });
 
   describe('Strict Schema Enforcement', () => {

@@ -182,6 +182,7 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
     onSubmit: onFormDataSubmit,
     setDisabled: (value: boolean) => setDisabled(value),
     isEditMode: true,
+    formType,
   };
 
   const formButtons = (
