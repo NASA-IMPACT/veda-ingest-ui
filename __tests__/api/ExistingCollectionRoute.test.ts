@@ -84,7 +84,7 @@ describe('GET /api/existing-collection', () => {
 
     expect(response.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://staging.openveda.cloud/api/stac/collections'
+      expect.stringContaining('/api/stac/collections?limit=10&offset=0')
     );
 
     const data = await response.json();
@@ -110,7 +110,9 @@ describe('GET /api/existing-collection', () => {
 
     expect(response.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://staging.openveda.cloud/api/stac/collections?tenant=tenant1'
+      expect.stringContaining(
+        '/api/stac/collections?limit=10&offset=0&tenant=tenant1'
+      )
     );
   });
 
@@ -135,7 +137,12 @@ describe('GET /api/existing-collection', () => {
     mockFetch.mockResolvedValue({
       ok: true,
       json: async () => ({
-        collections: [{ id: 'collection3', title: 'Public Collection' }],
+        collections: [
+          { id: 'collection1', title: 'Collection 1', tenant: 'tenant1' },
+          { id: 'collection3', title: 'Public Collection', tenant: '' },
+          { id: 'collection4', title: 'No Tenant Collection' },
+          { id: 'collection5', title: 'Lower public tenant', tenant: 'public' },
+        ],
       }),
     });
 
@@ -146,8 +153,52 @@ describe('GET /api/existing-collection', () => {
 
     expect(response.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://staging.openveda.cloud/api/stac/collections?tenant=Public'
+      expect.stringContaining('/api/stac/collections?limit=10&offset=0')
     );
+
+    const data = await response.json();
+    expect(data.collections).toEqual([
+      { id: 'collection3', title: 'Public Collection', tenant: '' },
+      { id: 'collection4', title: 'No Tenant Collection' },
+      { id: 'collection5', title: 'Lower public tenant', tenant: 'public' },
+    ]);
+  });
+
+  it('treats lowercase public tenant filter as public collections', async () => {
+    authMock.mockResolvedValue(mockSession);
+    getUserTenantsMock.mockResolvedValue(['tenant1']);
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        collections: [
+          { id: 'collection3', title: 'Public Collection', tenant: '' },
+          { id: 'collection4', title: 'No Tenant Collection' },
+          { id: 'collection6', title: 'Upper public tenant', tenant: 'Public' },
+          {
+            id: 'collection7',
+            title: 'Tenant 2 Collection',
+            tenant: 'tenant2',
+          },
+        ],
+      }),
+    });
+
+    const request = new NextRequest(
+      'http://localhost:3000/api/existing-collection?tenant=public'
+    );
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/api/stac/collections?limit=10&offset=0')
+    );
+
+    const data = await response.json();
+    expect(data.collections).toEqual([
+      { id: 'collection3', title: 'Public Collection', tenant: '' },
+      { id: 'collection4', title: 'No Tenant Collection' },
+      { id: 'collection6', title: 'Upper public tenant', tenant: 'Public' },
+    ]);
   });
 
   it('handles STAC API errors properly', async () => {

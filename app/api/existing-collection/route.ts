@@ -31,23 +31,38 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const tenantFilter = searchParams.get('tenant');
+    const normalizedTenantFilter = tenantFilter?.trim();
+    const isPublicFilter = normalizedTenantFilter?.toLowerCase() === 'public';
+    const q = searchParams.get('q');
+    const limit = searchParams.get('limit') || '10';
+    const offset = searchParams.get('offset') || '0';
 
     // Validate that if a tenant filter is specified, the user has access to it
     if (
-      tenantFilter &&
-      tenantFilter !== 'Public' &&
-      !userTenants.includes(tenantFilter)
+      normalizedTenantFilter &&
+      !isPublicFilter &&
+      !userTenants.includes(normalizedTenantFilter)
     ) {
       return NextResponse.json(
-        { error: `Access denied for tenant: ${tenantFilter}` },
+        { error: `Access denied for tenant: ${normalizedTenantFilter}` },
         { status: 403 }
       );
     }
 
-    let stacUrl = `${VEDA_PROD_BACKEND_URL}/stac/collections`;
-    if (tenantFilter) {
-      stacUrl += `?tenant=${encodeURIComponent(tenantFilter)}`;
+    const stacSearchParams = new URLSearchParams({
+      limit,
+      offset,
+    });
+
+    if (q) {
+      stacSearchParams.set('q', q);
     }
+
+    if (normalizedTenantFilter && !isPublicFilter) {
+      stacSearchParams.set('tenant', normalizedTenantFilter);
+    }
+
+    const stacUrl = `${VEDA_PROD_BACKEND_URL}/stac/collections?${stacSearchParams.toString()}`;
 
     // Fetch from STAC API
     const stacResponse = await fetch(stacUrl);
@@ -61,8 +76,19 @@ export async function GET(request: NextRequest) {
 
     const stacData = await stacResponse.json();
 
+    if (isPublicFilter && stacData.collections) {
+      stacData.collections = stacData.collections.filter((collection: any) => {
+        const collectionTenant = collection.tenant?.toLowerCase?.();
+        return (
+          !collection.tenant ||
+          collection.tenant === '' ||
+          collectionTenant === 'public'
+        );
+      });
+    }
+
     // Filter collections by user's allowed tenants if no specific tenant filter
-    if (!tenantFilter && stacData.collections) {
+    if (!normalizedTenantFilter && stacData.collections) {
       stacData.collections = stacData.collections.filter((collection: any) => {
         // Allow public collections (no tenant property or empty tenant)
         if (!collection.tenant || collection.tenant === '') {
