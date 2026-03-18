@@ -54,8 +54,6 @@ const customFields = {
   asset: AssetField,
 };
 
-
-
 interface FormProps {
   formData: Record<string, unknown> | undefined;
   setFormData: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
@@ -91,16 +89,15 @@ function CollectionIngestionForm({
   const isExistingCollectionEditMode =
     isEditMode && formType === 'existingCollection';
 
-  const lockedFormFields =
-    isExistingCollectionEditMode
-      ? {
-          id: { 'ui:readonly': true },
-          summaries: { 'ui:readonly': true },
-          links: { 'ui:readonly': true },
-        }
-      : {
-          id: { 'ui:readonly': true },
-        };
+  const lockedFormFields = isExistingCollectionEditMode
+    ? {
+        id: { 'ui:readonly': true },
+        summaries: { 'ui:readonly': true },
+        links: { 'ui:readonly': true },
+      }
+    : {
+        id: { 'ui:readonly': true },
+      };
 
   const lockedUiSchema = dynamicUiSchema
     ? { ...dynamicUiSchema, ...lockedFormFields }
@@ -234,7 +231,9 @@ function CollectionIngestionForm({
     (updatedData: JSONEditorValue) => {
       setFormData(updatedData);
       // When JSON is edited, also update the separated summaries state
-      setSummariesData((updatedData.summaries as Record<string, unknown>) || {});
+      setSummariesData(
+        (updatedData.summaries as Record<string, unknown>) || {}
+      );
       setForceRenderKey((prev) => prev + 1);
       setActiveTab('form');
       setHasJSONChanges(false);

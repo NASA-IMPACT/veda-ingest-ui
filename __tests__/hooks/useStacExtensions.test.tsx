@@ -57,8 +57,8 @@ describe('useStacExtensions', () => {
   });
 
   it('should initialize with default empty state', () => {
-    const { result } = renderHook(() =>
-      useStacExtensions({ setFormData: mockSetFormData }),
+    const { result } = renderHook(
+      () => useStacExtensions({ setFormData: mockSetFormData }),
       { wrapper }
     );
     expect(result.current.extensionFields).toEqual({});
@@ -71,8 +71,8 @@ describe('useStacExtensions', () => {
       json: async () => mockDatacubeSchema,
     } as Response);
 
-    const { result } = renderHook(() =>
-      useStacExtensions({ setFormData: mockSetFormData }),
+    const { result } = renderHook(
+      () => useStacExtensions({ setFormData: mockSetFormData }),
       { wrapper }
     );
 
@@ -92,8 +92,8 @@ describe('useStacExtensions', () => {
 
   it('should handle fetch errors gracefully', async () => {
     vi.mocked(fetch).mockResolvedValue({ ok: false } as Response);
-    const { result } = renderHook(() =>
-      useStacExtensions({ setFormData: mockSetFormData }),
+    const { result } = renderHook(
+      () => useStacExtensions({ setFormData: mockSetFormData }),
       { wrapper }
     );
 
@@ -109,8 +109,8 @@ describe('useStacExtensions', () => {
   });
 
   it('should remove an extension when removeExtension is called', () => {
-    const { result } = renderHook(() =>
-      useStacExtensions({ setFormData: mockSetFormData }),
+    const { result } = renderHook(
+      () => useStacExtensions({ setFormData: mockSetFormData }),
       { wrapper }
     );
 
@@ -136,8 +136,8 @@ describe('useStacExtensions', () => {
       json: async () => mockDatacubeSchema,
     } as Response);
 
-    const { result } = renderHook(() =>
-      useStacExtensions({ setFormData: mockSetFormData }),
+    const { result } = renderHook(
+      () => useStacExtensions({ setFormData: mockSetFormData }),
       { wrapper }
     );
     const url = 'http://example.com/schema.json';

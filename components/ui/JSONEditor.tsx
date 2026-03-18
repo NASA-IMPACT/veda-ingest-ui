@@ -85,7 +85,9 @@ const isDeepEqual = (a: unknown, b: unknown): boolean => {
     if (aKeys.length !== bKeys.length) return false;
 
     return aKeys.every(
-      (key) => Object.prototype.hasOwnProperty.call(bObj, key) && isDeepEqual(aObj[key], bObj[key])
+      (key) =>
+        Object.prototype.hasOwnProperty.call(bObj, key) &&
+        isDeepEqual(aObj[key], bObj[key])
     );
   }
 
@@ -287,7 +289,9 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
 
       if (disableIdChange && initialIdValue !== undefined) {
         if (parsedValue.id !== initialIdValue) {
-          message?.error?.(`ID cannot be changed! Expected: "${initialIdValue}"`);
+          message?.error?.(
+            `ID cannot be changed! Expected: "${initialIdValue}"`
+          );
           return;
         }
       }
