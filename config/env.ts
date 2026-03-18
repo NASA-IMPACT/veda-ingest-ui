@@ -43,7 +43,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'veda-thumbnails',
     ADDITIONAL_LOGO: '',
     VEDA_BACKEND_URL: 'https://staging.openveda.cloud/api',
-    VEDA_PROD_BACKEND_URL: 'https://ingest.openveda.cloud/api',
+    VEDA_PROD_BACKEND_URL: 'https://openveda.cloud/api',
   },
   eic: {
     OWNER: 'nasa-impact',
@@ -53,7 +53,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'veda-thumbnails',
     ADDITIONAL_LOGO: 'eic',
     VEDA_BACKEND_URL: 'https://eic-staging.staging.earth.gov/api',
-    VEDA_PROD_BACKEND_URL: 'https://ingest.openveda.cloud/api',
+    VEDA_PROD_BACKEND_URL: 'https://openveda.cloud/api',
   },
 };
 
