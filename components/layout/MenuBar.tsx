@@ -23,7 +23,9 @@ const MenuBar = () => {
     'stac:collection:update'
   );
   const isEditExistingCollectionEnabled =
-    process.env.NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT === 'true';
+    process.env.NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT === 'true' ||
+    process.env.NEXT_PUBLIC_APP_ENV === 'local' ||
+    process.env.NEXT_PUBLIC_APP_ENV === 'veda';
 
   const pathname = usePathname();
   const [activeLink, setActiveLink] = useState(pathname);
