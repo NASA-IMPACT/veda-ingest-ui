@@ -26,6 +26,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    if (!session.scopes?.includes('stac:collection:update')) {
+      return NextResponse.json(
+        {
+          error:
+            'Insufficient permissions: stac:collection:update scope required',
+        },
+        { status: 403 }
+      );
+    }
+
     // Get user's allowed tenants
     const userTenants = await getUserTenants(session);
 
