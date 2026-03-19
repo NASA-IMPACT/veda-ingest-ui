@@ -30,7 +30,7 @@ describe('config/env.ts', () => {
     process.env.NEXT_PUBLIC_APP_ENV = 'disasters';
     vi.resetModules();
     const { cfg } = await import('@/config/env');
-    expect(cfg.REPO).toBe('disaster-data');
+    expect(cfg.REPO).toBe('disasters-data');
     expect(cfg.NEXT_PUBLIC_AWS_S3_BUCKET_NAME).toBe('veda-thumbnails');
   });
 });
