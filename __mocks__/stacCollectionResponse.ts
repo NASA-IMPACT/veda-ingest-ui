@@ -40,7 +40,7 @@ export const stacCollectionResponse = {
     },
   },
   license: 'CC0-1.0',
-  keywords: null,
+  keywords: [],
   providers: [
     {
       name: 'NASA VEDA',
@@ -61,7 +61,6 @@ export const stacCollectionResponse = {
     },
   },
   stac_version: '1.0.0',
-  stac_extensions: null,
   'dashboard:is_periodic': true,
   'dashboard:time_density': 'month',
 };

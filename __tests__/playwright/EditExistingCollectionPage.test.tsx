@@ -1,8 +1,9 @@
 import { expect, test } from '@/__tests__/playwright/setup-msw';
 import { HttpResponse } from 'msw';
+import { stacCollectionResponse } from '@/__mocks__/stacCollectionResponse';
 
+// Configuration with only editable fields
 const modifiedCollectionConfig = {
-  id: 'test-collection-1',
   title: 'MODIFIED test collection title',
   stac_version: '1.0.0',
   type: 'Collection',
@@ -16,34 +17,6 @@ const modifiedCollectionConfig = {
       interval: [['1998-01-01T00:00:00+00:00', null]],
     },
   },
-  links: [
-    {
-      rel: 'items',
-      type: 'application/geo+json',
-      href: 'https://openveda.cloud/api/stac/collections/TEST/items',
-    },
-    {
-      rel: 'parent',
-      type: 'application/json',
-      href: 'https://openveda.cloud/api/stac/',
-    },
-    {
-      rel: 'root',
-      type: 'application/json',
-      href: 'https://openveda.cloud/api/stac/',
-    },
-    {
-      rel: 'self',
-      type: 'application/json',
-      href: 'https://openveda.cloud/api/stac/collections/test',
-    },
-    {
-      rel: 'http://www.opengis.net/def/rel/ogc/1.0/queryables',
-      type: 'application/schema+json',
-      title: 'Queryables',
-      href: 'https://openveda.cloud/api/stac/collections/test/queryables',
-    },
-  ],
   providers: [
     {
       name: 'NASA VEDA',
@@ -59,9 +32,6 @@ const modifiedCollectionConfig = {
       type: 'image/jpeg',
       roles: ['thumbnail'],
     },
-  },
-  summaries: {
-    'eo:bands': ['B1', 'B2'],
   },
 };
 
@@ -163,17 +133,22 @@ test.describe('Edit Existing Collection Page', () => {
   }, testInfo) => {
     let putRequestIntercepted = false;
 
+    const expectedPayload = {
+      ...stacCollectionResponse,
+      ...modifiedCollectionConfig,
+    };
+
     // Intercept and validate the request payload
     await page.route('**/api/existing-collection/*', async (route, request) => {
       if (request.method() === 'PUT') {
         putRequestIntercepted = true;
         const postData = request.postDataJSON();
 
-        // Assert that the submitted data matches the modified config
+        // Assert that the submitted data matches the modified json input
         expect(
           postData,
           'validate request body matches modified json'
-        ).toMatchObject(modifiedCollectionConfig);
+        ).toMatchObject(expectedPayload);
 
         await route.fulfill({
           status: 200,
@@ -224,10 +199,16 @@ test.describe('Edit Existing Collection Page', () => {
       await page.getByRole('tab', { name: /manual json edit/i }).click();
     });
 
+    await test.step('uncheck the Enforce Strict Schema checkbox', async () => {
+      await page
+        .getByRole('checkbox', { name: /enforce strict schema/i })
+        .uncheck();
+    });
+
     await test.step('edit collection via JSON Editor', async () => {
       await page
         .getByTestId('json-editor')
-        .fill(JSON.stringify(modifiedCollectionConfig));
+        .fill(JSON.stringify(expectedPayload));
       await page.getByRole('button', { name: /apply changes/i }).click();
     });
 
@@ -235,6 +216,10 @@ test.describe('Edit Existing Collection Page', () => {
     testInfo.attach('form with values pasted in JSON editor', {
       body: completedFormScreenshot,
       contentType: 'image/png',
+    });
+
+    await test.step('switch back to form tab', async () => {
+      await page.getByRole('tab', { name: /form/i }).click();
     });
 
     await page.getByRole('button', { name: /submit/i }).click();

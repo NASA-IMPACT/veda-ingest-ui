@@ -29,6 +29,9 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
   const [apiError, setApiError] = useState('');
 
   const { tenants } = useUserTenants();
+  const visibleTenants = tenants.filter(
+    (tenant) => tenant.toLowerCase() !== 'public'
+  );
 
   useEffect(() => {
     if (sessionStatus === 'unauthenticated') {
@@ -76,7 +79,7 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
           Edit Pending Ingest Requests
         </Title>
         <SkeletonLoading
-          tenants={tenants}
+          count={Math.max(visibleTenants.length + 1, 3)}
           bannerMessage="Checking with GitHub for pending ingests..."
         />
       </>
@@ -84,7 +87,10 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
   }
 
   const publicIngests = allIngests.filter(
-    (ingest) => !ingest.tenant || ingest.tenant === ''
+    (ingest) =>
+      !ingest.tenant ||
+      ingest.tenant === '' ||
+      ingest.tenant.toLowerCase() === 'public'
   );
 
   return (
@@ -94,9 +100,8 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
       </Title>
 
       <Row gutter={[16, 16]}>
-        {tenants &&
-          tenants.length > 0 &&
-          tenants.map((tenant: string) => {
+        {visibleTenants.length > 0 &&
+          visibleTenants.map((tenant: string) => {
             const tenantIngests: IngestPullRequest[] = allIngests.filter(
               (ingest: IngestPullRequest) => ingest.tenant === tenant
             );

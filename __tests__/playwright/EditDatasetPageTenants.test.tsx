@@ -1,5 +1,4 @@
 import { expect, test } from '@/__tests__/playwright/setup-msw';
-import { HttpResponse } from 'msw';
 
 const modifiedConfig = {
   collection: 'seeded-ingest-1',

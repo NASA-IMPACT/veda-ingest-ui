@@ -27,6 +27,7 @@ describe('ExistingCollectionsList', () => {
   const mockOnCollectionSelect = vi.fn();
   const mockPush = vi.fn();
   const mockRouter = { push: mockPush };
+  const PAGE_SIZE = 10;
 
   const mockCollections = [
     {
@@ -47,6 +48,14 @@ describe('ExistingCollectionsList', () => {
       description: 'A public collection without tenant',
     },
   ];
+
+  const createCollections = (count: number, startIndex = 1) =>
+    Array.from({ length: count }, (_, index) => ({
+      id: `collection-${startIndex + index}`,
+      title: `Test Collection ${startIndex + index}`,
+      description: `Description ${startIndex + index}`,
+      tenant: 'nasa',
+    }));
 
   beforeEach(() => {
     cleanup();
@@ -122,7 +131,9 @@ describe('ExistingCollectionsList', () => {
       expect(screen.getByText('Public Collection')).toBeInTheDocument();
     });
 
-    expect(fetch).toHaveBeenCalledWith('/api/existing-collection');
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/existing-collection?limit=10&offset=0'
+    );
   });
 
   it('should display tenant information in cards', async () => {
@@ -220,7 +231,7 @@ describe('ExistingCollectionsList', () => {
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        '/api/existing-collection?tenant=nasa'
+        '/api/existing-collection?limit=10&offset=0&tenant=nasa'
       );
     });
   });
@@ -267,7 +278,7 @@ describe('ExistingCollectionsList', () => {
     });
   });
 
-  it('should call onCollectionSelect when collection is selected from dropdown', async () => {
+  it('should search collections when entering a query', async () => {
     const user = userEvent.setup();
 
     vi.mocked(useSession).mockReturnValue({
@@ -287,43 +298,33 @@ describe('ExistingCollectionsList', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Select Collection')).toBeInTheDocument();
+      expect(screen.getByText('Search Collections')).toBeInTheDocument();
     });
 
-    // Mock fetch for collection details
-    const collectionDetails = { ...mockCollections[1], extended: 'data' };
+    // Mock search fetch
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
-      json: async () => collectionDetails,
+      json: async () => ({ collections: [mockCollections[2]] }),
     } as Response);
 
-    // Select from dropdown - find by closest Select to "Select Collection" heading
-    const collectionSection = screen
-      .getByText('Select Collection')
-      .closest('div');
-    const collectionSelect = collectionSection!.querySelector(
-      '.ant-select-selector'
+    const searchInput = screen.getByPlaceholderText(
+      'Free-text queries against STAC metadata'
     );
-    await user.click(collectionSelect!);
-
-    // Find the option in the dropdown (not the card)
-    const dropdownOptions = document.querySelectorAll(
-      '.ant-select-item-option-content'
-    );
-    const option = Array.from(dropdownOptions).find(
-      (el) => el.textContent === 'Test Collection 2'
-    );
-    await user.click(option!);
+    await user.type(searchInput, 'Public');
+    await user.keyboard('{Enter}');
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        '/api/existing-collection/collection-2'
+        '/api/existing-collection?limit=10&offset=0&q=Public'
       );
-      expect(mockOnCollectionSelect).toHaveBeenCalledWith(collectionDetails);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Public Collection')).toBeInTheDocument();
     });
   });
 
-  it('should filter collections by search value', async () => {
+  it('should paginate collections with limit and offset', async () => {
     const user = userEvent.setup();
 
     vi.mocked(useSession).mockReturnValue({
@@ -332,9 +333,22 @@ describe('ExistingCollectionsList', () => {
       update: vi.fn(),
     } as any);
 
+    const firstPageCollections = createCollections(PAGE_SIZE, 1);
+    const secondPageCollections = createCollections(PAGE_SIZE, 11);
+
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ collections: mockCollections }),
+      json: async () => ({ collections: firstPageCollections }),
+    } as Response);
+
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ collections: secondPageCollections }),
+    } as Response);
+
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ collections: firstPageCollections }),
     } as Response);
 
     render(
@@ -343,22 +357,25 @@ describe('ExistingCollectionsList', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Test Collection 1')).toBeInTheDocument();
-      expect(screen.getByText('Test Collection 2')).toBeInTheDocument();
-      expect(screen.getByText('Public Collection')).toBeInTheDocument();
     });
 
-    // Search for "Public" using the collection select input
-    const collectionSection = screen
-      .getByText('Select Collection')
-      .closest('div');
-    const searchInput = collectionSection!.querySelector(
-      '.ant-select-selection-search-input'
-    ) as HTMLInputElement;
-    await user.click(searchInput);
-    await user.type(searchInput, 'Public');
+    await user.click(screen.getByRole('button', { name: 'Next' }));
 
-    // Verify search value is updated (the component filters internally)
-    expect(searchInput.value).toBe('Public');
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/existing-collection?limit=10&offset=10'
+      );
+      expect(screen.getByText('Test Collection 11')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Previous' }));
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/existing-collection?limit=10&offset=0'
+      );
+      expect(screen.getByText('Test Collection 1')).toBeInTheDocument();
+    });
   });
 
   it('should show empty state when no collections are found', async () => {
@@ -415,6 +432,45 @@ describe('ExistingCollectionsList', () => {
         .getAllByText('Public')
         .find((el) => el.classList.contains('ant-select-item-option-content'));
       expect(publicOption).toBeInTheDocument();
+    });
+  });
+
+  it('should render only one Public option when user tenants include public variants', async () => {
+    const user = userEvent.setup();
+
+    vi.mocked(useSession).mockReturnValue({
+      data: { user: { name: 'Test User' } },
+      status: 'authenticated',
+      update: vi.fn(),
+    } as any);
+
+    vi.mocked(useUserTenants).mockReturnValue({
+      tenants: ['nasa', 'public', 'Public'],
+      isLoading: false,
+    } as any);
+
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ collections: mockCollections }),
+    } as Response);
+
+    render(
+      <ExistingCollectionsList onCollectionSelect={mockOnCollectionSelect} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Select Tenant')).toBeInTheDocument();
+    });
+
+    const tenantSection = screen.getByText('Select Tenant').closest('div');
+    const tenantSelect = tenantSection!.querySelector('.ant-select-selector');
+    await user.click(tenantSelect!);
+
+    await waitFor(() => {
+      const publicOptions = Array.from(
+        document.querySelectorAll('.ant-select-item-option-content')
+      ).filter((el) => el.textContent === 'Public');
+      expect(publicOptions).toHaveLength(1);
     });
   });
 

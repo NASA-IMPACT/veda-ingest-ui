@@ -229,4 +229,49 @@ describe('PendingIngestList', () => {
       'Ingest Request for tenant1 Dataset'
     );
   });
+
+  it('should not render a Tenant: public column when session includes public tenant', async () => {
+    vi.mocked(useSession).mockReturnValue({
+      data: { user: { name: 'Test User' } },
+      status: 'authenticated',
+      update: vi.fn(),
+    } as any);
+
+    vi.mocked(useUserTenants).mockReturnValue({
+      tenants: ['tenant1', 'public'],
+      isLoading: false,
+    } as any);
+
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        githubResponse: [
+          ...mockIngests,
+          {
+            pr: {
+              title: 'Ingest Request with explicit public tenant',
+              head: { ref: 'refs/heads/public-tenant-value' },
+            },
+            tenant: 'public',
+          },
+        ],
+      }),
+    } as Response);
+
+    render(
+      <PendingIngestList
+        ingestionType="collection"
+        onIngestSelect={mockOnIngestSelect}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('tenant-column-tenant1')).toBeInTheDocument();
+      expect(screen.getByTestId('tenant-column-public')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('tenant-column-public-public')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText('Tenant: public')).not.toBeInTheDocument();
+    });
+  });
 });

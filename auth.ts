@@ -6,16 +6,37 @@ import { VEDA_BACKEND_URL } from '@/config/env';
 
 const authDisabled = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
+// Normalize tenant values by deduping case-insensitively and enforcing one Public Tenant.
+const normalizeTenants = (tenants: string[]): string[] => {
+  const seen = new Set<string>();
+  const normalized: string[] = [];
+
+  for (const tenant of tenants) {
+    const trimmedTenant = tenant.trim();
+    if (!trimmedTenant) continue;
+
+    const lowered = trimmedTenant.toLowerCase();
+    if (lowered === 'public') {
+      continue;
+    }
+
+    if (!seen.has(lowered)) {
+      seen.add(lowered);
+      normalized.push(trimmedTenant);
+    }
+  }
+
+  normalized.push('Public');
+  return normalized;
+};
+
 // Helper function to get mock tenants from environment variable
 const getMockTenants = (): string[] => {
   const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
   if (mockTenants && mockTenants.trim() !== '') {
-    return mockTenants
-      .split(',')
-      .map((tenant) => tenant.trim())
-      .filter(Boolean);
+    return normalizeTenants(mockTenants.split(','));
   }
-  return [''];
+  return normalizeTenants([]);
 };
 
 const getMockScopes = (): string[] => {
@@ -96,13 +117,14 @@ const fetchWritableTenants = async (accessToken: string): Promise<string[]> => {
         ? tenantsData.tenants
         : [];
 
-    return rawTenants
-      .filter((tenant: unknown): tenant is string => typeof tenant === 'string')
-      .map((tenant: string) => tenant.trim())
-      .filter(Boolean);
+    return normalizeTenants(
+      rawTenants.filter(
+        (tenant: unknown): tenant is string => typeof tenant === 'string'
+      )
+    );
   } catch (error) {
     console.warn('Failed to fetch allowed tenants during auth:', error);
-    return [];
+    return normalizeTenants([]);
   }
 };
 
@@ -228,10 +250,9 @@ if (authDisabled) {
               );
               const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
               if (mockTenants && mockTenants.trim() !== '') {
-                customToken.tenants = mockTenants
-                  .split(',')
-                  .map((tenant) => tenant.trim())
-                  .filter(Boolean);
+                customToken.tenants = normalizeTenants(mockTenants.split(','));
+              } else {
+                customToken.tenants = normalizeTenants([]);
               }
             } else {
               customToken.tenants = await fetchWritableTenants(
@@ -240,7 +261,7 @@ if (authDisabled) {
             }
           } catch (error) {
             console.error('Error fetching allowed tenants during auth:', error);
-            customToken.tenants = [];
+            customToken.tenants = normalizeTenants([]);
           }
 
           return customToken;
@@ -275,10 +296,7 @@ if (authDisabled) {
         // Check if we should use mock tenants instead of real ones
         const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
         if (mockTenants && mockTenants.trim() !== '') {
-          const tenants = mockTenants
-            .split(',')
-            .map((tenant) => tenant.trim())
-            .filter(Boolean);
+          const tenants = normalizeTenants(mockTenants.split(','));
           console.log('🎭 Overriding real tenants with mock tenants:', tenants);
           customSession.tenants = tenants;
         }
