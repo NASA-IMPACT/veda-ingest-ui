@@ -223,6 +223,60 @@ describe('Middleware', () => {
         expect(vi.mocked(NextResponse.redirect)).not.toHaveBeenCalled();
       }
     });
+
+    it('blocks access to edit existing collection routes', async () => {
+      const blockedRoutes = [
+        '/edit-existing-collection',
+        '/api/existing-collection',
+        '/api/existing-collection/test-collection',
+      ];
+
+      for (const pathname of blockedRoutes) {
+        vi.clearAllMocks();
+        const request = createMockRequest(pathname);
+        const result = await middleware(request);
+
+        if (pathname.startsWith('/api/')) {
+          expect(result).toBeInstanceOf(Response);
+          expect(result.status).toBe(403);
+          expect(await result.text()).toBe('Forbidden');
+        } else {
+          expect(vi.mocked(NextResponse.redirect)).toHaveBeenCalledWith(
+            new URL('/unauthorized', request.url)
+          );
+        }
+      }
+    });
+  });
+
+  describe('Users with existing collection edit permissions', () => {
+    const editExistingSession = {
+      user: { name: 'Test' },
+      scopes: ['stac:collection:update'],
+    };
+
+    beforeEach(() => {
+      vi.mocked(auth).mockResolvedValue(editExistingSession);
+    });
+
+    it('allows access to edit existing collection routes', async () => {
+      const allowedRoutes = [
+        '/collections',
+        '/create-collection',
+        '/edit-existing-collection',
+        '/api/existing-collection',
+        '/api/existing-collection/test-collection',
+      ];
+
+      for (const pathname of allowedRoutes) {
+        vi.clearAllMocks();
+        const request = createMockRequest(pathname);
+        await middleware(request);
+
+        expect(vi.mocked(NextResponse.next)).toHaveBeenCalled();
+        expect(vi.mocked(NextResponse.redirect)).not.toHaveBeenCalled();
+      }
+    });
   });
 
   describe('API route handling', () => {

@@ -49,6 +49,7 @@ const mockSession = {
   user: { email: 'test@example.com' },
   tenants: ['tenant1', 'tenant2'],
   accessToken: 'mock-access-token',
+  scopes: ['stac:collection:update'],
 };
 
 const mockCollectionResponse = {
@@ -72,6 +73,28 @@ describe('GET /api/existing-collection/[collectionId]', () => {
     expect(response.status).toBe(401);
     const data = await response.json();
     expect(data.error).toBe('Authentication required');
+  });
+
+  it('returns 403 when user lacks stac collection update scope', async () => {
+    authMock.mockResolvedValue({
+      user: { email: 'test@example.com' },
+      tenants: ['tenant1', 'tenant2'],
+      accessToken: 'mock-access-token',
+      scopes: ['dataset:update'],
+    });
+
+    const request = new NextRequest(
+      'http://localhost:3000/api/existing-collection/test-collection'
+    );
+    const response = await GET(request, mockParams);
+
+    expect(response.status).toBe(403);
+    expect(mockFetch).not.toHaveBeenCalled();
+
+    const data = await response.json();
+    expect(data.error).toBe(
+      'Insufficient permissions: stac:collection:update scope required'
+    );
   });
 
   it('successfully fetches public collection', async () => {
@@ -327,6 +350,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       user: { email: 'test@example.com' },
       tenants: ['tenant1'],
       accessToken: 'mock-access-token',
+      scopes: ['stac:collection:update'],
     });
 
     validateTenantAccessMock.mockResolvedValue({ isValid: true });
@@ -384,6 +408,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       user: { email: 'test@example.com' },
       tenants: ['tenant1'],
       accessToken: 'mock-access-token',
+      scopes: ['stac:collection:update'],
     });
   });
 
@@ -405,6 +430,34 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
+  it('should return 403 when stac collection update scope is missing', async () => {
+    const request = new NextRequest(
+      'http://localhost:3000/api/existing-collection/test-collection',
+      {
+        method: 'PUT',
+        body: JSON.stringify(updateData),
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+
+    authMock.mockResolvedValue({
+      user: { email: 'test@example.com' },
+      tenants: ['tenant1'],
+      accessToken: 'mock-access-token',
+      scopes: ['dataset:update'],
+    });
+
+    const response = await PUT(request, createMockParams('test-collection'));
+
+    expect(response.status).toBe(403);
+    expect(mockFetch).not.toHaveBeenCalled();
+
+    const data = await response.json();
+    expect(data.error).toBe(
+      'Insufficient permissions: stac:collection:update scope required'
+    );
+  });
+
   it('should return 404 when collection not found', async () => {
     const request = new NextRequest(
       'http://localhost:3000/api/existing-collection/nonexistent-collection',
@@ -419,6 +472,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       user: { email: 'test@example.com' },
       tenants: ['tenant1'],
       accessToken: 'mock-access-token',
+      scopes: ['stac:collection:update'],
     });
 
     mockFetch.mockResolvedValueOnce({
@@ -456,6 +510,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       user: { email: 'test@example.com' },
       tenants: ['other-tenant'],
       accessToken: 'mock-access-token',
+      scopes: ['stac:collection:update'],
     });
 
     validateTenantAccessMock.mockResolvedValue({ isValid: false });
@@ -475,6 +530,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       user: { email: 'test@example.com' },
       tenants: ['other-tenant'],
       accessToken: 'mock-access-token',
+      scopes: ['stac:collection:update'],
     });
   });
 
@@ -492,6 +548,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       user: { email: 'test@example.com' },
       tenants: ['tenant1'],
       accessToken: 'mock-access-token',
+      scopes: ['stac:collection:update'],
     });
 
     // Mock existing collection fetch (public collection)
@@ -532,6 +589,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       user: { email: 'test@example.com' },
       tenants: ['tenant1'],
       accessToken: 'mock-access-token',
+      scopes: ['stac:collection:update'],
     });
 
     validateTenantAccessMock.mockResolvedValue({ isValid: true });
@@ -575,6 +633,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       user: { email: 'test@example.com' },
       tenants: ['tenant1'],
       accessToken: 'mock-access-token',
+      scopes: ['stac:collection:update'],
     });
 
     mockFetch.mockRejectedValue(new Error('Network error'));

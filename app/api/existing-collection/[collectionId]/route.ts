@@ -19,6 +19,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    if (!session.scopes?.includes('stac:collection:update')) {
+      return NextResponse.json(
+        {
+          error:
+            'Insufficient permissions: stac:collection:update scope required',
+        },
+        { status: 403 }
+      );
+    }
+
     const { collectionId } = await params;
 
     const stacUrl = `${VEDA_PROD_BACKEND_URL}/stac/collections/${encodeURIComponent(collectionId)}`;
@@ -76,6 +86,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
+      );
+    }
+
+    if (!session.scopes?.includes('stac:collection:update')) {
+      return NextResponse.json(
+        {
+          error:
+            'Insufficient permissions: stac:collection:update scope required',
+        },
+        { status: 403 }
       );
     }
 

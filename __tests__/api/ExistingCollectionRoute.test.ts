@@ -44,6 +44,7 @@ beforeEach(() => {
 const mockSession = {
   user: { email: 'test@example.com' },
   tenants: ['tenant1', 'tenant2'],
+  scopes: ['stac:collection:update'],
 };
 
 const mockStacCollectionsResponse = {
@@ -67,6 +68,27 @@ describe('GET /api/existing-collection', () => {
     expect(response.status).toBe(401);
     const data = await response.json();
     expect(data.error).toBe('Authentication required');
+  });
+
+  it('returns 403 when user lacks stac collection update scope', async () => {
+    authMock.mockResolvedValue({
+      user: { email: 'test@example.com' },
+      tenants: ['tenant1', 'tenant2'],
+      scopes: ['dataset:update'],
+    });
+
+    const request = new NextRequest(
+      'http://localhost:3000/api/existing-collection'
+    );
+    const response = await GET(request);
+
+    expect(response.status).toBe(403);
+    expect(mockFetch).not.toHaveBeenCalled();
+
+    const data = await response.json();
+    expect(data.error).toBe(
+      'Insufficient permissions: stac:collection:update scope required'
+    );
   });
 
   it('fetches all collections when no tenant filter is specified', async () => {

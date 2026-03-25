@@ -27,6 +27,7 @@ const routeConfig = {
   editStacCollectionAccess: [
     '/edit-existing-collection',
     '/existing-collection',
+    '/api/existing-collection',
   ],
 };
 
@@ -158,5 +159,6 @@ export const config = {
     '/create-ingest',
     '/upload-url',
     '/existing-collection',
+    '/api/existing-collection/:path*',
   ],
 };
