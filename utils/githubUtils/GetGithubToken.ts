@@ -1,5 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { createAppAuth } from '@octokit/auth-app';
+import { getRuntimeSecret } from '@/lib/runtimeSecrets';
 
 interface AuthResult {
   token: string;
@@ -8,7 +9,7 @@ interface AuthResult {
 export default async function GetGithubToken(): Promise<string> {
   const appId = parseInt(process.env.APP_ID || '');
   const installationId = parseInt(process.env.INSTALLATION_ID || '');
-  const rawKey = process.env.GITHUB_PRIVATE_KEY;
+  const rawKey = await getRuntimeSecret('GITHUB_PRIVATE_KEY');
 
   if (isNaN(appId) || isNaN(installationId) || !rawKey) {
     const missing = [];

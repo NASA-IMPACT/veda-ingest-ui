@@ -3,6 +3,7 @@ import KeycloakProvider from 'next-auth/providers/keycloak';
 import { JWT } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 import { VEDA_BACKEND_URL } from '@/config/env';
+import { getRequiredRuntimeSecret } from '@/lib/runtimeSecrets';
 
 const authDisabled = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
@@ -51,7 +52,8 @@ const getMockScopes = (): string[] => {
   return [];
 };
 
-let auth: any, handlers: any, signIn: any, signOut: any;
+let authImpl: any, handlersImpl: any, signInImpl: any, signOutImpl: any;
+let authInitPromise: Promise<void> | null = null;
 
 type AppJWT = JWT & {
   accessToken?: string;
@@ -135,6 +137,9 @@ const refreshAccessToken = async (token: AppJWT): Promise<AppJWT> => {
 
   try {
     const issuer = process.env.NEXT_PUBLIC_KEYCLOAK_ISSUER!;
+    const keycloakClientSecret = await getRequiredRuntimeSecret(
+      'KEYCLOAK_CLIENT_SECRET'
+    );
     const tokenEndpoint = `${issuer}/protocol/openid-connect/token`;
 
     const response = await fetch(tokenEndpoint, {
@@ -144,7 +149,7 @@ const refreshAccessToken = async (token: AppJWT): Promise<AppJWT> => {
       },
       body: new URLSearchParams({
         client_id: process.env.KEYCLOAK_CLIENT_ID!,
-        client_secret: process.env.KEYCLOAK_CLIENT_SECRET!,
+        client_secret: keycloakClientSecret,
         grant_type: 'refresh_token',
         refresh_token: token.refreshToken,
       }),
@@ -178,54 +183,58 @@ const refreshAccessToken = async (token: AppJWT): Promise<AppJWT> => {
   }
 };
 
-if (authDisabled) {
-  // --- MOCKED AUTH FOR TESTING --- 🎭
-  console.log('🎭 Auth is disabled. Using mock session.');
+const initializeAuth = async (): Promise<void> => {
+  if (authDisabled) {
+    // --- MOCKED AUTH FOR TESTING --- 🎭
+    console.log('🎭 Auth is disabled. Using mock session.');
 
-  const mockTenants = getMockTenants();
-  console.log('🎭 Mock tenants:', mockTenants);
+    const mockTenants = getMockTenants();
+    console.log('🎭 Mock tenants:', mockTenants);
 
-  const mockScopes = getMockScopes();
-  console.log('Mock scopes:', mockScopes);
+    const mockScopes = getMockScopes();
+    console.log('Mock scopes:', mockScopes);
 
-  const mockSession: Session & {
-    scopes?: string[];
-    accessToken?: string;
-    tenants?: string[];
-  } = {
-    user: {
-      name: 'Mock User',
-      email: 'test@example.com',
-    },
-    expires: '2099-12-31T23:59:59.999Z',
-    tenants: mockTenants,
-    accessToken: 'mock-access-token-for-development',
-    ...(mockScopes.length > 0 ? { scopes: mockScopes } : {}),
-  };
+    const mockSession: Session & {
+      scopes?: string[];
+      accessToken?: string;
+      tenants?: string[];
+    } = {
+      user: {
+        name: 'Mock User',
+        email: 'test@example.com',
+      },
+      expires: '2099-12-31T23:59:59.999Z',
+      tenants: mockTenants,
+      accessToken: 'mock-access-token-for-development',
+      ...(mockScopes.length > 0 ? { scopes: mockScopes } : {}),
+    };
 
-  // The `auth` function is used by middleware and server components
-  auth = async () => mockSession;
+    authImpl = async () => mockSession;
+    handlersImpl = {
+      GET: async () => NextResponse.json(mockSession),
+      POST: async () => new NextResponse(),
+    };
+    signInImpl = async () => {};
+    signOutImpl = async () => {};
+    return;
+  }
 
-  handlers = {
-    GET: async () => NextResponse.json(mockSession),
-    POST: async () => new NextResponse(),
-  };
-
-  signIn = async () => {};
-  signOut = async () => {};
-} else {
   // --- REAL NEXTAUTH.JS CONFIGURATION FOR PRODUCTION ---
+  const keycloakClientSecret = await getRequiredRuntimeSecret(
+    'KEYCLOAK_CLIENT_SECRET'
+  );
+  const nextAuthSecret = await getRequiredRuntimeSecret('NEXTAUTH_SECRET');
 
   const providers = [
     KeycloakProvider({
       clientId: process.env.KEYCLOAK_CLIENT_ID!,
-      clientSecret: process.env.KEYCLOAK_CLIENT_SECRET!,
+      clientSecret: keycloakClientSecret,
       issuer: process.env.NEXT_PUBLIC_KEYCLOAK_ISSUER!,
     }),
   ];
 
   const authOptions: NextAuthConfig = {
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: nextAuthSecret,
     trustHost: true,
     providers,
     session: {
@@ -321,11 +330,48 @@ if (authDisabled) {
   };
 
   const nextAuthExports = NextAuth(authOptions);
-  auth = nextAuthExports.auth;
-  handlers = nextAuthExports.handlers;
-  signIn = nextAuthExports.signIn;
-  signOut = nextAuthExports.signOut;
-}
+  authImpl = nextAuthExports.auth;
+  handlersImpl = nextAuthExports.handlers;
+  signInImpl = nextAuthExports.signIn;
+  signOutImpl = nextAuthExports.signOut;
+};
+
+const ensureAuthInitialized = async (): Promise<void> => {
+  if (!authInitPromise) {
+    authInitPromise = initializeAuth().catch((error) => {
+      authInitPromise = null;
+      throw error;
+    });
+  }
+
+  await authInitPromise;
+};
+
+const auth = async (...args: any[]) => {
+  await ensureAuthInitialized();
+  return authImpl(...args);
+};
+
+const handlers = {
+  GET: async (...args: any[]) => {
+    await ensureAuthInitialized();
+    return handlersImpl.GET(...args);
+  },
+  POST: async (...args: any[]) => {
+    await ensureAuthInitialized();
+    return handlersImpl.POST(...args);
+  },
+};
+
+const signIn = async (...args: any[]) => {
+  await ensureAuthInitialized();
+  return signInImpl(...args);
+};
+
+const signOut = async (...args: any[]) => {
+  await ensureAuthInitialized();
+  return signOutImpl(...args);
+};
 
 export { auth, handlers, signIn, signOut };
 

@@ -11,15 +11,14 @@ frontend:
     build:
       commands:
         # Write non-secret environment variables to .env.production
-        - env | grep -e APP_ID -e INSTALLATION_ID -e ASSUME_ROLE_ARN -e KEYCLOAK_CLIENT_ID -e NEXTAUTH_URL >> .env.production
+        - env | grep -e APP_ID -e INSTALLATION_ID -e ASSUME_ROLE_ARN -e KEYCLOAK_CLIENT_ID -e NEXTAUTH_URL -e NEXT_PUBLIC_KEYCLOAK_ISSUER-e APP_RUNTIME_SECRET_ID >> .env.production
         # Write NEXT_PUBLIC_ variables to .env.production
         - env | grep -e NEXT_PUBLIC_ >> .env.production
-        # Write secrets to .env.production (these come from Amplify Environment Variables)
+        # Write secrets to .env.production during migration (fallback if runtime fetch fails)
         - echo "GITHUB_PRIVATE_KEY=\"$GITHUB_PRIVATE_KEY\"" >> .env.production
         - echo "KEYCLOAK_CLIENT_SECRET=\"$KEYCLOAK_CLIENT_SECRET\"" >> .env.production
         - echo "NEXTAUTH_SECRET=\"$NEXTAUTH_SECRET\"" >> .env.production
         - echo "INGEST_UI_EXTERNAL_ID=\"$INGEST_UI_EXTERNAL_ID\"" >> .env.production
-        - echo "NEXT_PUBLIC_KEYCLOAK_ISSUER=\"$NEXT_PUBLIC_KEYCLOAK_ISSUER\"" >> .env.production
         - yarn build
   artifacts:
     baseDirectory: .next

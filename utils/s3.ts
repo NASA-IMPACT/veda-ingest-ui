@@ -7,20 +7,22 @@ import { formatUrl } from '@aws-sdk/util-format-url';
 import { Hash } from '@smithy/hash-node';
 
 import { cfg } from '@/config/env';
+import { getRequiredRuntimeSecret } from '@/lib/runtimeSecrets';
+
 const bucketName = cfg.NEXT_PUBLIC_AWS_S3_BUCKET_NAME;
 const region = cfg.AWS_REGION;
 const RoleArn = process.env.ASSUME_ROLE_ARN;
-const ExternalId = process.env.INGEST_UI_EXTERNAL_ID;
 const timestamp = Date.now();
 
 async function assumeRole() {
   const sts = new STSClient({ region });
+  const externalId = await getRequiredRuntimeSecret('INGEST_UI_EXTERNAL_ID');
 
   const roleParams = {
     RoleArn,
     RoleSessionName: `veda-ingest-ui-${timestamp}`,
     DurationSeconds: 900,
-    ExternalId,
+    ExternalId: externalId,
   };
 
   const command = new AssumeRoleCommand(roleParams);
