@@ -243,26 +243,58 @@ Configuration uses environment files that are **never committed** to version con
 
 ### AWS Amplify Deployment
 
-For production deployments, secrets are managed through Amplify's secrets manager:
+For production deployments, this app loads runtime secrets from AWS Secrets Manager.
 
-1. **Navigate to:** AWS Amplify Console → Your App → App settings → Environment variables
+1. **Navigate to:** AWS Amplify Console -> Your App -> App settings -> Environment variables
 
-2. **Add Secrets** (use the "Secrets" tab):
-   - `GITHUB_PRIVATE_KEY` - Your GitHub App's private key
-   - `KEYCLOAK_CLIENT_SECRET` - Keycloak client secret
-   - `NEXTAUTH_SECRET` - NextAuth session secret (generate with `openssl rand -base64 32`)
-   - `INGEST_UI_EXTERNAL_ID` - AWS STS external ID
+2. **Add required Amplify environment variables** (plain env vars):
 
-3. **Add Regular Environment Variables:**
-   - `APP_ID` - Your GitHub App ID
-   - `INSTALLATION_ID` - GitHub App installation ID
-   - `ASSUME_ROLE_ARN` - AWS IAM role ARN
-   - `KEYCLOAK_CLIENT_ID` - Keycloak client ID
-   - `NEXT_PUBLIC_KEYCLOAK_ISSUER` - Keycloak server URL
-   - `NEXT_PUBLIC_APP_ENV` - Environment profile (`eic`, `veda`, etc.)
-   - Any other `NEXT_PUBLIC_*` variables
+- `APP_RUNTIME_SECRET_ID` - ARN of the Secrets Manager secret containing runtime JSON
+- `APP_ID` - GitHub App ID
+- `INSTALLATION_ID` - GitHub App installation ID
+- `ASSUME_ROLE_ARN` - AWS IAM role ARN used for STS AssumeRole for uploading Thumbnails
+- `KEYCLOAK_CLIENT_ID` - Keycloak client ID
+- `NEXTAUTH_URL` - Base URL for NextAuth
+- `NEXT_PUBLIC_KEYCLOAK_ISSUER` - Keycloak issuer URL
+- `NEXT_PUBLIC_APP_ENV` - Environment profile (`local`, `veda`, `eic`, `disasters`)
 
-4. **How it works:** The `amplify.yml` build script automatically writes secrets from Amplify's secure storage into `.env.production` during build time. Secrets are never committed or exposed in logs.
+3. **Create a Secrets Manager secret** (in the same account/region as your Amplify compute) with a JSON object in this shape:
+
+```json
+{
+  "GITHUB_PRIVATE_KEY": "-----BEGIN RSA PRIVATE KEY-----\\n...\\n-----END RSA PRIVATE KEY-----\\n",
+  "KEYCLOAK_CLIENT_SECRET": "your-keycloak-client-secret",
+  "NEXTAUTH_SECRET": "your-nextauth-secret",
+  "INGEST_UI_EXTERNAL_ID": "your-external-id"
+}
+```
+
+Notes:
+
+- Keep these keys at the top level (no wrapper object).
+- Use escaped newlines (`\\n`) for the private key value.
+- Set `APP_RUNTIME_SECRET_ID` environment variable to this secret ARN or name.
+
+4. **Add IAM permission to the Amplify server runtime role** (the SSR Lambda execution role, not only the build role). Ensure the ARN matches your actual roles.
+
+```json
+  {
+    "Effect": "Allow",
+    "Action": "sts:AssumeRole",
+    "Resource": "arn:aws:iam::12345:role/thumbnail-uploader"
+},
+{
+  "Sid": "ReadVedaIngestUiSecrets",
+  "Effect": "Allow",
+  "Action": [
+   "secretsmanager:GetSecretValue",
+   "secretsmanager:DescribeSecret"
+  ],
+  "Resource": "arn:aws:secretsmanager:us-west-2:12345:secret:veda-ingest-ui/*"
+}
+```
+
+5. **Runtime fallback behavior:** If Secrets Manager is unavailable, the app falls back to matching environment variables (`GITHUB_PRIVATE_KEY`, `KEYCLOAK_CLIENT_SECRET`, `NEXTAUTH_SECRET`, `INGEST_UI_EXTERNAL_ID`).
 
 ### Github Access
 
