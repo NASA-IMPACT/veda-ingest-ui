@@ -22,10 +22,6 @@ const MenuBar = () => {
   const hasEditStacCollectionPermission = session?.scopes?.includes(
     'stac:collection:update'
   );
-  const isEditExistingCollectionEnabled =
-    process.env.NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT === 'true' ||
-    process.env.NEXT_PUBLIC_APP_ENV === 'local' ||
-    process.env.NEXT_PUBLIC_APP_ENV === 'veda';
 
   const pathname = usePathname();
   const [activeLink, setActiveLink] = useState(pathname);
@@ -76,32 +72,28 @@ const MenuBar = () => {
           icon: <FormOutlined />,
           disabled: hasLimitedAccess || !hasEditIngestPermission,
         },
-        ...(isEditExistingCollectionEnabled
-          ? [
-              {
-                key: '/edit-existing-collection',
-                label:
-                  hasLimitedAccess || !hasEditStacCollectionPermission ? (
-                    <Tooltip
-                      title="Contact the VEDA Data Services team for access"
-                      placement="right"
-                    >
-                      <span style={{ cursor: 'not-allowed' }}>
-                        <Link href="/edit-existing-collection">
-                          Edit Existing Collection
-                        </Link>
-                      </span>
-                    </Tooltip>
-                  ) : (
-                    <Link href="/edit-existing-collection">
-                      Edit Existing Collection
-                    </Link>
-                  ),
-                icon: <DatabaseOutlined />,
-                disabled: hasLimitedAccess || !hasEditStacCollectionPermission,
-              },
-            ]
-          : []),
+        {
+          key: '/edit-existing-collection',
+          label:
+            hasLimitedAccess || !hasEditStacCollectionPermission ? (
+              <Tooltip
+                title="Contact the VEDA Data Services team for access"
+                placement="right"
+              >
+                <span style={{ cursor: 'not-allowed' }}>
+                  <Link href="/edit-existing-collection">
+                    Edit Existing Collection
+                  </Link>
+                </span>
+              </Tooltip>
+            ) : (
+              <Link href="/edit-existing-collection">
+                Edit Existing Collection
+              </Link>
+            ),
+          icon: <DatabaseOutlined />,
+          disabled: hasLimitedAccess || !hasEditStacCollectionPermission,
+        },
       ],
     },
     {

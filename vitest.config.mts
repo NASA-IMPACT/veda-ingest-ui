@@ -11,7 +11,6 @@ export default defineConfig({
     exclude: ['**/__tests__/playwright/**', '**/node_modules/**'],
     env: {
       NEXT_PUBLIC_APP_ENV: 'local',
-      NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT: 'true',
     },
     coverage: {
       provider: 'v8',

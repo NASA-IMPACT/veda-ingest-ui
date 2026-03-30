@@ -236,12 +236,6 @@ Configuration uses environment files that are **never committed** to version con
    # NEXT_PUBLIC_MOCK_TENANTS=tenant1,tenant2
    ```
 
-   **Feature Flags:**
-
-   ```bash
-   NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT=true
-   ```
-
 3. **Verify `.env.local` is gitignored:**
    ```bash
    git check-ignore .env.local  # Should output: .env.local
@@ -266,7 +260,6 @@ For production deployments, secrets are managed through Amplify's secrets manage
    - `KEYCLOAK_CLIENT_ID` - Keycloak client ID
    - `NEXT_PUBLIC_KEYCLOAK_ISSUER` - Keycloak server URL
    - `NEXT_PUBLIC_APP_ENV` - Environment profile (`eic`, `veda`, etc.)
-   - `NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT` - Feature flag for UI visibility
    - Any other `NEXT_PUBLIC_*` variables
 
 4. **How it works:** The `amplify.yml` build script automatically writes secrets from Amplify's secure storage into `.env.production` during build time. Secrets are never committed or exposed in logs.

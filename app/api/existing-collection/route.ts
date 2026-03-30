@@ -3,21 +3,8 @@ import { auth } from '@/auth';
 import { getUserTenants } from '@/lib/serverTenantValidation';
 import { VEDA_PROD_BACKEND_URL } from '@/config/env';
 
-const isAllowedAppEnv = () => {
-  const env = process.env.NEXT_PUBLIC_APP_ENV?.toLowerCase();
-  return env === 'veda' || env === 'local';
-};
-
 export async function GET(request: NextRequest) {
   try {
-    // Incremental rollout: API access is allowed only for allowed environments (veda, local).
-    if (!isAllowedAppEnv()) {
-      return NextResponse.json(
-        { error: 'Edit Existing Collection feature is disabled' },
-        { status: 403 }
-      );
-    }
-
     const session = await auth();
     if (!session) {
       return NextResponse.json(

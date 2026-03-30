@@ -19,8 +19,6 @@ const CollectionsClient = function CollectionsClient() {
   const hasEditStacCollectionPermission = session?.scopes?.includes(
     'stac:collection:update'
   );
-  const isEditExistingCollectionEnabled =
-    process.env.NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT === 'true';
 
   if (hasLimitedAccess) {
     return (
@@ -99,49 +97,47 @@ const CollectionsClient = function CollectionsClient() {
             </Tooltip>
           </Col>
         </Row>
-        {isEditExistingCollectionEnabled && (
-          <>
-            <Title level={3} style={{ marginTop: 40 }}>
-              Existing STAC Collections
-            </Title>
-            <Row gutter={16} style={{ marginTop: 16 }}>
-              <Col span={24}>
-                <Tooltip
-                  title="Contact the VEDA Data Services team for access"
-                  placement="topLeft"
-                  color={token.colorBgElevated}
-                  styles={{
-                    body: {
-                      color: token.colorText,
-                      backgroundColor: token.colorBgElevated,
-                      border: `1px solid ${token.colorBorder}`,
-                    },
+        <>
+          <Title level={3} style={{ marginTop: 40 }}>
+            Existing STAC Collections
+          </Title>
+          <Row gutter={16} style={{ marginTop: 16 }}>
+            <Col span={24}>
+              <Tooltip
+                title="Contact the VEDA Data Services team for access"
+                placement="topLeft"
+                color={token.colorBgElevated}
+                styles={{
+                  body: {
+                    color: token.colorText,
+                    backgroundColor: token.colorBgElevated,
+                    border: `1px solid ${token.colorBorder}`,
+                  },
+                }}
+              >
+                <Card
+                  title={
+                    <>
+                      <DatabaseOutlined style={{ marginRight: 8 }} />
+                      Edit Existing Collection
+                    </>
+                  }
+                  variant="outlined"
+                  style={{
+                    opacity: 0.6,
+                    cursor: 'not-allowed',
+                    pointerEvents: 'auto',
+                    backgroundColor: token.colorBgContainerDisabled,
+                    borderColor: token.colorBorder,
+                    color: token.colorTextDisabled,
                   }}
                 >
-                  <Card
-                    title={
-                      <>
-                        <DatabaseOutlined style={{ marginRight: 8 }} />
-                        Edit Existing Collection
-                      </>
-                    }
-                    variant="outlined"
-                    style={{
-                      opacity: 0.6,
-                      cursor: 'not-allowed',
-                      pointerEvents: 'auto',
-                      backgroundColor: token.colorBgContainerDisabled,
-                      borderColor: token.colorBorder,
-                      color: token.colorTextDisabled,
-                    }}
-                  >
-                    Edit collections that have already been ingested
-                  </Card>
-                </Tooltip>
-              </Col>
-            </Row>
-          </>
-        )}
+                  Edit collections that have already been ingested
+                </Card>
+              </Tooltip>
+            </Col>
+          </Row>
+        </>
       </AppLayout>
     );
   }

@@ -1,49 +1,31 @@
-# Edit Existing Collection Feature Flag Cleanup Guide
+# Edit Existing Collection Cleanup Status
 
-This document describes the current behavior of Edit Existing Collection and the remaining cleanup work.
+This cleanup is complete.
 
-## Current Rollout Behavior
+## Current Behavior
 
-- Direct page navigation to `/edit-existing-collection` is allowed only when `NEXT_PUBLIC_APP_ENV=veda` or `local`. Other environments redirect to `/unauthorized`.
-- Server/API access to `/api/existing-collection/*` is allowed only when `NEXT_PUBLIC_APP_ENV=veda` or `local`.
-- UI visibility (menu/card) is controlled by `NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT`.
-- Result: Page and API are AppEnv-gated, while menu/page visibility remains behind the UI feature flag.
+- Edit Existing Collection is available in all environments.
+- Menu and Collections page visibility is no longer controlled by a feature flag.
+- Access is controlled by existing authentication and Keycloak scopes.
+- Existing tenant validation for collection reads/updates remains in place.
 
-UI visibility for Edit Existing Collection remains feature-flag controlled in:
+## Access Control
 
-- `components/layout/MenuBar.tsx`
-- `app/(pages)/collections/_components/CollectionsClient.tsx`
+- UI access: users need `stac:collection:update` (and must not be `dataset:limited-access`) to interact with Edit Existing Collection links/actions.
+- Route/API authorization: enforced by existing middleware permission handling and API auth checks.
+- Tenant access: enforced by `getUserTenants` and `validateTenantAccess` logic in API routes.
 
-Page and API access gating is implemented in:
+## Removed Gating
 
-- `proxy.ts` (middleware-level route protection for `/edit-existing-collection`)
-- `app/api/existing-collection/route.ts`
-- `app/api/existing-collection/[collectionId]/route.ts` (both `GET` and `PUT`)
+- Removed `NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT` checks from:
+	- `components/layout/MenuBar.tsx`
+	- `app/(pages)/collections/_components/CollectionsClient.tsx`
+- Removed app-environment gating for Edit Existing Collection from:
+	- `proxy.ts`
+	- `app/api/existing-collection/route.ts`
+	- `app/api/existing-collection/[collectionId]/route.ts`
 
-## Environment Variables
+## Config and Docs Cleanup
 
-### Keep
-
-- `NEXT_PUBLIC_APP_ENV` (must be `veda` or `local` for direct page navigation and API access)
-- `NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT` (controls menu/card visibility)
-
-### Removed
-
-- `ENABLE_EXISTING_COLLECTION_EDIT` - has been fully removed from test configs and env files
-
-## Verification Checklist
-
-- [ ] With `NEXT_PUBLIC_APP_ENV=veda` or `local`, direct navigation to `/edit-existing-collection` works
-- [ ] With `NEXT_PUBLIC_APP_ENV=veda` or `local`, `/api/existing-collection/*` routes are accessible (subject to auth/tenant checks)
-- [ ] With `NEXT_PUBLIC_APP_ENV` set to `disasters` or `eic`, `/edit-existing-collection` redirects to `/unauthorized` and `/api/existing-collection/*` returns `403`
-- [ ] Menu item and Collections page card remain hidden unless `NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT=true`
-- [ ] Existing auth and tenant checks still behave as expected for allowed environments
-
-## Future Cleanup (Phase 2)
-
-When ready to fully launch in UI:
-
-1. Remove `NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT` checks from `MenuBar` and `CollectionsClient`.
-2. Remove related test env wiring that only exists to force UI visibility.
-3. Update README and environment examples to remove UI flag references.
-4. Remove documentation references to temporary UI flag gating.
+- Removed `NEXT_PUBLIC_ENABLE_EXISTING_COLLECTION_EDIT` from `vitest.config.mts`.
+- Removed stale flag examples from `.env` and `README.md`.

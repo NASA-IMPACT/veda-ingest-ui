@@ -3,11 +3,6 @@ import { auth } from '@/auth';
 import { validateTenantAccess } from '@/lib/serverTenantValidation';
 import { VEDA_PROD_BACKEND_URL } from '@/config/env';
 
-const isAllowedAppEnv = () => {
-  const env = process.env.NEXT_PUBLIC_APP_ENV?.toLowerCase();
-  return env === 'veda' || env === 'local';
-};
-
 interface RouteParams {
   params: Promise<{
     collectionId: string;
@@ -16,13 +11,6 @@ interface RouteParams {
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    if (!isAllowedAppEnv()) {
-      return NextResponse.json(
-        { error: 'Edit Existing Collection feature is disabled' },
-        { status: 403 }
-      );
-    }
-
     const session = await auth();
     if (!session) {
       return NextResponse.json(
@@ -93,14 +81,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    // Incremental rollout: API access is allowed only for the VEDA and local environments.
-    if (!isAllowedAppEnv()) {
-      return NextResponse.json(
-        { error: 'Edit Existing Collection feature is disabled' },
-        { status: 403 }
-      );
-    }
-
     const session = await auth();
     if (!session) {
       return NextResponse.json(
