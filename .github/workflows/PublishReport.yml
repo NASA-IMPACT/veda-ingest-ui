@@ -23,6 +23,14 @@ jobs:
 
       - name: Run Playwright E2E Tests
         run: yarn test:e2e
+        env:
+          NEXT_PUBLIC_DISABLE_AUTH: 'true'
+          NEXT_PUBLIC_APP_ENV: local
+          NEXT_PUBLIC_MOCK_SCOPES: dataset:update stac:collection:update dataset:create
+          NEXT_PUBLIC_KEYCLOAK_ISSUER: https://example.test/realms/veda
+          KEYCLOAK_CLIENT_ID: ingest-ui
+          APP_ID: '1'
+          INSTALLATION_ID: '1'
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
