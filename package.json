@@ -103,7 +103,16 @@
     ]
   },
   "resolutions": {
-    "fast-xml-parser": "5.5.8"
+    "fast-xml-parser": "5.5.8",
+    "eslint/minimatch": "3.1.4",
+    "@eslint/eslintrc/minimatch": "3.1.4",
+    "@humanwhocodes/config-array/minimatch": "3.1.4",
+    "eslint/@humanwhocodes/config-array/minimatch": "3.1.4",
+    "**/@humanwhocodes/config-array/minimatch": "3.1.4",
+    "eslint-plugin-import/minimatch": "3.1.4",
+    "eslint-plugin-jsx-a11y/minimatch": "3.1.4",
+    "eslint-plugin-react/minimatch": "3.1.4",
+    "**/rimraf/glob/minimatch": "3.1.4"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
