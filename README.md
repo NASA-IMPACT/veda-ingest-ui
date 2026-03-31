@@ -1,6 +1,6 @@
 # VEDA Data Ingest
 
-This application is to allow users to create PRs in [veda-data](https://github.com/NASA-IMPACT/veda-data) to ingest data.
+This application is to allow users to create PRs in a data repo such as [veda-data](https://github.com/NASA-IMPACT/veda-data) to ingest data into the staging environment.
 
 ## Quick Start
 
@@ -60,7 +60,7 @@ The application supports two primary workflows:
 
 ## 1. Data Ingestion
 
-The application allows users to create and edit PRs in the veda-data repository for data ingestion. New PRs are created with a prefix of `'[collection/dataset] Ingest Request for [collectionName]'`. The branch name and file name of the json for these new PRs is set by the Collection Name field in the form after any non-alphanumeric characters are removed from the collection name:
+The application allows users to create and edit PRs in the data repository for data ingestion. New PRs are created with a prefix of `'[collection/dataset] Ingest Request for [collectionName]'`. The branch name and file name of the json for these new PRs is set by the Collection Name field in the form after any non-alphanumeric characters are removed from the collection name:
 
 ```
 const fileName = 'ingestion-data/staging/dataset-config/${collectionName}.json';
@@ -71,11 +71,11 @@ Users are allowed to edit open PRs that are modifying json files in the standard
 
 ## 2. Collection Editing
 
-The application also provides direct editing of existing STAC collections through the STAC API. User must have `stac:collection:update` scope for editing permissions.
+The application also provides direct editing of existing STAC collections through the STAC API. User must have `stac:collection:update` scope from keycloak for editing permissions.
 
-- **Collection Discovery**: Browse existing collections from `https://staging.openveda.cloud/api/stac/collections`
+- **Collection Discovery**: Browse existing collections from `/api/stac/collections`
 - **Real-time Editing**: Modify collection metadata directly without GitHub PRs
-- **Data Sanitization**: Automatic STAC schema compliance with null-to-array/object conversion and datetime format fixes
+- **Data Sanitization**: Automatic STAC schema compliance with null-to-array/object conversion and datetime format fixes. This helps clean legacy formatting errors in veda-data.
 
 ## Authentication & Authorization
 
