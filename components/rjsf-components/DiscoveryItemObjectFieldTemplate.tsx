@@ -7,7 +7,6 @@ import {
   ObjectFieldTemplateProps,
   RJSFSchema,
   StrictRJSFSchema,
-  getUiOptions,
 } from '@rjsf/utils';
 
 const { Panel } = Collapse;
@@ -17,9 +16,8 @@ export default function DiscoveryItemObjectFieldTemplate<
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = any,
 >(props: ObjectFieldTemplateProps<T, S, F>) {
-  const { properties, uiSchema, fieldPathId, registry } = props;
+  const { properties, uiSchema, registry } = props;
 
-  const uiOptions = getUiOptions(uiSchema);
   const rowGutter = (registry.formContext as any)?.rowGutter || 12;
 
   // We want the "More Options" panel to be collapsed by default

@@ -1,5 +1,4 @@
 import { Octokit } from '@octokit/rest';
-import { Endpoints } from '@octokit/types';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 import { IngestPullRequest } from '@/types/ingest';
 
@@ -68,7 +67,7 @@ const ListPRs = async (
           try {
             const parsedContent = JSON.parse(fileContent);
             return { pr, tenant: parsedContent.tenant };
-          } catch (e) {
+          } catch {
             console.error(`Failed to parse JSON for PR #${pr.number}`);
             return { pr, tenant: undefined };
           }

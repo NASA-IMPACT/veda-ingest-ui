@@ -3,7 +3,7 @@
 import React from 'react';
 import { Button, Tooltip } from 'antd';
 import { LogoutOutlined } from '@ant-design/icons';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
 import { keycloakSignOut } from '@/app/actions/auth';
 
@@ -27,8 +27,7 @@ interface LogoutButtonProps {
 
 const LogoutButton = ({ collapsed }: LogoutButtonProps) => {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const callbackUrl = searchParams.get('callbackUrl') || '/login';
 
   const handleLogout = () => {

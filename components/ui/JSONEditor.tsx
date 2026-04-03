@@ -342,7 +342,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       try {
         const valueFromEditor = JSON.parse(editorValue) as JSONEditorValue;
         validateAndApply(valueFromEditor);
-      } catch (err) {
+      } catch {
         setJsonError('Invalid JSON format after modal action.');
       }
     }
@@ -359,7 +359,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
           ...value.renders,
           dashboard: JSON.parse(value.renders.dashboard),
         };
-      } catch (err) {
+      } catch {
         console.warn(
           "Could not parse 'renders.dashboard' as JSON, leaving it as-is."
         );
@@ -379,7 +379,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
     let currentEditorParsedValue: JSONEditorValue;
     try {
       currentEditorParsedValue = JSON.parse(editorValue) as JSONEditorValue;
-    } catch (err) {
+    } catch {
       setJsonError(
         'Invalid JSON format. Please correct before applying changes.'
       );

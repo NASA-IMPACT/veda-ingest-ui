@@ -100,7 +100,7 @@ const SummariesManager: React.FC<SummariesManagerProps> = ({
               {JSON.stringify(parsedData, null, 2)}
             </pre>
           );
-        } catch (e) {
+        } catch {
           return (
             <pre
               style={{

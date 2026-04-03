@@ -95,7 +95,7 @@ export const customValidate: CustomValidator = (formData, errors) => {
               `Summary '${key}' is not a valid JSON Schema object.`
             );
           }
-        } catch (e) {
+        } catch {
           errors.summaries?.addError(`Summary '${key}' contains invalid JSON.`);
         }
       }

@@ -10,7 +10,7 @@ test.describe('COGControlsForm Layout 🎨', () => {
     worker,
   }, testInfo) => {
     await worker.use(
-      http.get('/api/raster/cog/info', ({ request }) => {
+      http.get('/api/raster/cog/info', () => {
         return HttpResponse.json({
           band_descriptions: [['b1', 'Band 1']],
         });

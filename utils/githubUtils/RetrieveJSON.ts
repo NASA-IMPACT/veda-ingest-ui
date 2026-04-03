@@ -58,7 +58,7 @@ const RetrieveJSON = async (ref: string, ingestionType: IngestionType) => {
     let content;
     try {
       content = JSON.parse(jsonString);
-    } catch (parseError) {
+    } catch {
       throw new Error(`Invalid JSON format in GitHub file: ${filePath}`);
     }
 

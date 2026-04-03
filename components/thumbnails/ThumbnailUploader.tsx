@@ -53,9 +53,7 @@ function ThumbnailUploader({
   onUploadSuccess,
 }: ThumbnailUploaderProps) {
   const { message, modal } = App.useApp();
-  const [uploadingFile, setUploadingFile] = useState<UploadingFile | null>(
-    null
-  );
+  const [, setUploadingFile] = useState<UploadingFile | null>(null);
   const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
   const [imageValidation, setImageValidation] =
     useState<ImageValidationResult | null>(null);

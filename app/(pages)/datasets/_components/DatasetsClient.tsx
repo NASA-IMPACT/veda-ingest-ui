@@ -1,7 +1,7 @@
 'use client';
 
 import AppLayout from '@/components/layout/Layout';
-import { Layout, List, Typography, Row, Col, Card, Tooltip, theme } from 'antd';
+import { Row, Col, Card, Tooltip, theme } from 'antd';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import Title from 'antd/lib/typography/Title';

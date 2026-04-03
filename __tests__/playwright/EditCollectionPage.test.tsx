@@ -275,7 +275,7 @@ test.describe('Edit Collection Page', () => {
   }, testInfo) => {
     // Mock a failure for the list-ingests API endpoint
     await worker.use(
-      http.get('/api/list-ingests', ({ request }) => {
+      http.get('/api/list-ingests', () => {
         return HttpResponse.json(
           { error: 'something went wrong' },
           { status: 400 }
@@ -307,7 +307,7 @@ test.describe('Edit Collection Page', () => {
   }, testInfo) => {
     // Mock a failure for the retrieve-collection API endpoint
     await worker.use(
-      http.get('/api/retrieve-ingest', ({ request }) => {
+      http.get('/api/retrieve-ingest', () => {
         return HttpResponse.json(
           { error: 'something went wrong' },
           { status: 400 }

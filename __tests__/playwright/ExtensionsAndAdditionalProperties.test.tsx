@@ -1,6 +1,4 @@
 import { expect, test } from '@/__tests__/playwright/setup-msw';
-import { HttpResponse, http } from 'msw';
-import { extensionSchemaResponse } from '@/__mocks__/extensionSchemaResponse';
 
 const testExtensionUrl =
   'https://stac-extensions.github.io/testExtension/v2.2.0/schema.json';
@@ -107,7 +105,7 @@ test.describe('Extensions and Additional Properties', () => {
     });
 
     // 4. Validate that submitting a form will include the RJSF data, the Additional Properties Data, and the Extension’s data.
-    await test.step('Submit form with all data types', async (testInfo) => {
+    await test.step('Submit form with all data types', async () => {
       // Re-add the extension to have all data types present
       await page
         .getByPlaceholder(/Enter extension schema URL/i)

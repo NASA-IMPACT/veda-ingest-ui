@@ -4,7 +4,6 @@ import { describe, it, expect, vi } from 'vitest';
 import CreateIngestClient from '@/app/(pages)/create-dataset/_components/CreateIngestClient';
 
 import { TenantContext } from '@/app/contexts/TenantContext';
-import { SessionProvider } from 'next-auth/react';
 
 vi.mock('@/components/layout/AppLayout', () => ({
   default: ({ children }: { children: ReactNode }) => (
@@ -13,8 +12,6 @@ vi.mock('@/components/layout/AppLayout', () => ({
 }));
 
 const AllProviders = ({ children }: { children: ReactNode }) => {
-  const mockSession = null;
-
   const mockTenantContext = {
     tenants: ['test-tenant-1', 'test-tenant-2'],
     isLoading: false,

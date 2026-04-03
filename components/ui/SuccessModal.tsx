@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, ModalProps } from 'antd';
+import { Modal } from 'antd';
 
 // Base props shared by both modal types
 type BaseSuccessModalProps = {

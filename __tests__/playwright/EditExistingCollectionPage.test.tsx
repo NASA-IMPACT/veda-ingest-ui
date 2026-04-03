@@ -298,7 +298,7 @@ test.describe('Edit Existing Collection Page', () => {
   }, testInfo) => {
     // Mock a failure for the existing collection API endpoint
     await worker.use(
-      http.get('/api/existing-collection', ({ request }) => {
+      http.get('/api/existing-collection', () => {
         return HttpResponse.json(
           { error: 'something went wrong' },
           { status: 400 }
@@ -330,7 +330,7 @@ test.describe('Edit Existing Collection Page', () => {
   }, testInfo) => {
     // Mock a failure for the individual collection retrieval API endpoint
     await worker.use(
-      http.get('/api/existing-collection/test-collection-1', ({ request }) => {
+      http.get('/api/existing-collection/test-collection-1', () => {
         return HttpResponse.json(
           { error: 'something went wrong' },
           { status: 400 }

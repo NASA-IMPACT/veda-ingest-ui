@@ -140,7 +140,6 @@ describe('EditFormManager', () => {
 
     render(<EditFormManager {...defaultProps} formType="dataset" />);
 
-    const submitButton = screen.getByRole('button', { name: 'Submit' });
     const form = screen.getByTestId('dataset-ingestion-form');
 
     fireEvent.submit(form);

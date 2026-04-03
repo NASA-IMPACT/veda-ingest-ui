@@ -143,7 +143,7 @@ function CollectionIngestionForm({
           return;
         }
         setFormData((prev) => ({ ...prev, [propKey]: parsedValue }));
-      } catch (e) {
+      } catch {
         setFormData((prev) => ({ ...prev, [propKey]: newValue }));
       }
     },

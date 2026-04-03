@@ -49,7 +49,7 @@ interface EditIngestRequestBody {
 }
 
 export const handlers = [
-  http.get('/api/list-ingests', async ({ request }) => {
+  http.get('/api/list-ingests', async () => {
     return HttpResponse.json({ githubResponse });
   }),
 
@@ -101,13 +101,13 @@ export const handlers = [
     return HttpResponse.json({ message: 'Data updated successfully' });
   }),
 
-  http.post('/api/create-ingest', async ({ request }) => {
+  http.post('/api/create-ingest', async () => {
     return HttpResponse.json({
       githubURL: 'https://github.com/nasa-veda/veda-data/pull/12345',
     });
   }),
 
-  http.get('/api/raster/cog/info', ({ request }) => {
+  http.get('/api/raster/cog/info', () => {
     return HttpResponse.json({
       band_descriptions: [
         ['b1', 'Band 1'],
@@ -118,7 +118,7 @@ export const handlers = [
     });
   }),
 
-  http.get('/api/raster/cog/WebMercatorQuad/tilejson.json', ({ request }) => {
+  http.get('/api/raster/cog/WebMercatorQuad/tilejson.json', () => {
     return HttpResponse.json({
       tilejson: '2.2.0',
       tiles: [
@@ -131,7 +131,7 @@ export const handlers = [
     });
   }),
 
-  http.get('/api/raster/colorMaps', ({ request }) => {
+  http.get('/api/raster/colorMaps', () => {
     return HttpResponse.json({
       colorMaps: ['accent', 'autumn', 'binary', 'bwr', 'cfastie'],
       links: [
@@ -159,7 +159,7 @@ export const handlers = [
     });
   }),
 
-  http.post('/api/upload-url', async ({ request }) => {
+  http.post('/api/upload-url', async () => {
     return HttpResponse.json({
       uploadUrl:
         'https://s3bucket.s3.us-west-2.amazonaws.com/thumbnail.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIA4NPAGWTH4OAKYR4F%2F20250306%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250306T210052Z&X-Amz-Expires=900&X-Amz-Signature=50d8e81e05d3b7ec427b0d9add69c839f5379ce2a27f7f7b6832c1b15fd430c8&X-Amz-SignedHeaders=host',
@@ -175,13 +175,13 @@ export const handlers = [
     }
   ),
 
-  http.get('/api/auth/session', ({ request }) => {
+  http.get('/api/auth/session', () => {
     return HttpResponse.json(mockSession);
   }),
 
   http.get(
     'https://example.com/api/raster/cog/tiles/WebMercatorQuad/:z/:x/:y.png',
-    ({ request, params }) => {
+    () => {
       if (!mockTileBuffer || mockTileBuffer.byteLength === 0) {
         console.error('[MSW] Mock tile buffer is invalid for example.com!');
         return new HttpResponse('Error generating mock tile', { status: 500 });
@@ -197,7 +197,7 @@ export const handlers = [
     }
   ),
 
-  http.get('https://*.tile.openstreetmap.org/:z/:x/:y.png', ({ request }) => {
+  http.get('https://*.tile.openstreetmap.org/:z/:x/:y.png', () => {
     if (!mockTileBuffer || mockTileBuffer.byteLength === 0) {
       console.error('[MSW] Mock tile buffer is invalid for OSM!');
       return new HttpResponse('Error generating mock tile', { status: 500 });

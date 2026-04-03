@@ -321,7 +321,7 @@ describe('CreationFormManager', () => {
 
     // Create a custom wrapper that submits data with empty tenant array
     const TestWrapper = () => {
-      const [formData, setFormData] = useState<Record<string, unknown>>({
+      const [formData] = useState<Record<string, unknown>>({
         collection: 'Test Dataset',
         sample_files: 'http://example.com/file.tif',
         tenant: [],

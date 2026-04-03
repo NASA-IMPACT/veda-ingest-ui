@@ -34,12 +34,10 @@ const mockIconInstance = {
 
 // Mock the main 'L' object and its factory functions
 const L = {
-  map: vi.fn((_id: string | HTMLElement, _options?: any) => mockMapInstance),
-  tileLayer: vi.fn(
-    (_urlTemplate?: string, _options?: any) => mockTileLayerInstance
-  ),
-  marker: vi.fn((_latlng?: any, _options?: any) => mockMarkerInstance),
-  icon: vi.fn((_options?: any) => mockIconInstance),
+  map: vi.fn(() => mockMapInstance),
+  tileLayer: vi.fn(() => mockTileLayerInstance),
+  marker: vi.fn(() => mockMarkerInstance),
+  icon: vi.fn(() => mockIconInstance),
   Icon: {
     // If you use new L.Icon.Default() or similar
     Default: vi.fn().mockImplementation(() => mockIconInstance),

@@ -17,7 +17,6 @@ const AssetsField: React.FC<FieldProps> = (props) => {
     required,
     description,
   } = props;
-  const formContext = registry.formContext;
 
   const { SchemaField } = registry.fields;
   const { TitleFieldTemplate, DescriptionFieldTemplate } = registry.templates;
