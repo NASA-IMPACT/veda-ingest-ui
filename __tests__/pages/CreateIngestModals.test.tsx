@@ -3,6 +3,23 @@ import userEvent from '@testing-library/user-event';
 import CreateIngestClient from '@/app/(pages)/create-dataset/_components/CreateIngestClient';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+type CreationFormManagerProps = {
+  setStatus: (status: string) => void;
+  setCollectionName: (name: string) => void;
+  setApiErrorMessage: (message: string) => void;
+  setPullRequestUrl: (url: string) => void;
+};
+
+type ErrorModalProps = {
+  collectionName?: string;
+  apiErrorMessage?: string;
+};
+
+type SuccessModalProps = {
+  collectionName?: string;
+  pullRequestUrl?: string;
+};
+
 // Mock `CreationFormManager`
 vi.mock('@/components/ingestion/CreationFormManager', () => ({
   default: ({
@@ -10,7 +27,7 @@ vi.mock('@/components/ingestion/CreationFormManager', () => ({
     setCollectionName,
     setApiErrorMessage,
     setPullRequestUrl,
-  }: any) => (
+  }: CreationFormManagerProps) => (
     <div data-testid="creation-form-manager">
       <button
         onClick={() => {
@@ -36,7 +53,7 @@ vi.mock('@/components/ingestion/CreationFormManager', () => ({
 
 // Mock ErrorModal
 vi.mock('@/components/ui/ErrorModal', () => ({
-  default: ({ collectionName, apiErrorMessage }: any) => (
+  default: ({ collectionName, apiErrorMessage }: ErrorModalProps) => (
     <div role="dialog" data-testid="error-modal">
       <p>Error Modal</p>
       <p>Collection: {collectionName}</p>
@@ -47,7 +64,7 @@ vi.mock('@/components/ui/ErrorModal', () => ({
 
 // Mock SuccessModal
 vi.mock('@/components/ui/SuccessModal', () => ({
-  default: ({ collectionName, pullRequestUrl }: any) => (
+  default: ({ collectionName, pullRequestUrl }: SuccessModalProps) => (
     <div role="dialog" data-testid="success-modal">
       <p>Success Modal</p>
       <p>Collection: {collectionName}</p>

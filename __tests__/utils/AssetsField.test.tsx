@@ -9,7 +9,11 @@ import AssetsField from '@/components/rjsf-components/AssetsField';
 // We still need to mock the RJSF-provided fields/templates.
 
 const MockSchemaField = vi.fn(
-  ({ formData, onChange, fieldPathId }: FieldProps<Record<string, any>>) => (
+  ({
+    formData,
+    onChange,
+    fieldPathId,
+  }: FieldProps<Record<string, unknown>>) => (
     <div>
       {/* Simulate a change within the asset's form */}
       <button
@@ -30,7 +34,7 @@ const MockDescriptionField = ({ description }: { description: string }) => (
 
 describe('AssetsField', () => {
   const mockOnChange = vi.fn();
-  let baseProps: FieldProps;
+  let baseProps: FieldProps<Record<string, unknown>>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -66,7 +70,7 @@ describe('AssetsField', () => {
       uiSchema: {},
       disabled: false,
       readonly: false,
-    } as unknown as FieldProps;
+    } as unknown as FieldProps<Record<string, unknown>>;
   });
 
   it('should render initial assets correctly', () => {

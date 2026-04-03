@@ -4,6 +4,28 @@ import userEvent from '@testing-library/user-event';
 import EditIngestView from '@/components/ingestion/EditIngestView';
 import React from 'react';
 
+type EditFormManagerMockProps = {
+  formType: string;
+  gitRef?: string;
+  filePath?: string;
+  fileSha?: string;
+  formData: Record<string, unknown>;
+  handleCancel: () => void;
+};
+
+type ErrorModalProps = {
+  collectionName?: string;
+  apiErrorMessage?: string;
+};
+
+type SuccessModalProps = {
+  type?: string;
+  collectionName?: string;
+  open?: boolean;
+  onOk?: () => void;
+  onCancel?: () => void;
+};
+
 // Mock child components
 vi.mock('@/components/ingestion/EditFormManager', () => ({
   default: ({
@@ -13,7 +35,7 @@ vi.mock('@/components/ingestion/EditFormManager', () => ({
     fileSha,
     formData,
     handleCancel,
-  }: any) => (
+  }: EditFormManagerMockProps) => (
     <div data-testid="edit-form-manager">
       <div data-testid="form-type">{formType}</div>
       <div data-testid="git-ref">{gitRef}</div>
@@ -28,7 +50,7 @@ vi.mock('@/components/ingestion/EditFormManager', () => ({
 }));
 
 vi.mock('@/components/ui/ErrorModal', () => ({
-  default: ({ collectionName, apiErrorMessage }: any) => (
+  default: ({ collectionName, apiErrorMessage }: ErrorModalProps) => (
     <div data-testid="error-modal">
       <div data-testid="error-collection-name">{collectionName}</div>
       <div data-testid="error-message">{apiErrorMessage}</div>
@@ -37,7 +59,13 @@ vi.mock('@/components/ui/ErrorModal', () => ({
 }));
 
 vi.mock('@/components/ui/SuccessModal', () => ({
-  default: ({ type, collectionName, open, onOk, onCancel }: any) => (
+  default: ({
+    type,
+    collectionName,
+    open,
+    onOk,
+    onCancel,
+  }: SuccessModalProps) => (
     <div data-testid="success-modal" data-open={open}>
       <div data-testid="success-type">{type}</div>
       <div data-testid="success-collection-name">{collectionName}</div>

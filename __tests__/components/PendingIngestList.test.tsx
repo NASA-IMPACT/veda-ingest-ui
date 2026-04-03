@@ -5,12 +5,19 @@ import { PendingIngestList } from '@/components/ingestion/PendingIngestList';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useUserTenants } from '@/app/contexts/TenantContext';
+import { createMockRouter } from '@/__tests__/types/router';
+import { createMockSessionReturn } from '@/__tests__/types/session';
+
+type ErrorModalProps = {
+  context?: string;
+  apiErrorMessage?: string;
+};
 
 vi.mock('next-auth/react');
 vi.mock('next/navigation');
 vi.mock('@/app/contexts/TenantContext');
 vi.mock('@/components/ui/ErrorModal', () => ({
-  default: ({ context, apiErrorMessage }: any) => (
+  default: ({ context, apiErrorMessage }: ErrorModalProps) => (
     <div data-testid="error-modal">
       <div data-testid="error-context">{context}</div>
       <div data-testid="error-message">{apiErrorMessage}</div>
@@ -21,7 +28,7 @@ vi.mock('@/components/ui/ErrorModal', () => ({
 describe('PendingIngestList', () => {
   const mockOnIngestSelect = vi.fn();
   const mockPush = vi.fn();
-  const mockRouter = { push: mockPush };
+  const mockRouter = createMockRouter({ push: mockPush });
 
   const mockIngests = [
     {
@@ -52,11 +59,11 @@ describe('PendingIngestList', () => {
     vi.clearAllMocks();
     global.fetch = vi.fn();
 
-    vi.mocked(useRouter).mockReturnValue(mockRouter as any);
+    vi.mocked(useRouter).mockReturnValue(mockRouter);
     vi.mocked(useUserTenants).mockReturnValue({
       tenants: ['tenant1', 'tenant2'],
       isLoading: false,
-    } as any);
+    } as ReturnType<typeof useUserTenants>);
   });
 
   afterEach(() => {
@@ -64,11 +71,9 @@ describe('PendingIngestList', () => {
   });
 
   it('should redirect to login when session is unauthenticated', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: null,
-      status: 'unauthenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(
+      createMockSessionReturn({}, 'unauthenticated')
+    );
 
     render(
       <PendingIngestList
@@ -83,11 +88,9 @@ describe('PendingIngestList', () => {
   });
 
   it('should show skeleton loading when session is loading', () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: null,
-      status: 'loading',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(
+      createMockSessionReturn({}, 'loading')
+    );
 
     render(
       <PendingIngestList
@@ -102,11 +105,7 @@ describe('PendingIngestList', () => {
   });
 
   it('should fetch and render tenant and public columns', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
@@ -135,11 +134,7 @@ describe('PendingIngestList', () => {
   });
 
   it('should not render public column when no public ingests exist', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
@@ -167,11 +162,7 @@ describe('PendingIngestList', () => {
   });
 
   it('should display error modal when API fetch fails', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     const errorMessage = 'Failed to fetch pending ingests';
     vi.mocked(fetch).mockResolvedValueOnce({
@@ -200,11 +191,7 @@ describe('PendingIngestList', () => {
   it('should call onIngestSelect when ingest is clicked', async () => {
     const user = userEvent.setup();
 
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
@@ -235,12 +222,12 @@ describe('PendingIngestList', () => {
       data: { user: { name: 'Test User' } },
       status: 'authenticated',
       update: vi.fn(),
-    } as any);
+    } as ReturnType<typeof useSession>);
 
     vi.mocked(useUserTenants).mockReturnValue({
       tenants: ['tenant1', 'public'],
       isLoading: false,
-    } as any);
+    } as ReturnType<typeof useUserTenants>);
 
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,

@@ -2,8 +2,9 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import DatasetsClient from '@/app/(pages)/datasets/_components/DatasetsClient';
 import { SessionProvider } from 'next-auth/react';
+import { TestSession } from '@/__tests__/types/session';
 
-function renderWithSession(session: any) {
+function renderWithSession(session: TestSession) {
   return render(
     <SessionProvider session={session}>
       <DatasetsClient />

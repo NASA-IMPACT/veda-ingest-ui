@@ -5,10 +5,15 @@ import React from 'react';
 
 import { AddSummaryForm } from '@/components/rjsf-components/AddSummaryForm';
 
+type EditorWidgetProps = {
+  value: string;
+  onChange: (value: string) => void;
+};
+
 // --- Mocks ---
 
 vi.mock('@/components/ui/CodeEditorWidget', () => ({
-  default: ({ value, onChange }: any) => (
+  default: ({ value, onChange }: EditorWidgetProps) => (
     <textarea
       data-testid="code-editor-widget"
       value={value}
@@ -26,13 +31,29 @@ vi.mock('@ant-design/icons', () => ({
 vi.mock('antd', async (importOriginal) => {
   const antd = await importOriginal<typeof import('antd')>();
 
-  const MockSelect = ({ children, value, onChange, ...props }: any) => (
+  const MockSelect = ({
+    children,
+    value,
+    onChange,
+    ...props
+  }: {
+    children: React.ReactNode;
+    value?: string;
+    onChange: (value: string) => void;
+  }) => (
     <select {...props} value={value} onChange={(e) => onChange(e.target.value)}>
       {children}
     </select>
   );
 
-  const MockOption = ({ children, value, ...props }: any) => (
+  const MockOption = ({
+    children,
+    value,
+    ...props
+  }: {
+    children: React.ReactNode;
+    value: string;
+  }) => (
     <option {...props} value={value}>
       {children}
     </option>
@@ -49,7 +70,7 @@ vi.mock('antd', async (importOriginal) => {
 describe('AddSummaryForm', () => {
   let mockOnAdd: ReturnType<typeof vi.fn>;
   let mockOnCancel: ReturnType<typeof vi.fn>;
-  let defaultProps: any;
+  let defaultProps: React.ComponentProps<typeof AddSummaryForm>;
 
   beforeEach(() => {
     mockOnAdd = vi.fn();

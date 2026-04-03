@@ -64,7 +64,7 @@ describe('IntervalField', () => {
       uiSchema: {},
       disabled: false,
       readonly: false,
-      registry: {} as any,
+      registry: {} as FieldProps['registry'],
     };
   });
 

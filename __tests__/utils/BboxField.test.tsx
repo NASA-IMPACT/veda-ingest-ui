@@ -52,7 +52,7 @@ describe('BboxField', () => {
       disabled: false,
       readonly: false,
       formContext: {},
-      registry: {} as any,
+      registry: {} as FieldProps['registry'],
     };
   });
 

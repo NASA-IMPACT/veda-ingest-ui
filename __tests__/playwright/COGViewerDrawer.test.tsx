@@ -1,7 +1,7 @@
 import { expect, test } from '@/__tests__/playwright/setup-msw';
-import { HttpResponse } from 'msw';
+import type { Page } from '@playwright/test';
 
-async function openCOGDrawer(page: any) {
+async function openCOGDrawer(page: Page) {
   await page.waitForTimeout(1000);
   await page
     .getByRole('button', {
@@ -12,10 +12,10 @@ async function openCOGDrawer(page: any) {
   // Wait for the drawer to open and content to load
   await expect(page.locator('.ant-drawer')).toBeVisible({ timeout: 10000 });
 
-  await expect(page.getByTestId('colormap', { timeout: 10000 })).toBeVisible();
+  await expect(page.getByTestId('colormap')).toBeVisible({ timeout: 10000 });
 }
 
-async function fillRenders(page: any, rendersData: any) {
+async function fillRenders(page: Page, rendersData: Record<string, unknown>) {
   const rendersTextbox = page.locator('#root_renders').getByRole('textbox');
   await rendersTextbox.clear();
   await rendersTextbox.fill(JSON.stringify(rendersData, null, 2));

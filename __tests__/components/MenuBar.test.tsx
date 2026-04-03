@@ -2,8 +2,9 @@ import { act, render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import MenuBar from '@/components/layout/MenuBar';
 import { SessionProvider } from 'next-auth/react';
+import { TestSession } from '@/__tests__/types/session';
 
-async function renderWithSession(session: any) {
+async function renderWithSession(session: TestSession) {
   await act(async () => {
     render(
       <SessionProvider session={session}>

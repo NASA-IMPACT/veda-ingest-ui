@@ -19,7 +19,24 @@ import userEvent from '@testing-library/user-event';
 import JSONEditor from '@/components/ui/JSONEditor';
 import { message } from 'antd';
 import type { MessageType } from 'antd/es/message/interface';
+import type { JSONSchema7 } from 'json-schema';
 import React from 'react';
+
+type AdditionalPropertyCardProps = {
+  additionalProperties: Record<string, unknown>;
+  style: string;
+};
+
+type MockModalProps = {
+  open?: boolean;
+  title?: React.ReactNode;
+  children?: React.ReactNode;
+  footer?: React.ReactElement<{
+    onClick?: () => void;
+    children?: React.ReactNode;
+  }>[];
+  onCancel?: () => void;
+};
 
 // --- JSDOM Workaround for Ant Design ---
 Object.defineProperty(window, 'getComputedStyle', {
@@ -43,7 +60,7 @@ vi.mock('@/components/rjsf-components/AdditionalPropertyCard', async () => {
   const React = await vi.importActual<typeof import('react')>('react');
   const MockCard = React.forwardRef<
     HTMLDivElement,
-    { additionalProperties: any; style: string }
+    AdditionalPropertyCardProps
   >(({ additionalProperties, style }, ref) => (
     <div
       ref={ref}
@@ -63,7 +80,13 @@ vi.mock('@/components/rjsf-components/AdditionalPropertyCard', async () => {
 vi.mock('antd', async (importOriginal) => {
   const antd = await importOriginal<typeof import('antd')>();
 
-  function MockModal({ open, title, children, footer, onCancel }: any) {
+  function MockModal({
+    open,
+    title,
+    children,
+    footer,
+    onCancel,
+  }: MockModalProps) {
     if (!open) return null;
     return (
       <div role="dialog" data-testid="mock-modal-overlay">
@@ -71,7 +94,7 @@ vi.mock('antd', async (importOriginal) => {
         <div>{children}</div>
         {footer && (
           <div>
-            {footer.map((button: any, index: number) => (
+            {footer.map((button, index: number) => (
               <button key={index} onClick={button.props.onClick}>
                 {button.props.children}
               </button>
@@ -110,7 +133,7 @@ const mockFormData = {
   stac_version: '1.0.0',
 };
 
-const mockJsonSchema = {
+const mockJsonSchema: JSONSchema7 = {
   type: 'object',
   properties: {
     id: { type: 'string' },
@@ -137,7 +160,7 @@ describe('JSONEditor', () => {
   let mockOnChange: Mock;
   let mockSetHasJSONChanges: Mock;
   let mockSetAdditionalProperties: Mock;
-  let defaultProps: any;
+  let defaultProps: React.ComponentProps<typeof JSONEditor>;
 
   beforeEach(() => {
     mockOnChange = vi.fn();
@@ -161,7 +184,9 @@ describe('JSONEditor', () => {
     vi.clearAllMocks();
   });
 
-  const renderEditor = async (props: any) => {
+  const renderEditor = async (
+    props: React.ComponentProps<typeof JSONEditor>
+  ) => {
     render(<JSONEditor {...props} />);
     return await screen.findByTestId('json-editor');
   };

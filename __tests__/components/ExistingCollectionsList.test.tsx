@@ -5,6 +5,8 @@ import ExistingCollectionsList from '@/components/ingestion/ExistingCollectionsL
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useUserTenants } from '@/app/contexts/TenantContext';
+import { createMockRouter } from '@/__tests__/types/router';
+import { createMockSessionReturn } from '@/__tests__/types/session';
 
 // Mock dependencies
 vi.mock('next-auth/react');
@@ -26,7 +28,7 @@ vi.mock('@/components/ui/ErrorModal', () => ({
 describe('ExistingCollectionsList', () => {
   const mockOnCollectionSelect = vi.fn();
   const mockPush = vi.fn();
-  const mockRouter = { push: mockPush };
+  const mockRouter = createMockRouter({ push: mockPush });
   const PAGE_SIZE = 10;
 
   const mockCollections = [
@@ -62,11 +64,11 @@ describe('ExistingCollectionsList', () => {
     vi.clearAllMocks();
     global.fetch = vi.fn();
 
-    vi.mocked(useRouter).mockReturnValue(mockRouter as any);
+    vi.mocked(useRouter).mockReturnValue(mockRouter);
     vi.mocked(useUserTenants).mockReturnValue({
       tenants: ['nasa', 'noaa'],
       isLoading: false,
-    } as any);
+    } as ReturnType<typeof useUserTenants>);
   });
 
   afterEach(() => {
@@ -74,11 +76,9 @@ describe('ExistingCollectionsList', () => {
   });
 
   it('should redirect to login when session is unauthenticated', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: null,
-      status: 'unauthenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(
+      createMockSessionReturn({}, 'unauthenticated')
+    );
 
     render(
       <ExistingCollectionsList onCollectionSelect={mockOnCollectionSelect} />
@@ -90,11 +90,9 @@ describe('ExistingCollectionsList', () => {
   });
 
   it('should show skeleton loading when session is loading', () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: null,
-      status: 'loading',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(
+      createMockSessionReturn({}, 'loading')
+    );
 
     render(
       <ExistingCollectionsList onCollectionSelect={mockOnCollectionSelect} />
@@ -106,11 +104,7 @@ describe('ExistingCollectionsList', () => {
   });
 
   it('should fetch and display collections when authenticated', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
@@ -137,11 +131,7 @@ describe('ExistingCollectionsList', () => {
   });
 
   it('should display tenant information in cards', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
@@ -159,11 +149,7 @@ describe('ExistingCollectionsList', () => {
   });
 
   it('should display error modal when API fetch fails', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     const errorMessage = 'something went wrong';
     vi.mocked(fetch).mockResolvedValueOnce({
@@ -187,11 +173,7 @@ describe('ExistingCollectionsList', () => {
   it('should filter collections by tenant when tenant is selected', async () => {
     const user = userEvent.setup();
 
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     // Initial fetch without tenant filter
     vi.mocked(fetch).mockResolvedValueOnce({
@@ -239,11 +221,7 @@ describe('ExistingCollectionsList', () => {
   it('should call onCollectionSelect when a card is clicked', async () => {
     const user = userEvent.setup();
 
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     // Initial fetch
     vi.mocked(fetch).mockResolvedValueOnce({
@@ -281,11 +259,7 @@ describe('ExistingCollectionsList', () => {
   it('should search collections when entering a query', async () => {
     const user = userEvent.setup();
 
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     // Initial fetch
     vi.mocked(fetch).mockResolvedValueOnce({
@@ -327,11 +301,7 @@ describe('ExistingCollectionsList', () => {
   it('should paginate collections with limit and offset', async () => {
     const user = userEvent.setup();
 
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     const firstPageCollections = createCollections(PAGE_SIZE, 1);
     const secondPageCollections = createCollections(PAGE_SIZE, 11);
@@ -379,11 +349,7 @@ describe('ExistingCollectionsList', () => {
   });
 
   it('should show empty state when no collections are found', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
@@ -402,11 +368,7 @@ describe('ExistingCollectionsList', () => {
   it('should display all tenant options including Public', async () => {
     const user = userEvent.setup();
 
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,
@@ -438,11 +400,7 @@ describe('ExistingCollectionsList', () => {
   it('should render only one Public option when user tenants include public variants', async () => {
     const user = userEvent.setup();
 
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     vi.mocked(useUserTenants).mockReturnValue({
       tenants: ['nasa', 'public', 'Public'],
@@ -475,11 +433,7 @@ describe('ExistingCollectionsList', () => {
   });
 
   it('should truncate long descriptions in cards', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     const longDescriptionCollection = {
       id: 'long-desc',
@@ -510,11 +464,7 @@ describe('ExistingCollectionsList', () => {
   it('should handle collection selection error gracefully', async () => {
     const user = userEvent.setup();
 
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as any);
+    vi.mocked(useSession).mockReturnValue(createMockSessionReturn());
 
     // Initial fetch
     vi.mocked(fetch).mockResolvedValueOnce({

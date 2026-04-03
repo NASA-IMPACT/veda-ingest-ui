@@ -180,7 +180,7 @@ describe('useCOGViewer', () => {
       ok: false,
       status: 500,
       json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
-    } as any as Response);
+    } as unknown as Response);
 
     const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
@@ -431,7 +431,7 @@ describe('useCOGViewer', () => {
     const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     // Set the mapRef before calling fetchTileUrl
-    result.current.mapRef.current = mockMapRef.current as any;
+    result.current.mapRef.current = mockMapRef.current;
 
     await act(async () => {
       await result.current.fetchTileUrl(

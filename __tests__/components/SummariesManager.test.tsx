@@ -26,14 +26,20 @@ vi.mock('@ant-design/icons', () => ({
 }));
 
 // A simple mock for the Modal that just renders its children when open
+type ModalMockProps = {
+  open?: boolean;
+  title?: string;
+  children?: React.ReactNode;
+};
+
 vi.mock('antd', async (importOriginal) => {
   const antd = await importOriginal<typeof import('antd')>();
   return {
     ...antd,
-    Modal: ({ open, title, children }: any) => {
+    Modal: ({ open, title, children }: ModalMockProps) => {
       if (!open) return null;
       return (
-        <div role="dialog" aria-label={title}>
+        <div role="dialog" aria-label={title ?? undefined}>
           {children}
         </div>
       );

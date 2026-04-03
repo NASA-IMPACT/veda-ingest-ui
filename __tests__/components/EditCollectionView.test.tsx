@@ -4,8 +4,14 @@ import userEvent from '@testing-library/user-event';
 import EditCollectionView from '@/components/ingestion/EditCollectionView';
 import React from 'react';
 
+type EditFormManagerMockProps = {
+  formType: string;
+  formData: Record<string, unknown>;
+  handleCancel: () => void;
+};
+
 vi.mock('@/components/ingestion/EditFormManager', () => ({
-  default: ({ formType, formData, handleCancel }: any) => (
+  default: ({ formType, formData, handleCancel }: EditFormManagerMockProps) => (
     <div data-testid="edit-form-manager">
       <div data-testid="form-type">{formType}</div>
       <div data-testid="form-data">{JSON.stringify(formData)}</div>

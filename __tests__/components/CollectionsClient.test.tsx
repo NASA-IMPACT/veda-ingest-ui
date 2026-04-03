@@ -2,8 +2,9 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import CollectionsClient from '@/app/(pages)/collections/_components/CollectionsClient';
 import { SessionProvider } from 'next-auth/react';
+import { TestSession } from '@/__tests__/types/session';
 
-function renderWithSession(session: any) {
+function renderWithSession(session: TestSession) {
   return render(
     <SessionProvider session={session}>
       <CollectionsClient />

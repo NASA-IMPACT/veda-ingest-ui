@@ -47,7 +47,13 @@ const mockSession = {
   scopes: ['stac:collection:update'],
 };
 
-const mockStacCollectionsResponse = {
+type StacCollection = {
+  id: string;
+  title: string;
+  tenant?: string;
+};
+
+const mockStacCollectionsResponse: { collections: StacCollection[] } = {
   collections: [
     { id: 'collection1', title: 'Collection 1', tenant: 'tenant1' },
     { id: 'collection2', title: 'Collection 2', tenant: 'tenant2' },
@@ -260,7 +266,8 @@ describe('GET /api/existing-collection', () => {
 
     // Should include: tenant1 collections, Public collections, and collections with no tenant
     const allowedCollections = data.collections.filter(
-      (col: any) => !col.tenant || col.tenant === '' || col.tenant === 'tenant1'
+      (col: StacCollection) =>
+        !col.tenant || col.tenant === '' || col.tenant === 'tenant1'
     );
     expect(allowedCollections).toHaveLength(3); // collection1, collection3, collection4
   });

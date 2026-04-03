@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useCogValidation } from '@/hooks/useCogValidation';
 
 // Mock fetch globally
@@ -84,7 +84,7 @@ describe('useCogValidation', () => {
     });
 
     it('should validate COG URL for dataset with sample_files (string)', async () => {
-      (global.fetch as any).mockResolvedValue({ ok: true });
+      vi.mocked(global.fetch).mockResolvedValue({ ok: true } as Response);
       const { result } = renderHook(() => useCogValidation());
 
       const formData = { sample_files: 'http://example.com/file.tif' };
@@ -102,7 +102,7 @@ describe('useCogValidation', () => {
     });
 
     it('should validate COG URL for dataset with sample_files (array)', async () => {
-      (global.fetch as any).mockResolvedValue({ ok: true });
+      vi.mocked(global.fetch).mockResolvedValue({ ok: true } as Response);
       const { result } = renderHook(() => useCogValidation());
 
       const formData = {
@@ -125,7 +125,7 @@ describe('useCogValidation', () => {
     });
 
     it('should return false when COG validation fails', async () => {
-      (global.fetch as any).mockResolvedValue({ ok: false });
+      vi.mocked(global.fetch).mockResolvedValue({ ok: false } as Response);
       const { result } = renderHook(() => useCogValidation());
 
       const formData = { sample_files: 'http://example.com/invalid.tif' };
@@ -139,7 +139,7 @@ describe('useCogValidation', () => {
     });
 
     it('should return false when COG validation throws an error', async () => {
-      (global.fetch as any).mockRejectedValue(new Error('Network error'));
+      vi.mocked(global.fetch).mockRejectedValue(new Error('Network error'));
       const consoleSpy = vi
         .spyOn(console, 'error')
         .mockImplementation(() => {});
@@ -162,7 +162,7 @@ describe('useCogValidation', () => {
     });
 
     it('should complete validation successfully and reset loading state', async () => {
-      (global.fetch as any).mockResolvedValue({ ok: true });
+      vi.mocked(global.fetch).mockResolvedValue({ ok: true } as Response);
 
       const { result } = renderHook(() => useCogValidation());
       const formData = { sample_files: 'http://example.com/file.tif' };
@@ -178,7 +178,7 @@ describe('useCogValidation', () => {
     });
 
     it('should reset loading state even if validation fails', async () => {
-      (global.fetch as any).mockRejectedValue(new Error('Network error'));
+      vi.mocked(global.fetch).mockRejectedValue(new Error('Network error'));
       const consoleSpy = vi
         .spyOn(console, 'error')
         .mockImplementation(() => {});

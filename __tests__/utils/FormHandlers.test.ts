@@ -2,6 +2,11 @@ import { describe, it, expect, vi } from 'vitest';
 import { handleSubmit } from '@/utils/FormHandlers';
 import { IChangeEvent } from '@rjsf/core';
 import { RJSFSchema } from '@rjsf/utils';
+type ChangeEvent = IChangeEvent<
+  Record<string, unknown>,
+  RJSFSchema,
+  Record<string, unknown>
+>;
 
 describe('handleSubmit', () => {
   it('should allow startdate and enddate with YYYY-MM-DDT00:00:00.000Z format', () => {
@@ -13,10 +18,7 @@ describe('handleSubmit', () => {
     };
 
     const mockSubmit = vi.fn();
-    handleSubmit(
-      { formData } as unknown as IChangeEvent<any, RJSFSchema, any>,
-      mockSubmit
-    );
+    handleSubmit({ formData } as unknown as ChangeEvent, mockSubmit);
 
     expect(mockSubmit).toHaveBeenCalledWith({
       temporal_extent: {
@@ -35,10 +37,7 @@ describe('handleSubmit', () => {
     };
 
     const mockSubmit = vi.fn();
-    handleSubmit(
-      { formData } as unknown as IChangeEvent<any, RJSFSchema, any>,
-      mockSubmit
-    );
+    handleSubmit({ formData } as unknown as ChangeEvent, mockSubmit);
 
     expect(mockSubmit).toHaveBeenCalledWith({
       temporal_extent: {
@@ -55,10 +54,7 @@ describe('handleSubmit', () => {
     };
 
     const mockSubmit = vi.fn();
-    handleSubmit(
-      { formData } as unknown as IChangeEvent<any, RJSFSchema, any>,
-      mockSubmit
-    );
+    handleSubmit({ formData } as unknown as ChangeEvent, mockSubmit);
 
     expect(mockSubmit).toHaveBeenCalledWith({
       temporal_extent: {
@@ -76,10 +72,7 @@ describe('handleSubmit', () => {
     };
 
     const mockSubmit = vi.fn();
-    handleSubmit(
-      { formData } as unknown as IChangeEvent<any, RJSFSchema, any>,
-      mockSubmit
-    );
+    handleSubmit({ formData } as unknown as ChangeEvent, mockSubmit);
 
     expect(mockSubmit).toHaveBeenCalledWith({
       temporal_extent: {
@@ -98,10 +91,7 @@ describe('handleSubmit', () => {
     };
 
     const mockSubmit = vi.fn();
-    handleSubmit(
-      { formData } as unknown as IChangeEvent<any, RJSFSchema, any>,
-      mockSubmit
-    );
+    handleSubmit({ formData } as unknown as ChangeEvent, mockSubmit);
 
     expect(mockSubmit).toHaveBeenCalledWith({
       temporal_extent: {
@@ -117,10 +107,7 @@ describe('handleSubmit', () => {
     };
 
     const mockSubmit = vi.fn();
-    handleSubmit(
-      { formData } as unknown as IChangeEvent<any, RJSFSchema, any>,
-      mockSubmit
-    );
+    handleSubmit({ formData } as unknown as ChangeEvent, mockSubmit);
 
     expect(mockSubmit).toHaveBeenCalledWith({
       temporal_extent: {
@@ -139,10 +126,7 @@ describe('handleSubmit', () => {
     };
 
     const mockSubmit = vi.fn();
-    handleSubmit(
-      { formData } as unknown as IChangeEvent<any, RJSFSchema, any>,
-      mockSubmit
-    );
+    handleSubmit({ formData } as unknown as ChangeEvent, mockSubmit);
 
     expect(mockSubmit).toHaveBeenCalledWith({
       temporal_extent: {
@@ -157,10 +141,7 @@ describe('handleSubmit', () => {
     const formData = {};
 
     const mockSubmit = vi.fn();
-    handleSubmit(
-      { formData } as unknown as IChangeEvent<any, RJSFSchema, any>,
-      mockSubmit
-    );
+    handleSubmit({ formData } as unknown as ChangeEvent, mockSubmit);
 
     expect(mockSubmit).toHaveBeenCalledWith({});
   });
@@ -174,10 +155,7 @@ describe('handleSubmit', () => {
     };
 
     const mockSubmit = vi.fn();
-    handleSubmit(
-      { formData } as unknown as IChangeEvent<any, RJSFSchema, any>,
-      mockSubmit
-    );
+    handleSubmit({ formData } as unknown as ChangeEvent, mockSubmit);
 
     expect(mockSubmit).toHaveBeenCalledWith({
       temporal_extent: {
@@ -196,10 +174,7 @@ describe('handleSubmit', () => {
     };
 
     const mockSubmit = vi.fn();
-    handleSubmit(
-      { formData } as unknown as IChangeEvent<any, RJSFSchema, any>,
-      mockSubmit
-    );
+    handleSubmit({ formData } as unknown as ChangeEvent, mockSubmit);
 
     expect(mockSubmit).toHaveBeenCalledWith({
       temporal_extent: {
@@ -218,10 +193,7 @@ describe('handleSubmit', () => {
     };
 
     const mockSubmit = vi.fn();
-    handleSubmit(
-      { formData } as unknown as IChangeEvent<any, RJSFSchema, any>,
-      mockSubmit
-    );
+    handleSubmit({ formData } as unknown as ChangeEvent, mockSubmit);
 
     expect(mockSubmit).toHaveBeenCalledWith({
       temporal_extent: {

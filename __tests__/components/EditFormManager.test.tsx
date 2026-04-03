@@ -20,9 +20,20 @@ import userEvent from '@testing-library/user-event';
 import EditFormManager from '@/components/ingestion/EditFormManager';
 import React from 'react';
 
+type DatasetMockFormProps = {
+  onSubmit: (data: Record<string, unknown>) => void;
+  children?: React.ReactNode;
+  setDisabled: (value: boolean) => void;
+};
+
+type CollectionMockFormProps = {
+  onSubmit: (data: Record<string, unknown>) => void;
+  children?: React.ReactNode;
+};
+
 // Mock child components to isolate the manager's logic
 vi.mock('@/components/ingestion/DatasetIngestionForm', () => ({
-  default: ({ onSubmit, children, setDisabled }: any) => (
+  default: ({ onSubmit, children, setDisabled }: DatasetMockFormProps) => (
     <form
       data-testid="dataset-ingestion-form"
       onSubmit={(e) => {
@@ -40,7 +51,7 @@ vi.mock('@/components/ingestion/DatasetIngestionForm', () => ({
 }));
 
 vi.mock('@/components/ingestion/CollectionIngestionForm', () => ({
-  default: ({ onSubmit, children }: any) => (
+  default: ({ onSubmit, children }: CollectionMockFormProps) => (
     <form
       data-testid="collection-ingestion-form"
       onSubmit={(e) => {

@@ -5,6 +5,7 @@ import DatasetsClient from '@/app/(pages)/datasets/_components/DatasetsClient';
 
 import { TenantContext } from '@/app/contexts/TenantContext';
 import { SessionProvider } from 'next-auth/react';
+import { Session } from 'next-auth';
 
 vi.mock('@/components/layout/Layout', () => ({
   default: ({ children }: { children: ReactNode }) => (
@@ -21,12 +22,14 @@ const createMockSession = (scopes: string[] = []) => ({
   },
 });
 
+type SessionWithScopes = Session & { scopes?: string[] };
+
 const AllProviders = ({
   children,
   session,
 }: {
   children: ReactNode;
-  session?: any;
+  session?: SessionWithScopes | null;
 }) => {
   const mockTenantContext = {
     tenants: ['test-tenant-1', 'test-tenant-2'],

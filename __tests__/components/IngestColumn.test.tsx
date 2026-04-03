@@ -2,23 +2,30 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IngestColumn } from '@/components/ingestion/_components/IngestColumn';
+import { IngestPullRequest } from '@/types/ingest';
 
 describe('IngestColumn', () => {
   const mockOnIngestSelect = vi.fn();
 
-  const mockIngests = [
+  const createMockPr = (title: string, ref: string): IngestPullRequest['pr'] =>
+    ({
+      title,
+      head: { ref },
+    }) as unknown as IngestPullRequest['pr'];
+
+  const mockIngests: IngestPullRequest[] = [
     {
-      pr: {
-        title: 'Ingest Request for tenant1 Dataset',
-        head: { ref: 'refs/heads/tenant1-dataset' },
-      },
+      pr: createMockPr(
+        'Ingest Request for tenant1 Dataset',
+        'refs/heads/tenant1-dataset'
+      ),
       tenant: 'tenant1',
     },
     {
-      pr: {
-        title: 'Ingest Request for tenant2 Dataset',
-        head: { ref: 'refs/heads/tenant2-dataset' },
-      },
+      pr: createMockPr(
+        'Ingest Request for tenant2 Dataset',
+        'refs/heads/tenant2-dataset'
+      ),
       tenant: 'tenant2',
     },
   ];
@@ -32,7 +39,7 @@ describe('IngestColumn', () => {
     render(
       <IngestColumn
         title="Tenant: tenant1"
-        ingests={mockIngests as any}
+        ingests={mockIngests}
         onIngestSelect={mockOnIngestSelect}
         testId="tenant-column-tenant1"
       />
@@ -50,7 +57,7 @@ describe('IngestColumn', () => {
     render(
       <IngestColumn
         title="Tenant: tenant1"
-        ingests={mockIngests as any}
+        ingests={mockIngests}
         onIngestSelect={mockOnIngestSelect}
       />
     );

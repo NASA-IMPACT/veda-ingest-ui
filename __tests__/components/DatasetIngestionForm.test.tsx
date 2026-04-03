@@ -5,6 +5,15 @@ import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm'; 
 import React, { useState } from 'react';
 import { useTenants } from '@/hooks/useTenants';
 
+type JsonEditorProps = {
+  onChange: (value: Record<string, unknown>) => void;
+};
+
+type CodeEditorProps = {
+  value?: string;
+  onChange?: (value: string) => void;
+};
+
 // Mock RJSF's Form component to isolate our component's logic
 vi.mock('@rjsf/core', () => {
   const MockRjsfForm = vi.fn(
@@ -36,7 +45,7 @@ vi.mock('@/hooks/useTenants');
 
 // Mock child components
 vi.mock('@/components/ui/JSONEditor', () => ({
-  default: ({ onChange }: any) => (
+  default: ({ onChange }: JsonEditorProps) => (
     <div data-testid="json-editor">
       <button onClick={() => onChange({ collection: 'edited from json' })}>
         Simulate JSON Change
@@ -50,7 +59,7 @@ vi.mock('@/components/rjsf-components/AdditionalPropertyCard', () => ({
 }));
 
 vi.mock('@/components/ui/CodeEditorWidget', () => ({
-  default: ({ value, onChange }: any) => (
+  default: ({ value, onChange }: CodeEditorProps) => (
     <div data-testid="code-editor-widget">
       <textarea
         data-testid="code-editor-textarea"
@@ -94,7 +103,10 @@ vi.mock('@/FormSchemas/datasets/uischema.json', () => ({
 describe('DatasetIngestionForm', () => {
   const mockOnSubmit = vi.fn();
   const mockSetDisabled = vi.fn();
-  let defaultProps: any;
+  let defaultProps: Omit<
+    React.ComponentProps<typeof DatasetIngestionForm>,
+    'formData' | 'setFormData'
+  >;
 
   const mockedSchemaForTests = {
     type: 'object',
@@ -119,7 +131,7 @@ describe('DatasetIngestionForm', () => {
       disableCollectionNameChange: false,
     };
 
-    (useTenants as any).mockReturnValue({
+    vi.mocked(useTenants).mockReturnValue({
       schema: {
         ...mockedSchemaForTests,
         properties: {
@@ -134,7 +146,7 @@ describe('DatasetIngestionForm', () => {
         },
       },
       isLoading: false,
-    });
+    } as ReturnType<typeof useTenants>);
   });
 
   afterEach(() => {

@@ -12,7 +12,6 @@ vi.mock('@/config/env', () => ({
 import { Octokit } from '@octokit/rest';
 import ListPRs from '@/utils/githubUtils/ListPRs';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
-import { IngestPullRequest } from '@/types/ingest';
 
 vi.mock('@octokit/rest', () => ({
   Octokit: vi.fn(),
@@ -37,11 +36,16 @@ const mockOctokitInstance = {
   },
 };
 
+const mockedGetGithubToken = vi.mocked(GetGithubToken);
+const mockedOctokit = vi.mocked(Octokit);
+
 describe('ListPRs Utility', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (GetGithubToken as any).mockResolvedValue('mocked-github-token');
-    (Octokit as any).mockImplementation(() => mockOctokitInstance);
+    mockedGetGithubToken.mockResolvedValue('mocked-github-token');
+    mockedOctokit.mockImplementation(
+      () => mockOctokitInstance as unknown as Octokit
+    );
   });
 
   beforeAll(() => {
@@ -49,7 +53,7 @@ describe('ListPRs Utility', () => {
   });
 
   it('throws error if ingestionType is invalid', async () => {
-    await expect(ListPRs('invalid' as any)).rejects.toThrow(
+    await expect(ListPRs('invalid' as 'collection')).rejects.toThrow(
       'ingestionType parameter is required and must be either "collection" or "dataset".'
     );
   });

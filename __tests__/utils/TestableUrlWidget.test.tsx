@@ -50,7 +50,7 @@ describe('TestableUrlWidget', () => {
     readonly: false,
     schema: {},
     options: {},
-    registry: {} as any,
+    registry: {} as WidgetProps['registry'],
   };
 
   beforeEach(() => {

@@ -21,7 +21,7 @@ import React, { useState } from 'react';
 // --- JSDOM Workaround for Ant Design ---
 beforeAll(() => {
   Object.defineProperty(window, 'getComputedStyle', {
-    value: (elt: { style: any }) => {
+    value: (elt: { style: CSSStyleDeclaration }) => {
       // The 'elt' parameter is the DOM element being checked.
       // We can read its actual inline styles.
       const style = elt.style;
@@ -29,7 +29,7 @@ beforeAll(() => {
         getPropertyValue: (prop: string | number) => {
           // Return the property from the element's inline style
           // This will correctly return 'none' when antd hides the modal.
-          return style[prop] || '';
+          return style.getPropertyValue(String(prop)) || '';
         },
       };
     },
@@ -38,7 +38,11 @@ beforeAll(() => {
 
 // Mock child components to isolate the manager's logic
 vi.mock('@/components/ingestion/DatasetIngestionForm', () => ({
-  default: ({ onSubmit }: any) => (
+  default: ({
+    onSubmit,
+  }: {
+    onSubmit: (data: Record<string, unknown>) => void;
+  }) => (
     <form
       data-testid="dataset-ingestion-form"
       onSubmit={(e) => {
@@ -53,7 +57,11 @@ vi.mock('@/components/ingestion/DatasetIngestionForm', () => ({
 }));
 
 vi.mock('@/components/ingestion/CollectionIngestionForm', () => ({
-  default: ({ onSubmit }: any) => (
+  default: ({
+    onSubmit,
+  }: {
+    onSubmit: (data: Record<string, unknown>) => void;
+  }) => (
     <form
       data-testid="collection-ingestion-form"
       onSubmit={(e) => {
@@ -72,7 +80,7 @@ const mockShowCogValidationModal = vi.fn();
 const mockHideCogValidationModal = vi.fn();
 const mockValidateFormDataCog = vi.fn().mockResolvedValue(true);
 
-let mockCogValidationState = {
+const mockCogValidationState = {
   isCogValidationModalVisible: false,
   isValidatingCog: false,
 };
@@ -320,7 +328,7 @@ describe('CreationFormManager', () => {
       });
 
       const handleSubmit = async () => {
-        await defaultProps.setStatus('idle' as any);
+        await defaultProps.setStatus('idle');
         // Simulate the form submission through the manager
         const cleanedData = { ...formData };
         if (

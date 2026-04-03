@@ -13,12 +13,33 @@ import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionF
 import { useStacExtensions } from '@/hooks/useStacExtensions';
 import { useTenants } from '@/hooks/useTenants';
 
+type ExtensionManagerProps = {
+  onAddExtension: (extension: string) => void;
+};
+
+type CodeEditorProps = {
+  id?: string;
+  value: string;
+  onChange: (value: string) => void;
+};
+
+type JsonEditorProps = {
+  onChange: (data: Record<string, unknown>) => void;
+  setHasJSONChanges: (value: boolean) => void;
+  immutableFields?: Record<string, unknown>;
+};
+
+type SummariesManagerProps = {
+  onChange: (value: Record<string, unknown>) => void;
+  readonly?: boolean;
+};
+
 // --- Mocks ---
 vi.mock('@/hooks/useStacExtensions');
 vi.mock('@/hooks/useTenants');
 
 vi.mock('@/components/ui/ExtensionManager', () => ({
-  default: ({ onAddExtension }: any) => (
+  default: ({ onAddExtension }: ExtensionManagerProps) => (
     <div data-testid="extension-manager">
       <button
         onClick={() => onAddExtension('http://example.com/datacube.json')}
@@ -29,7 +50,7 @@ vi.mock('@/components/ui/ExtensionManager', () => ({
   ),
 }));
 vi.mock('@/components/ui/CodeEditorWidget', () => ({
-  default: ({ id, value, onChange }: any) => (
+  default: ({ id, value, onChange }: CodeEditorProps) => (
     <textarea
       id={id}
       data-testid="code-editor-widget"
@@ -48,7 +69,11 @@ vi.mock('@rjsf/core', () => ({
     )),
 }));
 vi.mock('@/components/ui/JSONEditor', () => ({
-  default: ({ onChange, setHasJSONChanges, immutableFields }: any) => (
+  default: ({
+    onChange,
+    setHasJSONChanges,
+    immutableFields,
+  }: JsonEditorProps) => (
     <div data-testid="json-editor">
       <div data-testid="json-editor-immutable-fields">
         {JSON.stringify(immutableFields || {})}
@@ -70,7 +95,7 @@ vi.mock('@/components/ui/JSONEditor', () => ({
   ),
 }));
 vi.mock('@/components/rjsf-components/SummariesManager', () => ({
-  default: ({ onChange, readonly }: any) => (
+  default: ({ onChange, readonly }: SummariesManagerProps) => (
     <div data-testid="summaries-manager">
       <div data-testid="summaries-manager-readonly">{String(readonly)}</div>
       <button onClick={() => onChange({ a: 1 })}>
@@ -103,8 +128,8 @@ vi.mock('@/FormSchemas/collections/collectionSchema.json', () => ({
 vi.mock('@/FormSchemas/collections/uischema.json', () => ({ default: {} }));
 
 interface TestWrapperProps {
-  initialFormData?: Record<string, any>;
-  mockExtensionFields?: Record<string, any>;
+  initialFormData?: Record<string, unknown>;
+  mockExtensionFields?: Record<string, unknown>;
   children?: React.ReactNode;
 }
 
@@ -135,12 +160,12 @@ describe('CollectionIngestionForm', () => {
   }: TestWrapperProps) => {
     const [formData, setFormData] = useState(initialFormData);
 
-    (useStacExtensions as any).mockReturnValue({
+    vi.mocked(useStacExtensions).mockReturnValue({
       extensionFields: mockExtensionFields,
       addExtension: mockAddExtension,
       removeExtension: mockRemoveExtension,
       isLoading: false,
-    });
+    } as ReturnType<typeof useStacExtensions>);
 
     return (
       <CollectionIngestionForm
@@ -156,14 +181,14 @@ describe('CollectionIngestionForm', () => {
   beforeEach(() => {
     mockAddExtension = vi.fn();
     mockRemoveExtension = vi.fn();
-    (useStacExtensions as any).mockReturnValue({
+    vi.mocked(useStacExtensions).mockReturnValue({
       extensionFields: {},
       addExtension: mockAddExtension,
       removeExtension: mockRemoveExtension,
       isLoading: false,
-    });
+    } as ReturnType<typeof useStacExtensions>);
 
-    (useTenants as any).mockReturnValue({
+    vi.mocked(useTenants).mockReturnValue({
       schema: {
         ...mockedSchemaForTests,
         properties: {
@@ -178,7 +203,7 @@ describe('CollectionIngestionForm', () => {
         },
       },
       isLoading: false,
-    });
+    } as ReturnType<typeof useTenants>);
   });
 
   afterEach(() => {
@@ -380,17 +405,17 @@ describe('CollectionIngestionForm', () => {
 
   it('uses locked UI schema in edit mode', () => {
     const TestWrapperEditMode = () => {
-      const [formData, setFormData] = useState<Record<string, any>>({
+      const [formData, setFormData] = useState<Record<string, unknown>>({
         id: 'test-id',
         title: 'Test',
       });
 
-      (useStacExtensions as any).mockReturnValue({
+      vi.mocked(useStacExtensions).mockReturnValue({
         extensionFields: {},
         addExtension: mockAddExtension,
         removeExtension: mockRemoveExtension,
         isLoading: false,
-      });
+      } as ReturnType<typeof useStacExtensions>);
 
       return (
         <CollectionIngestionForm
@@ -409,17 +434,17 @@ describe('CollectionIngestionForm', () => {
 
   it('sets summaries to readonly in existingCollection edit mode', () => {
     const TestWrapperExistingCollectionEditMode = () => {
-      const [formData, setFormData] = useState<Record<string, any>>({
+      const [formData, setFormData] = useState<Record<string, unknown>>({
         id: 'test-id',
         title: 'Test',
       });
 
-      (useStacExtensions as any).mockReturnValue({
+      vi.mocked(useStacExtensions).mockReturnValue({
         extensionFields: {},
         addExtension: mockAddExtension,
         removeExtension: mockRemoveExtension,
         isLoading: false,
-      });
+      } as ReturnType<typeof useStacExtensions>);
 
       return (
         <CollectionIngestionForm
@@ -443,19 +468,19 @@ describe('CollectionIngestionForm', () => {
     const user = userEvent.setup();
 
     const TestWrapperExistingCollectionJsonEditMode = () => {
-      const [formData, setFormData] = useState<Record<string, any>>({
+      const [formData, setFormData] = useState<Record<string, unknown>>({
         id: 'test-id',
         title: 'Original Title',
         summaries: { original: 'summary' },
         links: [{ rel: 'about', href: 'https://original.example.com' }],
       });
 
-      (useStacExtensions as any).mockReturnValue({
+      vi.mocked(useStacExtensions).mockReturnValue({
         extensionFields: {},
         addExtension: mockAddExtension,
         removeExtension: mockRemoveExtension,
         isLoading: false,
-      });
+      } as ReturnType<typeof useStacExtensions>);
 
       return (
         <CollectionIngestionForm

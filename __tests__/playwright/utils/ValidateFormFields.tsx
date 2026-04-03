@@ -1,8 +1,45 @@
 import { Page, expect } from '@playwright/test';
 
+type IngestExpectedValues = {
+  collection: string;
+  title: string;
+  license: string;
+  data_type: string;
+  description: string;
+  spatial_extent: {
+    xmin: number;
+    xmax: number;
+    ymin: number;
+    ymax: number;
+  };
+  temporal_extent: {
+    startdate: string;
+    enddate: string;
+  };
+  discovery_items: Array<{
+    discovery: string;
+    prefix: string;
+    bucket: string;
+    filename_regex: string;
+  }>;
+  sample_files: string[];
+  renders: {
+    dashboard: unknown;
+  };
+};
+
+type CollectionExpectedValues = {
+  id: string;
+  title: string;
+  license: string;
+  type: string;
+  stac_version: string;
+  description: string;
+};
+
 export async function validateIngestFormFields(
   page: Page,
-  expectedValues: any
+  expectedValues: IngestExpectedValues
 ) {
   // Simple field assertions
   await expect(page.getByText('Invalid JSON format.')).toBeHidden();
@@ -67,7 +104,7 @@ export async function validateIngestFormFields(
 
 export async function validateCollectionFormFields(
   page: Page,
-  expectedValues: any
+  expectedValues: CollectionExpectedValues
 ) {
   // Simple field assertions
   await expect(page.getByText('Invalid JSON format.')).toBeHidden();
