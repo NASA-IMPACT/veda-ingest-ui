@@ -32,7 +32,7 @@ const SummariesManager: React.FC<SummariesManagerProps> = ({
   }, [initialData]);
 
   const handleShowModal = () => {
-    let baseKey = 'new-summary';
+    const baseKey = 'new-summary';
     let counter = 1;
     let key = `${baseKey}`;
     while (summaries && summaries.hasOwnProperty(key)) {

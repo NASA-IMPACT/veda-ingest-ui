@@ -32,7 +32,7 @@ const AssetsField: React.FC<FieldProps> = (props) => {
   }, [formData]);
 
   const generateUniqueKey = useCallback(() => {
-    let newKeyBase = 'new_asset';
+    const newKeyBase = 'new_asset';
     let counter = 1;
     let newKey = newKeyBase;
     while (formData && formData.hasOwnProperty(newKey)) {

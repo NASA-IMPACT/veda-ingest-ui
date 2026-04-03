@@ -232,7 +232,7 @@ export const handlers = [
     const url = new URL(request.url);
     const tenant = url.searchParams.get('tenant');
 
-    let filteredResponse = { ...stacCollectionsResponse };
+    const filteredResponse = { ...stacCollectionsResponse };
 
     // Filter by tenant if specified
     if (tenant) {

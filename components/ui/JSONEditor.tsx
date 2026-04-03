@@ -137,7 +137,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
 
   const validateAndApply = useCallback(
     (valueToValidate: JSONEditorValue) => {
-      let processedValue = structuredClone(valueToValidate);
+      const processedValue = structuredClone(valueToValidate);
 
       if (
         processedValue.renders?.dashboard &&
@@ -276,7 +276,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       setJsonError(null);
       setSchemaErrors([]);
 
-      let parsedValue = JSON.parse(editorValue) as JSONEditorValue;
+      const parsedValue = JSON.parse(editorValue) as JSONEditorValue;
 
       if (disableCollectionNameChange && initialCollectionValue !== undefined) {
         if (parsedValue.collection !== initialCollectionValue) {
@@ -349,7 +349,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
   }, [modalActionType, editorValue, validateAndApply]);
 
   useEffect(() => {
-    let updatedValue = { ...value };
+    const updatedValue = { ...value };
     if (
       value.renders?.dashboard &&
       typeof value.renders.dashboard === 'string'
