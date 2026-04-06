@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { proxy as middleware } from '@/proxy';
+import { createMockSession } from '@/__tests__/types/session';
 
 vi.mock('@/auth', () => ({
   auth: vi.fn(),
@@ -104,10 +105,10 @@ describe('Middleware', () => {
   });
 
   describe('Limited access users', () => {
-    const limitedSession = {
+    const limitedSession = createMockSession({
       user: { name: 'Test' },
       scopes: ['dataset:limited-access'],
-    };
+    });
 
     beforeEach(() => {
       vi.mocked(auth).mockResolvedValue(limitedSession);
@@ -148,10 +149,10 @@ describe('Middleware', () => {
   });
 
   describe('Users with create permissions', () => {
-    const createSession = {
+    const createSession = createMockSession({
       user: { name: 'Test' },
       scopes: ['dataset:create'],
-    };
+    });
 
     beforeEach(() => {
       vi.mocked(auth).mockResolvedValue(createSession);
@@ -193,10 +194,10 @@ describe('Middleware', () => {
   });
 
   describe('Users with edit permissions', () => {
-    const editSession = {
+    const editSession = createMockSession({
       user: { name: 'Test' },
       scopes: ['dataset:update'],
-    };
+    });
 
     beforeEach(() => {
       vi.mocked(auth).mockResolvedValue(editSession);
@@ -250,10 +251,10 @@ describe('Middleware', () => {
   });
 
   describe('Users with existing collection edit permissions', () => {
-    const editExistingSession = {
+    const editExistingSession = createMockSession({
       user: { name: 'Test' },
       scopes: ['stac:collection:update'],
-    };
+    });
 
     beforeEach(() => {
       vi.mocked(auth).mockResolvedValue(editExistingSession);
@@ -292,10 +293,10 @@ describe('Middleware', () => {
     });
 
     it('returns 403 for limited access users on restricted API routes', async () => {
-      const limitedSession = {
+      const limitedSession = createMockSession({
         user: { name: 'Test' },
         scopes: ['dataset:limited-access'],
-      };
+      });
       vi.mocked(auth).mockResolvedValue(limitedSession);
 
       const request = createMockRequest('/api/create-ingest');
@@ -337,10 +338,10 @@ describe('Middleware', () => {
         vi.clearAllMocks();
 
         const session = testCase.scopes
-          ? {
+          ? createMockSession({
               user: { name: 'Test' },
               scopes: testCase.scopes,
-            }
+            })
           : null;
 
         vi.mocked(auth).mockResolvedValue(session);

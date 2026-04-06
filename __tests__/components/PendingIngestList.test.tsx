@@ -218,11 +218,9 @@ describe('PendingIngestList', () => {
   });
 
   it('should not render a Tenant: public column when session includes public tenant', async () => {
-    vi.mocked(useSession).mockReturnValue({
-      data: { user: { name: 'Test User' } },
-      status: 'authenticated',
-      update: vi.fn(),
-    } as ReturnType<typeof useSession>);
+    vi.mocked(useSession).mockReturnValue(
+      createMockSessionReturn({ user: { name: 'Test User' } })
+    );
 
     vi.mocked(useUserTenants).mockReturnValue({
       tenants: ['tenant1', 'public'],

@@ -3,6 +3,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { useCOGViewer } from '@/hooks/useCOGViewer';
 import React from 'react';
 import { App } from 'antd';
+import { Map as LeafletMap } from 'leaflet';
 
 // --- Mocks ---
 global.fetch = vi.fn();
@@ -253,7 +254,7 @@ describe('useCOGViewer', () => {
 
     const rendersObject = {
       bidx: [2, 1],
-      rescale: [[0, 100]],
+      rescale: [[0, 100]] as [number, number][],
       colormap_name: 'viridis',
       color_formula: 'Gamma RGB 3.5 Saturation 1.7 Sigmoidal RGB 15 0.35',
       resampling: 'bilinear',
@@ -431,7 +432,7 @@ describe('useCOGViewer', () => {
     const { result } = renderHook(() => useCOGViewer(), { wrapper });
 
     // Set the mapRef before calling fetchTileUrl
-    result.current.mapRef.current = mockMapRef.current;
+    result.current.mapRef.current = mockMapRef.current as unknown as LeafletMap;
 
     await act(async () => {
       await result.current.fetchTileUrl(

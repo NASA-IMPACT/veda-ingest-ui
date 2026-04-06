@@ -96,11 +96,11 @@ describe('useTenants', () => {
     mockedUseUserTenants.mockReturnValue(mockContextValue);
 
     const baseUiSchema = {
-      'ui:grid': [{ tenant: {} }, { other: {} }],
+      'ui:grid': [{ tenant: 12 }, { other: 12 }],
     };
 
     const { result } = renderHook(() => useTenants(baseSchema, baseUiSchema));
-    expect(result.current.uiSchema['ui:grid']).toEqual([{ other: {} }]);
+    expect(result.current.uiSchema?.['ui:grid']).toEqual([{ other: 12 }]);
   });
 
   it('should not mutate the original baseSchema and baseUiSchema', () => {
@@ -111,10 +111,10 @@ describe('useTenants', () => {
     mockedUseUserTenants.mockReturnValue(mockContextValue);
 
     const schemaCopy = JSON.parse(JSON.stringify(baseSchema));
-    const uiSchemaCopy = { 'ui:grid': [{ tenant: {} }] };
+    const uiSchemaCopy = { 'ui:grid': [{ tenant: 12 }] };
 
     renderHook(() => useTenants(schemaCopy, uiSchemaCopy));
     expect(schemaCopy).toEqual(baseSchema);
-    expect(uiSchemaCopy).toEqual({ 'ui:grid': [{ tenant: {} }] });
+    expect(uiSchemaCopy).toEqual({ 'ui:grid': [{ tenant: 12 }] });
   });
 });

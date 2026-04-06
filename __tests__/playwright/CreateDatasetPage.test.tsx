@@ -70,6 +70,19 @@ const requiredConfig = {
   links: [],
 };
 
+const omitRequiredDatasetKeys = (
+  config: typeof requiredConfig
+): Omit<
+  typeof requiredConfig,
+  'stac_version' | 'stac_extensions' | 'links'
+> => {
+  const { stac_version, stac_extensions, links, ...rest } = config;
+  void stac_version;
+  void stac_extensions;
+  void links;
+  return rest;
+};
+
 const MOCK_GITHUB_URL = 'https://github.com/nasa-veda/veda-data/pull/12345';
 
 test.describe('Create Dataset Page', () => {
@@ -93,10 +106,7 @@ test.describe('Create Dataset Page', () => {
     });
 
     await test.step('paste a JSON with config options matching schema minimum', async () => {
-      const minimalConfig = { ...requiredConfig };
-      delete minimalConfig.stac_version;
-      delete minimalConfig.stac_extensions;
-      delete minimalConfig.links;
+      const minimalConfig = omitRequiredDatasetKeys(requiredConfig);
       await page.getByTestId('json-editor').fill(JSON.stringify(minimalConfig));
       await page.getByRole('button', { name: /apply changes/i }).click();
     });
@@ -176,10 +186,7 @@ test.describe('Create Dataset Page', () => {
     ).toBeDisabled();
 
     await test.step('paste a JSON with config options matching schema minimum', async () => {
-      const minimalConfig = { ...requiredConfig };
-      delete minimalConfig.stac_version;
-      delete minimalConfig.stac_extensions;
-      delete minimalConfig.links;
+      const minimalConfig = omitRequiredDatasetKeys(requiredConfig);
       await page.getByTestId('json-editor').fill(JSON.stringify(minimalConfig));
       const JSONScreenshot = await page.screenshot();
       testInfo.attach('pasted JSON in editor', {
@@ -248,10 +255,7 @@ test.describe('Create Dataset Page', () => {
     });
 
     await test.step('paste in a valid config with an additional field', async () => {
-      const minimalConfig = { ...requiredConfig };
-      delete minimalConfig.stac_version;
-      delete minimalConfig.stac_extensions;
-      delete minimalConfig.links;
+      const minimalConfig = omitRequiredDatasetKeys(requiredConfig);
       await page
         .getByTestId('json-editor')
         .fill(JSON.stringify({ ...minimalConfig, extraField: true }));
@@ -415,10 +419,7 @@ test.describe('Create Dataset Page', () => {
     });
 
     await test.step('paste a JSON with config options matching schema minimum', async () => {
-      const minimalConfig = { ...requiredConfig };
-      delete minimalConfig.stac_version;
-      delete minimalConfig.stac_extensions;
-      delete minimalConfig.links;
+      const minimalConfig = omitRequiredDatasetKeys(requiredConfig);
       await page.getByTestId('json-editor').fill(JSON.stringify(minimalConfig));
       await page.getByRole('button', { name: /apply changes/i }).click();
     });
@@ -465,10 +466,7 @@ test.describe('Create Dataset Page', () => {
     });
 
     await test.step('paste a JSON with config options matching schema minimum', async () => {
-      const minimalConfig = { ...requiredConfig };
-      delete minimalConfig.stac_version;
-      delete minimalConfig.stac_extensions;
-      delete minimalConfig.links;
+      const minimalConfig = omitRequiredDatasetKeys(requiredConfig);
       await page.getByTestId('json-editor').fill(JSON.stringify(minimalConfig));
       await page.getByRole('button', { name: /apply changes/i }).click();
     });

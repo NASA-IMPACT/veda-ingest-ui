@@ -8,7 +8,7 @@ import SuccessModal from '@/components/ui/SuccessModal';
 import ErrorModal from '@/components/ui/ErrorModal';
 
 interface EditCollectionViewProps {
-  collectionData: Record<string, unknown>;
+  collectionData?: Record<string, unknown>;
   onComplete: () => void;
 }
 

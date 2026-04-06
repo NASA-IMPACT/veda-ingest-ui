@@ -243,7 +243,9 @@ describe('DatasetIngestionForm', () => {
 
   it('switches to the JSON editor tab and handles changes', async () => {
     const TestWrapper = () => {
-      const [formData, setFormData] = useState({ collection: 'initial' });
+      const [formData, setFormData] = useState<Record<string, unknown>>({
+        collection: 'initial',
+      });
       return (
         <DatasetIngestionForm
           {...defaultProps}

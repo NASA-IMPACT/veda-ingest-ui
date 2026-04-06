@@ -66,6 +66,14 @@ const requiredCollectionConfig = {
   },
 };
 
+const omitCollectionAssets = (
+  config: typeof requiredCollectionConfig
+): Omit<typeof requiredCollectionConfig, 'assets'> => {
+  const { assets, ...rest } = config;
+  void assets;
+  return rest;
+};
+
 const MOCK_GITHUB_URL = 'https://github.com/nasa-veda/veda-data/pull/12345';
 
 test.describe('Create Collection Page', () => {
@@ -254,8 +262,9 @@ test.describe('Create Collection Page', () => {
     ).toBeDisabled();
 
     await test.step('paste a JSON with valid collection config', async () => {
-      const configWithoutAssets = { ...requiredCollectionConfig };
-      delete configWithoutAssets.assets;
+      const configWithoutAssets = omitCollectionAssets(
+        requiredCollectionConfig
+      );
       await page
         .getByTestId('json-editor')
         .fill(JSON.stringify(configWithoutAssets));

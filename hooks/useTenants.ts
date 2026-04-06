@@ -10,7 +10,7 @@ import { useUserTenants } from '@/app/contexts/TenantContext';
  * @param baseUiSchema Optional UI schema to modify.
  * @returns An object containing the dynamically updated schema and a loading state.
  */
-type UiGridRow = Record<string, number | undefined>;
+type UiGridRow = Record<string, unknown>;
 type UiSchemaLike = {
   'ui:grid'?: UiGridRow[];
   [key: string]: unknown;

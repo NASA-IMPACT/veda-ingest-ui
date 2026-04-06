@@ -11,6 +11,7 @@ import {
   validateTenantAccess,
   getUserTenants,
 } from '@/lib/serverTenantValidation';
+import { createMockSession } from '@/__tests__/types/session';
 
 // Mock the auth module
 vi.mock('@/auth', () => ({
@@ -34,10 +35,12 @@ describe('Server-side Tenant Validation', () => {
 
   describe('validateTenantAccess', () => {
     it('should return valid when user has access to tenant', async () => {
-      mockedAuth.mockResolvedValue({
-        user: { email: 'test@example.com' },
-        tenants: ['tenant1', 'tenant2', 'tenant3'],
-      });
+      mockedAuth.mockResolvedValue(
+        createMockSession({
+          user: { email: 'test@example.com' },
+          tenants: ['tenant1', 'tenant2', 'tenant3'],
+        })
+      );
 
       const result = await validateTenantAccess('tenant2');
 
@@ -47,10 +50,12 @@ describe('Server-side Tenant Validation', () => {
     });
 
     it('should return invalid when user does not have access to tenant', async () => {
-      mockedAuth.mockResolvedValue({
-        user: { email: 'test@example.com' },
-        tenants: ['tenant1', 'tenant3'],
-      });
+      mockedAuth.mockResolvedValue(
+        createMockSession({
+          user: { email: 'test@example.com' },
+          tenants: ['tenant1', 'tenant3'],
+        })
+      );
 
       const result = await validateTenantAccess('tenant2');
 
@@ -60,10 +65,12 @@ describe('Server-side Tenant Validation', () => {
     });
 
     it('should return invalid when session has no tenants', async () => {
-      mockedAuth.mockResolvedValue({
-        user: { email: 'test@example.com' },
-        // No tenants property
-      });
+      mockedAuth.mockResolvedValue(
+        createMockSession({
+          user: { email: 'test@example.com' },
+          // No tenants property
+        })
+      );
 
       const result = await validateTenantAccess('tenant1');
 
@@ -85,10 +92,12 @@ describe('Server-side Tenant Validation', () => {
 
   describe('getUserTenants', () => {
     it('should return user tenants from session', async () => {
-      mockedAuth.mockResolvedValue({
-        user: { email: 'test@example.com' },
-        tenants: ['tenant1', 'tenant2'],
-      });
+      mockedAuth.mockResolvedValue(
+        createMockSession({
+          user: { email: 'test@example.com' },
+          tenants: ['tenant1', 'tenant2'],
+        })
+      );
 
       const result = await getUserTenants();
 
@@ -96,9 +105,11 @@ describe('Server-side Tenant Validation', () => {
     });
 
     it('should return empty array when no tenants in session', async () => {
-      mockedAuth.mockResolvedValue({
-        user: { email: 'test@example.com' },
-      });
+      mockedAuth.mockResolvedValue(
+        createMockSession({
+          user: { email: 'test@example.com' },
+        })
+      );
 
       const result = await getUserTenants();
 
