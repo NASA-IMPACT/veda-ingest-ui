@@ -85,6 +85,7 @@
     "jsdom": "^25.0.1",
     "lint-staged": "^15.2.11",
     "msw": "^2.7.0",
+    "pin-github-action": "3.4.0",
     "playwright-msw": "^3.0.1",
     "prettier": "^3.4.2",
     "typescript": "^5",

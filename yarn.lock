@@ -3222,7 +3222,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@octokit/rest@npm:^21.0.2":
+"@octokit/rest@npm:^21, @octokit/rest@npm:^21.0.2":
   version: 21.1.1
   resolution: "@octokit/rest@npm:21.1.1"
   dependencies:
@@ -6615,7 +6615,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^13.1.0":
+"commander@npm:^13, commander@npm:^13.1.0":
   version: 13.1.0
   resolution: "commander@npm:13.1.0"
   checksum: 10c0/7b8c5544bba704fbe84b7cab2e043df8586d5c114a4c5b607f83ae5060708940ed0b5bd5838cf8ce27539cde265c1cbd59ce3c8c6b017ed3eec8943e3a415164
@@ -7234,6 +7234,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"escape-string-regexp@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "escape-string-regexp@npm:5.0.0"
+  checksum: 10c0/6366f474c6f37a802800a435232395e04e9885919873e382b157ab7e8f0feb8fed71497f84a6f6a81a49aab41815522f5839112bd38026d203aea0c91622df95
+  languageName: node
+  linkType: hard
+
 "eslint-config-next@npm:15.5.14":
   version: 15.5.14
   resolution: "eslint-config-next@npm:15.5.14"
@@ -7654,7 +7661,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-glob@npm:^3.3.2":
+"fast-glob@npm:^3.3.2, fast-glob@npm:^3.3.3":
   version: 3.3.3
   resolution: "fast-glob@npm:3.3.3"
   dependencies:
@@ -9391,6 +9398,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"matcher@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "matcher@npm:5.0.0"
+  dependencies:
+    escape-string-regexp: "npm:^5.0.0"
+  checksum: 10c0/eda5471fc9d5b7264d63c81727824adc3585ddb5cfdc5fce5a9b7c86f946ff181610735d330b1c37a84811df872d1290bf4e9401d2be2a414204343701144b18
+  languageName: node
+  linkType: hard
+
 "math-intrinsics@npm:^1.1.0":
   version: 1.1.0
   resolution: "math-intrinsics@npm:1.1.0"
@@ -10287,6 +10303,23 @@ __metadata:
   bin:
     pidtree: bin/pidtree.js
   checksum: 10c0/0829ec4e9209e230f74ebf4265f5ccc9ebfb488334b525cb13f86ff801dca44b362c41252cd43ae4d7653a10a5c6ab3be39d2c79064d6895e0d78dc50a5ed6e9
+  languageName: node
+  linkType: hard
+
+"pin-github-action@npm:3.4.0":
+  version: 3.4.0
+  resolution: "pin-github-action@npm:3.4.0"
+  dependencies:
+    "@octokit/rest": "npm:^21"
+    commander: "npm:^13"
+    debug: "npm:^4.4.0"
+    escape-string-regexp: "npm:^5.0.0"
+    fast-glob: "npm:^3.3.3"
+    matcher: "npm:^5.0.0"
+    yaml: "npm:^2.7.0"
+  bin:
+    pin-github-action: bin.js
+  checksum: 10c0/72329fad651c34d6b0ad4741352936d3a311f318f4f26b58d6e429c17e42ec02f6240fc56002408f3e66ab61fcf204f83496f8dcb54ac81a5a862bd9e0bf2e46
   languageName: node
   linkType: hard
 
@@ -12772,6 +12805,7 @@ __metadata:
     next: "npm:15.5.14"
     next-auth: "npm:^5.0.0-beta.30"
     next-remove-imports: "npm:^1.0.12"
+    pin-github-action: "npm:3.4.0"
     playwright-msw: "npm:^3.0.1"
     prettier: "npm:^3.4.2"
     react: "npm:19.2.4"
