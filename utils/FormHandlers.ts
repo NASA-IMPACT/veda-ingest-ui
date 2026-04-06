@@ -2,24 +2,28 @@ import { IChangeEvent } from '@rjsf/core';
 import { RJSFSchema } from '@rjsf/utils';
 
 export const handleSubmit = (
-  data: IChangeEvent<any, RJSFSchema, any>,
+  data: IChangeEvent<
+    Record<string, unknown>,
+    RJSFSchema,
+    Record<string, unknown>
+  >,
   onSubmit: (formData: Record<string, unknown>) => void
 ) => {
   if (onSubmit) {
     const updatedFormData = { ...data.formData };
 
     if (updatedFormData.temporal_extent) {
+      const te = updatedFormData.temporal_extent as {
+        startdate?: string;
+        enddate?: string;
+      };
       updatedFormData.temporal_extent = {
         startdate:
-          updatedFormData.temporal_extent.startdate === '' ||
-          updatedFormData.temporal_extent.startdate === undefined
+          te.startdate === '' || te.startdate === undefined
             ? null
-            : updatedFormData.temporal_extent.startdate,
+            : te.startdate,
         enddate:
-          updatedFormData.temporal_extent.enddate === '' ||
-          updatedFormData.temporal_extent.enddate === undefined
-            ? null
-            : updatedFormData.temporal_extent.enddate,
+          te.enddate === '' || te.enddate === undefined ? null : te.enddate,
       };
     }
 

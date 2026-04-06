@@ -52,8 +52,18 @@ const getMockScopes = (): string[] => {
   return [];
 };
 
-let authImpl: any, handlersImpl: any, signInImpl: any, signOutImpl: any;
 let authInitPromise: Promise<void> | null = null;
+
+type NextAuthExports = ReturnType<typeof NextAuth>;
+type AuthImpl = () => Promise<Session | null>;
+type HandlersImpl = NextAuthExports['handlers'];
+type SignInImpl = NextAuthExports['signIn'];
+type SignOutImpl = NextAuthExports['signOut'];
+
+let authImpl: AuthImpl;
+let handlersImpl: HandlersImpl;
+let signInImpl: SignInImpl;
+let signOutImpl: SignOutImpl;
 
 type AppJWT = JWT & {
   accessToken?: string;
@@ -214,8 +224,8 @@ const initializeAuth = async (): Promise<void> => {
       GET: async () => NextResponse.json(mockSession),
       POST: async () => new NextResponse(),
     };
-    signInImpl = async () => {};
-    signOutImpl = async () => {};
+    signInImpl = (async () => undefined) as unknown as SignInImpl;
+    signOutImpl = (async () => undefined) as unknown as SignOutImpl;
     return;
   }
 
@@ -295,7 +305,7 @@ const initializeAuth = async (): Promise<void> => {
         };
 
         if (customToken.accessToken) {
-          (customSession as any).accessToken = customToken.accessToken;
+          customSession.accessToken = customToken.accessToken;
         }
 
         if (customToken.tenants) {
@@ -347,28 +357,30 @@ const ensureAuthInitialized = async (): Promise<void> => {
   await authInitPromise;
 };
 
-const auth = async (...args: any[]) => {
+const auth = async (): Promise<Session | null> => {
   await ensureAuthInitialized();
-  return authImpl(...args);
+  return authImpl();
 };
 
 const handlers = {
-  GET: async (...args: any[]) => {
+  GET: async (...args: Parameters<HandlersImpl['GET']>): Promise<Response> => {
     await ensureAuthInitialized();
     return handlersImpl.GET(...args);
   },
-  POST: async (...args: any[]) => {
+  POST: async (
+    ...args: Parameters<HandlersImpl['POST']>
+  ): Promise<Response> => {
     await ensureAuthInitialized();
     return handlersImpl.POST(...args);
   },
 };
 
-const signIn = async (...args: any[]) => {
+const signIn = async (...args: Parameters<SignInImpl>): Promise<unknown> => {
   await ensureAuthInitialized();
   return signInImpl(...args);
 };
 
-const signOut = async (...args: any[]) => {
+const signOut = async (...args: Parameters<SignOutImpl>): Promise<unknown> => {
   await ensureAuthInitialized();
   return signOutImpl(...args);
 };

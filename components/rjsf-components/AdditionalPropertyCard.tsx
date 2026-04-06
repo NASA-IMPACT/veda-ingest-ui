@@ -10,7 +10,7 @@ import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
 const { useToken } = theme;
 
 interface AdditionalPropertyCardProps {
-  additionalProperties: { [key: string]: any } | null;
+  additionalProperties: Record<string, unknown> | null;
   style: 'warning' | 'error';
 }
 

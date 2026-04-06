@@ -236,14 +236,17 @@ export const handlers = [
 
     // Filter by tenant if specified
     if (tenant) {
-      filteredResponse.collections = stacCollectionsResponse.collections.filter(
-        (collection: any) => {
-          if (tenant === 'Public') {
-            return !collection.tenant || collection.tenant === '';
-          }
-          return collection.tenant === tenant;
+      const collections = stacCollectionsResponse.collections as Array<
+        Record<string, unknown>
+      >;
+      filteredResponse.collections = collections.filter((collection) => {
+        const collectionTenant =
+          typeof collection.tenant === 'string' ? collection.tenant : '';
+        if (tenant === 'Public') {
+          return !collectionTenant;
         }
-      );
+        return collectionTenant === tenant;
+      }) as typeof stacCollectionsResponse.collections;
     }
 
     return HttpResponse.json(filteredResponse);

@@ -15,7 +15,7 @@ interface EditFormManagerProps {
   filePath?: string;
   fileSha?: string;
   formData: Record<string, unknown>;
-  setFormData: any;
+  setFormData: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
   setStatus: (status: Status) => void;
   setApiErrorMessage: (apiErrorMessage: string) => void;
   handleCancel: () => void;

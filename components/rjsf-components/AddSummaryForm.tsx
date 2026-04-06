@@ -11,9 +11,20 @@ const SUMMARY_TYPES = {
 
 interface AddSummaryFormProps {
   initialKey: string;
-  onAdd: (summary: { key: string; value: any }) => void;
+  onAdd: (summary: { key: string; value: unknown }) => void;
   onCancel: () => void;
 }
+
+type SummaryFormValues = {
+  key?: string;
+  type?: string;
+  set?: string[];
+  range?: {
+    minimum?: string | number;
+    maximum?: string | number;
+  };
+  json_schema?: string;
+};
 
 export const AddSummaryForm: React.FC<AddSummaryFormProps> = ({
   initialKey,
@@ -36,28 +47,28 @@ export const AddSummaryForm: React.FC<AddSummaryFormProps> = ({
     });
   }, [initialKey, form]);
 
-  const handleFinish = (values: any) => {
+  const handleFinish = (values: SummaryFormValues) => {
     const { key, type } = values;
     if (!key || !key.trim()) return;
 
-    let value: any;
+    let value: unknown;
     switch (type) {
       case SUMMARY_TYPES.JSON_SCHEMA:
         try {
-          value = JSON.parse(values.json_schema);
+          value = JSON.parse(values.json_schema ?? '{}');
         } catch {
-          value = values.json_schema; // Keep as string if invalid JSON
+          value = values.json_schema ?? '{}'; // Keep as string if invalid JSON
         }
         break;
       case SUMMARY_TYPES.RANGE:
         // FIX: Parse the string values from the input into numbers.
         value = {
-          minimum: parseFloat(values.range.minimum) || 0,
-          maximum: parseFloat(values.range.maximum) || 0,
+          minimum: parseFloat(String(values.range?.minimum ?? '0')) || 0,
+          maximum: parseFloat(String(values.range?.maximum ?? '0')) || 0,
         };
         break;
       case SUMMARY_TYPES.SET:
-        value = values.set.filter((v: string) => v && v.trim() !== '');
+        value = (values.set || []).filter((v: string) => v && v.trim() !== '');
         break;
       default:
         value = {};

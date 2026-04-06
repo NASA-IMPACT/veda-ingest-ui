@@ -112,7 +112,7 @@ function DatasetIngestionForm({
   const [forceRenderKey, setForceRenderKey] = useState<number>(0);
   const [hasJSONChanges, setHasJSONChanges] = useState<boolean>(false);
   const [additionalProperties, setAdditionalProperties] = useState<{
-    [key: string]: any;
+    [key: string]: unknown;
   } | null>(null);
 
   const lockedUiSchema = dynamicUiSchema

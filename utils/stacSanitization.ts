@@ -50,11 +50,15 @@ function sanitizeDatetime(dateStr: string): string {
  * @param data - The data to sanitize (can be object, array, or primitive)
  * @returns Sanitized data with null values converted and datetime formats fixed
  */
-function sanitizeFormData(data: any): any {
+interface JsonObject {
+  [key: string]: unknown;
+}
+
+function sanitizeFormData<T>(data: T): T {
   if (Array.isArray(data)) {
-    return data.map(sanitizeFormData);
+    return data.map((item) => sanitizeFormData(item)) as T;
   } else if (data && typeof data === 'object') {
-    const sanitized: Record<string, any> = {};
+    const sanitized: JsonObject = {};
     for (const [key, value] of Object.entries(data)) {
       // Convert null values to empty arrays for fields that should be arrays
       if (value === null && shouldBeArray(key)) {
@@ -67,10 +71,10 @@ function sanitizeFormData(data: any): any {
         sanitized[key] = sanitizeFormData(value);
       }
     }
-    return sanitized;
+    return sanitized as T;
   } else if (typeof data === 'string') {
     // Fix datetime format issues for existing data that wasn't processed by IntervalField
-    return sanitizeDatetime(data);
+    return sanitizeDatetime(data) as T;
   }
 
   return data;
@@ -84,17 +88,20 @@ function sanitizeFormData(data: any): any {
  * @param sanitized - Data after sanitization
  * @returns Array of change descriptions
  */
-function findSanitizationChanges(original: any, sanitized: any): string[] {
+function findSanitizationChanges(
+  original: unknown,
+  sanitized: unknown
+): string[] {
   const changes: string[] = [];
 
-  function findChanges(orig: any, san: any, path = ''): void {
+  function findChanges(orig: unknown, san: unknown, path = ''): void {
     if (Array.isArray(orig) && Array.isArray(san)) {
       return; // Arrays should be processed the same
     }
 
     if (orig && san && typeof orig === 'object' && typeof san === 'object') {
       for (const [key, origValue] of Object.entries(orig)) {
-        const sanValue = (san as Record<string, any>)[key];
+        const sanValue = (san as JsonObject)[key];
         const currentPath = path ? `${path}.${key}` : key;
 
         if (origValue === null && Array.isArray(sanValue)) {

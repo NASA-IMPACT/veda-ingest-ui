@@ -6,7 +6,7 @@ const UpdatePR = async (
   gitRef: string,
   fileSha: string,
   filePath: string,
-  formData: any
+  formData: Record<string, unknown>
 ) => {
   // prettify stringify to preserve json formatting
   const stringContent = CleanAndPrettifyJSON(formData);

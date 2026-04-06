@@ -8,6 +8,11 @@ import { useUserTenants } from '@/app/contexts/TenantContext';
 import { createMockRouter } from '@/__tests__/types/router';
 import { createMockSessionReturn } from '@/__tests__/types/session';
 
+type ErrorModalProps = {
+  collectionName?: string;
+  apiErrorMessage?: string;
+};
+
 // Mock dependencies
 vi.mock('next-auth/react');
 vi.mock('next/navigation');
@@ -17,7 +22,7 @@ vi.mock('@/utils/truncateWords', () => ({
     text ? text.split(' ').slice(0, maxWords).join(' ') : '',
 }));
 vi.mock('@/components/ui/ErrorModal', () => ({
-  default: ({ collectionName, apiErrorMessage }: any) => (
+  default: ({ collectionName, apiErrorMessage }: ErrorModalProps) => (
     <div data-testid="error-modal">
       <div data-testid="error-collection-name">{collectionName}</div>
       <div data-testid="error-message">{apiErrorMessage}</div>
@@ -405,7 +410,7 @@ describe('ExistingCollectionsList', () => {
     vi.mocked(useUserTenants).mockReturnValue({
       tenants: ['nasa', 'public', 'Public'],
       isLoading: false,
-    } as any);
+    } as ReturnType<typeof useUserTenants>);
 
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,

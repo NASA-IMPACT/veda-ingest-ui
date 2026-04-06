@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { App } from 'antd';
 import { VEDA_BACKEND_URL } from '@/config/env';
+import { Map as LeafletMap } from 'leaflet';
 
 type RendersType = {
   bidx?: number[];
@@ -13,11 +14,21 @@ type RendersType = {
   title?: string;
 };
 
+type COGMetadata = {
+  band_descriptions?: Array<[string | number, string]>;
+  [key: string]: unknown;
+};
+
+type TileJsonResponse = {
+  tiles: string[];
+  bounds?: [number, number, number, number];
+};
+
 export const useCOGViewer = () => {
   const { message } = App.useApp();
   const [cogUrl, setCogUrl] = useState<string | null>(null);
   const [renders, setRenders] = useState<string | null>(null);
-  const [metadata, setMetadata] = useState<any | null>(null);
+  const [metadata, setMetadata] = useState<COGMetadata | null>(null);
   const [selectedBands, setSelectedBands] = useState<number[]>([]);
   const [rescale, setRescale] = useState<[number | null, number | null][]>([]);
   const [selectedColormap, setSelectedColormap] = useState<string>('Internal');
@@ -30,19 +41,12 @@ export const useCOGViewer = () => {
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const mapRef = useRef<any>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      import('leaflet').then((L) => {
-        if (!mapRef.current) {
-          mapRef.current = L.map; // Ensure Leaflet map is only initialized on the client
-        }
-      });
-    }
-  }, []);
-
-  const fetchMetadata = async (url: string, renders?: any) => {
+  const fetchMetadata = async (
+    url: string,
+    renders?: string | RendersType | null
+  ) => {
     if (!url) {
       message.error('COG URL is required');
       return;
@@ -71,16 +75,18 @@ export const useCOGViewer = () => {
         );
       }
 
-      const COGdata = await response.json();
+      const COGdata = (await response.json()) as COGMetadata;
 
-      let mergedMetadata = { ...COGdata };
+      let mergedMetadata: COGMetadata = { ...COGdata };
       let parsedRenders: RendersType = {};
 
       if (renders) {
         try {
           // Parse only if `renders` is a string
           parsedRenders =
-            typeof renders === 'string' ? JSON.parse(renders) : renders;
+            typeof renders === 'string'
+              ? (JSON.parse(renders) as RendersType)
+              : renders;
           mergedMetadata = { ...COGdata, ...parsedRenders };
         } catch (error) {
           console.error('Error parsing renders:', error);
@@ -89,16 +95,8 @@ export const useCOGViewer = () => {
 
       setMetadata(mergedMetadata);
 
-      // Ensure values from renders are used if available
-      // Default to band 1 if not provided
-      const availableBands = metadata?.band_descriptions?.length || 1;
-      const defaultBands = Array.from(
-        { length: Math.min(3, availableBands) },
-        (_, i) => i + 1
-      );
-
-      // Use `bidx` if present in `renders`, otherwise default to the first three bands
-      setSelectedBands(parsedRenders.bidx?.slice(0, 3) || defaultBands);
+      // Keep default behavior to a single selected band unless renders specifies bidx.
+      setSelectedBands(parsedRenders.bidx?.slice(0, 3) || [1]);
       setRescale(parsedRenders.rescale || [[null, null]]);
       setSelectedColormap(parsedRenders.colormap_name || 'Internal');
       setColorFormula(parsedRenders.color_formula || null);
@@ -160,16 +158,17 @@ export const useCOGViewer = () => {
       );
 
       if (!response.ok) throw new Error('Failed to fetch tile URL');
-      const data = await response.json();
+      const data = (await response.json()) as TileJsonResponse;
       setTileUrl(data.tiles[0]);
 
-      if (mapRef.current && data.bounds) {
+      const bounds = data.bounds;
+      if (mapRef.current && bounds) {
         import('leaflet').then((L) => {
-          const bounds = L.latLngBounds([
-            [data.bounds[1], data.bounds[0]],
-            [data.bounds[3], data.bounds[2]],
+          const leafletBounds = L.latLngBounds([
+            [bounds[1], bounds[0]],
+            [bounds[3], bounds[2]],
           ]);
-          mapRef.current.fitBounds(bounds);
+          mapRef.current?.fitBounds(leafletBounds);
         });
       }
 

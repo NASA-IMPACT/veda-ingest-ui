@@ -10,10 +10,13 @@ import {
 } from '@/components/error-boundaries';
 import { Alert } from 'antd';
 
-const EditExistingCollectionClient = () => {
-  const [selectedCollection, setSelectedCollection] = useState<any>(null);
+type ExistingCollectionData = Record<string, unknown>;
 
-  const handleCollectionSelect = (data: any) => {
+const EditExistingCollectionClient = () => {
+  const [selectedCollection, setSelectedCollection] =
+    useState<ExistingCollectionData | null>(null);
+
+  const handleCollectionSelect = (data: ExistingCollectionData) => {
     setSelectedCollection(data);
   };
 

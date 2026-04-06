@@ -36,9 +36,9 @@ const DESCRIPTION_COL_STYLE = {
 };
 
 export default function ObjectFieldTemplate<
-  T = any,
+  T = GenericObjectType,
   S extends StrictRJSFSchema = RJSFSchema,
-  F extends FormContextType = any,
+  F extends FormContextType = FormContextType,
 >(props: ObjectFieldTemplateProps<T, S, F>) {
   const {
     description,
@@ -83,13 +83,38 @@ export default function ObjectFieldTemplate<
   const { labelAlign = 'left', rowGutter = 12 } =
     formContext as GenericObjectType;
 
+  type FormDataLike = {
+    sample_files?: string[];
+    renders?: {
+      dashboard?: string;
+    };
+    assets?: {
+      thumbnail?: Record<string, unknown>;
+    };
+    [key: string]: unknown;
+  };
+
+  type FormContextWithUpdate = {
+    formData?: FormDataLike;
+    updateFormData?: (
+      updater: (prevData: FormDataLike) => FormDataLike
+    ) => void;
+  };
+
+  const formContextWithUpdate = formContext as
+    | FormContextWithUpdate
+    | undefined;
+
   const handleOpenCOGDrawer = () => {
-    if (!formContext || typeof formContext.updateFormData !== 'function') {
+    if (
+      !formContextWithUpdate ||
+      typeof formContextWithUpdate.updateFormData !== 'function'
+    ) {
       console.error('formContext or updateFormData is not available.');
       return;
     }
     // Use full form data from formContext
-    const fullFormData = formContext.formData || {};
+    const fullFormData = formContextWithUpdate.formData || {};
     const sampleUrl: string | undefined = fullFormData?.sample_files?.[0]; // Use full form data
     const rendersDashboardEntry: string | undefined =
       fullFormData?.renders?.dashboard;
@@ -120,12 +145,15 @@ export default function ObjectFieldTemplate<
   };
 
   const handleUploadSuccess = (s3Uri: string) => {
-    if (!formContext || typeof formContext.updateFormData !== 'function') {
+    if (
+      !formContextWithUpdate ||
+      typeof formContextWithUpdate.updateFormData !== 'function'
+    ) {
       console.error('formContext or updateFormData is not available.');
       return;
     }
 
-    formContext.updateFormData((prevData: any) => {
+    formContextWithUpdate.updateFormData((prevData: FormDataLike) => {
       const updatedFormData = {
         ...prevData,
         assets: {
@@ -143,12 +171,15 @@ export default function ObjectFieldTemplate<
   };
 
   const handleAcceptRenderOptions = (renderOptions: string) => {
-    if (!formContext || typeof formContext.updateFormData !== 'function') {
+    if (
+      !formContextWithUpdate ||
+      typeof formContextWithUpdate.updateFormData !== 'function'
+    ) {
       console.error('formContext or updateFormData is not available.');
       return;
     }
 
-    formContext.updateFormData((prevData: any) => {
+    formContextWithUpdate.updateFormData((prevData: FormDataLike) => {
       const updatedFormData = {
         ...prevData,
         renders: {
@@ -163,7 +194,10 @@ export default function ObjectFieldTemplate<
 
   const isDashboardField = (element: ObjectFieldTemplatePropertyType) =>
     element.name === 'dashboard' &&
-    (element.content?.props as any)?.fieldPathId?.$id.includes('renders');
+    (
+      (element.content?.props as { fieldPathId?: { $id?: string } })
+        ?.fieldPathId?.$id || ''
+    ).includes('renders');
   const isDiscoveryItem =
     fieldPathId.$id.startsWith('root_discovery_items_') &&
     schema.type === 'object';
@@ -217,8 +251,11 @@ export default function ObjectFieldTemplate<
                           (p) => p.name === row_item
                         );
                         if (element) {
-                          const fieldId = (element.content?.props as any)
-                            ?.fieldPathId?.$id;
+                          const fieldId = (
+                            element.content?.props as {
+                              fieldPathId?: { $id?: string };
+                            }
+                          )?.fieldPathId?.$id;
                           const isAssetsThumbnailHrefField =
                             element.name === 'href' &&
                             fieldId === 'root_assets_thumbnail';
@@ -314,7 +351,6 @@ export default function ObjectFieldTemplate<
               renders={renders}
               onClose={handleCloseCOGDrawer}
               onAcceptRenderOptions={handleAcceptRenderOptions}
-              formContext={formContext}
             />
             <ThumbnailUploaderDrawer
               open={thumbnailDrawerOpen}

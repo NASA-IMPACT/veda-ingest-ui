@@ -47,11 +47,16 @@ interface JSONEditorProps {
   immutableFields?: Record<string, ImmutableFieldConfig>;
   hasJSONChanges?: boolean;
   setHasJSONChanges: (hasJSONChanges: boolean) => void;
-  additionalProperties: { [key: string]: any } | null;
+  additionalProperties: Record<string, unknown> | null;
   setAdditionalProperties: (
-    additionalProperties: { [key: string]: any } | null
+    additionalProperties: Record<string, unknown> | null
   ) => void;
 }
+
+type MutableSchema = {
+  additionalProperties?: unknown;
+  properties?: Record<string, unknown>;
+};
 
 const codeEditorStyle = {
   backgroundColor: '#00152a',
@@ -120,7 +125,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
   const [modalBeforeCode, setModalBeforeCode] = useState<string>('');
   const [modalAfterCode, setModalAfterCode] = useState<string>('');
 
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<HTMLTextAreaElement | null>(null);
   const additionalPropertyCardRef = useRef<HTMLDivElement>(null);
 
   // Store initial collection value (only if disableCollectionNameChange is true)
@@ -157,31 +162,27 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       }
 
       // Create a deep copy of the JSON schema
-      const modifiedSchema = structuredClone(jsonSchema) as Record<
-        string,
-        unknown
-      >;
+      const modifiedSchema = structuredClone(jsonSchema) as MutableSchema;
 
       if (strictSchema) {
-        (modifiedSchema as any).additionalProperties = false;
+        modifiedSchema.additionalProperties = false;
       } else {
-        delete (modifiedSchema as any).additionalProperties;
+        delete modifiedSchema.additionalProperties;
       }
 
       // Override "renders.dashboard" property to allow both string & object
-      if (
-        modifiedSchema.properties &&
-        (modifiedSchema.properties as any).renders?.dashboard &&
-        (modifiedSchema.properties as any).renders.dashboard.properties
-      ) {
-        (
-          modifiedSchema.properties as any
-        ).renders.dashboard.properties.dashboard = {
-          oneOf: [
+      const rendersSchema = modifiedSchema.properties?.renders;
+      if (typeof rendersSchema === 'object' && rendersSchema !== null) {
+        const rendersProperties = (
+          rendersSchema as { properties?: Record<string, unknown> }
+        ).properties;
+        const dashboardSchema = rendersProperties?.dashboard;
+        if (typeof dashboardSchema === 'object' && dashboardSchema !== null) {
+          (dashboardSchema as { oneOf?: unknown }).oneOf = [
             { type: 'string' },
             { type: 'object', additionalProperties: true },
-          ],
-        };
+          ];
+        }
       }
 
       // Extract additional properties manually when strictSchema is false
@@ -198,7 +199,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
               acc[key] = processedValue[key];
               return acc;
             },
-            {} as { [key: string]: any }
+            {} as Record<string, unknown>
           );
           setAdditionalProperties(extraPropsObject);
         } else {
@@ -314,8 +315,8 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
       );
 
       if (foundKeys.length > 0 && strictSchema) {
-        const before: { [key: string]: any } = {};
-        const after: { [key: string]: any } = {};
+        const before: Record<string, unknown> = {};
+        const after: Record<string, unknown> = {};
 
         foundKeys.forEach((key) => {
           before[key] = parsedValue[key as keyof JSONEditorValue];

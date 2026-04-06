@@ -10,9 +10,22 @@ const SUMMARY_TYPES = {
   SET: 'Set of values',
 };
 
+type RangeSummary = {
+  minimum?: unknown;
+  maximum?: unknown;
+};
+
+const isRangeSummary = (summaryData: unknown): summaryData is RangeSummary => {
+  return (
+    typeof summaryData === 'object' &&
+    summaryData !== null &&
+    'minimum' in summaryData
+  );
+};
+
 interface SummariesManagerProps {
-  initialData?: { [key: string]: any };
-  onChange: (data: { [key: string]: any }) => void;
+  initialData?: Record<string, unknown>;
+  onChange: (data: Record<string, unknown>) => void;
   disabled?: boolean;
   readonly?: boolean;
 }
@@ -42,7 +55,13 @@ const SummariesManager: React.FC<SummariesManagerProps> = ({
     setIsModalVisible(true);
   };
 
-  const handleAddSummary = ({ key, value }: { key: string; value: any }) => {
+  const handleAddSummary = ({
+    key,
+    value,
+  }: {
+    key: string;
+    value: unknown;
+  }) => {
     if (!key || (summaries && summaries.hasOwnProperty(key))) return;
     const newSummaries = { ...summaries, [key]: value };
     setSummaries(newSummaries);
@@ -57,32 +76,29 @@ const SummariesManager: React.FC<SummariesManagerProps> = ({
     onChange(newSummaries);
   };
 
-  const getSummaryType = (summaryData: any): string => {
+  const getSummaryType = (summaryData: unknown): string => {
     if (typeof summaryData === 'string') return SUMMARY_TYPES.JSON_SCHEMA;
     if (Array.isArray(summaryData)) return SUMMARY_TYPES.SET;
-    if (
-      typeof summaryData === 'object' &&
-      summaryData !== null &&
-      summaryData.minimum !== undefined
-    )
-      return SUMMARY_TYPES.RANGE;
+    if (isRangeSummary(summaryData)) return SUMMARY_TYPES.RANGE;
     return SUMMARY_TYPES.JSON_SCHEMA;
   };
 
-  const renderSummaryData = (type: string, data: any) => {
+  const renderSummaryData = (type: string, data: unknown) => {
     switch (type) {
       case SUMMARY_TYPES.SET:
         return (
           <div>
-            {(data as any[]).map((v, i) => (
+            {(data as unknown[]).map((v, i) => (
               <Tag key={i}>{String(v) || '(empty)'}</Tag>
             ))}
           </div>
         );
       case SUMMARY_TYPES.RANGE:
+        const rangeData = (data as RangeSummary) || {};
         return (
           <Typography.Text>
-            Minimum: {data.minimum}, Maximum: {data.maximum}
+            Minimum: {String(rangeData.minimum)}, Maximum:{' '}
+            {String(rangeData.maximum)}
           </Typography.Text>
         );
       case SUMMARY_TYPES.JSON_SCHEMA:

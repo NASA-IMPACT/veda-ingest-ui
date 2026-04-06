@@ -16,8 +16,12 @@ import {
 const { Option } = Select;
 const { Title } = Typography;
 
+type COGMetadata = {
+  band_descriptions?: Array<[string | number, string]>;
+};
+
 interface COGControlsFormProps {
-  metadata: any;
+  metadata: COGMetadata;
   selectedBands: number[];
   rescale: [number | null, number | null][];
   selectedColormap: string;
@@ -80,7 +84,7 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
   ]);
 
   const bandOptions =
-    metadata?.band_descriptions?.map((desc: any, index: number) => ({
+    metadata?.band_descriptions?.map((desc, index: number) => ({
       value: index + 1,
       label: `${desc[0]} - ${desc[1]}`,
     })) || [];
@@ -117,7 +121,7 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
         <Row>
           <Col span={24}>
             <Title level={5}>
-              Band: {metadata.band_descriptions[0][1]} (Index: 1)
+              Band: {metadata.band_descriptions![0][1]} (Index: 1)
             </Title>
           </Col>
         </Row>

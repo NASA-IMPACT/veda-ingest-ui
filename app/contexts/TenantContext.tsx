@@ -37,7 +37,7 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    const sessionTenants = (session as any)?.tenants;
+    const sessionTenants = session.tenants;
     const tenants = Array.isArray(sessionTenants) ? sessionTenants : [];
     setTenants(tenants);
   }, [session, status]);

@@ -68,8 +68,15 @@ export async function checkFileExists(filename: string): Promise<boolean> {
     const s3 = await createS3Client();
     await s3.send(new HeadObjectCommand({ Bucket: bucketName, Key: filename }));
     return true;
-  } catch (error: any) {
-    if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 403) {
+  } catch (error: unknown) {
+    const typedError = error as {
+      name?: string;
+      $metadata?: { httpStatusCode?: number };
+    };
+    if (
+      typedError.name === 'NotFound' ||
+      typedError.$metadata?.httpStatusCode === 403
+    ) {
       return false;
     }
     console.error(error);

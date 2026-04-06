@@ -9,8 +9,13 @@ import RenderingOptionsModal from './RenderingOptionsModal';
 import dynamic from 'next/dynamic';
 const DynamicMap = dynamic(() => import('./DynamicMap'), { ssr: false });
 
+type COGMetadata = {
+  band_descriptions?: Array<[string | number, string]>;
+  [key: string]: unknown;
+};
+
 interface COGViewerContentProps {
-  metadata: any | null;
+  metadata: COGMetadata | null;
   tileUrl: string | null;
   loading: boolean;
   isModalVisible: boolean;

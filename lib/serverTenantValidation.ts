@@ -7,6 +7,18 @@ export interface TenantValidationResult {
   error?: string;
 }
 
+type SessionLike = {
+  tenants?: string[];
+};
+
+const isSessionLike = (value: unknown): value is SessionLike => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  return 'tenants' in value;
+};
+
 /**
  * Validates that a user has access to a specific tenant
  * @param tenantId - The tenant to validate access for
@@ -15,13 +27,13 @@ export interface TenantValidationResult {
  */
 export async function validateTenantAccess(
   tenantId: string,
-  requestOrSession?: NextRequest | any
+  requestOrSession?: NextRequest | SessionLike
 ): Promise<TenantValidationResult> {
   try {
     let session;
 
     // If a session object is passed directly, use it
-    if (requestOrSession && requestOrSession.tenants) {
+    if (isSessionLike(requestOrSession) && requestOrSession.tenants) {
       session = requestOrSession;
     } else {
       // Otherwise, get the session
@@ -60,11 +72,11 @@ export async function validateTenantAccess(
  * @returns Promise<string[]>
  */
 export async function getUserTenants(
-  requestOrSession?: NextRequest | any
+  requestOrSession?: NextRequest | SessionLike
 ): Promise<string[]> {
   try {
     // If a session object is passed directly, use it
-    if (requestOrSession && requestOrSession.tenants) {
+    if (isSessionLike(requestOrSession) && requestOrSession.tenants) {
       return (requestOrSession.tenants as string[]) || [];
     }
 

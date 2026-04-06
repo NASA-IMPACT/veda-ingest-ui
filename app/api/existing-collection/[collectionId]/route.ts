@@ -19,6 +19,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    const accessToken = (session as { accessToken?: string }).accessToken;
+
     if (!session.scopes?.includes('stac:collection:update')) {
       return NextResponse.json(
         {
@@ -34,7 +36,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const stacUrl = `${VEDA_PROD_BACKEND_URL}/stac/collections/${encodeURIComponent(collectionId)}`;
     const stacResponse = await fetch(stacUrl, {
       headers: {
-        Authorization: `Bearer ${(session as any).accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -89,6 +91,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    const accessToken = (session as { accessToken?: string }).accessToken;
+
     if (!session.scopes?.includes('stac:collection:update')) {
       return NextResponse.json(
         {
@@ -106,7 +110,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const stacUrl = `${VEDA_PROD_BACKEND_URL}/stac/collections/${encodeURIComponent(collectionId)}`;
     const existingResponse = await fetch(stacUrl, {
       headers: {
-        Authorization: `Bearer ${(session as any).accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -144,7 +148,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${(session as any).accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(formData),
     });

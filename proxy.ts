@@ -31,7 +31,11 @@ const routeConfig = {
   ],
 };
 
-function getUserPermissionLevel(session: any) {
+type SessionLike = {
+  scopes?: string[];
+} | null;
+
+function getUserPermissionLevel(session: SessionLike) {
   if (!session) return 'unauthenticated';
   if (session.scopes?.includes('dataset:limited-access')) return 'limited';
 

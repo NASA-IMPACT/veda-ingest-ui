@@ -23,6 +23,6 @@ describe('truncateWords', () => {
   });
 
   it('handles undefined input', () => {
-    expect(truncateWords(undefined as any, 2)).toBe('');
+    expect(truncateWords(undefined as unknown as string, 2)).toBe('');
   });
 });

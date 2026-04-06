@@ -41,9 +41,9 @@ import {
 
 // Custom IconButton that works with Next.js
 function IconButton<
-  T = any,
+  T = GenericObjectType,
   S extends RJSFSchema = RJSFSchema,
-  F extends GenericObjectType = any,
+  F extends GenericObjectType = GenericObjectType,
 >(props: IconButtonProps<T, S, F>) {
   const { iconType = 'default', icon, onClick, ...otherProps } = props;
 
@@ -61,9 +61,9 @@ function IconButton<
 
 // Custom button implementations with correct icon imports for Next.js
 function AddButton<
-  T = any,
+  T = GenericObjectType,
   S extends RJSFSchema = RJSFSchema,
-  F extends GenericObjectType = any,
+  F extends GenericObjectType = GenericObjectType,
 >(props: IconButtonProps<T, S, F>) {
   const {
     registry: { translateString },
@@ -81,9 +81,9 @@ function AddButton<
 }
 
 function CopyButton<
-  T = any,
+  T = GenericObjectType,
   S extends RJSFSchema = RJSFSchema,
-  F extends GenericObjectType = any,
+  F extends GenericObjectType = GenericObjectType,
 >(props: IconButtonProps<T, S, F>) {
   const {
     registry: { translateString },
@@ -98,9 +98,9 @@ function CopyButton<
 }
 
 function MoveDownButton<
-  T = any,
+  T = GenericObjectType,
   S extends RJSFSchema = RJSFSchema,
-  F extends GenericObjectType = any,
+  F extends GenericObjectType = GenericObjectType,
 >(props: IconButtonProps<T, S, F>) {
   const {
     registry: { translateString },
@@ -115,9 +115,9 @@ function MoveDownButton<
 }
 
 function MoveUpButton<
-  T = any,
+  T = GenericObjectType,
   S extends RJSFSchema = RJSFSchema,
-  F extends GenericObjectType = any,
+  F extends GenericObjectType = GenericObjectType,
 >(props: IconButtonProps<T, S, F>) {
   const {
     registry: { translateString },
@@ -132,9 +132,9 @@ function MoveUpButton<
 }
 
 function RemoveButton<
-  T = any,
+  T = GenericObjectType,
   S extends RJSFSchema = RJSFSchema,
-  F extends GenericObjectType = any,
+  F extends GenericObjectType = GenericObjectType,
 >(props: IconButtonProps<T, S, F>) {
   const options = getUiOptions(props.uiSchema);
   const {
@@ -154,9 +154,9 @@ function RemoveButton<
 }
 
 function ClearButton<
-  T = any,
+  T = GenericObjectType,
   S extends RJSFSchema = RJSFSchema,
-  F extends GenericObjectType = any,
+  F extends GenericObjectType = GenericObjectType,
 >(props: IconButtonProps<T, S, F>) {
   const {
     registry: { translateString },
@@ -173,9 +173,9 @@ function ClearButton<
 
 // Custom ErrorList with correct icon imports for Next.js
 function ErrorList<
-  T = any,
+  T = GenericObjectType,
   S extends RJSFSchema = RJSFSchema,
-  F extends GenericObjectType = any,
+  F extends GenericObjectType = GenericObjectType,
 >(props: ErrorListProps<T, S, F>) {
   const { errors, registry } = props;
   const { translateString } = registry;
@@ -204,9 +204,9 @@ function ErrorList<
 }
 
 const baseTemplates = (AntDTheme.templates ?? {}) as TemplatesType<
-  any,
+  GenericObjectType,
   RJSFSchema,
-  any
+  GenericObjectType
 >;
 
 const FixedAntDTheme = {
@@ -223,7 +223,7 @@ const FixedAntDTheme = {
       ClearButton,
     },
     ErrorListTemplate: ErrorList,
-  } as TemplatesType<any, RJSFSchema, any>,
+  } as TemplatesType<GenericObjectType, RJSFSchema, GenericObjectType>,
 };
 
 export const Form = withTheme(FixedAntDTheme);

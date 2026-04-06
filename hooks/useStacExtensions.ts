@@ -13,7 +13,7 @@ export interface Extension {
 }
 
 interface UseStacExtensionsProps {
-  setFormData: React.Dispatch<React.SetStateAction<Record<string, any>>>;
+  setFormData: React.Dispatch<React.SetStateAction<Record<string, unknown>>>;
 }
 
 export function useStacExtensions({ setFormData }: UseStacExtensionsProps) {

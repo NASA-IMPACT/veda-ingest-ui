@@ -86,11 +86,14 @@ const AssetsField: React.FC<FieldProps> = (props) => {
       }
       if (oldKey === newKey) return;
 
-      const newFormData = Object.keys(formData).reduce((acc, currentKey) => {
-        const targetKey = currentKey === oldKey ? newKey : currentKey;
-        acc[targetKey] = formData[currentKey];
-        return acc;
-      }, {} as any);
+      const newFormData = Object.keys(formData).reduce(
+        (acc, currentKey) => {
+          const targetKey = currentKey === oldKey ? newKey : currentKey;
+          acc[targetKey] = formData[currentKey];
+          return acc;
+        },
+        {} as Record<string, unknown>
+      );
 
       onChange(newFormData, fieldPathId.path);
     },

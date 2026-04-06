@@ -12,13 +12,15 @@ import {
 const { Panel } = Collapse;
 
 export default function DiscoveryItemObjectFieldTemplate<
-  T = any,
+  T = Record<string, unknown>,
   S extends StrictRJSFSchema = RJSFSchema,
-  F extends FormContextType = any,
+  F extends FormContextType = Record<string, unknown>,
 >(props: ObjectFieldTemplateProps<T, S, F>) {
   const { properties, uiSchema, registry } = props;
 
-  const rowGutter = (registry.formContext as any)?.rowGutter || 12;
+  const rowGutter =
+    (registry.formContext as { rowGutter?: number } | undefined)?.rowGutter ||
+    12;
 
   // We want the "More Options" panel to be collapsed by default
   const defaultActiveKeys: string[] = [];

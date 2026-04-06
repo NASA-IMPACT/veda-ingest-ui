@@ -10,13 +10,22 @@ import { useUserTenants } from '@/app/contexts/TenantContext';
  * @param baseUiSchema Optional UI schema to modify.
  * @returns An object containing the dynamically updated schema and a loading state.
  */
-export const useTenants = (baseSchema: JSONSchema7, baseUiSchema?: any) => {
+type UiGridRow = Record<string, number | undefined>;
+type UiSchemaLike = {
+  'ui:grid'?: UiGridRow[];
+  [key: string]: unknown;
+};
+
+export const useTenants = (
+  baseSchema: JSONSchema7,
+  baseUiSchema?: UiSchemaLike
+) => {
   const { tenants, isLoading } = useUserTenants();
 
   const { dynamicSchema, dynamicUiSchema } = useMemo(() => {
     // Create deep copies to avoid mutating the original objects
     const newSchema = JSON.parse(JSON.stringify(baseSchema));
-    const newUiSchema = baseUiSchema
+    const newUiSchema: UiSchemaLike | undefined = baseUiSchema
       ? JSON.parse(JSON.stringify(baseUiSchema))
       : undefined;
 
@@ -25,9 +34,10 @@ export const useTenants = (baseSchema: JSONSchema7, baseUiSchema?: any) => {
         delete newSchema.properties.tenant;
       }
 
-      if (newUiSchema?.['ui:grid']?.length > 0) {
-        newUiSchema['ui:grid'] = newUiSchema['ui:grid'].filter(
-          (item: any) => !Object.keys(item).includes('tenant')
+      const grid = newUiSchema?.['ui:grid'];
+      if (newUiSchema && grid && grid.length > 0) {
+        newUiSchema['ui:grid'] = grid.filter(
+          (item: UiGridRow) => !Object.keys(item).includes('tenant')
         );
       }
     } else {

@@ -33,7 +33,7 @@ const RenderingOptionsModal: React.FC<RenderingOptionsModalProps> = ({
     options;
 
   // Build the rendering options object dynamically
-  const renderingOptions: Record<string, any> = {
+  const renderingOptions: Record<string, unknown> = {
     bidx,
     ...(rescale && rescale.length > 0
       ? {

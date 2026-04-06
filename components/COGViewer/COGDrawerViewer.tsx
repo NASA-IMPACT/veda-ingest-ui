@@ -16,7 +16,6 @@ interface COGDrawerViewerProps {
   drawerOpen: boolean;
   onClose: () => void;
   onAcceptRenderOptions: (options: string) => void;
-  formContext?: any;
   renders?: string | null;
 }
 

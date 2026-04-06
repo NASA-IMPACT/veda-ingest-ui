@@ -8,7 +8,7 @@ import SuccessModal from '@/components/ui/SuccessModal';
 import ErrorModal from '@/components/ui/ErrorModal';
 
 interface EditCollectionViewProps {
-  collectionData: any;
+  collectionData: Record<string, unknown>;
   onComplete: () => void;
 }
 
@@ -16,7 +16,9 @@ const EditCollectionView: React.FC<EditCollectionViewProps> = ({
   collectionData,
   onComplete,
 }) => {
-  const [formData, setFormData] = useState<any>(collectionData || {});
+  const [formData, setFormData] = useState<Record<string, unknown>>(
+    collectionData || {}
+  );
   const [status, setStatus] = useState<string>('idle');
   const [apiErrorMessage, setApiErrorMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(!collectionData);

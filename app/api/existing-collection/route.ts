@@ -3,6 +3,16 @@ import { auth } from '@/auth';
 import { getUserTenants } from '@/lib/serverTenantValidation';
 import { VEDA_PROD_BACKEND_URL } from '@/config/env';
 
+type StacCollection = {
+  tenant?: string;
+  [key: string]: unknown;
+};
+
+type StacCollectionsResponse = {
+  collections?: StacCollection[];
+  [key: string]: unknown;
+};
+
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
@@ -71,10 +81,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const stacData = await stacResponse.json();
+    const stacData = (await stacResponse.json()) as StacCollectionsResponse;
 
     if (isPublicFilter && stacData.collections) {
-      stacData.collections = stacData.collections.filter((collection: any) => {
+      stacData.collections = stacData.collections.filter((collection) => {
         const collectionTenant = collection.tenant?.toLowerCase?.();
         return (
           !collection.tenant ||
@@ -86,7 +96,7 @@ export async function GET(request: NextRequest) {
 
     // Filter collections by user's allowed tenants if no specific tenant filter
     if (!normalizedTenantFilter && stacData.collections) {
-      stacData.collections = stacData.collections.filter((collection: any) => {
+      stacData.collections = stacData.collections.filter((collection) => {
         // Allow public collections (no tenant property or empty tenant)
         if (!collection.tenant || collection.tenant === '') {
           return true;

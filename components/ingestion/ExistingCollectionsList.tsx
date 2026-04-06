@@ -26,7 +26,7 @@ const { Title } = Typography;
 const PAGE_SIZE = 10;
 
 interface ExistingCollectionsListProps {
-  onCollectionSelect: (data: any) => void;
+  onCollectionSelect: (data: Record<string, unknown>) => void;
 }
 
 const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
