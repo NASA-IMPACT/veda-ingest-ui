@@ -10,7 +10,7 @@ const UpdatePR = async (
 ) => {
   // prettify stringify to preserve json formatting
   const stringContent = CleanAndPrettifyJSON(formData);
-  const content = btoa(stringContent);
+  const content = Buffer.from(stringContent, 'utf-8').toString('base64');
 
   const { OWNER: owner, REPO: repo } = await import('@/config/env').then(
     (m) => m.cfg
