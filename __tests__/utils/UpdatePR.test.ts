@@ -73,7 +73,10 @@ describe('UpdatePR', () => {
       sha: mockFileSha,
       path: mockFilePath,
       message: 'update via UI',
-      content: btoa(JSON.stringify(mockFormData, null, 2)),
+      content: Buffer.from(
+        JSON.stringify(mockFormData, null, 2),
+        'utf-8'
+      ).toString('base64'),
     });
   });
 
