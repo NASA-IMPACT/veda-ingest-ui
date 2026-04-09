@@ -4,12 +4,12 @@ import { HttpResponse } from 'msw';
 const modifiedConfig = {
   collection: 'seeded-ingest-1',
   title: 'test title',
-  description: 'test description',
+  description: 'test description — now with more details! 🙂',
   license: 'test license',
   tenant: 'tenant2',
   discovery_items: [
     {
-      filename_regex: '(.*)Test_(.*).tif$',
+      filename_regex: '.*_\\d{6}.tif$',
       use_multithreading: false,
       discovery: 's3',
       prefix: 'Test/',

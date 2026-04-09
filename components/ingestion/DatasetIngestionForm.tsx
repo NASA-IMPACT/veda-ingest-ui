@@ -25,6 +25,7 @@ import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
 import staticBaseSchema from '@/FormSchemas/datasets/datasetSchema.json';
 import uiSchema from '@/FormSchemas/datasets/uischema.json';
 import { TestableUrlWidget } from '@/components/rjsf-components/TestableUrlWidget';
+import { RegexStringWidget } from '@/components/rjsf-components/RegexStringWidget';
 
 import { useTenants } from '@/hooks/useTenants';
 import { Form } from './rjsfTheme';
@@ -235,6 +236,7 @@ function DatasetIngestionForm({
   const widgets = {
     'renders.dashboard': RjsfCodeEditorWidget,
     testableUrl: TestableUrlWidget,
+    regexString: RegexStringWidget,
   };
 
   if (isTenantsLoading) {
