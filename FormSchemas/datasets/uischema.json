@@ -60,6 +60,12 @@
       "datetime_range": {
         "ui:help": "omit for sub-daily data"
       },
+      "filename_regex": {
+        "ui:widget": "regexString"
+      },
+      "id_regex": {
+        "ui:widget": "regexString"
+      },
       "ui:grid": [
         {
           "discovery": 8,
