@@ -27,19 +27,20 @@ const COGDrawerViewer: React.FC<COGDrawerViewerProps> = ({
   renders,
 }) => {
   const cogViewer = useCOGViewer();
+  const { setCogUrl, fetchMetadata } = cogViewer;
 
   useEffect(() => {
     if (drawerOpen && url) {
-      cogViewer.setCogUrl(url);
+      setCogUrl(url);
 
       // Ensure we pass the latest renders object
       if (renders) {
-        cogViewer.fetchMetadata(url, renders);
+        fetchMetadata(url, renders);
       } else {
-        cogViewer.fetchMetadata(url, null);
+        fetchMetadata(url, null);
       }
     }
-  }, [drawerOpen, url, renders]);
+  }, [drawerOpen, url, renders, setCogUrl, fetchMetadata]);
 
   const handleAccept = () => {
     if (!onAcceptRenderOptions) {

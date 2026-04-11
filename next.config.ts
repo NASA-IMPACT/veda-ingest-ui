@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import removeImports from 'next-remove-imports';
 
 // Environment variable validation
 const requiredEnvVars = [
@@ -36,10 +37,9 @@ const nextConfig: NextConfig = {
   },
 };
 
-const removeImports = require('next-remove-imports')();
-module.exports = removeImports({
+const withRemoveImports = removeImports();
+
+export default withRemoveImports({
   ...nextConfig,
   experimental: { esmExternals: true },
 });
-
-export default nextConfig;

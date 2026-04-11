@@ -68,13 +68,13 @@ vi.mock('antd', async (importOriginal) => {
 });
 
 describe('AddSummaryForm', () => {
-  let mockOnAdd: ReturnType<typeof vi.fn>;
-  let mockOnCancel: ReturnType<typeof vi.fn>;
+  const mockOnAdd = vi.fn<(summary: { key: string; value: unknown }) => void>();
+  const mockOnCancel = vi.fn<() => void>();
   let defaultProps: React.ComponentProps<typeof AddSummaryForm>;
 
   beforeEach(() => {
-    mockOnAdd = vi.fn();
-    mockOnCancel = vi.fn();
+    mockOnAdd.mockReset();
+    mockOnCancel.mockReset();
     defaultProps = {
       initialKey: 'new-summary',
       onAdd: mockOnAdd,

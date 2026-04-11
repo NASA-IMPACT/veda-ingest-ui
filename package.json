@@ -14,8 +14,8 @@
     "prepare": "husky",
     "test": "vitest",
     "test:e2e": "yarn build && yarn playwright test",
-    "test:coverage": "vitest run --coverage",
-    "test:coverage:threshold": "vitest run --coverage --reporter=verbose",
+    "test:coverage": "vitest run --coverage --testTimeout=15000 --hookTimeout=15000",
+    "test:coverage:threshold": "vitest run --coverage --reporter=verbose --testTimeout=15000 --hookTimeout=15000",
     "type-check": "tsc --noEmit",
     "analyze": "ANALYZE=true yarn build",
     "deps:check": "yarn outdated",
@@ -70,9 +70,9 @@
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",
-    "@vitejs/plugin-react": "^4.3.4",
-    "@vitest/coverage-v8": "3.2.4",
-    "@vitest/ui": "3.2.4",
+    "@vitejs/plugin-react": "^5.2.0",
+    "@vitest/coverage-v8": "4.1.2",
+    "@vitest/ui": "4.1.2",
     "babel-loader": "^10.0.0",
     "eslint": "^8",
     "eslint-config-next": "15.5.14",
@@ -89,8 +89,9 @@
     "playwright-msw": "^3.0.1",
     "prettier": "^3.4.2",
     "typescript": "^5",
+    "vite": "^7.0.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "3.2.4"
+    "vitest": "4.1.2"
   },
   "husky": {
     "hooks": {

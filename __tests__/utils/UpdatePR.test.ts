@@ -40,13 +40,15 @@ describe('UpdatePR', () => {
     (GetGithubToken as Mock).mockResolvedValue('mockToken');
 
     // Mock Octokit
-    (Octokit as unknown as Mock).mockImplementation(() => ({
-      rest: {
-        repos: {
-          createOrUpdateFileContents: mockCreateOrUpdateFileContents,
+    (Octokit as unknown as Mock).mockImplementation(function () {
+      return {
+        rest: {
+          repos: {
+            createOrUpdateFileContents: mockCreateOrUpdateFileContents,
+          },
         },
-      },
-    }));
+      };
+    });
   });
 
   it('successfully updates a pull request file', async () => {

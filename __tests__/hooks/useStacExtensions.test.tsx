@@ -37,10 +37,11 @@ const mockDatacubeSchema = {
 };
 
 describe('useStacExtensions', () => {
-  let mockSetFormData: ReturnType<typeof vi.fn>;
+  const mockSetFormData =
+    vi.fn<React.Dispatch<React.SetStateAction<Record<string, unknown>>>>();
 
   beforeEach(() => {
-    mockSetFormData = vi.fn();
+    mockSetFormData.mockReset();
     vi.mocked(fetch).mockClear();
   });
 

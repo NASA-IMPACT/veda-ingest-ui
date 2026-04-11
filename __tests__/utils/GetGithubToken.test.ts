@@ -22,9 +22,9 @@ describe('GetGithubToken', () => {
     process.env.GITHUB_PRIVATE_KEY = 'mock-private-key';
 
     // Mock Octokit behavior
-    (Octokit as unknown as Mock).mockImplementation(() => ({
-      auth: mockAuth,
-    }));
+    (Octokit as unknown as Mock).mockImplementation(function () {
+      return { auth: mockAuth };
+    });
   });
 
   it('returns a valid token on success', async () => {

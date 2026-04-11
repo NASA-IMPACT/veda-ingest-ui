@@ -43,9 +43,9 @@ describe('ListPRs Utility', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockedGetGithubToken.mockResolvedValue('mocked-github-token');
-    mockedOctokit.mockImplementation(
-      () => mockOctokitInstance as unknown as Octokit
-    );
+    mockedOctokit.mockImplementation(function () {
+      return mockOctokitInstance as unknown as Octokit;
+    });
   });
 
   beforeAll(() => {

@@ -48,10 +48,10 @@ vi.mock('antd', async (importOriginal) => {
 });
 
 describe('SummariesManager', () => {
-  let mockOnChange: ReturnType<typeof vi.fn>;
+  const mockOnChange = vi.fn<(data: Record<string, unknown>) => void>();
 
   beforeEach(() => {
-    mockOnChange = vi.fn();
+    mockOnChange.mockReset();
   });
 
   afterEach(() => {

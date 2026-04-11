@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import debounce from 'lodash/debounce';
 import dynamic from 'next/dynamic';
 import { theme } from 'antd';
@@ -31,12 +31,17 @@ const CodeEditorWidget: React.FC<CodeEditorWidgetProps> = ({
     setEditorValue(value);
   }, [value]);
 
-  const debouncedOnChange = useCallback(
-    debounce((newValue: string) => {
-      onChange?.(newValue);
-    }, 300),
+  const debouncedOnChange = useMemo(
+    () =>
+      debounce((newValue: string) => {
+        onChange?.(newValue);
+      }, 300),
     [onChange]
   );
+
+  useEffect(() => {
+    return () => debouncedOnChange.cancel();
+  }, [debouncedOnChange]);
 
   const handleEditorChange = (newValue: string) => {
     setEditorValue(newValue);

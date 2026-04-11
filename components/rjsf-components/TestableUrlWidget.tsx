@@ -27,7 +27,7 @@ export const TestableUrlWidget = ({
     }
     // When the value changes externally, reset the validation state
     setValidationState('idle');
-  }, [value]);
+  }, [value, inputValue]);
 
   // Cleanup the timeout when the component unmounts
   useEffect(() => {

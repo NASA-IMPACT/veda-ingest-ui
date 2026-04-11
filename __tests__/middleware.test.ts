@@ -9,9 +9,9 @@ vi.mock('@/auth', () => ({
 
 vi.mock('next/server', async () => {
   const actual = await vi.importActual('next/server');
-  const NextResponseMock = vi
-    .fn()
-    .mockImplementation((body, init) => new Response(body, init));
+  const NextResponseMock = vi.fn().mockImplementation(function (body, init) {
+    return new Response(body, init);
+  });
 
   Object.assign(NextResponseMock, {
     redirect: vi.fn(),

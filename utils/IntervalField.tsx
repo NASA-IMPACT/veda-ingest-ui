@@ -2,11 +2,11 @@ import React from 'react';
 import { FieldProps } from '@rjsf/utils';
 import { DatePicker, Row, Col } from 'antd';
 import dayjs from 'dayjs';
-import 'dayjs/plugin/utc';
-import 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
-dayjs.extend(require('dayjs/plugin/utc'));
-dayjs.extend(require('dayjs/plugin/timezone'));
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const IntervalField: React.FC<FieldProps> = (props) => {
   const { formData, onChange, disabled, readonly, fieldPathId } = props;

@@ -75,6 +75,7 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
       noDataValue,
     });
   }, [
+    form,
     selectedBands,
     rescale,
     selectedColormap,

@@ -52,13 +52,15 @@ describe('RetrieveJSON', () => {
 
     (GetGithubToken as Mock).mockResolvedValue('mockToken');
 
-    (Octokit as unknown as Mock).mockImplementation(() => ({
-      rest: {
-        repos: {
-          getContent: mockGetContent,
+    (Octokit as unknown as Mock).mockImplementation(function () {
+      return {
+        rest: {
+          repos: {
+            getContent: mockGetContent,
+          },
         },
-      },
-    }));
+      };
+    });
   });
 
   describe('Dataset Retrieval', () => {

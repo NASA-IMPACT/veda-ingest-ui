@@ -63,14 +63,13 @@ test.describe('Edit Dataset Page', () => {
     page,
   }, testInfo) => {
     let putRequestIntercepted = false;
+    let putPayload: unknown;
 
     // Intercept and validate the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'PUT') {
         putRequestIntercepted = true;
-        const putData = request.postDataJSON();
-
-        expect(putData.formData.tenant).toEqual('tenant1');
+        putPayload = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -144,6 +143,13 @@ test.describe('Edit Dataset Page', () => {
         putRequestIntercepted,
         'PUT request should have been intercepted'
       ).toBe(true);
+
+      expect(putPayload).toBeDefined();
+      const putData = putPayload as { formData: { tenant: string } };
+      expect(
+        putData.formData.tenant,
+        'PUT payload should preserve tenant1 in form mode submission'
+      ).toEqual('tenant1');
     });
   });
 
@@ -151,14 +157,13 @@ test.describe('Edit Dataset Page', () => {
     page,
   }, testInfo) => {
     let putRequestIntercepted = false;
+    let putPayload: unknown;
 
     // Intercept and validate the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'PUT') {
         putRequestIntercepted = true;
-        const putData = request.postDataJSON();
-
-        expect(putData.formData.tenant).toEqual('tenant3');
+        putPayload = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -239,6 +244,13 @@ test.describe('Edit Dataset Page', () => {
         putRequestIntercepted,
         'PUT request should have been intercepted'
       ).toBe(true);
+
+      expect(putPayload).toBeDefined();
+      const putData = putPayload as { formData: { tenant: string } };
+      expect(
+        putData.formData.tenant,
+        'PUT payload should include tenant3 from JSON mode submission'
+      ).toEqual('tenant3');
     });
   });
 

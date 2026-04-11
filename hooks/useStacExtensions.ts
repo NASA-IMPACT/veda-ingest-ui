@@ -43,7 +43,7 @@ export function useStacExtensions({ setFormData }: UseStacExtensionsProps) {
         const requireFieldDefinition = schema?.definitions?.require_field;
         const requiredFields = new Set(
           typeof requireFieldDefinition === 'object' &&
-          Array.isArray(requireFieldDefinition.required)
+            Array.isArray(requireFieldDefinition.required)
             ? requireFieldDefinition.required
             : []
         );
@@ -86,7 +86,7 @@ export function useStacExtensions({ setFormData }: UseStacExtensionsProps) {
         setUrlsToProcess((prev) => prev.filter((u) => u !== urlToProcess));
       }
     }
-  }, [urlsToProcess, extensionFields, setFormData]);
+  }, [urlsToProcess, extensionFields, setFormData, message]);
 
   const addExtension = (url: string) => {
     if (!url || extensionFields[url]) {

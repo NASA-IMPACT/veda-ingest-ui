@@ -12,12 +12,12 @@ const AppWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('ExtensionManager', () => {
-  let mockOnAddExtension: ReturnType<typeof vi.fn>;
-  let mockOnRemoveExtension: ReturnType<typeof vi.fn>;
+  const mockOnAddExtension = vi.fn<(url: string) => void>();
+  const mockOnRemoveExtension = vi.fn<(url: string) => void>();
 
   beforeEach(() => {
-    mockOnAddExtension = vi.fn();
-    mockOnRemoveExtension = vi.fn();
+    mockOnAddExtension.mockReset();
+    mockOnRemoveExtension.mockReset();
   });
 
   afterEach(() => {
