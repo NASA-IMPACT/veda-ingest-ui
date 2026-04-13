@@ -135,27 +135,13 @@ test.describe('Edit Collection Page', () => {
   }, testInfo) => {
     let putRequestIntercepted = false;
 
-    // Intercept and validate the request payload
+    let putPayload: unknown;
+
+    // Intercept and capture the request payload
     await page.route('**/api/create-ingest', async (route, request) => {
       if (request.method() === 'PUT') {
         putRequestIntercepted = true;
-        const postData = request.postDataJSON();
-
-        expect(postData, 'validate filePath property exists').toHaveProperty(
-          'filePath'
-        );
-        expect(postData, 'validate fileSha property exists').toHaveProperty(
-          'fileSha'
-        );
-        expect(postData, 'validate formData property exists').toHaveProperty(
-          'formData'
-        );
-
-        // Assert that the submitted formData matches the modified config
-        expect(
-          postData.formData,
-          'validate formData matches modified json'
-        ).toMatchObject(modifiedCollectionConfig);
+        putPayload = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -236,6 +222,25 @@ test.describe('Edit Collection Page', () => {
         putRequestIntercepted,
         'PUT request should have been intercepted'
       ).toBe(true);
+
+      const postData = putPayload as {
+        filePath: unknown;
+        fileSha: unknown;
+        formData: unknown;
+      };
+      expect(postData, 'validate filePath property exists').toHaveProperty(
+        'filePath'
+      );
+      expect(postData, 'validate fileSha property exists').toHaveProperty(
+        'fileSha'
+      );
+      expect(postData, 'validate formData property exists').toHaveProperty(
+        'formData'
+      );
+      expect(
+        postData.formData,
+        'validate formData matches modified json'
+      ).toMatchObject(modifiedCollectionConfig);
     });
   });
 

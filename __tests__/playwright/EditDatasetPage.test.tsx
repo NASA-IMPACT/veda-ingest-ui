@@ -109,40 +109,13 @@ test.describe('Edit Dataset Page', () => {
   }, testInfo) => {
     let putRequestIntercepted = false;
 
-    // Intercept and validate the request
+    let putPayload: unknown;
+
+    // Intercept and capture the request
     await page.route('**/api/create-ingest', async (route, request) => {
       if (request.method() === 'PUT') {
         putRequestIntercepted = true;
-        const postData = request.postDataJSON(); // Capture full request body
-
-        expect(postData, 'validate filePath property exists').toHaveProperty(
-          'filePath'
-        );
-        expect(postData, 'validate fileSha property exists').toHaveProperty(
-          'fileSha'
-        );
-
-        expect(postData, 'validate formData property exists').toHaveProperty(
-          'formData'
-        );
-
-        // make sure the dashboard object is a prettified string before asserting
-        const expectedModifiedConfig = {
-          ...modifiedConfig,
-          renders: {
-            ...modifiedConfig.renders,
-            dashboard: JSON.stringify(
-              modifiedConfig.renders.dashboard,
-              null,
-              2
-            ),
-          },
-        };
-
-        expect(
-          postData.formData,
-          'validate formData matches modified json'
-        ).toMatchObject(expectedModifiedConfig);
+        putPayload = request.postDataJSON();
 
         // Return a successful response instead of aborting
         await route.fulfill({
@@ -224,6 +197,35 @@ test.describe('Edit Dataset Page', () => {
         putRequestIntercepted,
         'PUT request should have been intercepted'
       ).toBe(true);
+
+      const postData = putPayload as {
+        filePath: unknown;
+        fileSha: unknown;
+        formData: unknown;
+      };
+      expect(postData, 'validate filePath property exists').toHaveProperty(
+        'filePath'
+      );
+      expect(postData, 'validate fileSha property exists').toHaveProperty(
+        'fileSha'
+      );
+      expect(postData, 'validate formData property exists').toHaveProperty(
+        'formData'
+      );
+
+      // make sure the dashboard object is a prettified string before asserting
+      const expectedModifiedConfig = {
+        ...modifiedConfig,
+        renders: {
+          ...modifiedConfig.renders,
+          dashboard: JSON.stringify(modifiedConfig.renders.dashboard, null, 2),
+        },
+      };
+
+      expect(
+        postData.formData,
+        'validate formData matches modified json'
+      ).toMatchObject(expectedModifiedConfig);
     });
   });
 

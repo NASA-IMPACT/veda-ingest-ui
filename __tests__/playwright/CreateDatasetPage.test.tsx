@@ -141,26 +141,11 @@ test.describe('Create Dataset Page', () => {
   test('Create Dataset request submitted with pasted JSON', async ({
     page,
   }, testInfo) => {
-    // Intercept and block the request
+    let postPayload: unknown;
+    // Intercept and capture the request
     await page.route('**/create-dataset', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON();
-
-        expect(postData.ingestionType).toBe('dataset');
-
-        const { renders: receivedRendersObj, ...restOfReceivedData } =
-          postData.data;
-        const { renders: expectedRendersObj, ...restOfExpectedData } =
-          requiredConfig;
-
-        const receivedRenders = JSON.parse(receivedRendersObj.dashboard);
-        const expectedRenders = expectedRendersObj.dashboard;
-
-        expect(receivedRenders).toEqual(expectedRenders);
-
-        expect(restOfReceivedData).toEqual(
-          expect.objectContaining(restOfExpectedData)
-        );
+        postPayload = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -219,20 +204,39 @@ test.describe('Create Dataset Page', () => {
     });
 
     await expect(successDialog).toBeVisible();
+
+    const postData = postPayload as {
+      ingestionType: string;
+      data: { renders: { dashboard: string } } & Record<string, unknown>;
+    };
+    expect(postData.ingestionType, 'ingestionType should be dataset').toBe(
+      'dataset'
+    );
+
+    const { renders: receivedRendersObj, ...restOfReceivedData } =
+      postData.data;
+    const { renders: expectedRendersObj, ...restOfExpectedData } =
+      requiredConfig;
+    const receivedRenders = JSON.parse(receivedRendersObj.dashboard);
+    const expectedRenders = expectedRendersObj.dashboard;
+
+    expect(receivedRenders, 'renders should match expected').toEqual(
+      expectedRenders
+    );
+    expect(
+      restOfReceivedData,
+      'POST data should contain required config fields'
+    ).toEqual(expect.objectContaining(restOfExpectedData));
   });
 
   test('Create Dataset allows extra fields with toggle enabled', async ({
     page,
   }, testInfo) => {
-    // Intercept and block the request
+    let postPayload2: unknown;
+    // Intercept and capture the request
     await page.route('**/create-dataset', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON();
-
-        expect(postData.ingestionType).toBe('dataset');
-        expect(postData.data).toEqual(
-          expect.objectContaining({ extraField: true })
-        );
+        postPayload2 = request.postDataJSON();
 
         await route.abort();
       } else {
@@ -305,6 +309,14 @@ test.describe('Create Dataset Page', () => {
     await test.step('continue without adding a comment', async () => {
       await page.getByRole('button', { name: /continue & submit/i }).click();
     });
+
+    const postData2 = postPayload2 as { ingestionType: string; data: unknown };
+    expect(postData2.ingestionType, 'ingestionType should be dataset').toBe(
+      'dataset'
+    );
+    expect(postData2.data, 'POST data should include the extra field').toEqual(
+      expect.objectContaining({ extraField: true })
+    );
   });
 
   test('Create Dataset handles errors with pasted JSON', async ({

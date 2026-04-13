@@ -71,15 +71,11 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
   test('Create Collection with tenants in form mode', async ({
     page,
   }, testInfo) => {
-    // Intercept and block the request
+    let postPayload: unknown;
+    // Intercept and capture the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON();
-
-        expect(
-          postData.data.tenant,
-          'tenant key value should match selection'
-        ).toEqual('tenant2');
+        postPayload = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -146,20 +142,22 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
       await page.getByRole('button', { name: /submit/i }).click();
       await page.getByRole('button', { name: /continue & submit/i }).click();
     });
+
+    const postData = postPayload as { data: { tenant: string } };
+    expect(
+      postData.data.tenant,
+      'tenant key value should match selection'
+    ).toEqual('tenant2');
   });
 
   test('Create Collection not selecting tenants in form mode omits tenant key', async ({
     page,
   }) => {
-    // Intercept and block the request
+    let postPayload2: unknown;
+    // Intercept and capture the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON();
-
-        expect(
-          postData.data,
-          'tenant key should not be included'
-        ).not.toHaveProperty('tenant');
+        postPayload2 = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -190,18 +188,20 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
       await page.getByRole('button', { name: /submit/i }).click();
       await page.getByRole('button', { name: /continue & submit/i }).click();
     });
+
+    const postData2 = postPayload2 as { data: Record<string, unknown> };
+    expect(
+      postData2.data,
+      'tenant key should not be included'
+    ).not.toHaveProperty('tenant');
   });
 
   test('Create Collection with tenants in JSON mode', async ({ page }) => {
-    // Intercept and block the request
+    let postPayload3: unknown;
+    // Intercept and capture the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON();
-
-        expect(
-          postData.data.tenant,
-          'tenant key value should match JSON entry'
-        ).toEqual('tenant3');
+        postPayload3 = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -256,6 +256,12 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
         page.getByRole('dialog', { name: /Ingestion Request Submitted/i })
       ).toBeVisible();
     });
+
+    const postData3 = postPayload3 as { data: { tenant: string } };
+    expect(
+      postData3.data.tenant,
+      'tenant key value should match JSON entry'
+    ).toEqual('tenant3');
   });
 
   test('Validate tenant restrictions enforced on JSON Editor', async ({
@@ -314,15 +320,11 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
       })
     );
 
-    // Intercept and block the request
+    let postPayload4: unknown;
+    // Intercept and capture the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON();
-
-        expect(
-          postData.data,
-          'tenant key should not be included'
-        ).not.toHaveProperty('tenant');
+        postPayload4 = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -372,5 +374,11 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
         page.getByRole('dialog', { name: /Ingestion Request Submitted/i })
       ).toBeVisible();
     });
+
+    const postData4 = postPayload4 as { data: Record<string, unknown> };
+    expect(
+      postData4.data,
+      'tenant key should not be included'
+    ).not.toHaveProperty('tenant');
   });
 });

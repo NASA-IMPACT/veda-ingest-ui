@@ -137,24 +137,11 @@ test.describe('Create Collection Page', () => {
     page,
   }, testInfo) => {
     const userComment = 'This comment was entered in the VEDA Ingest UI';
-    // Intercept the POST request to validate its payload
+    let postPayload: unknown;
+    // Intercept the POST request to capture its payload
     await page.route('**/create-dataset', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON();
-
-        expect(
-          postData.ingestionType,
-          'Ingestion Type is included in POST data'
-        ).toBe('collection');
-        expect(
-          postData.data,
-          `Collection cofig data is included in POST data`
-        ).toEqual(expect.objectContaining(requiredCollectionConfig));
-
-        expect(
-          postData.userComment,
-          'user comment is included in POST data'
-        ).toBe(userComment);
+        postPayload = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -213,30 +200,34 @@ test.describe('Create Collection Page', () => {
     await expect(
       page.getByRole('dialog', { name: /Ingestion Request Submitted/i })
     ).toBeVisible();
+
+    const postData = postPayload as {
+      ingestionType: string;
+      data: unknown;
+      userComment: string;
+    };
+    expect(
+      postData.ingestionType,
+      'Ingestion Type is included in POST data'
+    ).toBe('collection');
+    expect(
+      postData.data,
+      'Collection config data is included in POST data'
+    ).toEqual(expect.objectContaining(requiredCollectionConfig));
+    expect(postData.userComment, 'user comment is included in POST data').toBe(
+      userComment
+    );
   });
 
   test('Create Collection handles manually entered assets', async ({
     page,
   }) => {
     const userComment = 'This comment was entered in the VEDA Ingest UI';
-    // Intercept the POST request to validate its payload
+    let postPayload2: unknown;
+    // Intercept the POST request to capture its payload
     await page.route('**/create-dataset', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON();
-
-        expect(
-          postData.ingestionType,
-          'Ingestion Type is included in POST data'
-        ).toBe('collection');
-        expect(
-          postData.data,
-          `Collection cofig data is included in POST data`
-        ).toEqual(expect.objectContaining(requiredCollectionConfig));
-
-        expect(
-          postData.userComment,
-          'user comment is included in POST data'
-        ).toBe(userComment);
+        postPayload2 = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -325,20 +316,33 @@ test.describe('Create Collection Page', () => {
     await expect(
       page.getByRole('dialog', { name: /Ingestion Request Submitted/i })
     ).toBeVisible();
+
+    const postData2 = postPayload2 as {
+      ingestionType: string;
+      data: unknown;
+      userComment: string;
+    };
+    expect(
+      postData2.ingestionType,
+      'Ingestion Type is included in POST data'
+    ).toBe('collection');
+    expect(
+      postData2.data,
+      'Collection config data is included in POST data'
+    ).toEqual(expect.objectContaining(requiredCollectionConfig));
+    expect(postData2.userComment, 'user comment is included in POST data').toBe(
+      userComment
+    );
   });
 
   test('Create Collection allows extra fields with toggle enabled', async ({
     page,
   }, testInfo) => {
-    // Intercept the request to validate the payload
+    let postPayload3: unknown;
+    // Intercept the request to capture the payload
     await page.route('**/create-dataset', async (route, request) => {
       if (request.method() === 'POST') {
-        const postData = request.postDataJSON();
-
-        expect(postData.ingestionType).toBe('collection');
-        expect(postData.data).toEqual(
-          expect.objectContaining({ extraField: true })
-        );
+        postPayload3 = request.postDataJSON();
 
         await route.abort(); // Abort to prevent actual submission
       } else {
@@ -418,6 +422,14 @@ test.describe('Create Collection Page', () => {
     await test.step('continue without adding a comment', async () => {
       await page.getByRole('button', { name: /continue & submit/i }).click();
     });
+
+    const postData3 = postPayload3 as { ingestionType: string; data: unknown };
+    expect(postData3.ingestionType, 'ingestionType should be collection').toBe(
+      'collection'
+    );
+    expect(postData3.data, 'POST data should include the extra field').toEqual(
+      expect.objectContaining({ extraField: true })
+    );
   });
 
   test('Create Collection handles errors with pasted JSON', async ({

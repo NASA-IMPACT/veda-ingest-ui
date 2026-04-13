@@ -133,13 +133,13 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
   }, testInfo) => {
     let putRequestIntercepted = false;
 
-    // Intercept and validate the request
+    let putPayload: unknown;
+
+    // Intercept and capture the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'PUT') {
         putRequestIntercepted = true;
-        const putData = request.postDataJSON();
-
-        expect(putData.formData.tenant).toEqual('tenant1');
+        putPayload = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -212,6 +212,12 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
         putRequestIntercepted,
         'PUT request should have been intercepted'
       ).toBe(true);
+
+      const putData = putPayload as { formData: { tenant: string } };
+      expect(
+        putData.formData.tenant,
+        'PUT payload should preserve tenant1 in form mode submission'
+      ).toEqual('tenant1');
     });
   });
 
@@ -219,14 +225,13 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
     page,
   }, testInfo) => {
     let putRequestIntercepted = false;
+    let putPayload2: unknown;
 
-    // Intercept and validate the request
+    // Intercept and capture the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'PUT') {
         putRequestIntercepted = true;
-        const putData = request.postDataJSON();
-
-        expect(putData.formData.tenant).toEqual('tenant3');
+        putPayload2 = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -313,6 +318,12 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
         putRequestIntercepted,
         'PUT request should have been intercepted'
       ).toBe(true);
+
+      const putData2 = putPayload2 as { formData: { tenant: string } };
+      expect(
+        putData2.formData.tenant,
+        'PUT payload should include tenant3 from JSON mode submission'
+      ).toEqual('tenant3');
     });
   });
 

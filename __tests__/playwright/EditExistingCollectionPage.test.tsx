@@ -138,17 +138,13 @@ test.describe('Edit Existing Collection Page', () => {
       ...modifiedCollectionConfig,
     };
 
-    // Intercept and validate the request payload
+    let putPayload: unknown;
+
+    // Intercept and capture the request payload
     await page.route('**/api/existing-collection/*', async (route, request) => {
       if (request.method() === 'PUT') {
         putRequestIntercepted = true;
-        const postData = request.postDataJSON();
-
-        // Assert that the submitted data matches the modified json input
-        expect(
-          postData,
-          'validate request body matches modified json'
-        ).toMatchObject(expectedPayload);
+        putPayload = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -254,6 +250,12 @@ test.describe('Edit Existing Collection Page', () => {
         putRequestIntercepted,
         'PUT request should have been intercepted'
       ).toBe(true);
+
+      // Assert that the submitted data matches the modified json input
+      expect(
+        putPayload,
+        'validate request body matches modified json'
+      ).toMatchObject(expectedPayload);
     });
   });
 
