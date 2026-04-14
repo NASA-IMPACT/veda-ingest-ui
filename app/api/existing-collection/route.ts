@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getUserTenants } from '@/lib/serverTenantValidation';
 import { VEDA_PROD_BACKEND_URL } from '@/config/env';
+import { getTenantFieldKey } from '@/utils/tenantField';
 
 type StacCollection = {
-  tenant?: string;
   [key: string]: unknown;
 };
 
@@ -35,6 +35,12 @@ export async function GET(request: NextRequest) {
 
     // Get user's allowed tenants
     const userTenants = await getUserTenants(session);
+
+    const tenantFieldKey = getTenantFieldKey();
+    const getCollectionTenant = (collection: StacCollection): string | undefined => {
+      const tenant = collection[tenantFieldKey];
+      return typeof tenant === 'string' ? tenant : undefined;
+    };
 
     const { searchParams } = new URL(request.url);
     const tenantFilter = searchParams.get('tenant');
@@ -85,10 +91,11 @@ export async function GET(request: NextRequest) {
 
     if (isPublicFilter && stacData.collections) {
       stacData.collections = stacData.collections.filter((collection) => {
-        const collectionTenant = collection.tenant?.toLowerCase?.();
+        const tenant = getCollectionTenant(collection);
+        const collectionTenant = tenant?.toLowerCase();
         return (
-          !collection.tenant ||
-          collection.tenant === '' ||
+          !tenant ||
+          tenant === '' ||
           collectionTenant === 'public'
         );
       });
@@ -97,11 +104,12 @@ export async function GET(request: NextRequest) {
     // Filter collections by user's allowed tenants if no specific tenant filter
     if (!normalizedTenantFilter && stacData.collections) {
       stacData.collections = stacData.collections.filter((collection) => {
+        const tenant = getCollectionTenant(collection);
         // Allow public collections (no tenant property or empty tenant)
-        if (!collection.tenant || collection.tenant === '') {
+        if (!tenant || tenant === '' || tenant.toLowerCase() === 'public') {
           return true;
         }
-        return userTenants.includes(collection.tenant);
+        return userTenants.includes(tenant);
       });
     }
 

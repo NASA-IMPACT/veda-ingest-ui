@@ -56,7 +56,7 @@ const mockCollectionResponse = {
   id: 'test-collection',
   title: 'Test Collection',
   description: 'A test collection',
-  tenant: 'tenant1',
+  'local:tenant': 'tenant1',
 };
 
 describe('GET /api/existing-collection/[collectionId]', () => {
@@ -103,7 +103,7 @@ describe('GET /api/existing-collection/[collectionId]', () => {
       ok: true,
       json: async () => ({
         ...mockCollectionResponse,
-        tenant: 'Public',
+        'local:tenant': 'Public',
       }),
     });
 
@@ -125,7 +125,7 @@ describe('GET /api/existing-collection/[collectionId]', () => {
 
     const data = await response.json();
     expect(data.id).toBe('test-collection');
-    expect(data.tenant).toBe('Public');
+    expect(data['local:tenant']).toBe('Public');
   });
 
   it('successfully fetches collection with no tenant', async () => {
@@ -134,7 +134,7 @@ describe('GET /api/existing-collection/[collectionId]', () => {
       ok: true,
       json: async () => ({
         ...mockCollectionResponse,
-        tenant: '',
+        'local:tenant': '',
       }),
     });
 
@@ -147,7 +147,7 @@ describe('GET /api/existing-collection/[collectionId]', () => {
     expect(validateTenantAccessMock).not.toHaveBeenCalled();
 
     const data = await response.json();
-    expect(data.tenant).toBe('');
+    expect(data['local:tenant']).toBe('');
   });
 
   it('successfully fetches collection when user has tenant access', async () => {
@@ -174,7 +174,7 @@ describe('GET /api/existing-collection/[collectionId]', () => {
 
     const data = await response.json();
     expect(data.id).toBe('test-collection');
-    expect(data.tenant).toBe('tenant1');
+    expect(data['local:tenant']).toBe('tenant1');
   });
 
   it('returns 403 when user does not have tenant access', async () => {
@@ -275,7 +275,7 @@ describe('GET /api/existing-collection/[collectionId]', () => {
       json: async () => ({
         ...mockCollectionResponse,
         id: 'collection with spaces',
-        tenant: 'Public',
+        'local:tenant': 'Public',
       }),
     });
 
@@ -304,8 +304,9 @@ describe('GET /api/existing-collection/[collectionId]', () => {
     mockFetch.mockResolvedValue({
       ok: true,
       json: async () => ({
-        ...mockCollectionResponse,
-        tenant: undefined,
+        id: 'test-collection',
+        title: 'Test Collection',
+        description: 'A test collection',
       }),
     });
 
@@ -318,7 +319,7 @@ describe('GET /api/existing-collection/[collectionId]', () => {
     expect(validateTenantAccessMock).not.toHaveBeenCalled();
 
     const data = await response.json();
-    expect(data.tenant).toBeUndefined();
+    expect(data['local:tenant']).toBeUndefined();
   });
 });
 
@@ -360,7 +361,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       ok: true,
       json: async () => ({
         id: 'test-collection',
-        tenant: 'tenant1',
+        'local:tenant': 'tenant1',
         title: 'Original Title',
       }),
     });
@@ -370,7 +371,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       ok: true,
       json: async () => ({
         ...updateData,
-        tenant: 'tenant1',
+        'local:tenant': 'tenant1',
       }),
     });
 
@@ -519,7 +520,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       ok: true,
       json: async () => ({
         id: 'test-collection',
-        tenant: 'restricted-tenant',
+        'local:tenant': 'restricted-tenant',
       }),
     });
 
@@ -556,7 +557,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       ok: true,
       json: async () => ({
         id: 'public-collection',
-        tenant: 'Public',
+        'local:tenant': 'Public',
       }),
     });
 
@@ -565,7 +566,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       ok: true,
       json: async () => ({
         ...updateData,
-        tenant: 'Public',
+        'local:tenant': 'Public',
       }),
     });
 
@@ -599,7 +600,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
       ok: true,
       json: async () => ({
         id: 'test-collection',
-        tenant: 'tenant1',
+        'local:tenant': 'tenant1',
       }),
     });
 

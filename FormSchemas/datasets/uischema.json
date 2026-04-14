@@ -1,9 +1,6 @@
 {
   "ui:grid": [
     {
-      "tenant": 24
-    },
-    {
       "collection": 8,
       "title": 16
     },
@@ -59,6 +56,12 @@
     "items": {
       "datetime_range": {
         "ui:help": "omit for sub-daily data"
+      },
+      "filename_regex": {
+        "ui:widget": "regexString"
+      },
+      "id_regex": {
+        "ui:widget": "regexString"
       },
       "ui:grid": [
         {
@@ -157,6 +160,11 @@
           "rows": 8,
           "description": "Thumbnail description should also include source attribution."
         }
+      },
+      "type": {
+        "ui:options": {
+          "description": "e.g. image/jpeg"
+        }
       }
     }
   },
@@ -196,9 +204,5 @@
     "items": {
       "ui:widget": "testableUrl"
     }
-  },
-  "tenant": {
-    "classNames": "tenants-field",
-    "ui:help": "Optional tenant allowed to access this item."
   }
 }

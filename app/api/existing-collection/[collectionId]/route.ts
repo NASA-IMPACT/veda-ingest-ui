@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { validateTenantAccess } from '@/lib/serverTenantValidation';
 import { VEDA_PROD_BACKEND_URL } from '@/config/env';
+import { getTenantFieldKey } from '@/utils/tenantField';
 
 interface RouteParams {
   params: Promise<{
@@ -11,6 +12,8 @@ interface RouteParams {
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    const tenantFieldKey = getTenantFieldKey();
+
     const session = await auth();
     if (!session) {
       return NextResponse.json(
@@ -49,22 +52,25 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     const collectionData = await stacResponse.json();
+    const collectionTenantValue = collectionData?.[tenantFieldKey];
+    const collectionTenant =
+      typeof collectionTenantValue === 'string' ? collectionTenantValue : undefined;
 
     // Validate tenant access if collection has a tenant
     if (
-      collectionData.tenant &&
-      collectionData.tenant !== '' &&
-      collectionData.tenant !== 'Public'
+      collectionTenant &&
+      collectionTenant !== '' &&
+      collectionTenant.toLowerCase() !== 'public'
     ) {
       const tenantValidation = await validateTenantAccess(
-        collectionData.tenant,
+        collectionTenant,
         session
       );
 
       if (!tenantValidation.isValid) {
         return NextResponse.json(
           {
-            error: `Access denied for collection from tenant: ${collectionData.tenant}`,
+            error: `Access denied for collection from tenant: ${collectionTenant}`,
           },
           { status: 403 }
         );
@@ -83,6 +89,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    const tenantFieldKey = getTenantFieldKey();
+
     const session = await auth();
     if (!session) {
       return NextResponse.json(
@@ -122,22 +130,25 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     const existingCollection = await existingResponse.json();
+    const existingTenantValue = existingCollection?.[tenantFieldKey];
+    const existingTenant =
+      typeof existingTenantValue === 'string' ? existingTenantValue : undefined;
 
     // Validate tenant access if collection has a tenant
     if (
-      existingCollection.tenant &&
-      existingCollection.tenant !== '' &&
-      existingCollection.tenant !== 'Public'
+      existingTenant &&
+      existingTenant !== '' &&
+      existingTenant.toLowerCase() !== 'public'
     ) {
       const tenantValidation = await validateTenantAccess(
-        existingCollection.tenant,
+        existingTenant,
         session
       );
 
       if (!tenantValidation.isValid) {
         return NextResponse.json(
           {
-            error: `Access denied for collection from tenant: ${existingCollection.tenant}`,
+            error: `Access denied for collection from tenant: ${existingTenant}`,
           },
           { status: 403 }
         );

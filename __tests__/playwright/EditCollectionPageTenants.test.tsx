@@ -139,7 +139,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
         putRequestIntercepted = true;
         const putData = request.postDataJSON();
 
-        expect(putData.formData.tenant).toEqual('tenant1');
+        expect(putData.formData['local:tenant']).toEqual('tenant1');
 
         await route.fulfill({
           status: 200,
@@ -226,7 +226,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
         putRequestIntercepted = true;
         const putData = request.postDataJSON();
 
-        expect(putData.formData.tenant).toEqual('tenant3');
+        expect(putData.formData['local:tenant']).toEqual('tenant3');
 
         await route.fulfill({
           status: 200,
@@ -249,7 +249,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       const updatedConfig = {
         ...modifiedCollectionConfig,
         id: 'Playwright_TEST',
-        tenant: 'tenant3',
+        'local:tenant': 'tenant3',
       };
 
       await expect(
@@ -351,7 +351,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       const invalidConfig = {
         ...modifiedCollectionConfig,
         id: 'Playwright_TEST',
-        tenant: 'unauthorized-tenant',
+        'local:tenant': 'unauthorized-tenant',
       };
 
       await page
@@ -364,9 +364,12 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
 
       // Should show validation error
       await expect(
-        page.getByText('"tenant must be equal to one of the allowed values"', {
-          exact: true,
-        })
+        page.getByText(
+          `"local:tenant must be equal to one of the allowed values"`,
+          {
+            exact: true,
+          }
+        )
       ).toBeVisible();
     });
   });

@@ -241,10 +241,9 @@ export const handlers = [
       >;
       filteredResponse.collections = collections.filter((collection) => {
         const collectionTenant =
-          typeof collection.tenant === 'string' ? collection.tenant : '';
-        if (tenant === 'Public') {
-          return !collectionTenant;
-        }
+          typeof collection['local:tenant'] === 'string'
+            ? collection['local:tenant']
+            : undefined;
         return collectionTenant === tenant;
       }) as typeof stacCollectionsResponse.collections;
     }

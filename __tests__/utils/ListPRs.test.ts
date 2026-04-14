@@ -4,6 +4,7 @@ vi.mock('@/config/env', () => ({
     OWNER: 'test-owner',
     REPO: 'test-repo',
     TARGET_BRANCH: 'main',
+    VEDA_TENANT_FILTER_FIELD: 'local:tenant',
     AWS_REGION: 'us-west-2',
     NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'mock-bucket',
   },
@@ -75,7 +76,7 @@ describe('ListPRs Utility', () => {
       ],
     });
     const fileContent = Buffer.from(
-      JSON.stringify({ tenant: 'tenant2' })
+      JSON.stringify({ 'local:tenant': 'tenant2' })
     ).toString('base64');
     mockGetContent.mockResolvedValue({
       data: { content: fileContent },

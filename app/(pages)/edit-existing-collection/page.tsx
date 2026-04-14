@@ -4,11 +4,6 @@ import EditExistingCollectionClient from './_components/EditExistingCollectionCl
 
 export const dynamic = 'force-dynamic';
 
-const isAllowedAppEnv = () => {
-  const env = process.env.NEXT_PUBLIC_APP_ENV?.toLowerCase();
-  return env === 'veda' || env === 'local';
-};
-
 export default async function EditExistingCollectionPage() {
   const session = await auth();
 
@@ -16,10 +11,7 @@ export default async function EditExistingCollectionPage() {
     redirect('/login');
   }
 
-  if (
-    !isAllowedAppEnv() ||
-    !session.scopes?.includes('stac:collection:update')
-  ) {
+  if (!session.scopes?.includes('stac:collection:update')) {
     redirect('/unauthorized');
   }
 

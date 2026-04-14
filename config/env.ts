@@ -12,6 +12,7 @@ interface EnvConfig {
   ADDITIONAL_LOGO: string;
   VEDA_BACKEND_URL: string;
   VEDA_PROD_BACKEND_URL: string;
+  VEDA_TENANT_FILTER_FIELD?: string;
 }
 
 const profiles: Record<AppEnv, EnvConfig> = {
@@ -24,6 +25,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     ADDITIONAL_LOGO: '',
     VEDA_BACKEND_URL: 'https://dev.openveda.cloud/api',
     VEDA_PROD_BACKEND_URL: 'https://staging.openveda.cloud/api',
+    VEDA_TENANT_FILTER_FIELD: 'local:tenant',
   },
   disasters: {
     OWNER: 'Disasters-Learning-Portal',
@@ -54,6 +56,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     ADDITIONAL_LOGO: 'eic',
     VEDA_BACKEND_URL: 'https://eic-staging.staging.earth.gov/api',
     VEDA_PROD_BACKEND_URL: 'https://openveda.cloud/api',
+    VEDA_TENANT_FILTER_FIELD: 'eic:tenant',
   },
 };
 

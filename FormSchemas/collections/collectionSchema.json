@@ -48,12 +48,17 @@
     "extent": {
       "title": "Extents",
       "type": "object",
-      "required": ["spatial", "temporal"],
+      "required": [
+        "spatial",
+        "temporal"
+      ],
       "properties": {
         "spatial": {
           "title": "Spatial extent object",
           "type": "object",
-          "required": ["bbox"],
+          "required": [
+            "bbox"
+          ],
           "properties": {
             "bbox": {
               "title": "Spatial extents",
@@ -74,7 +79,9 @@
         "temporal": {
           "title": "Temporal extent object",
           "type": "object",
-          "required": ["interval"],
+          "required": [
+            "interval"
+          ],
           "properties": {
             "interval": {
               "title": "Temporal extents",
@@ -86,7 +93,10 @@
                 "minItems": 2,
                 "maxItems": 2,
                 "items": {
-                  "type": ["string", "null"],
+                  "type": [
+                    "string",
+                    "null"
+                  ],
                   "pattern": "(\\+00:00|\\+00|Z)$"
                 }
               }
@@ -100,7 +110,10 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["rel", "href"],
+        "required": [
+          "rel",
+          "href"
+        ],
         "properties": {
           "href": {
             "title": "Link reference",
@@ -134,15 +147,24 @@
           {
             "title": "Range",
             "type": "object",
-            "required": ["minimum", "maximum"],
+            "required": [
+              "minimum",
+              "maximum"
+            ],
             "properties": {
               "minimum": {
                 "title": "Minimum value",
-                "type": ["number", "string"]
+                "type": [
+                  "number",
+                  "string"
+                ]
               },
               "maximum": {
                 "title": "Maximum value",
-                "type": ["number", "string"]
+                "type": [
+                  "number",
+                  "string"
+                ]
               }
             }
           },
@@ -162,7 +184,9 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "properties": {
           "name": {
             "title": "Organization name",
@@ -177,7 +201,12 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["producer", "licensor", "processor", "host"]
+              "enum": [
+                "producer",
+                "licensor",
+                "processor",
+                "host"
+              ]
             }
           },
           "url": {
@@ -192,7 +221,9 @@
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["href"],
+        "required": [
+          "href"
+        ],
         "properties": {
           "href": {
             "title": "Asset reference",
@@ -227,17 +258,17 @@
     },
     "dashboard:time_density": {
       "type": "string",
-      "enum": ["day", "month", "year"],
+      "enum": [
+        "day",
+        "month",
+        "year"
+      ],
       "title": "Time Density"
     },
     "dashboard:time_interval": {
       "type": "string",
       "format": "duration",
       "title": "Time Interval"
-    },
-    "tenant": {
-      "type": "string",
-      "title": "Tenants"
     }
   }
 }

@@ -50,14 +50,15 @@ const mockSession = {
 type StacCollection = {
   id: string;
   title: string;
+  'local:tenant'?: string;
   tenant?: string;
 };
 
 const mockStacCollectionsResponse: { collections: StacCollection[] } = {
   collections: [
-    { id: 'collection1', title: 'Collection 1', tenant: 'tenant1' },
-    { id: 'collection2', title: 'Collection 2', tenant: 'tenant2' },
-    { id: 'collection3', title: 'Public Collection', tenant: '' },
+    { id: 'collection1', title: 'Collection 1', 'local:tenant': 'tenant1' },
+    { id: 'collection2', title: 'Collection 2', 'local:tenant': 'tenant2' },
+    { id: 'collection3', title: 'Public Collection', 'local:tenant': '' },
     { id: 'collection4', title: 'No Tenant Collection' },
   ],
 };
@@ -126,7 +127,11 @@ describe('GET /api/existing-collection', () => {
       ok: true,
       json: async () => ({
         collections: [
-          { id: 'collection1', title: 'Collection 1', tenant: 'tenant1' },
+          {
+            id: 'collection1',
+            title: 'Collection 1',
+            'local:tenant': 'tenant1',
+          },
         ],
       }),
     });
@@ -166,10 +171,22 @@ describe('GET /api/existing-collection', () => {
       ok: true,
       json: async () => ({
         collections: [
-          { id: 'collection1', title: 'Collection 1', tenant: 'tenant1' },
-          { id: 'collection3', title: 'Public Collection', tenant: '' },
+          {
+            id: 'collection1',
+            title: 'Collection 1',
+            'local:tenant': 'tenant1',
+          },
+          {
+            id: 'collection3',
+            title: 'Public Collection',
+            'local:tenant': '',
+          },
           { id: 'collection4', title: 'No Tenant Collection' },
-          { id: 'collection5', title: 'Lower public tenant', tenant: 'public' },
+          {
+            id: 'collection5',
+            title: 'Lower public tenant',
+            'local:tenant': 'public',
+          },
         ],
       }),
     });
@@ -186,9 +203,13 @@ describe('GET /api/existing-collection', () => {
 
     const data = await response.json();
     expect(data.collections).toEqual([
-      { id: 'collection3', title: 'Public Collection', tenant: '' },
+      { id: 'collection3', title: 'Public Collection', 'local:tenant': '' },
       { id: 'collection4', title: 'No Tenant Collection' },
-      { id: 'collection5', title: 'Lower public tenant', tenant: 'public' },
+      {
+        id: 'collection5',
+        title: 'Lower public tenant',
+        'local:tenant': 'public',
+      },
     ]);
   });
 
@@ -199,13 +220,21 @@ describe('GET /api/existing-collection', () => {
       ok: true,
       json: async () => ({
         collections: [
-          { id: 'collection3', title: 'Public Collection', tenant: '' },
+          {
+            id: 'collection3',
+            title: 'Public Collection',
+            'local:tenant': '',
+          },
           { id: 'collection4', title: 'No Tenant Collection' },
-          { id: 'collection6', title: 'Upper public tenant', tenant: 'Public' },
+          {
+            id: 'collection6',
+            title: 'Upper public tenant',
+            'local:tenant': 'Public',
+          },
           {
             id: 'collection7',
             title: 'Tenant 2 Collection',
-            tenant: 'tenant2',
+            'local:tenant': 'tenant2',
           },
         ],
       }),
@@ -223,9 +252,13 @@ describe('GET /api/existing-collection', () => {
 
     const data = await response.json();
     expect(data.collections).toEqual([
-      { id: 'collection3', title: 'Public Collection', tenant: '' },
+      { id: 'collection3', title: 'Public Collection', 'local:tenant': '' },
       { id: 'collection4', title: 'No Tenant Collection' },
-      { id: 'collection6', title: 'Upper public tenant', tenant: 'Public' },
+      {
+        id: 'collection6',
+        title: 'Upper public tenant',
+        'local:tenant': 'Public',
+      },
     ]);
   });
 
@@ -267,9 +300,58 @@ describe('GET /api/existing-collection', () => {
     // Should include: tenant1 collections, Public collections, and collections with no tenant
     const allowedCollections = data.collections.filter(
       (col: StacCollection) =>
-        !col.tenant || col.tenant === '' || col.tenant === 'tenant1'
+        !col['local:tenant'] ||
+        col['local:tenant'] === '' ||
+        col['local:tenant'] === 'tenant1'
     );
     expect(allowedCollections).toHaveLength(3); // collection1, collection3, collection4
+  });
+
+  it('treats the authoritative tenant key as the only tenant key for filtering', async () => {
+    authMock.mockResolvedValue(mockSession);
+    getUserTenantsMock.mockResolvedValue(['tenant1']);
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        collections: [
+          {
+            id: 'collection-authoritative-deny',
+            title: 'Authoritative tenant wins',
+            'local:tenant': 'tenant2',
+            tenant: 'tenant1',
+          },
+          {
+            id: 'collection-legacy-only',
+            title: 'Legacy tenant only',
+            tenant: 'tenant1',
+          },
+          {
+            id: 'collection-public',
+            title: 'Public collection',
+          },
+        ],
+      }),
+    });
+
+    const request = new NextRequest(
+      'http://localhost:3000/api/existing-collection'
+    );
+    const response = await GET(request);
+
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data.collections).toEqual([
+      {
+        id: 'collection-legacy-only',
+        title: 'Legacy tenant only',
+        tenant: 'tenant1',
+      },
+      {
+        id: 'collection-public',
+        title: 'Public collection',
+      },
+    ]);
   });
 
   it('handles network errors gracefully', async () => {
