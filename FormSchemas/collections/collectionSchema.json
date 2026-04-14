@@ -234,10 +234,6 @@
       "type": "string",
       "format": "duration",
       "title": "Time Interval"
-    },
-    "tenant": {
-      "type": "string",
-      "title": "Tenants"
     }
   }
 }

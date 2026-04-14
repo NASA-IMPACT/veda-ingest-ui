@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getUserTenants } from '@/lib/serverTenantValidation';
+import { getTenantFieldKey } from '@/utils/tenantField';
 
 import ListPRs from '@/utils/githubUtils/ListPRs';
 
@@ -34,6 +35,8 @@ export async function GET(request: NextRequest) {
 
     const allIngests = await ListPRs(ingestionType);
 
+    const tenantFieldKey = getTenantFieldKey();
+
     const filteredIngests = allIngests.filter((ingest) => {
       const fileTenant = ingest.tenant;
 
@@ -46,7 +49,23 @@ export async function GET(request: NextRequest) {
       return userTenants.includes(fileTenant);
     });
 
-    return NextResponse.json({ githubResponse: filteredIngests });
+    const tenantKeyedIngests = filteredIngests.map((ingest) => {
+      const ingestRecord = ingest as unknown as Record<string, unknown>;
+      const tenant = ingestRecord.tenant;
+
+      if (typeof tenant !== 'string') {
+        return ingestRecord;
+      }
+
+      const { tenant: _tenant, ...rest } = ingestRecord;
+      void _tenant;
+      return {
+        ...rest,
+        [tenantFieldKey]: tenant,
+      };
+    });
+
+    return NextResponse.json({ githubResponse: tenantKeyedIngests });
   } catch (error) {
     console.error('Error in /api/list-ingest:', error);
     if (error instanceof Error) {

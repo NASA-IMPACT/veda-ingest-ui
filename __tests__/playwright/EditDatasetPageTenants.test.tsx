@@ -5,7 +5,6 @@ const modifiedConfig = {
   title: 'test title',
   description: 'test description',
   license: 'test license',
-  tenant: 'tenant2',
   discovery_items: [
     {
       filename_regex: '(.*)Test_(.*).tif$',
@@ -145,9 +144,9 @@ test.describe('Edit Dataset Page', () => {
       ).toBe(true);
 
       expect(putPayload).toBeDefined();
-      const putData = putPayload as { formData: { tenant: string } };
+      const putData = putPayload as { formData: { 'local:tenant': string } };
       expect(
-        putData.formData.tenant,
+        putData.formData['local:tenant'],
         'PUT payload should preserve tenant1 in form mode submission'
       ).toEqual('tenant1');
     });
@@ -185,7 +184,7 @@ test.describe('Edit Dataset Page', () => {
     await test.step('edit dataset via JSON Editor', async () => {
       const updatedConfig = {
         ...modifiedConfig,
-        tenant: 'tenant3',
+        'local:tenant': 'tenant3',
       };
 
       await expect(
@@ -246,9 +245,9 @@ test.describe('Edit Dataset Page', () => {
       ).toBe(true);
 
       expect(putPayload).toBeDefined();
-      const putData = putPayload as { formData: { tenant: string } };
+      const putData = putPayload as { formData: { 'local:tenant': string } };
       expect(
-        putData.formData.tenant,
+        putData.formData['local:tenant'],
         'PUT payload should include tenant3 from JSON mode submission'
       ).toEqual('tenant3');
     });
@@ -278,7 +277,7 @@ test.describe('Edit Dataset Page', () => {
 
       const invalidConfig = {
         ...modifiedConfig,
-        tenant: 'unauthorized-tenant',
+        'local:tenant': 'unauthorized-tenant',
       };
 
       await page
@@ -288,9 +287,12 @@ test.describe('Edit Dataset Page', () => {
 
       // Should show validation error
       await expect(
-        page.getByText('"tenant must be equal to one of the allowed values"', {
-          exact: true,
-        })
+        page.getByText(
+          `"local:tenant must be equal to one of the allowed values"`,
+          {
+            exact: true,
+          }
+        )
       ).toBeVisible();
     });
   });

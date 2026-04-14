@@ -308,19 +308,9 @@
                 "type": "string"
               }
             }
-          },
-          "required": ["title", "description", "href", "type", "roles"],
-          "default": {
-            "title": "Thumbnail",
-            "type": "image/jpeg",
-            "roles": ["thumbnail"]
           }
         }
       }
-    },
-    "tenant": {
-      "type": "string",
-      "title": "Tenants"
     }
   }
 }

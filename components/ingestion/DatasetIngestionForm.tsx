@@ -120,6 +120,8 @@ function DatasetIngestionForm({
     ? { ...dynamicUiSchema, ...lockedFormFields }
     : { ...uiSchema, ...lockedFormFields };
 
+  const formScopedData = formData;
+
   // --- Set initial "default" data for new forms ---
   useEffect(() => {
     if (!isEditMode && (!formData || Object.keys(formData).length === 0)) {
@@ -153,13 +155,6 @@ function DatasetIngestionForm({
             url: 'https://www.earthdata.nasa.gov/dashboard/',
           },
         ],
-        assets: {
-          thumbnail: {
-            title: 'Thumbnail',
-            type: 'image/jpeg',
-            roles: ['thumbnail'],
-          },
-        },
       }));
     }
   }, [isEditMode, formData, setFormData]);
@@ -201,7 +196,8 @@ function DatasetIngestionForm({
 
   const onFormDataChanged = useCallback(
     (formState: { formData?: object }) => {
-      setFormData((formState.formData as Record<string, unknown>) ?? {});
+      const nextData = (formState.formData as Record<string, unknown>) ?? {};
+      setFormData(nextData);
       if (setDisabled) {
         setDisabled(false);
       }
@@ -211,7 +207,7 @@ function DatasetIngestionForm({
 
   const handleJsonEditorChange = useCallback(
     (updatedData: JSONEditorValue) => {
-      setFormData(updatedData);
+      setFormData((updatedData as Record<string, unknown>) ?? {});
       setForceRenderKey((prev) => prev + 1);
       setActiveTab('form');
       setHasJSONChanges(false);
@@ -225,7 +221,7 @@ function DatasetIngestionForm({
   const handleFormSubmit = useCallback(
     (rjsfData: { formData?: object }) => {
       const finalFormData = {
-        ...rjsfData.formData,
+        ...((rjsfData.formData as Record<string, unknown>) ?? {}),
         ...additionalProperties,
       };
       onSubmit(finalFormData);
@@ -276,10 +272,13 @@ function DatasetIngestionForm({
                 templates={{
                   ObjectFieldTemplate: ObjectFieldTemplate,
                 }}
-                formData={formData}
+                formData={formScopedData}
                 onChange={onFormDataChanged}
                 onSubmit={handleFormSubmit}
-                formContext={{ formData, updateFormData: setFormData }}
+                formContext={{
+                  formData: formScopedData,
+                  updateFormData: setFormData,
+                }}
                 widgets={widgets}
               >
                 {children ? (
@@ -322,7 +321,7 @@ function DatasetIngestionForm({
               }
             >
               <JSONEditor
-                value={formData || {}}
+                value={formScopedData || {}}
                 jsonSchema={dynamicSchema}
                 onChange={handleJsonEditorChange}
                 disableCollectionNameChange={disableCollectionNameChange}

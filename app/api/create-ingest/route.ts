@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { validateTenantAccess } from '@/lib/serverTenantValidation';
+import { getTenantFieldKey } from '@/utils/tenantField';
 
 import CreatePR from '@/utils/githubUtils/CreatePR';
 import UpdatePR from '@/utils/githubUtils/UpdatePR';
@@ -49,7 +50,11 @@ export async function POST(request: NextRequest) {
 
     const validatedIngestionType: AllowedIngestionType = ingestionType;
 
-    if (data.tenant) {
+    const tenantFieldKey = getTenantFieldKey();
+    const tenantValue = data[tenantFieldKey];
+    const tenant = typeof tenantValue === 'string' ? tenantValue : undefined;
+
+    if (tenant && tenant !== '' && tenant.toLowerCase() !== 'public') {
       const session = await auth();
       if (!session) {
         return NextResponse.json(
@@ -58,7 +63,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const tenantValidation = await validateTenantAccess(data.tenant, request);
+      const tenantValidation = await validateTenantAccess(tenant, request);
       if (!tenantValidation.isValid) {
         return NextResponse.json(
           {
@@ -124,7 +129,11 @@ export async function PUT(request: NextRequest) {
 
     const { gitRef, fileSha, filePath, formData } = body;
 
-    if (formData?.tenant) {
+    const tenantFieldKey = getTenantFieldKey();
+    const tenantValue = formData?.[tenantFieldKey];
+    const tenant = typeof tenantValue === 'string' ? tenantValue : undefined;
+
+    if (tenant && tenant !== '' && tenant.toLowerCase() !== 'public') {
       const session = await auth();
       if (!session) {
         return NextResponse.json(
@@ -133,10 +142,7 @@ export async function PUT(request: NextRequest) {
         );
       }
 
-      const tenantValidation = await validateTenantAccess(
-        formData.tenant,
-        request
-      );
+      const tenantValidation = await validateTenantAccess(tenant, request);
       if (!tenantValidation.isValid) {
         return NextResponse.json(
           {

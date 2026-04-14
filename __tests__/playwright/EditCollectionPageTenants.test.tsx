@@ -213,9 +213,9 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
         'PUT request should have been intercepted'
       ).toBe(true);
 
-      const putData = putPayload as { formData: { tenant: string } };
+      const putData = putPayload as { formData: { 'local:tenant': string } };
       expect(
-        putData.formData.tenant,
+        putData.formData['local:tenant'],
         'PUT payload should preserve tenant1 in form mode submission'
       ).toEqual('tenant1');
     });
@@ -254,7 +254,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       const updatedConfig = {
         ...modifiedCollectionConfig,
         id: 'Playwright_TEST',
-        tenant: 'tenant3',
+        'local:tenant': 'tenant3',
       };
 
       await expect(
@@ -319,9 +319,11 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
         'PUT request should have been intercepted'
       ).toBe(true);
 
-      const putData2 = putPayload2 as { formData: { tenant: string } };
+      const putData2 = putPayload2 as {
+        formData: { 'local:tenant': string };
+      };
       expect(
-        putData2.formData.tenant,
+        putData2.formData['local:tenant'],
         'PUT payload should include tenant3 from JSON mode submission'
       ).toEqual('tenant3');
     });
@@ -362,7 +364,7 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
       const invalidConfig = {
         ...modifiedCollectionConfig,
         id: 'Playwright_TEST',
-        tenant: 'unauthorized-tenant',
+        'local:tenant': 'unauthorized-tenant',
       };
 
       await page
@@ -375,9 +377,12 @@ test.describe('Tenant Functionality - Edit Collection Page', () => {
 
       // Should show validation error
       await expect(
-        page.getByText('"tenant must be equal to one of the allowed values"', {
-          exact: true,
-        })
+        page.getByText(
+          `"local:tenant must be equal to one of the allowed values"`,
+          {
+            exact: true,
+          }
+        )
       ).toBeVisible();
     });
   });

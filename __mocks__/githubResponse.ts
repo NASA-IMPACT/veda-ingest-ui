@@ -35,7 +35,7 @@ export const githubResponse = [
       base: { ref: 'main' },
       author_association: 'CONTRIBUTOR',
     },
-    tenant: 'tenant1',
+    'local:tenant': 'tenant1',
   },
   {
     pr: {
@@ -72,7 +72,7 @@ export const githubResponse = [
       base: { ref: 'main' },
       author_association: 'CONTRIBUTOR',
     },
-    tenant: 'tenant3',
+    'local:tenant': 'tenant3',
   },
   {
     // PR #3: Public (no tenants specified)
@@ -135,6 +135,6 @@ export const githubResponse = [
       base: { ref: 'main' },
       author_association: 'CONTRIBUTOR',
     },
-    tenant: 'tenant3',
+    'local:tenant': 'tenant3',
   },
 ];
