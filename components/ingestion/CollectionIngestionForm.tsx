@@ -103,6 +103,8 @@ function CollectionIngestionForm({
     ? { ...dynamicUiSchema, ...lockedFormFields }
     : { ...uiSchema, ...lockedFormFields };
 
+  const formScopedData = formData;
+
   const prevFormDataRef = useRef(formData);
   useEffect(() => {
     const wasCleared =
@@ -179,17 +181,17 @@ function CollectionIngestionForm({
     const rjsfData: Record<string, unknown> = {};
     const additional: Record<string, unknown> = {};
 
-    if (formData) {
-      for (const key in formData) {
+    if (formScopedData) {
+      for (const key in formScopedData) {
         if (baseKeys.has(key)) {
-          rjsfData[key] = formData[key];
+          rjsfData[key] = formScopedData[key];
         } else if (key !== 'summaries' && !currentExtensionKeys.has(key)) {
-          additional[key] = formData[key];
+          additional[key] = formScopedData[key];
         }
       }
     }
     return { rjsfFormData: rjsfData, additionalProperties: additional };
-  }, [formData, extensionFields, dynamicSchema]);
+  }, [dynamicSchema, extensionFields, formScopedData]);
 
   const [summariesData, setSummariesData] = useState(
     rjsfFormData.summaries || {}
@@ -224,12 +226,15 @@ function CollectionIngestionForm({
     if (!validateExtensionFields()) {
       return;
     }
-    onSubmit({ ...formData, summaries: summariesData });
+    onSubmit({
+      ...(formData ?? {}),
+      summaries: summariesData,
+    });
   }, [validateExtensionFields, formData, summariesData, onSubmit]);
 
   const handleJsonEditorChange = useCallback(
     (updatedData: JSONEditorValue) => {
-      setFormData(updatedData);
+      setFormData((updatedData as Record<string, unknown>) ?? {});
       // When JSON is edited, also update the separated summaries state
       setSummariesData(
         (updatedData.summaries as Record<string, unknown>) || {}
@@ -394,7 +399,7 @@ function CollectionIngestionForm({
                 }
               >
                 <JSONEditor
-                  value={formData || {}}
+                  value={formScopedData || {}}
                   jsonSchema={dynamicSchema}
                   onChange={handleJsonEditorChange}
                   disableIdChange={isEditMode}
@@ -402,11 +407,11 @@ function CollectionIngestionForm({
                     isExistingCollectionEditMode
                       ? {
                           summaries: {
-                            value: formData?.summaries,
+                            value: formScopedData?.summaries,
                             label: 'Summaries',
                           },
                           links: {
-                            value: formData?.links,
+                            value: formScopedData?.links,
                             label: 'Links',
                           },
                         }

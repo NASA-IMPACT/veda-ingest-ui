@@ -6,6 +6,7 @@ import { Status } from '@/types/global';
 import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm';
 import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
 import { useCogValidation } from '@/hooks/useCogValidation';
+import { getTenantFieldKey } from '@/utils/tenantField';
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -49,8 +50,12 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
 
     // Clean up the form data
     const cleanedData = { ...data };
-    if (Array.isArray(cleanedData.tenant) && cleanedData.tenant.length === 0) {
-      delete cleanedData.tenant;
+    const tenantFieldKey = getTenantFieldKey();
+    if (
+      Array.isArray(cleanedData[tenantFieldKey]) &&
+      cleanedData[tenantFieldKey].length === 0
+    ) {
+      delete cleanedData[tenantFieldKey];
     }
 
     setStagedFormData(cleanedData);

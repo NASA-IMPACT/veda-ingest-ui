@@ -1,9 +1,6 @@
 {
   "ui:grid": [
     {
-      "tenant": 24
-    },
-    {
       "collection": 8,
       "title": 16
     },
@@ -202,9 +199,5 @@
     "items": {
       "ui:widget": "testableUrl"
     }
-  },
-  "tenant": {
-    "classNames": "tenants-field",
-    "ui:help": "Optional tenant allowed to access this item."
   }
 }

@@ -1,6 +1,7 @@
 import { Octokit } from '@octokit/rest';
 import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 import { IngestPullRequest } from '@/types/ingest';
+import { getTenantFieldKey } from '@/utils/tenantField';
 
 import { cfg } from '@/config/env';
 const base = cfg.TARGET_BRANCH || 'main';
@@ -14,6 +15,14 @@ const TARGET_PATHS = {
 
 type IngestionType = 'collection' | 'dataset';
 
+const extractTenantFromContent = (
+  parsedContent: Record<string, unknown>,
+  tenantFieldKey: string
+): string | undefined => {
+  const tenant = parsedContent[tenantFieldKey];
+  return typeof tenant === 'string' ? tenant : undefined;
+};
+
 const ListPRs = async (
   ingestionType: IngestionType
 ): Promise<IngestPullRequest[]> => {
@@ -24,6 +33,7 @@ const ListPRs = async (
   }
 
   try {
+    const tenantFieldKey = getTenantFieldKey();
     const token = await GetGithubToken();
     const octokit = new Octokit({ auth: token });
     const targetPath = TARGET_PATHS[ingestionType];
@@ -65,8 +75,16 @@ const ListPRs = async (
             'base64'
           ).toString('utf-8');
           try {
-            const parsedContent = JSON.parse(fileContent);
-            return { pr, tenant: parsedContent.tenant };
+            const parsedContent = JSON.parse(fileContent) as Record<
+              string,
+              unknown
+            >;
+            const tenant = extractTenantFromContent(
+              parsedContent,
+              tenantFieldKey
+            );
+
+            return { pr, tenant };
           } catch {
             console.error(`Failed to parse JSON for PR #${pr.number}`);
             return { pr, tenant: undefined };

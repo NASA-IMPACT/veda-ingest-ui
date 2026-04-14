@@ -8,6 +8,7 @@ import ErrorModal from '@/components/ui/ErrorModal';
 
 import { IngestPullRequest } from '@/types/ingest';
 import { useUserTenants } from '@/app/contexts/TenantContext';
+import { getTenantFieldKey } from '@/utils/tenantField';
 import { IngestColumn } from './_components/IngestColumn';
 import { SkeletonLoading } from './_components/SkeletonLoading';
 
@@ -17,6 +18,13 @@ interface PendingIngestListProps {
   ingestionType: 'dataset' | 'collection';
   onIngestSelect: (ref: string, title: string) => void;
 }
+
+const getIngestTenant = (ingest: IngestPullRequest): string | undefined => {
+  const tenantFieldKey = getTenantFieldKey();
+  const ingestRecord = ingest as unknown as Record<string, unknown>;
+  const tenant = ingestRecord[tenantFieldKey];
+  return typeof tenant === 'string' ? tenant : undefined;
+};
 
 const PendingIngestList: React.FC<PendingIngestListProps> = ({
   ingestionType,
@@ -88,9 +96,9 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
 
   const publicIngests = allIngests.filter(
     (ingest) =>
-      !ingest.tenant ||
-      ingest.tenant === '' ||
-      ingest.tenant.toLowerCase() === 'public'
+      !getIngestTenant(ingest) ||
+      getIngestTenant(ingest) === '' ||
+      getIngestTenant(ingest)?.toLowerCase() === 'public'
   );
 
   return (
@@ -103,7 +111,7 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
         {visibleTenants.length > 0 &&
           visibleTenants.map((tenant: string) => {
             const tenantIngests: IngestPullRequest[] = allIngests.filter(
-              (ingest: IngestPullRequest) => ingest.tenant === tenant
+              (ingest: IngestPullRequest) => getIngestTenant(ingest) === tenant
             );
 
             return (
