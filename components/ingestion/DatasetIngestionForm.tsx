@@ -155,13 +155,6 @@ function DatasetIngestionForm({
             url: 'https://www.earthdata.nasa.gov/dashboard/',
           },
         ],
-        assets: {
-          thumbnail: {
-            title: 'Thumbnail',
-            type: 'image/jpeg',
-            roles: ['thumbnail'],
-          },
-        },
       }));
     }
   }, [isEditMode, formData, setFormData]);
@@ -282,7 +275,10 @@ function DatasetIngestionForm({
                 formData={formScopedData}
                 onChange={onFormDataChanged}
                 onSubmit={handleFormSubmit}
-                formContext={{ formData: formScopedData, updateFormData: setFormData }}
+                formContext={{
+                  formData: formScopedData,
+                  updateFormData: setFormData,
+                }}
                 widgets={widgets}
               >
                 {children ? (

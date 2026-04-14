@@ -160,6 +160,11 @@
           "rows": 8,
           "description": "Thumbnail description should also include source attribution."
         }
+      },
+      "type": {
+        "ui:options": {
+          "description": "e.g. image/jpeg"
+        }
       }
     }
   },

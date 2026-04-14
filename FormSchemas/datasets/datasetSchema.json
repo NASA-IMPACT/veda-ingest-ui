@@ -308,11 +308,6 @@
                 "type": "string"
               }
             }
-          },
-          "default": {
-            "title": "Thumbnail",
-            "type": "image/jpeg",
-            "roles": ["thumbnail"]
           }
         }
       }
