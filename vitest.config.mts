@@ -43,7 +43,7 @@ export default defineConfig({
     },
     server: {
       deps: {
-        inline: ['next-auth', '@next-auth/core'],
+          inline: ['next-auth', '@next-auth/core', /@smithy\//],
       },
     },
   },
