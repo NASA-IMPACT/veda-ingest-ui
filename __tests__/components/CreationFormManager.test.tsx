@@ -330,12 +330,13 @@ describe('CreationFormManager', () => {
       const handleSubmit = async () => {
         await defaultProps.setStatus('idle');
         // Simulate the form submission through the manager
-         const cleanedData = { ...formData };
-         if (
+        const cleanedData = { ...formData };
+        if (
           Array.isArray(cleanedData['local:tenant']) &&
           cleanedData['local:tenant'].length === 0
-         ) {
+        ) {
           delete cleanedData['local:tenant'];
+        }
 
         defaultProps.setStatus('loadingGithub');
         defaultProps.setCollectionName(cleanedData.collection as string);
