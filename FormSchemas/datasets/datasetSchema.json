@@ -42,11 +42,7 @@
     },
     "dashboard:time_density": {
       "type": "string",
-      "enum": [
-        "day",
-        "month",
-        "year"
-      ],
+      "enum": ["day", "month", "year"],
       "title": "Time Density"
     },
     "dashboard:time_interval": {
@@ -116,17 +112,11 @@
       "type": "object",
       "properties": {
         "startdate": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "title": "Start Date"
         },
         "enddate": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "title": "End Date"
         }
       }
@@ -139,9 +129,7 @@
         "properties": {
           "discovery": {
             "type": "string",
-            "enum": [
-              "s3"
-            ],
+            "enum": ["s3"],
             "title": "Discovery"
           },
           "prefix": {
@@ -159,11 +147,7 @@
           },
           "datetime_range": {
             "type": "string",
-            "enum": [
-              "day",
-              "month",
-              "year"
-            ],
+            "enum": ["day", "month", "year"],
             "title": "Datetime Range"
           },
           "start_datetime": {
@@ -195,10 +179,7 @@
             "default": false
           }
         },
-        "required": [
-          "prefix",
-          "bucket"
-        ]
+        "required": ["prefix", "bucket"]
       },
       "minItems": 1
     },
@@ -254,9 +235,7 @@
     "renders": {
       "title": "Renders",
       "type": "object",
-      "required": [
-        "dashboard"
-      ],
+      "required": ["dashboard"],
       "properties": {
         "dashboard": {
           "type": "string",
@@ -269,9 +248,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": [
-          "name"
-        ],
+        "required": ["name"],
         "properties": {
           "name": {
             "title": "Organization name",
@@ -287,12 +264,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": [
-                "producer",
-                "licensor",
-                "processor",
-                "host"
-              ]
+              "enum": ["producer", "licensor", "processor", "host"]
             }
           },
           "url": {
@@ -305,9 +277,7 @@
       "default": [
         {
           "name": "NASA VEDA",
-          "roles": [
-            "host"
-          ],
+          "roles": ["host"],
           "url": "https://www.earthdata.nasa.gov/dashboard/"
         }
       ]
@@ -339,19 +309,10 @@
               }
             }
           },
-          "required": [
-            "title",
-            "description",
-            "href",
-            "type",
-            "roles"
-          ],
           "default": {
             "title": "Thumbnail",
             "type": "image/jpeg",
-            "roles": [
-              "thumbnail"
-            ]
+            "roles": ["thumbnail"]
           }
         }
       }
