@@ -324,19 +324,18 @@ describe('CreationFormManager', () => {
       const [formData] = useState<Record<string, unknown>>({
         collection: 'Test Dataset',
         sample_files: 'http://example.com/file.tif',
-        tenant: [],
+        'local:tenant': [],
       });
 
       const handleSubmit = async () => {
         await defaultProps.setStatus('idle');
         // Simulate the form submission through the manager
-        const cleanedData = { ...formData };
-        if (
-          Array.isArray(cleanedData.tenant) &&
-          cleanedData.tenant.length === 0
-        ) {
-          delete cleanedData.tenant;
-        }
+         const cleanedData = { ...formData };
+         if (
+          Array.isArray(cleanedData['local:tenant']) &&
+          cleanedData['local:tenant'].length === 0
+         ) {
+          delete cleanedData['local:tenant'];
 
         defaultProps.setStatus('loadingGithub');
         defaultProps.setCollectionName(cleanedData.collection as string);

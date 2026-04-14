@@ -6,7 +6,7 @@ const modifiedConfig = {
   title: 'test title',
   description: 'test description — now with more details! 🙂',
   license: 'test license',
-  tenant: 'tenant2',
+  'local:tenant': 'tenant2',
   discovery_items: [
     {
       filename_regex: '.*_\\d{6}.tif$',

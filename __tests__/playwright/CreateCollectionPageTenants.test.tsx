@@ -77,7 +77,7 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
         const postData = request.postDataJSON();
 
         expect(
-          postData.data.tenant,
+          postData.data['local:tenant'],
           'tenant key value should match selection'
         ).toEqual('tenant2');
 
@@ -159,7 +159,7 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
         expect(
           postData.data,
           'tenant key should not be included'
-        ).not.toHaveProperty('tenant');
+        ).not.toHaveProperty('local:tenant');
 
         await route.fulfill({
           status: 200,
@@ -199,7 +199,7 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
         const postData = request.postDataJSON();
 
         expect(
-          postData.data.tenant,
+          postData.data['local:tenant'],
           'tenant key value should match JSON entry'
         ).toEqual('tenant3');
 
@@ -224,7 +224,7 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
     await test.step('paste JSON with tenants', async () => {
       const configWithTenants = {
         ...requiredCollectionConfig,
-        tenant: 'tenant3',
+        'local:tenant': 'tenant3',
       };
       await page
         .getByTestId('json-editor')
@@ -270,7 +270,7 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
 
       const invalidConfig = {
         ...requiredCollectionConfig,
-        tenant: 'unauthorized-tenant',
+        'local:tenant': 'unauthorized-tenant',
       };
 
       await page
@@ -282,9 +282,12 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
       await page.getByRole('button', { name: /apply changes/i }).click();
 
       await expect(
-        page.getByText('"tenant must be equal to one of the allowed values"', {
-          exact: true,
-        }),
+        page.getByText(
+          `"local:tenant must be equal to one of the allowed values"`,
+          {
+            exact: true,
+          }
+        ),
         'Should show validation error'
       ).toBeVisible();
 
@@ -322,7 +325,7 @@ test.describe('Tenant Functionality - Create Collection Page', () => {
         expect(
           postData.data,
           'tenant key should not be included'
-        ).not.toHaveProperty('tenant');
+        ).not.toHaveProperty('local:tenant');
 
         await route.fulfill({
           status: 200,

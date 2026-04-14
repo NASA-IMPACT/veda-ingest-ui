@@ -36,14 +36,14 @@ describe('PendingIngestList', () => {
         title: 'Ingest Request for tenant1 Dataset',
         head: { ref: 'refs/heads/tenant1-dataset' },
       },
-      tenant: 'tenant1',
+      'local:tenant': 'tenant1',
     },
     {
       pr: {
         title: 'Ingest Request for tenant2 Dataset',
         head: { ref: 'refs/heads/tenant2-dataset' },
       },
-      tenant: 'tenant2',
+      'local:tenant': 'tenant2',
     },
     {
       pr: {
@@ -237,7 +237,7 @@ describe('PendingIngestList', () => {
               title: 'Ingest Request with explicit public tenant',
               head: { ref: 'refs/heads/public-tenant-value' },
             },
-            tenant: 'public',
+            'local:tenant': 'public',
           },
         ],
       }),
