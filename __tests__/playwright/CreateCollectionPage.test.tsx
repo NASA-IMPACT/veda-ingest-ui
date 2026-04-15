@@ -223,11 +223,11 @@ test.describe('Create Collection Page', () => {
     page,
   }) => {
     const userComment = 'This comment was entered in the VEDA Ingest UI';
-    let postPayload2: unknown;
+    let postPayload: unknown;
     // Intercept the POST request to capture its payload
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
-        postPayload2 = request.postDataJSON();
+        postPayload = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -317,20 +317,20 @@ test.describe('Create Collection Page', () => {
       page.getByRole('dialog', { name: /Ingestion Request Submitted/i })
     ).toBeVisible();
 
-    const postData2 = postPayload2 as {
+    const postData = postPayload as {
       ingestionType: string;
       data: unknown;
       userComment: string;
     };
     expect(
-      postData2.ingestionType,
+      postData.ingestionType,
       'Ingestion Type is included in POST data'
     ).toBe('collection');
     expect(
-      postData2.data,
+      postData.data,
       'Collection config data is included in POST data'
     ).toEqual(expect.objectContaining(requiredCollectionConfig));
-    expect(postData2.userComment, 'user comment is included in POST data').toBe(
+    expect(postData.userComment, 'user comment is included in POST data').toBe(
       userComment
     );
   });
@@ -338,11 +338,11 @@ test.describe('Create Collection Page', () => {
   test('Create Collection allows extra fields with toggle enabled', async ({
     page,
   }, testInfo) => {
-    let postPayload3: unknown;
+    let postPayload: unknown;
     // Intercept the request to capture the payload
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
-        postPayload3 = request.postDataJSON();
+        postPayload = request.postDataJSON();
 
         await route.abort(); // Abort to prevent actual submission
       } else {
@@ -423,11 +423,11 @@ test.describe('Create Collection Page', () => {
       await page.getByRole('button', { name: /continue & submit/i }).click();
     });
 
-    const postData3 = postPayload3 as { ingestionType: string; data: unknown };
-    expect(postData3.ingestionType, 'ingestionType should be collection').toBe(
+    const postData = postPayload as { ingestionType: string; data: unknown };
+    expect(postData.ingestionType, 'ingestionType should be collection').toBe(
       'collection'
     );
-    expect(postData3.data, 'POST data should include the extra field').toEqual(
+    expect(postData.data, 'POST data should include the extra field').toEqual(
       expect.objectContaining({ extraField: true })
     );
   });

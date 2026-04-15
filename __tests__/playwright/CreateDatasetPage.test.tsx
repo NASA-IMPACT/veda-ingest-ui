@@ -227,11 +227,11 @@ test.describe('Create Dataset Page', () => {
   test('Create Dataset allows extra fields with toggle enabled', async ({
     page,
   }, testInfo) => {
-    let postPayload2: unknown;
+    let postPayload: unknown;
     // Intercept and capture the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
-        postPayload2 = request.postDataJSON();
+        postPayload = request.postDataJSON();
 
         await route.abort();
       } else {
@@ -305,11 +305,11 @@ test.describe('Create Dataset Page', () => {
       await page.getByRole('button', { name: /continue & submit/i }).click();
     });
 
-    const postData2 = postPayload2 as { ingestionType: string; data: unknown };
-    expect(postData2.ingestionType, 'ingestionType should be dataset').toBe(
+    const postData = postPayload as { ingestionType: string; data: unknown };
+    expect(postData.ingestionType, 'ingestionType should be dataset').toBe(
       'dataset'
     );
-    expect(postData2.data, 'POST data should include the extra field').toEqual(
+    expect(postData.data, 'POST data should include the extra field').toEqual(
       expect.objectContaining({ extraField: true })
     );
   });

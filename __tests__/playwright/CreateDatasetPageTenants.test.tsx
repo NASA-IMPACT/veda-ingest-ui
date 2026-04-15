@@ -224,11 +224,11 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
   test('not selecting tenants in form mode omits tenant key', async ({
     page,
   }) => {
-    let postPayload2: unknown;
+    let postPayload: unknown;
     // Intercept and capture the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
-        postPayload2 = request.postDataJSON();
+        postPayload = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -260,19 +260,19 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
       await page.getByRole('button', { name: /continue & submit/i }).click();
     });
 
-    const postData2 = postPayload2 as { data: Record<string, unknown> };
+    const postData = postPayload as { data: Record<string, unknown> };
     expect(
-      postData2.data,
+      postData.data,
       'tenant key should not be included'
     ).not.toHaveProperty('local:tenant');
   });
 
   test('Create Dataset with tenants in JSON mode', async ({ page }) => {
-    let postPayload3: unknown;
+    let postPayload: unknown;
     // Intercept and capture the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
-        postPayload3 = request.postDataJSON();
+        postPayload = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -327,9 +327,9 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
       ).toBeVisible();
     });
 
-    const postData3 = postPayload3 as { data: { 'local:tenant': string } };
+    const postData = postPayload as { data: { 'local:tenant': string } };
     expect(
-      postData3.data['local:tenant'],
+      postData.data['local:tenant'],
       'tenant key value should match JSON entry'
     ).toEqual('tenant2');
   });
@@ -390,11 +390,11 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
       })
     );
 
-    let postPayload4: unknown;
+    let postPayload: unknown;
     // Intercept and capture the request
     await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
-        postPayload4 = request.postDataJSON();
+        postPayload = request.postDataJSON();
 
         await route.fulfill({
           status: 200,
@@ -445,9 +445,9 @@ test.describe('Tenant Functionality - Create Dataset Page', () => {
       ).toBeVisible();
     });
 
-    const postData4 = postPayload4 as { data: Record<string, unknown> };
+    const postData = postPayload as { data: Record<string, unknown> };
     expect(
-      postData4.data,
+      postData.data,
       'tenant key should not be in POST data'
     ).not.toHaveProperty('local:tenant');
   });
