@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { App } from 'antd';
 import { VEDA_BACKEND_URL } from '@/config/env';
 import { Map as LeafletMap } from 'leaflet';
@@ -43,143 +43,148 @@ export const useCOGViewer = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const mapRef = useRef<LeafletMap | null>(null);
 
-  const fetchMetadata = async (
-    url: string,
-    renders?: string | RendersType | null
-  ) => {
-    if (!url) {
-      message.error('COG URL is required');
-      return;
-    }
-    setLoading(true);
+  const fetchTileUrl = useCallback(
+    async (
+      url: string,
+      bands: number[],
+      rescale: [number | null, number | null][],
+      colormap: string,
+      colorFormula?: string | null,
+      resampling?: string | null,
+      noData?: string | null
+    ) => {
+      setLoading(true);
+      try {
+        if (!url) throw new Error('COG URL is required.');
 
-    try {
-      const response = await fetch(
-        `${VEDA_BACKEND_URL}/raster/cog/info?url=${encodeURIComponent(url)}`
-      );
-      if (!response.ok) {
-        const errorMessage = await response.json().catch(() => null);
+        const bidxParams = bands.map((band) => `&bidx=${band}`).join('');
+        const rescaleParams = rescale
+          .filter((range) => range[0] !== null && range[1] !== null)
+          .map((range) => `&rescale=${range[0]},${range[1]}`)
+          .join('');
+        const colormapParam =
+          colormap !== 'Internal' ? `&colormap_name=${colormap}` : '';
+        const colorFormulaParam = colorFormula
+          ? `&color_formula=${encodeURIComponent(colorFormula)}`
+          : '';
+        const resamplingParam = resampling ? `&resampling=${resampling}` : '';
+        const noDataParam = noData
+          ? `&nodata=${encodeURIComponent(noData)}`
+          : '';
 
-        if (response.status === 500 && errorMessage?.detail) {
-          const match = errorMessage.detail.match(
-            /^(.*?): No such file or directory$/
-          );
-          if (match) {
-            throw new Error(`Failed to load ${match[1]}. Check URL entry.`);
-          }
-          throw new Error(`Server Error: ${errorMessage.detail}`);
-        }
-
-        throw new Error(
-          `Failed to fetch metadata (Status: ${response.status})`
+        const response = await fetch(
+          `${VEDA_BACKEND_URL}/raster/cog/WebMercatorQuad/tilejson.json?url=${encodeURIComponent(
+            url
+          )}${bidxParams}${rescaleParams}${colormapParam}${colorFormulaParam}${resamplingParam}${noDataParam}`
         );
-      }
 
-      const COGdata = (await response.json()) as COGMetadata;
+        if (!response.ok) throw new Error('Failed to fetch tile URL');
+        const data = (await response.json()) as TileJsonResponse;
+        setTileUrl(data.tiles[0]);
 
-      let mergedMetadata: COGMetadata = { ...COGdata };
-      let parsedRenders: RendersType = {};
-
-      if (renders) {
-        try {
-          // Parse only if `renders` is a string
-          parsedRenders =
-            typeof renders === 'string'
-              ? (JSON.parse(renders) as RendersType)
-              : renders;
-          mergedMetadata = { ...COGdata, ...parsedRenders };
-        } catch (error) {
-          console.error('Error parsing renders:', error);
+        const bounds = data.bounds;
+        if (mapRef.current && bounds) {
+          import('leaflet').then((L) => {
+            const leafletBounds = L.latLngBounds([
+              [bounds[1], bounds[0]],
+              [bounds[3], bounds[2]],
+            ]);
+            mapRef.current?.fitBounds(leafletBounds);
+          });
         }
+
+        message.success('COG tile layer loaded successfully!');
+      } catch (error) {
+        console.error('Error fetching tile URL:', error);
+        message.error('Failed to load tile layer.');
+      } finally {
+        setLoading(false);
       }
+    },
+    [message, mapRef]
+  );
 
-      setMetadata(mergedMetadata);
-
-      // Keep default behavior to a single selected band unless renders specifies bidx.
-      setSelectedBands(parsedRenders.bidx?.slice(0, 3) || [1]);
-      setRescale(parsedRenders.rescale || [[null, null]]);
-      setSelectedColormap(parsedRenders.colormap_name || 'Internal');
-      setColorFormula(parsedRenders.color_formula || null);
-      setSelectedResampling(parsedRenders.resampling || null);
-      setNoDataValue(parsedRenders.nodata || null);
-
-      fetchTileUrl(
-        url,
-        parsedRenders.bidx || [1],
-        parsedRenders.rescale || [[null, null]],
-        parsedRenders.colormap_name || 'Internal',
-        parsedRenders.color_formula || null,
-        parsedRenders.resampling || null,
-        parsedRenders.nodata || null
-      );
-
-      message.success('COG metadata loaded successfully!');
-    } catch (error) {
-      if (error instanceof Error) {
-        message.error(error.message);
-      } else {
-        message.error('Failed to load COG metadata.');
+  const fetchMetadata = useCallback(
+    async (url: string, renders?: string | RendersType | null) => {
+      if (!url) {
+        message.error('COG URL is required');
+        return;
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+      setLoading(true);
 
-  const fetchTileUrl = async (
-    url: string,
-    bands: number[],
-    rescale: [number | null, number | null][],
-    colormap: string,
-    colorFormula?: string | null,
-    resampling?: string | null,
-    noData?: string | null
-  ) => {
-    setLoading(true);
-    try {
-      if (!url) throw new Error('COG URL is required.');
+      try {
+        const response = await fetch(
+          `${VEDA_BACKEND_URL}/raster/cog/info?url=${encodeURIComponent(url)}`
+        );
+        if (!response.ok) {
+          const errorMessage = await response.json().catch(() => null);
 
-      const bidxParams = bands.map((band) => `&bidx=${band}`).join('');
-      const rescaleParams = rescale
-        .filter((range) => range[0] !== null && range[1] !== null)
-        .map((range) => `&rescale=${range[0]},${range[1]}`)
-        .join('');
-      const colormapParam =
-        colormap !== 'Internal' ? `&colormap_name=${colormap}` : '';
-      const colorFormulaParam = colorFormula
-        ? `&color_formula=${encodeURIComponent(colorFormula)}`
-        : '';
-      const resamplingParam = resampling ? `&resampling=${resampling}` : '';
-      const noDataParam = noData ? `&nodata=${encodeURIComponent(noData)}` : '';
+          if (response.status === 500 && errorMessage?.detail) {
+            const match = errorMessage.detail.match(
+              /^(.*?): No such file or directory$/
+            );
+            if (match) {
+              throw new Error(`Failed to load ${match[1]}. Check URL entry.`);
+            }
+            throw new Error(`Server Error: ${errorMessage.detail}`);
+          }
 
-      const response = await fetch(
-        `${VEDA_BACKEND_URL}/raster/cog/WebMercatorQuad/tilejson.json?url=${encodeURIComponent(
-          url
-        )}${bidxParams}${rescaleParams}${colormapParam}${colorFormulaParam}${resamplingParam}${noDataParam}`
-      );
+          throw new Error(
+            `Failed to fetch metadata (Status: ${response.status})`
+          );
+        }
 
-      if (!response.ok) throw new Error('Failed to fetch tile URL');
-      const data = (await response.json()) as TileJsonResponse;
-      setTileUrl(data.tiles[0]);
+        const COGdata = (await response.json()) as COGMetadata;
 
-      const bounds = data.bounds;
-      if (mapRef.current && bounds) {
-        import('leaflet').then((L) => {
-          const leafletBounds = L.latLngBounds([
-            [bounds[1], bounds[0]],
-            [bounds[3], bounds[2]],
-          ]);
-          mapRef.current?.fitBounds(leafletBounds);
-        });
+        let mergedMetadata: COGMetadata = { ...COGdata };
+        let parsedRenders: RendersType = {};
+
+        if (renders) {
+          try {
+            // Parse only if `renders` is a string
+            parsedRenders =
+              typeof renders === 'string'
+                ? (JSON.parse(renders) as RendersType)
+                : renders;
+            mergedMetadata = { ...COGdata, ...parsedRenders };
+          } catch (error) {
+            console.error('Error parsing renders:', error);
+          }
+        }
+
+        setMetadata(mergedMetadata);
+
+        // Keep default behavior to a single selected band unless renders specifies bidx.
+        setSelectedBands(parsedRenders.bidx?.slice(0, 3) || [1]);
+        setRescale(parsedRenders.rescale || [[null, null]]);
+        setSelectedColormap(parsedRenders.colormap_name || 'Internal');
+        setColorFormula(parsedRenders.color_formula || null);
+        setSelectedResampling(parsedRenders.resampling || null);
+        setNoDataValue(parsedRenders.nodata || null);
+
+        fetchTileUrl(
+          url,
+          parsedRenders.bidx || [1],
+          parsedRenders.rescale || [[null, null]],
+          parsedRenders.colormap_name || 'Internal',
+          parsedRenders.color_formula || null,
+          parsedRenders.resampling || null,
+          parsedRenders.nodata || null
+        );
+
+        message.success('COG metadata loaded successfully!');
+      } catch (error) {
+        if (error instanceof Error) {
+          message.error(error.message);
+        } else {
+          message.error('Failed to load COG metadata.');
+        }
+      } finally {
+        setLoading(false);
       }
-
-      message.success('COG tile layer loaded successfully!');
-    } catch (error) {
-      console.error('Error fetching tile URL:', error);
-      message.error('Failed to load tile layer.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [message, fetchTileUrl]
+  );
 
   return {
     cogUrl,

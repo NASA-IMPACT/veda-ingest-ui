@@ -1,5 +1,29 @@
 import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
 
+// Hoist cfg mock so it is applied before ListPRs is imported
+vi.mock('@/config/env', () => ({
+  cfg: {
+    OWNER: 'test-owner',
+    REPO: 'test-repo',
+    TARGET_BRANCH: 'main',
+    // VEDA_TENANT_FILTER_FIELD intentionally absent to exercise fallback to 'eic:tenant'
+    AWS_REGION: 'us-west-2',
+    NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'mock-bucket',
+  },
+}));
+
+import { Octokit } from '@octokit/rest';
+import ListPRs from '@/utils/githubUtils/ListPRs';
+import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
+
+vi.mock('@octokit/rest', () => ({
+  Octokit: vi.fn(),
+}));
+
+vi.mock('@/utils/githubUtils/GetGithubToken', () => ({
+  default: vi.fn(),
+}));
+
 const mockList = vi.fn();
 const mockListFiles = vi.fn();
 const mockGetContent = vi.fn();
@@ -16,37 +40,23 @@ const mockOctokitInstance = {
   },
 };
 
-vi.mock('@octokit/rest', () => ({
-  Octokit: vi.fn(() => mockOctokitInstance),
-}));
-
-vi.mock('@/utils/githubUtils/GetGithubToken', () => ({
-  default: vi.fn().mockResolvedValue('mocked-github-token'),
-}));
+const mockedGetGithubToken = vi.mocked(GetGithubToken);
+const mockedOctokit = vi.mocked(Octokit);
 
 describe('ListPRs fallback tenant behavior', () => {
-  beforeEach(() => {
-    vi.resetModules();
-    vi.clearAllMocks();
-  });
-
   beforeAll(() => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockedGetGithubToken.mockResolvedValue('mocked-github-token');
+    mockedOctokit.mockImplementation(function () {
+      return mockOctokitInstance as unknown as Octokit;
+    });
+  });
+
   it('falls back to eic:tenant when VEDA_TENANT_FILTER_FIELD is unset and ignores other tenant-like keys', async () => {
-    vi.doMock('@/config/env', () => ({
-      cfg: {
-        OWNER: 'test-owner',
-        REPO: 'test-repo',
-        TARGET_BRANCH: 'main',
-        AWS_REGION: 'us-west-2',
-        NEXT_PUBLIC_AWS_S3_BUCKET_NAME: 'mock-bucket',
-      },
-    }));
-
-    const { default: ListPRs } = await import('@/utils/githubUtils/ListPRs');
-
     const pr = { number: 1, head: { sha: 'abc123' } };
     mockList.mockResolvedValue({ data: [pr] });
     mockListFiles.mockResolvedValue({

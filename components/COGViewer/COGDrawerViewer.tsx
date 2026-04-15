@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Drawer, Button } from 'antd';
 import { useCOGViewer } from '@/hooks/useCOGViewer';
 import dynamic from 'next/dynamic';
@@ -29,18 +29,22 @@ const COGDrawerViewer: React.FC<COGDrawerViewerProps> = ({
   const cogViewer = useCOGViewer();
   const { setCogUrl, fetchMetadata } = cogViewer;
 
+  // Use a ref so the effect doesn't re-fire when fetchMetadata's identity changes
+  const fetchMetadataRef = useRef(fetchMetadata);
+  fetchMetadataRef.current = fetchMetadata;
+
   useEffect(() => {
     if (drawerOpen && url) {
       setCogUrl(url);
 
       // Ensure we pass the latest renders object
       if (renders) {
-        fetchMetadata(url, renders);
+        fetchMetadataRef.current(url, renders);
       } else {
-        fetchMetadata(url, null);
+        fetchMetadataRef.current(url, null);
       }
     }
-  }, [drawerOpen, url, renders, setCogUrl, fetchMetadata]);
+  }, [drawerOpen, url, renders, setCogUrl]);
 
   const handleAccept = () => {
     if (!onAcceptRenderOptions) {

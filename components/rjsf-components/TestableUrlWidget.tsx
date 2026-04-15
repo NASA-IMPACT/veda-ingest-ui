@@ -20,14 +20,14 @@ export const TestableUrlWidget = ({
     useState<ValidationState>('idle');
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // This effect syncs the local state if the form data is changed from elsewhere
+  // This effect syncs the local state if the form data is changed from elsewhere.
+  // Depends only on `value` (the external prop) so user edits are not overwritten.
   useEffect(() => {
-    if (value !== inputValue) {
-      setInputValue(value || '');
-    }
+    setInputValue(value || '');
     // When the value changes externally, reset the validation state
     setValidationState('idle');
-  }, [value, inputValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
 
   // Cleanup the timeout when the component unmounts
   useEffect(() => {

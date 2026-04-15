@@ -67,19 +67,14 @@ const requiredConfig = {
     'https://stac-extensions.github.io/render/v1.0.0/schema.json',
     'https://stac-extensions.github.io/item-assets/v1.0.0/schema.json',
   ],
-  links: [],
 };
 
 const omitRequiredDatasetKeys = (
   config: typeof requiredConfig
-): Omit<
-  typeof requiredConfig,
-  'stac_version' | 'stac_extensions' | 'links'
-> => {
-  const { stac_version, stac_extensions, links, ...rest } = config;
+): Omit<typeof requiredConfig, 'stac_version' | 'stac_extensions'> => {
+  const { stac_version, stac_extensions, ...rest } = config;
   void stac_version;
   void stac_extensions;
-  void links;
   return rest;
 };
 
@@ -143,7 +138,7 @@ test.describe('Create Dataset Page', () => {
   }, testInfo) => {
     let postPayload: unknown;
     // Intercept and capture the request
-    await page.route('**/create-dataset', async (route, request) => {
+    await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
         postPayload = request.postDataJSON();
 
@@ -234,7 +229,7 @@ test.describe('Create Dataset Page', () => {
   }, testInfo) => {
     let postPayload2: unknown;
     // Intercept and capture the request
-    await page.route('**/create-dataset', async (route, request) => {
+    await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
         postPayload2 = request.postDataJSON();
 

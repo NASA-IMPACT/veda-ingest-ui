@@ -5,9 +5,18 @@ import CreateIngestClient from '@/app/(pages)/create-dataset/_components/CreateI
 
 import { TenantContext } from '@/app/contexts/TenantContext';
 
-vi.mock('@/components/layout/AppLayout', () => ({
+vi.mock('@/components/layout/Layout', () => ({
   default: ({ children }: { children: ReactNode }) => (
     <div data-testid="app-layout">{children}</div>
+  ),
+}));
+
+vi.mock('@/components/ingestion/CreationFormManager', () => ({
+  default: () => (
+    <div>
+      <label htmlFor="collection-name">Collection Name</label>
+      <input id="collection-name" aria-label="Collection Name" />
+    </div>
   ),
 }));
 

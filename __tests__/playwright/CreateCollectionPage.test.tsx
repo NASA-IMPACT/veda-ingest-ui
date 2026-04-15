@@ -139,7 +139,7 @@ test.describe('Create Collection Page', () => {
     const userComment = 'This comment was entered in the VEDA Ingest UI';
     let postPayload: unknown;
     // Intercept the POST request to capture its payload
-    await page.route('**/create-dataset', async (route, request) => {
+    await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
         postPayload = request.postDataJSON();
 
@@ -225,7 +225,7 @@ test.describe('Create Collection Page', () => {
     const userComment = 'This comment was entered in the VEDA Ingest UI';
     let postPayload2: unknown;
     // Intercept the POST request to capture its payload
-    await page.route('**/create-dataset', async (route, request) => {
+    await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
         postPayload2 = request.postDataJSON();
 
@@ -340,7 +340,7 @@ test.describe('Create Collection Page', () => {
   }, testInfo) => {
     let postPayload3: unknown;
     // Intercept the request to capture the payload
-    await page.route('**/create-dataset', async (route, request) => {
+    await page.route('**/create-ingest', async (route, request) => {
       if (request.method() === 'POST') {
         postPayload3 = request.postDataJSON();
 
