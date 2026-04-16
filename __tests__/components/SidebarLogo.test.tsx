@@ -1,6 +1,13 @@
 import React from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
+
+const mockedCfg = vi.hoisted(() => ({ ADDITIONAL_LOGO: '' }));
+
+vi.mock('@/config/env', () => ({
+  cfg: mockedCfg,
+}));
+
 import SidebarLogo from '@/components/layout/SidebarLogo';
 
 describe('SidebarLogo', () => {
@@ -8,6 +15,7 @@ describe('SidebarLogo', () => {
 
   beforeEach(() => {
     process.env = { ...ORIGINAL_ENV };
+    mockedCfg.ADDITIONAL_LOGO = '';
     delete process.env.NEXT_PUBLIC_MOCK_TENANTS;
     delete process.env.NEXT_PUBLIC_MOCK_SCOPES;
     delete process.env.NEXT_PUBLIC_DISABLE_AUTH;
@@ -33,10 +41,7 @@ describe('SidebarLogo', () => {
   });
 
   it('shows disaster logo when cfg.ADDITIONAL_LOGO=disasters', async () => {
-    vi.resetModules();
-    vi.mock('../../config/env', () => ({
-      cfg: { ADDITIONAL_LOGO: 'disasters' },
-    }));
+    mockedCfg.ADDITIONAL_LOGO = 'disasters';
     render(<SidebarLogo collapsed={false} />);
     const disasterLogo = screen.getByAltText('Disasters Wordmark');
     expect(disasterLogo).toBeInTheDocument();

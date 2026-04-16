@@ -190,9 +190,7 @@ describe('ExistingCollectionsList', () => {
       <ExistingCollectionsList onCollectionSelect={mockOnCollectionSelect} />
     );
 
-    await waitFor(() => {
-      expect(screen.getByText('Select Tenant')).toBeInTheDocument();
-    });
+    const tenantSelect = await screen.findByRole('combobox');
 
     // Mock second fetch with tenant filter
     vi.mocked(fetch).mockResolvedValueOnce({
@@ -202,24 +200,23 @@ describe('ExistingCollectionsList', () => {
       }),
     } as Response);
 
-    // Select nasa tenant - find by closest Select to "Select Tenant" heading
-    const tenantSection = screen.getByText('Select Tenant').closest('div');
-    const tenantSelect = tenantSection!.querySelector('.ant-select-selector');
-    await user.click(tenantSelect!);
+    await user.click(tenantSelect);
 
-    // Find nasa option in the dropdown (not in cards)
-    const dropdownOptions = document.querySelectorAll(
-      '.ant-select-item-option-content'
-    );
-    const nasaOption = Array.from(dropdownOptions).find(
-      (el) => el.textContent === 'nasa'
-    );
-    await user.click(nasaOption!);
+    const nasaOption = await screen.findByText('nasa', {
+      selector: '.ant-select-item-option-content',
+    });
+    await user.click(nasaOption);
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith(
+      expect(fetch).toHaveBeenNthCalledWith(
+        2,
         '/api/existing-collection?limit=10&offset=0&tenant=nasa'
       );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Test Collection 1')).toBeInTheDocument();
+      expect(screen.queryByText('Test Collection 2')).not.toBeInTheDocument();
     });
   });
 

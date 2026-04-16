@@ -34,7 +34,7 @@ const EditCollectionView: React.FC<EditCollectionViewProps> = ({
   }, [collectionData]);
 
   if (loading) {
-    return <Spin tip="Loading collection..." />;
+    return <Spin fullscreen tip="Loading collection..." />;
   }
 
   if (status === 'success') {

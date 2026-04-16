@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Card, Input, Divider, Typography, Space, Tag, App } from 'antd';
+import {
+  Card,
+  Input,
+  Divider,
+  Typography,
+  Space,
+  Tag,
+  App,
+  Button,
+} from 'antd';
 
 interface ExtensionManagerProps {
   extensionFields: Record<string, { title: string }>;
@@ -28,14 +37,21 @@ const ExtensionManager: React.FC<ExtensionManagerProps> = ({
 
   return (
     <Card title="STAC Extensions" style={{ marginBottom: '24px' }}>
-      <Input.Search
-        placeholder="Enter extension schema URL"
-        enterButton="Add Extension"
-        value={searchUrl}
-        onChange={(e) => setSearchUrl(e.target.value)}
-        onSearch={handleSearch}
-        loading={isLoading}
-      />
+      <Space.Compact block>
+        <Input
+          placeholder="Enter extension schema URL"
+          value={searchUrl}
+          onChange={(e) => setSearchUrl(e.target.value)}
+          onPressEnter={() => handleSearch(searchUrl)}
+        />
+        <Button
+          type="primary"
+          onClick={() => handleSearch(searchUrl)}
+          loading={isLoading}
+        >
+          Add Extension
+        </Button>
+      </Space.Compact>
       {Object.keys(extensionFields).length > 0 && (
         <>
           <Divider />

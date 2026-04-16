@@ -176,12 +176,23 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
         const rendersProperties = (
           rendersSchema as { properties?: Record<string, unknown> }
         ).properties;
-        const dashboardSchema = rendersProperties?.dashboard;
-        if (typeof dashboardSchema === 'object' && dashboardSchema !== null) {
-          (dashboardSchema as { oneOf?: unknown }).oneOf = [
-            { type: 'string' },
-            { type: 'object', additionalProperties: true },
-          ];
+        if (rendersProperties) {
+          const dashboardSchema = rendersProperties.dashboard;
+          if (typeof dashboardSchema === 'object' && dashboardSchema !== null) {
+            const { type, ...dashboardSchemaWithoutType } = dashboardSchema as {
+              type?: unknown;
+              oneOf?: unknown;
+              [key: string]: unknown;
+            };
+            void type;
+            rendersProperties.dashboard = {
+              ...dashboardSchemaWithoutType,
+              oneOf: [
+                { ...dashboardSchemaWithoutType, type: 'string' },
+                { type: 'object', additionalProperties: true },
+              ],
+            };
+          }
         }
       }
 
