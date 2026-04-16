@@ -76,6 +76,47 @@ interface FormData {
   temporal_extent?: TemporalExtent;
 }
 
+function stripEmptyRenders(
+  submittedData: Record<string, unknown>
+): Record<string, unknown> {
+  const nextData = { ...submittedData };
+  const renders = nextData.renders;
+
+  if (renders == null) {
+    delete nextData.renders;
+    return nextData;
+  }
+
+  if (Array.isArray(renders)) {
+    if (renders.length === 0) {
+      delete nextData.renders;
+    }
+    return nextData;
+  }
+
+  if (typeof renders !== 'object') {
+    return nextData;
+  }
+
+  const dashboard = (renders as Record<string, unknown>).dashboard;
+  const hasDashboardEntry =
+    !(dashboard == null) &&
+    !(typeof dashboard === 'string' && dashboard.trim() === '') &&
+    !(Array.isArray(dashboard) && dashboard.length === 0) &&
+    !(
+      typeof dashboard === 'object' &&
+      dashboard !== null &&
+      !Array.isArray(dashboard) &&
+      Object.keys(dashboard as Record<string, unknown>).length === 0
+    );
+
+  if (!hasDashboardEntry) {
+    delete nextData.renders;
+  }
+
+  return nextData;
+}
+
 const lockedFormFields = {
   collection: {
     'ui:readonly': true,
@@ -220,10 +261,12 @@ function DatasetIngestionForm({
 
   const handleFormSubmit = useCallback(
     (rjsfData: { formData?: object }) => {
-      const finalFormData = {
+      const mergedFormData = {
         ...((rjsfData.formData as Record<string, unknown>) ?? {}),
         ...additionalProperties,
       };
+
+      const finalFormData = stripEmptyRenders(mergedFormData);
       onSubmit(finalFormData);
     },
     [additionalProperties, onSubmit]
