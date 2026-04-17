@@ -13,22 +13,32 @@ export const customValidate: CustomValidator = (formData, errors) => {
   }
 
   try {
-    if (formData.renders && formData.renders.dashboard) {
-      const parsed = JSON.parse(formData.renders.dashboard);
-      if (
-        typeof parsed !== 'object' ||
-        parsed === null ||
-        Array.isArray(parsed)
-      ) {
-        errors.renders?.dashboard?.addError(
-          'Input must be a valid JSON object.'
-        );
-      }
+    if (formData.renders && typeof formData.renders === 'object') {
+      Object.entries(formData.renders).forEach(([renderKey, renderValue]) => {
+        if (typeof renderValue !== 'string' || renderValue.trim() === '') {
+          return;
+        }
+
+        try {
+          const parsed = JSON.parse(renderValue);
+          if (
+            typeof parsed !== 'object' ||
+            parsed === null ||
+            Array.isArray(parsed)
+          ) {
+            errors.renders?.[renderKey]?.addError(
+              'Input must be a valid JSON object.'
+            );
+          }
+        } catch {
+          errors.renders?.[renderKey]?.addError(
+            'Invalid JSON format. Please enter a valid JSON object.'
+          );
+        }
+      });
     }
   } catch {
-    errors.renders?.dashboard?.addError(
-      'Invalid JSON format. Please enter a valid JSON object.'
-    );
+    // Ignore unexpected renders shape errors; field-level validation above handles normal cases.
   }
 
   if (formData.temporal_extent) {

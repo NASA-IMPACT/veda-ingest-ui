@@ -2,6 +2,7 @@
 // Switch via `NEXT_PUBLIC_APP_ENV` = 'local' | 'veda' | 'disasters'
 
 export type AppEnv = 'local' | 'eic' | 'disasters' | 'veda';
+export type DatasetFormSchemaProfile = 'default' | 'disasters';
 
 interface EnvConfig {
   OWNER: string;
@@ -13,6 +14,7 @@ interface EnvConfig {
   VEDA_BACKEND_URL: string;
   VEDA_PROD_BACKEND_URL: string;
   VEDA_TENANT_FILTER_FIELD?: string;
+  DATASET_FORM_SCHEMA_PROFILE: DatasetFormSchemaProfile;
 }
 
 const profiles: Record<AppEnv, EnvConfig> = {
@@ -25,6 +27,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     ADDITIONAL_LOGO: '',
     VEDA_BACKEND_URL: 'https://dev.openveda.cloud/api',
     VEDA_PROD_BACKEND_URL: 'https://staging.openveda.cloud/api',
+    DATASET_FORM_SCHEMA_PROFILE: 'default',
     VEDA_TENANT_FILTER_FIELD: 'local:tenant',
   },
   disasters: {
@@ -36,6 +39,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     ADDITIONAL_LOGO: 'disasters',
     VEDA_BACKEND_URL: 'https://staging.openveda.cloud/api',
     VEDA_PROD_BACKEND_URL: 'https://staging.openveda.cloud/api',
+    DATASET_FORM_SCHEMA_PROFILE: 'disasters',
   },
   veda: {
     OWNER: 'nasa-impact',
@@ -46,6 +50,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     ADDITIONAL_LOGO: '',
     VEDA_BACKEND_URL: 'https://staging.openveda.cloud/api',
     VEDA_PROD_BACKEND_URL: 'https://openveda.cloud/api',
+    DATASET_FORM_SCHEMA_PROFILE: 'default',
   },
   eic: {
     OWNER: 'nasa-impact',
@@ -56,6 +61,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     ADDITIONAL_LOGO: 'eic',
     VEDA_BACKEND_URL: 'https://eic-staging.staging.earth.gov/api',
     VEDA_PROD_BACKEND_URL: 'https://openveda.cloud/api',
+    DATASET_FORM_SCHEMA_PROFILE: 'default',
     VEDA_TENANT_FILTER_FIELD: 'eic:tenant',
   },
 };
@@ -67,6 +73,7 @@ const getAppEnv = (): AppEnv => {
   return 'local';
 };
 
-export const cfg: EnvConfig = profiles[getAppEnv()];
+export const APP_ENV: AppEnv = getAppEnv();
+export const cfg: EnvConfig = profiles[APP_ENV];
 export const VEDA_BACKEND_URL = cfg.VEDA_BACKEND_URL;
 export const VEDA_PROD_BACKEND_URL = cfg.VEDA_PROD_BACKEND_URL;

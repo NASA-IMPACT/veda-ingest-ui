@@ -14,6 +14,30 @@ describe('CleanAndPrettifyJSON', () => {
     );
   });
 
+  test('parses valid JSON strings for dynamic renders keys', () => {
+    const input = {
+      name: 'Dynamic Render Key',
+      renders: {
+        dashboard: '{"assets":["ColorIR"]}',
+        ColorIR: '{"assets":["ColorIR"],"bidx":[1,2,3],"nodata":0}',
+      },
+    };
+    const output = CleanAndPrettifyJSON(input);
+    expect(output).toBe(
+      JSON.stringify(
+        {
+          name: 'Dynamic Render Key',
+          renders: {
+            dashboard: { assets: ['ColorIR'] },
+            ColorIR: { assets: ['ColorIR'], bidx: [1, 2, 3], nodata: 0 },
+          },
+        },
+        null,
+        2
+      )
+    );
+  });
+
   test('leaves renders dashboard as null if it is null', () => {
     const input = { name: 'Null Case', renders: { dashboard: null } };
     const output = CleanAndPrettifyJSON(input);
@@ -71,6 +95,31 @@ describe('CleanAndPrettifyJSON', () => {
     );
     expect(consoleWarnMock).toHaveBeenCalledWith(
       "Invalid JSON in 'renders dashboard' field. Keeping as string."
+    );
+    consoleWarnMock.mockRestore();
+  });
+
+  test('keeps dynamic renders key as string if JSON parsing fails', () => {
+    const consoleWarnMock = vi
+      .spyOn(console, 'warn')
+      .mockImplementation(() => {});
+    const input = {
+      name: 'Invalid Dynamic Render JSON',
+      renders: { ColorIR: '{invalid: json}' },
+    };
+    const output = CleanAndPrettifyJSON(input);
+    expect(output).toBe(
+      JSON.stringify(
+        {
+          name: 'Invalid Dynamic Render JSON',
+          renders: { ColorIR: '{invalid: json}' },
+        },
+        null,
+        2
+      )
+    );
+    expect(consoleWarnMock).toHaveBeenCalledWith(
+      "Invalid JSON in 'renders ColorIR' field. Keeping as string."
     );
     consoleWarnMock.mockRestore();
   });
