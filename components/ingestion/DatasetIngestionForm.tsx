@@ -79,42 +79,25 @@ interface FormData {
 function stripEmptyRenders(
   submittedData: Record<string, unknown>
 ): Record<string, unknown> {
-  const nextData = { ...submittedData };
-  const renders = nextData.renders;
+  const { renders, ...rest } = submittedData;
+  if (renders == null || (Array.isArray(renders) && renders.length === 0)) {
+    return rest;                                                                                                                     
+  }               
 
-  if (renders == null) {
-    delete nextData.renders;
-    return nextData;
+  if (typeof renders !== 'object' || Array.isArray(renders)) {                                                                       
+    return submittedData;
+  }                                                                                                                                  
+     
+  const isEmpty = (value: unknown): boolean => {                                                                                        
+    if (value == null) return true;                                                                                                  
+    if (typeof value === 'string') return value.trim() === '';                                                                     
+    if (Array.isArray(value)) return value.length === 0;                                                                             
+    if (typeof value === 'object') return Object.keys(value as object).length === 0;
+    return false;                                                                                                                    
   }
-
-  if (Array.isArray(renders)) {
-    if (renders.length === 0) {
-      delete nextData.renders;
-    }
-    return nextData;
-  }
-
-  if (typeof renders !== 'object') {
-    return nextData;
-  }
-
+  
   const dashboard = (renders as Record<string, unknown>).dashboard;
-  const hasDashboardEntry =
-    !(dashboard == null) &&
-    !(typeof dashboard === 'string' && dashboard.trim() === '') &&
-    !(Array.isArray(dashboard) && dashboard.length === 0) &&
-    !(
-      typeof dashboard === 'object' &&
-      dashboard !== null &&
-      !Array.isArray(dashboard) &&
-      Object.keys(dashboard as Record<string, unknown>).length === 0
-    );
-
-  if (!hasDashboardEntry) {
-    delete nextData.renders;
-  }
-
-  return nextData;
+  return isEmpty(dashboard) ? rest : submittedData;
 }
 
 const lockedFormFields = {
