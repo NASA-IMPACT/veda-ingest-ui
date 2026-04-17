@@ -347,7 +347,6 @@ test.describe('Create Dataset Page', () => {
         'sample_files',
         'data_type',
         'providers',
-        'renders',
       ];
 
       const errorCard = page.getByTestId('extra-properties-card');
