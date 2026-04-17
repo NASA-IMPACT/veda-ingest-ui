@@ -27,7 +27,7 @@ const profiles: Record<AppEnv, EnvConfig> = {
     ADDITIONAL_LOGO: '',
     VEDA_BACKEND_URL: 'https://dev.openveda.cloud/api',
     VEDA_PROD_BACKEND_URL: 'https://staging.openveda.cloud/api',
-    DATASET_FORM_SCHEMA_PROFILE: 'disasters',
+    DATASET_FORM_SCHEMA_PROFILE: 'default',
     VEDA_TENANT_FILTER_FIELD: 'local:tenant',
   },
   disasters: {
