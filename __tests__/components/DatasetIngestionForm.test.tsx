@@ -5,6 +5,23 @@ import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm'; 
 import React, { useState } from 'react';
 import { useTenants } from '@/hooks/useTenants';
 
+const mockedEnv = vi.hoisted(() => ({
+  DATASET_FORM_SCHEMA_PROFILE: 'default' as 'default' | 'disasters',
+}));
+
+vi.mock('@/config/env', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/config/env')>();
+  return {
+    ...actual,
+    get cfg() {
+      return {
+        ...actual.cfg,
+        DATASET_FORM_SCHEMA_PROFILE: mockedEnv.DATASET_FORM_SCHEMA_PROFILE,
+      };
+    },
+  };
+});
+
 type JsonEditorProps = {
   onChange: (value: Record<string, unknown>) => void;
 };
@@ -99,6 +116,19 @@ vi.mock('@/FormSchemas/datasets/datasetSchema.json', () => ({
 vi.mock('@/FormSchemas/datasets/uischema.json', () => ({
   default: { collection: { 'ui:widget': 'text' } },
 }));
+vi.mock('@/FormSchemas/disasters/datasetSchema.json', () => ({
+  default: {
+    type: 'object',
+    properties: {
+      disaster_only: { type: 'boolean' },
+    },
+  },
+}));
+vi.mock('@/FormSchemas/disasters/uischema.json', () => ({
+  default: {
+    disaster_only: { 'ui:widget': 'checkbox' },
+  },
+}));
 
 describe('DatasetIngestionForm', () => {
   const mockOnSubmit = vi.fn();
@@ -122,6 +152,7 @@ describe('DatasetIngestionForm', () => {
   };
 
   beforeEach(() => {
+    mockedEnv.DATASET_FORM_SCHEMA_PROFILE = 'default';
     defaultProps = {
       onSubmit: mockOnSubmit,
       setDisabled: mockSetDisabled,
@@ -323,6 +354,50 @@ describe('DatasetIngestionForm', () => {
     expect(uiSchema.collection['ui:readonly']).toBe(true);
   });
 
+  it('does not inject default item_assets for default profile on new forms', async () => {
+    mockedEnv.DATASET_FORM_SCHEMA_PROFILE = 'default';
+    const mockSetFormData = vi.fn();
+
+    render(
+      <DatasetIngestionForm
+        {...defaultProps}
+        formData={{}}
+        setFormData={mockSetFormData}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSetFormData).toHaveBeenCalled();
+    });
+
+    const updaterFn = mockSetFormData.mock.calls[0][0];
+    const newState = updaterFn({});
+
+    expect(newState.item_assets).toBeUndefined();
+  });
+
+  it('does not inject default item_assets for disasters profile on new forms', async () => {
+    mockedEnv.DATASET_FORM_SCHEMA_PROFILE = 'disasters';
+    const mockSetFormData = vi.fn();
+
+    render(
+      <DatasetIngestionForm
+        {...defaultProps}
+        formData={{}}
+        setFormData={mockSetFormData}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSetFormData).toHaveBeenCalled();
+    });
+
+    const updaterFn = mockSetFormData.mock.calls[0][0];
+    const newState = updaterFn({});
+
+    expect(newState.item_assets).toBeUndefined();
+  });
+
   it('correctly handles nested dashboard objects in form rendering', () => {
     const mockSetFormData = vi.fn();
     const formDataWithDashboard = {
@@ -353,5 +428,69 @@ describe('DatasetIngestionForm', () => {
 
     // Verify it's not showing '[object Object]'
     expect(formDataDiv.textContent).not.toContain('[object Object]');
+  });
+
+  it('selects schema source from env profile before tenant injection', () => {
+    mockedEnv.DATASET_FORM_SCHEMA_PROFILE = 'disasters';
+
+    vi.mocked(useTenants).mockReturnValueOnce({
+      schema: {
+        type: 'object',
+        properties: {
+          collection: { type: 'string' },
+          discovery_items: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                bucket: { type: 'string' },
+              },
+            },
+          },
+        },
+      },
+      uiSchema: {
+        discovery_items: {
+          items: {
+            bucket: {
+              'ui:widget': 'text',
+            },
+            'ui:grid': [{ bucket: 24 }],
+          },
+        },
+      },
+      isLoading: false,
+    } as ReturnType<typeof useTenants>);
+
+    const mockSetFormData = vi.fn();
+    render(
+      <DatasetIngestionForm
+        {...defaultProps}
+        formData={{ collection: 'initial' }}
+        setFormData={mockSetFormData}
+      />
+    );
+
+    const renderedSchema = JSON.parse(
+      screen.getByTestId('rjsf-schema').textContent || '{}'
+    );
+
+    expect(useTenants).toHaveBeenCalledWith(
+      {
+        type: 'object',
+        properties: {
+          disaster_only: { type: 'boolean' },
+        },
+      },
+      {
+        disaster_only: { 'ui:widget': 'checkbox' },
+      }
+    );
+
+    expect(
+      renderedSchema.properties.discovery_items.items.properties.bucket
+    ).toEqual({
+      type: 'string',
+    });
   });
 });

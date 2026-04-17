@@ -22,12 +22,15 @@ import { JSONEditorValue } from '@/components/ui/JSONEditor';
 import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
 
-import staticBaseSchema from '@/FormSchemas/datasets/datasetSchema.json';
-import uiSchema from '@/FormSchemas/datasets/uischema.json';
+import datasetSchema from '@/FormSchemas/datasets/datasetSchema.json';
+import datasetUiSchema from '@/FormSchemas/datasets/uischema.json';
+import disastersDatasetSchema from '@/FormSchemas/disasters/datasetSchema.json';
+import disastersUiSchema from '@/FormSchemas/disasters/uischema.json';
 import { TestableUrlWidget } from '@/components/rjsf-components/TestableUrlWidget';
 import { RegexStringWidget } from '@/components/rjsf-components/RegexStringWidget';
 
 import { useTenants } from '@/hooks/useTenants';
+import { cfg } from '@/config/env';
 import { Form } from './rjsfTheme';
 
 // Lazy load JSONEditor - only needed when JSON tab is active
@@ -103,11 +106,27 @@ function DatasetIngestionForm({
   disableCollectionNameChange = false,
   defaultTemporalExtent = false,
 }: FormProps) {
+  const schemaSources = {
+    default: {
+      schema: datasetSchema,
+      uiSchema: datasetUiSchema,
+    },
+    disasters: {
+      schema: disastersDatasetSchema,
+      uiSchema: disastersUiSchema,
+    },
+  } as const;
+
+  const selectedSource =
+    schemaSources[cfg.DATASET_FORM_SCHEMA_PROFILE] || schemaSources.default;
+  const selectedSchema = selectedSource.schema;
+  const selectedUiSchema = selectedSource.uiSchema;
+
   const {
     schema: dynamicSchema,
     uiSchema: dynamicUiSchema,
     isLoading: isTenantsLoading,
-  } = useTenants(staticBaseSchema as JSONSchema7, uiSchema);
+  } = useTenants(selectedSchema as JSONSchema7, selectedUiSchema);
 
   const [activeTab, setActiveTab] = useState<string>('form');
   const [forceRenderKey, setForceRenderKey] = useState<number>(0);
@@ -118,7 +137,10 @@ function DatasetIngestionForm({
 
   const lockedUiSchema = dynamicUiSchema
     ? { ...dynamicUiSchema, ...lockedFormFields }
-    : { ...uiSchema, ...lockedFormFields };
+    : { ...selectedUiSchema, ...lockedFormFields };
+  const resolvedUiSchema = isEditMode
+    ? lockedUiSchema
+    : dynamicUiSchema || selectedUiSchema;
 
   const formScopedData = formData;
 
@@ -140,14 +162,6 @@ function DatasetIngestionForm({
           'https://stac-extensions.github.io/render/v1.0.0/schema.json',
           'https://stac-extensions.github.io/item-assets/v1.0.0/schema.json',
         ],
-        item_assets: {
-          cog_default: {
-            type: 'image/tiff; application=geotiff; profile=cloud-optimized',
-            roles: ['data', 'layer'],
-            title: 'Default COG Layer',
-            description: 'Cloud optimized default layer to display on map',
-          },
-        },
         providers: [
           {
             name: 'NASA VEDA',
@@ -264,9 +278,7 @@ function DatasetIngestionForm({
               <Form
                 key={forceRenderKey} // Forces re-render when data updates
                 schema={dynamicSchema as JSONSchema7}
-                uiSchema={
-                  isEditMode ? lockedUiSchema : dynamicUiSchema || uiSchema
-                }
+                uiSchema={resolvedUiSchema}
                 validator={validator}
                 customValidate={customValidate}
                 templates={{
