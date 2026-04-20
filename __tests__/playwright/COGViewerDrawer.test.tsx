@@ -6,10 +6,12 @@ async function fillSampleFile(page: Page, value = 's3://test.com') {
   await sampleFileInput.fill(value);
   await sampleFileInput.blur();
   await expect(sampleFileInput).toHaveValue(value);
+  // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(2500);
 }
 
 async function openCOGDrawer(page: Page) {
+  // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(1000);
 
   await page
