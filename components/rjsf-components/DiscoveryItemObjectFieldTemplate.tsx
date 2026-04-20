@@ -78,6 +78,10 @@ export default function DiscoveryItemObjectFieldTemplate<
           {renderGridRow(4)}{' '}
           {/* start_datetime, end_datetime, single_datetime */}
           {renderGridRow(5)} {/* id_regex, id_template, use_multithreading */}
+          {/* Render any additional env-configured rows */}
+          {itemUiGrid &&
+            itemUiGrid.length > 5 &&
+            itemUiGrid.slice(5).map((_, idx) => renderGridRow(5 + idx + 1))}
         </Panel>
       </Collapse>
     </>

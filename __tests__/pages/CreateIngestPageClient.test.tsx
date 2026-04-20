@@ -13,10 +13,10 @@ vi.mock('@/components/layout/Layout', () => ({
 
 vi.mock('@/components/ingestion/CreationFormManager', () => ({
   default: () => (
-    <div>
-      <label htmlFor="collection-name">Collection Name</label>
-      <input id="collection-name" aria-label="Collection Name" />
-    </div>
+    <form>
+      <label htmlFor="collection">Collection Name</label>
+      <input id="collection" aria-label="Collection Name" />
+    </form>
   ),
 }));
 

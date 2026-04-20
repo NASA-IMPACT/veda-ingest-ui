@@ -4,7 +4,10 @@ import type { FormValidation } from '@rjsf/utils';
 
 type ValidationErrorsMock = {
   addError: ReturnType<typeof vi.fn>;
-  renders: { dashboard: { addError: ReturnType<typeof vi.fn> } };
+  renders: {
+    dashboard: { addError: ReturnType<typeof vi.fn> };
+    ColorIR: { addError: ReturnType<typeof vi.fn> };
+  };
   temporal_extent: {
     startdate: { addError: ReturnType<typeof vi.fn> };
     enddate: { addError: ReturnType<typeof vi.fn> };
@@ -18,7 +21,10 @@ describe('customValidate', () => {
   beforeEach(() => {
     mockErrors = {
       addError: vi.fn(),
-      renders: { dashboard: { addError: vi.fn() } },
+      renders: {
+        dashboard: { addError: vi.fn() },
+        ColorIR: { addError: vi.fn() },
+      },
       temporal_extent: {
         startdate: { addError: vi.fn() },
         enddate: { addError: vi.fn() },
@@ -79,6 +85,38 @@ describe('customValidate', () => {
     );
 
     expect(mockErrors.renders.dashboard.addError).not.toHaveBeenCalled();
+  });
+
+  it('should add an error if dynamic renders key is not valid JSON', () => {
+    const formData = { renders: { ColorIR: '{ invalid json' } };
+
+    customValidate(
+      formData,
+      mockErrors as unknown as FormValidation<Record<string, unknown>>
+    );
+
+    expect(mockErrors.renders.ColorIR.addError).toHaveBeenCalledWith(
+      'Invalid JSON format. Please enter a valid JSON object.'
+    );
+  });
+
+  it('should not add an error if dynamic renders key is a valid JSON object', () => {
+    const formData = {
+      renders: {
+        ColorIR: JSON.stringify({
+          assets: ['ColorIR'],
+          bidx: [1, 2, 3],
+          nodata: 0,
+        }),
+      },
+    };
+
+    customValidate(
+      formData,
+      mockErrors as unknown as FormValidation<Record<string, unknown>>
+    );
+
+    expect(mockErrors.renders.ColorIR.addError).not.toHaveBeenCalled();
   });
 
   it("should add an error if 'startdate' is not a string, null, or empty", () => {

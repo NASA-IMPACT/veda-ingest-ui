@@ -198,8 +198,10 @@ export default function ObjectFieldTemplate<
       (element.content?.props as { fieldPathId?: { $id?: string } })
         ?.fieldPathId?.$id || ''
     ).includes('renders');
+  // Apply discovery item template only to the array item object itself,
+  // not nested objects like discovery_items[].assets.
   const isDiscoveryItem =
-    fieldPathId.$id.startsWith('root_discovery_items_') &&
+    /^root_discovery_items_\d+$/.test(fieldPathId.$id) &&
     schema.type === 'object';
 
   if (isDiscoveryItem) {
