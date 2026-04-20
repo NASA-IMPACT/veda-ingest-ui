@@ -272,6 +272,33 @@ describe('DatasetIngestionForm', () => {
     });
   });
 
+  it('strips renders when submitted as an empty array', async () => {
+    vi.mocked(useTenants).mockReturnValueOnce({
+      schema: {
+        ...mockedSchemaForTests,
+        renders: [],
+      },
+      isLoading: false,
+    } as ReturnType<typeof useTenants>);
+
+    const mockSetFormData = vi.fn();
+    render(
+      <DatasetIngestionForm
+        {...defaultProps}
+        formData={{ collection: 'initial' }}
+        setFormData={mockSetFormData}
+      />
+    );
+
+    const submitButton = screen.getByRole('button', { name: 'Submit Form' });
+    await userEvent.click(submitButton);
+
+    await waitFor(() => {
+      const submittedPayload = mockOnSubmit.mock.calls[0][0];
+      expect(submittedPayload.renders).toBeUndefined();
+    });
+  });
+
   it('switches to the JSON editor tab and handles changes', async () => {
     const TestWrapper = () => {
       const [formData, setFormData] = useState<Record<string, unknown>>({

@@ -10,8 +10,7 @@
     "temporal_extent",
     "sample_files",
     "data_type",
-    "providers",
-    "renders"
+    "providers"
   ],
   "properties": {
     "collection": {
@@ -235,7 +234,6 @@
     "renders": {
       "title": "Renders",
       "type": "object",
-      "required": ["dashboard"],
       "properties": {
         "dashboard": {
           "type": "string",

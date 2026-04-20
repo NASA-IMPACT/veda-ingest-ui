@@ -79,6 +79,30 @@ interface FormData {
   temporal_extent?: TemporalExtent;
 }
 
+function stripEmptyRenders(
+  submittedData: Record<string, unknown>
+): Record<string, unknown> {
+  const { renders, ...rest } = submittedData;
+  if (renders == null || (Array.isArray(renders) && renders.length === 0)) {
+    return rest;                                                                                                                     
+  }               
+
+  if (typeof renders !== 'object' || Array.isArray(renders)) {                                                                       
+    return submittedData;
+  }                                                                                                                                  
+     
+  const isEmpty = (value: unknown): boolean => {                                                                                        
+    if (value == null) return true;                                                                                                  
+    if (typeof value === 'string') return value.trim() === '';                                                                     
+    if (Array.isArray(value)) return value.length === 0;                                                                             
+    if (typeof value === 'object') return Object.keys(value as object).length === 0;
+    return false;                                                                                                                    
+  }
+  
+  const dashboard = (renders as Record<string, unknown>).dashboard;
+  return isEmpty(dashboard) ? rest : submittedData;
+}
+
 const lockedFormFields = {
   collection: {
     'ui:readonly': true,
@@ -234,10 +258,12 @@ function DatasetIngestionForm({
 
   const handleFormSubmit = useCallback(
     (rjsfData: { formData?: object }) => {
-      const finalFormData = {
+      const mergedFormData = {
         ...((rjsfData.formData as Record<string, unknown>) ?? {}),
         ...additionalProperties,
       };
+
+      const finalFormData = stripEmptyRenders(mergedFormData);
       onSubmit(finalFormData);
     },
     [additionalProperties, onSubmit]
