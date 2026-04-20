@@ -9,6 +9,9 @@ module.exports = {
     {
       files: ['__tests__/playwright/**'],
       extends: ['plugin:playwright/recommended'],
+      rules: {
+        'playwright/no-nested-step': 'off',
+      },
     },
   ],
 };
