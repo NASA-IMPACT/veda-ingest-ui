@@ -89,7 +89,7 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
         JSON.stringify(formData) !== JSON.stringify(originalFormData);
       setDisabled(!hasChanges);
     }
-  }, [formData, originalFormData, shouldUseSanitizedCollectionFlow]);
+  }, [formData, originalFormData]);
 
   const {
     isCogValidationModalVisible,
