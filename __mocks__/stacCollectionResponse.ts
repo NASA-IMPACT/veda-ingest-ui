@@ -30,7 +30,7 @@ export const stacCollectionResponse = {
     },
   ],
   title: 'Test Collection 1 Full Details',
-  assets: null,
+  assets: {},
   extent: {
     spatial: {
       bbox: [[-96.71, 29.07, -94.41, 30.87]],
