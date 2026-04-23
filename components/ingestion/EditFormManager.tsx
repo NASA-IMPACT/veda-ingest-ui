@@ -265,7 +265,7 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
       >
         <div style={{ marginBottom: 16 }}>
           <Alert
-            message="The Existing Collection's STAC data has been updated as shown to match required metadata formats."
+            message="The Existing Collection's STAC metadata has been updated in the form to match required format conventions before submission."
             type="info"
             showIcon
           />
