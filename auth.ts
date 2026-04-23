@@ -4,6 +4,13 @@ import { JWT } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 import { VEDA_BACKEND_URL } from '@/config/env';
 import { getRequiredRuntimeSecret } from '@/lib/runtimeSecrets';
+import {
+  createRequestLogContext,
+  logRequestEnd,
+  logRequestError,
+  logRequestStart,
+  logStructured,
+} from '@/lib/structuredLogger';
 
 const authDisabled = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
@@ -106,19 +113,17 @@ const fetchWritableTenants = async (accessToken: string): Promise<string[]> => {
     );
 
     if (!tenantsResponse.ok) {
-      console.warn(
-        'Failed to fetch allowed tenants during auth:',
-        tenantsResponse.status
-      );
+      logStructured('warn', 'auth.tenants.fetch_failed', {
+        status: tenantsResponse.status,
+      });
       return [];
     }
 
     const contentType = tenantsResponse.headers.get('content-type') || '';
     if (!contentType.toLowerCase().includes('application/json')) {
-      console.warn(
-        'Failed to fetch allowed tenants during auth: unexpected content-type',
-        contentType
-      );
+      logStructured('warn', 'auth.tenants.invalid_content_type', {
+        contentType,
+      });
       return [];
     }
 
@@ -135,17 +140,21 @@ const fetchWritableTenants = async (accessToken: string): Promise<string[]> => {
       )
     );
   } catch (error) {
-    console.warn('Failed to fetch allowed tenants during auth:', error);
+    logStructured('warn', 'auth.tenants.fetch_failed', {
+      message: error instanceof Error ? error.message : String(error),
+    });
     return normalizeTenants([]);
   }
 };
 
 const refreshAccessToken = async (token: AppJWT): Promise<AppJWT> => {
   if (!token.refreshToken) {
+    logStructured('warn', 'auth.token.refresh_missing_refresh_token');
     return { ...token, error: 'NoRefreshToken' };
   }
 
   try {
+    logStructured('info', 'auth.token.refresh_attempt');
     const issuer = process.env.NEXT_PUBLIC_KEYCLOAK_ISSUER!;
     const keycloakClientSecret = await getRequiredRuntimeSecret(
       'KEYCLOAK_CLIENT_SECRET'
@@ -166,6 +175,9 @@ const refreshAccessToken = async (token: AppJWT): Promise<AppJWT> => {
     });
 
     if (!response.ok) {
+      logStructured('warn', 'auth.token.refresh_failed', {
+        status: response.status,
+      });
       return { ...token, error: 'RefreshAccessTokenError' };
     }
 
@@ -179,6 +191,11 @@ const refreshAccessToken = async (token: AppJWT): Promise<AppJWT> => {
     const refreshedScopes = parseScopesFromAccessToken(refreshedAccessToken);
     const refreshedTenants = await fetchWritableTenants(refreshedAccessToken);
 
+    logStructured('info', 'auth.token.refresh_succeeded', {
+      scopeCount: refreshedScopes.length,
+      tenantCount: refreshedTenants.length,
+    });
+
     return {
       ...token,
       accessToken: refreshedAccessToken,
@@ -188,21 +205,23 @@ const refreshAccessToken = async (token: AppJWT): Promise<AppJWT> => {
       tenants: refreshedTenants,
       error: undefined,
     };
-  } catch {
+  } catch (error) {
+    logStructured('error', 'auth.token.refresh_exception', {
+      message: error instanceof Error ? error.message : String(error),
+    });
     return { ...token, error: 'RefreshAccessTokenError' };
   }
 };
 
 const initializeAuth = async (): Promise<void> => {
   if (authDisabled) {
-    // --- MOCKED AUTH FOR TESTING --- 🎭
-    console.log('🎭 Auth is disabled. Using mock session.');
-
     const mockTenants = getMockTenants();
-    console.log('🎭 Mock tenants:', mockTenants);
-
     const mockScopes = getMockScopes();
-    console.log('Mock scopes:', mockScopes);
+
+    logStructured('warn', 'auth.mock_mode_enabled', {
+      mockTenantCount: mockTenants.length,
+      mockScopeCount: mockScopes.length,
+    });
 
     const mockSession: Session & {
       scopes?: string[];
@@ -264,24 +283,32 @@ const initializeAuth = async (): Promise<void> => {
 
           try {
             if (process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true') {
-              console.log(
-                'Skipping external tenants fetch in test environment'
-              );
               const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
               if (mockTenants && mockTenants.trim() !== '') {
                 customToken.tenants = normalizeTenants(mockTenants.split(','));
               } else {
                 customToken.tenants = normalizeTenants([]);
               }
+
+              logStructured('warn', 'auth.jwt.mock_tenants_applied', {
+                tenantCount: customToken.tenants.length,
+              });
             } else {
               customToken.tenants = await fetchWritableTenants(
                 account.access_token
               );
             }
           } catch (error) {
-            console.error('Error fetching allowed tenants during auth:', error);
+            logStructured('error', 'auth.jwt.tenants_fetch_exception', {
+              message: error instanceof Error ? error.message : String(error),
+            });
             customToken.tenants = normalizeTenants([]);
           }
+
+          logStructured('info', 'auth.jwt.initial_token_issued', {
+            scopeCount: customToken.scopes?.length ?? 0,
+            tenantCount: customToken.tenants?.length ?? 0,
+          });
 
           return customToken;
         }
@@ -316,22 +343,29 @@ const initializeAuth = async (): Promise<void> => {
         const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
         if (mockTenants && mockTenants.trim() !== '') {
           const tenants = normalizeTenants(mockTenants.split(','));
-          console.log('🎭 Overriding real tenants with mock tenants:', tenants);
           customSession.tenants = tenants;
+          logStructured('warn', 'auth.session.mock_tenants_overridden', {
+            tenantCount: tenants.length,
+          });
         }
 
         // Inject mock scopes from env if present
         const mockScopes = process.env.NEXT_PUBLIC_MOCK_SCOPES;
         if (mockScopes && mockScopes.trim() !== '') {
           const scopes = mockScopes.split(/[ ,]+/).filter(Boolean);
-          console.log('🎭 Overriding real scopes with mock scopes:', scopes);
           customSession.scopes = scopes;
+          logStructured('warn', 'auth.session.mock_scopes_overridden', {
+            scopeCount: scopes.length,
+          });
         } else if (customToken.scopes) {
           customSession.scopes = customToken.scopes as string[];
         }
 
         if (customToken.error) {
           customSession.error = customToken.error;
+          logStructured('warn', 'auth.session.token_error', {
+            error: customToken.error,
+          });
         }
 
         return customSession;
@@ -348,10 +382,18 @@ const initializeAuth = async (): Promise<void> => {
 
 const ensureAuthInitialized = async (): Promise<void> => {
   if (!authInitPromise) {
-    authInitPromise = initializeAuth().catch((error) => {
-      authInitPromise = null;
-      throw error;
-    });
+    logStructured('info', 'auth.initialize.start');
+    authInitPromise = initializeAuth()
+      .then(() => {
+        logStructured('info', 'auth.initialize.success');
+      })
+      .catch((error) => {
+        authInitPromise = null;
+        logStructured('error', 'auth.initialize.failure', {
+          message: error instanceof Error ? error.message : String(error),
+        });
+        throw error;
+      });
   }
 
   await authInitPromise;
@@ -364,14 +406,52 @@ const auth = async (): Promise<Session | null> => {
 
 const handlers = {
   GET: async (...args: Parameters<HandlersImpl['GET']>): Promise<Response> => {
-    await ensureAuthInitialized();
-    return handlersImpl.GET(...args);
+    const request = args[0] as Request;
+    const logContext = createRequestLogContext(
+      {
+        headers: request.headers,
+        method: request.method,
+        url: request.url,
+      },
+      '/api/auth/[...nextauth]'
+    );
+
+    logRequestStart(logContext);
+
+    try {
+      await ensureAuthInitialized();
+      const response = await handlersImpl.GET(...args);
+      logRequestEnd(logContext, response.status);
+      return response;
+    } catch (error) {
+      logRequestError(logContext, error, { status: 500 });
+      throw error;
+    }
   },
   POST: async (
     ...args: Parameters<HandlersImpl['POST']>
   ): Promise<Response> => {
-    await ensureAuthInitialized();
-    return handlersImpl.POST(...args);
+    const request = args[0] as Request;
+    const logContext = createRequestLogContext(
+      {
+        headers: request.headers,
+        method: request.method,
+        url: request.url,
+      },
+      '/api/auth/[...nextauth]'
+    );
+
+    logRequestStart(logContext);
+
+    try {
+      await ensureAuthInitialized();
+      const response = await handlersImpl.POST(...args);
+      logRequestEnd(logContext, response.status);
+      return response;
+    } catch (error) {
+      logRequestError(logContext, error, { status: 500 });
+      throw error;
+    }
   },
 };
 

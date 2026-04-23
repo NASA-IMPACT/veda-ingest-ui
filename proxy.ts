@@ -1,5 +1,11 @@
 import { auth } from '@/auth';
 import { NextResponse, NextRequest } from 'next/server';
+import {
+  createRequestLogContext,
+  logRequestEnd,
+  logRequestStart,
+  summarizeSession,
+} from '@/lib/structuredLogger';
 
 const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
@@ -108,18 +114,21 @@ function isRouteAllowed(pathname: string, permissionLevel: string) {
 }
 
 export async function proxy(request: NextRequest) {
+  const logContext = createRequestLogContext(request, 'proxy');
+  logRequestStart(logContext, { target: 'authz-gate' });
+
   // Security: Ensure auth is never disabled in production
   if (DISABLE_AUTH && process.env.NODE_ENV === 'production') {
-    console.error(
-      'SECURITY WARNING: Authentication cannot be disabled in production'
-    );
+    logRequestEnd(logContext, 500, {
+      reason: 'auth_disabled_in_production',
+    });
     throw new Error('Authentication cannot be disabled in production');
   }
 
   if (DISABLE_AUTH) {
-    console.warn(
-      'WARNING: Authentication is disabled for development - middleware skipping auth checks'
-    );
+    logRequestEnd(logContext, 200, {
+      reason: 'auth_disabled_in_non_production',
+    });
     return NextResponse.next();
   }
 
@@ -132,6 +141,11 @@ export async function proxy(request: NextRequest) {
   if (!isRouteAllowed(pathname, permissionLevel)) {
     if (pathname.startsWith('/api/')) {
       const status = permissionLevel === 'unauthenticated' ? 401 : 403;
+      logRequestEnd(logContext, status, {
+        reason: 'route_not_allowed',
+        permissionLevel,
+        ...summarizeSession(session),
+      });
       return new NextResponse(
         permissionLevel === 'unauthenticated' ? 'Unauthorized' : 'Forbidden',
         { status }
@@ -139,10 +153,21 @@ export async function proxy(request: NextRequest) {
     } else {
       const redirectUrl =
         permissionLevel === 'unauthenticated' ? '/login' : '/unauthorized';
+      logRequestEnd(logContext, 302, {
+        reason: 'route_not_allowed_redirect',
+        permissionLevel,
+        redirectUrl,
+        ...summarizeSession(session),
+      });
       return NextResponse.redirect(new URL(redirectUrl, request.url));
     }
   }
 
+  logRequestEnd(logContext, 200, {
+    reason: 'route_allowed',
+    permissionLevel,
+    ...summarizeSession(session),
+  });
   return NextResponse.next();
 }
 

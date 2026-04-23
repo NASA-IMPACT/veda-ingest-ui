@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { getUserTenants } from '@/lib/serverTenantValidation';
+import {
+  createRequestLogContext,
+  logRequestEnd,
+  logRequestError,
+  logRequestStart,
+  summarizeSession,
+} from '@/lib/structuredLogger';
 import { getTenantFieldKey } from '@/utils/tenantField';
 
 import ListPRs from '@/utils/githubUtils/ListPRs';
@@ -8,14 +15,22 @@ import ListPRs from '@/utils/githubUtils/ListPRs';
 type IngestionType = 'collection' | 'dataset';
 
 export async function GET(request: NextRequest) {
+  const logContext = createRequestLogContext(request, '/api/list-ingests');
+  logRequestStart(logContext);
+
   try {
     const session = await auth();
 
     if (!session) {
+      logRequestEnd(logContext, 401, { reason: 'missing_session' });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     if (!session.scopes?.includes('dataset:update')) {
+      logRequestEnd(logContext, 403, {
+        reason: 'missing_scope_dataset_update',
+        ...summarizeSession(session),
+      });
       return NextResponse.json(
         { error: 'Insufficient permissions: dataset:update scope required' },
         { status: 403 }
@@ -27,6 +42,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const ingestionType = searchParams.get('ingestionType') as IngestionType;
     if (!ingestionType) {
+      logRequestEnd(logContext, 400, { reason: 'missing_ingestion_type' });
       return NextResponse.json(
         { error: 'ingestionType parameter is required' },
         { status: 400 }
@@ -65,12 +81,18 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    logRequestEnd(logContext, 200, {
+      ingestionType,
+      resultCount: tenantKeyedIngests.length,
+    });
     return NextResponse.json({ githubResponse: tenantKeyedIngests });
   } catch (error) {
-    console.error('Error in /api/list-ingest:', error);
     if (error instanceof Error) {
+      logRequestError(logContext, error, { status: 400 });
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
+
+    logRequestError(logContext, error, { status: 500 });
     return NextResponse.json(
       { error: 'An unexpected error occurred on the server.' },
       { status: 500 }
