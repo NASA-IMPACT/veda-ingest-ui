@@ -94,7 +94,7 @@ test.describe('Edit Existing Collection Sanitization', () => {
       await expect(sanitizationModal).toBeVisible();
       await expect(
         sanitizationModal.getByText(
-          /The Existing Collection's STAC data has been updated as shown to match required metadata formats./i
+          /The Existing Collection's STAC metadata has been updated/i
         )
       ).toBeVisible();
 
