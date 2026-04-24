@@ -41,20 +41,44 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
     string,
     unknown
   > | null>(null);
+  const [isSanitizationModalVisible, setIsSanitizationModalVisible] =
+    useState(false);
+  const [sanitizedInitialFormData, setSanitizedInitialFormData] =
+    useState<Record<string, unknown> | null>(null);
+  const [hasInitializedOriginalData, setHasInitializedOriginalData] =
+    useState(false);
+  const shouldUseSanitizedCollectionFlow =
+    formType === 'collection' || formType === 'existingCollection';
 
   // When component mounts or formData is initially set, store it as the original state
+  // and check if sanitization would change the data for collection edit flows.
   useEffect(() => {
     if (
       formData &&
       Object.keys(formData).length > 0 &&
-      originalFormData &&
-      Object.keys(originalFormData).length === 0
+      !hasInitializedOriginalData
     ) {
-      setOriginalFormData(JSON.parse(JSON.stringify(formData)));
+      setHasInitializedOriginalData(true);
+      const raw = JSON.parse(JSON.stringify(formData));
+      setOriginalFormData(raw);
+      const sanitized = sanitizeFormData(raw);
+      if (
+        shouldUseSanitizedCollectionFlow &&
+        JSON.stringify(raw) !== JSON.stringify(sanitized)
+      ) {
+        setSanitizedInitialFormData(sanitized);
+        setIsSanitizationModalVisible(true);
+        setFormData(sanitized);
+      }
     }
-  }, [formData, originalFormData]);
+  }, [
+    formData,
+    hasInitializedOriginalData,
+    shouldUseSanitizedCollectionFlow,
+    setFormData,
+  ]);
 
-  // Compare current form data with original to determine if there are changes
+  // Compare current form data against the originally loaded payload.
   useEffect(() => {
     if (
       formData &&
@@ -109,17 +133,21 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
     setPendingFormData(null);
   };
 
+  const closeSanitizationModal = () => {
+    if (sanitizedInitialFormData) {
+      setFormData(sanitizedInitialFormData);
+    }
+    setIsSanitizationModalVisible(false);
+  };
+
   const submitFormData = (formData: Record<string, unknown>) => {
     setStatus('loadingGithub');
-
-    // Sanitize the form data to ensure STAC schema compliance
-    const sanitizedFormData = sanitizeFormData(formData);
 
     let url = 'api/create-ingest';
     let requestOptions: RequestInit;
 
     if (formType === 'existingCollection') {
-      const collectionId = sanitizedFormData.id as string;
+      const collectionId = formData.id as string;
       if (!collectionId) {
         console.error(
           'Collection ID is required for existing collection updates'
@@ -131,7 +159,7 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
       url = `/api/existing-collection/${encodeURIComponent(collectionId)}`;
       requestOptions = {
         method: 'PUT',
-        body: JSON.stringify(sanitizedFormData),
+        body: JSON.stringify(formData),
         headers: { 'Content-Type': 'application/json' },
       };
     } else {
@@ -141,7 +169,7 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
           gitRef,
           fileSha,
           filePath,
-          formData: sanitizedFormData,
+          formData,
         }),
         headers: { 'Content-Type': 'application/json' },
       };
@@ -224,6 +252,35 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
           />
         )}
       </Card>
+
+      <Modal
+        title="STAC Metadata Format Updates"
+        open={isSanitizationModalVisible}
+        onOk={closeSanitizationModal}
+        onCancel={closeSanitizationModal}
+        okText="OK"
+        cancelButtonProps={{ style: { display: 'none' } }}
+        width={1200}
+        destroyOnHidden={true}
+      >
+        <div style={{ marginBottom: 16 }}>
+          <Alert
+            message="The Existing Collection's STAC metadata has been updated in the form to match required format conventions before submission."
+            type="info"
+            showIcon
+          />
+        </div>
+        {sanitizedInitialFormData && (
+          <VirtualDiffViewer
+            oldValue={originalFormData}
+            newValue={sanitizedInitialFormData}
+            height={500}
+            showLineCount={true}
+            showObjectCountStats={false}
+            differOptions={{ showModifications: true }}
+          />
+        )}
+      </Modal>
 
       <Modal
         title="Review Changes"
