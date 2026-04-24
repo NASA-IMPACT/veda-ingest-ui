@@ -23,6 +23,8 @@ const REQUEST_ID_HEADERS = [
   'x-amzn-trace-id',
 ];
 
+const MAX_REQUEST_ID_LENGTH = 128;
+
 export interface RequestLogContext {
   requestId: string;
   route: string;
@@ -112,6 +114,18 @@ const createFallbackRequestId = (): string => {
   return `req-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
 
+const sanitizeRequestId = (value: string): string | null => {
+  const normalized = value
+    .trim()
+    // Remove control characters that can break one-line JSON logs.
+    .replace(/[\u0000-\u001F\u007F]/g, '')
+    // Keep a conservative set of safe characters for IDs.
+    .replace(/[^a-zA-Z0-9._:/-]/g, '')
+    .slice(0, MAX_REQUEST_ID_LENGTH);
+
+  return normalized === '' ? null : normalized;
+};
+
 const pickRequestId = (headers?: HeaderLike): string => {
   if (!headers) {
     return createFallbackRequestId();
@@ -120,7 +134,10 @@ const pickRequestId = (headers?: HeaderLike): string => {
   for (const headerName of REQUEST_ID_HEADERS) {
     const value = headers.get(headerName);
     if (value && value.trim() !== '') {
-      return value;
+      const sanitized = sanitizeRequestId(value);
+      if (sanitized) {
+        return sanitized;
+      }
     }
   }
 
@@ -140,7 +157,16 @@ const toSerializableError = (
 
   return {
     name: 'UnknownError',
-    message: typeof error === 'string' ? error : JSON.stringify(error),
+    message:
+      typeof error === 'string'
+        ? error
+        : (() => {
+            try {
+              return JSON.stringify(error);
+            } catch {
+              return '[unserializable-error]';
+            }
+          })(),
   };
 };
 
