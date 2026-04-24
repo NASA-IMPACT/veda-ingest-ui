@@ -205,7 +205,7 @@ test.describe('COG Viewer Drawer', () => {
       ).toHaveText(
         JSON.stringify(
           {
-            bidx: [1],
+            bidx: [1, 2, 3],
             rescale: [],
             assets: ['cog_default'],
           },
@@ -265,7 +265,7 @@ test.describe('COG Viewer Drawer', () => {
       ).toHaveText(
         JSON.stringify(
           {
-            bidx: [1],
+            bidx: [1, 2, 3],
             rescale: [],
             assets: ['cog_default'],
           },

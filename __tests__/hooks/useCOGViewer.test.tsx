@@ -72,7 +72,7 @@ describe('useCOGViewer', () => {
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
       expect(result.current.metadata).toEqual(mockInfoData);
-      expect(result.current.selectedBands).toEqual([1]);
+      expect(result.current.selectedBands).toEqual([1, 2, 3]);
       expect(result.current.tileUrl).toBe(mockTileJsonData.tiles[0]);
     });
   });
@@ -107,6 +107,91 @@ describe('useCOGViewer', () => {
     const tileUrlFetchCall = vi.mocked(fetch).mock.calls[1][0];
     expect(tileUrlFetchCall).toContain('&bidx=3&bidx=2&bidx=1');
     expect(tileUrlFetchCall).toContain('&colormap_name=pretty_color');
+  });
+
+  it('should default to the first 3 bands when metadata has more than 3 bands', async () => {
+    const multiBandInfoData = {
+      band_descriptions: [
+        [1, 'Band 1'],
+        [2, 'Band 2'],
+        [3, 'Band 3'],
+        [4, 'Band 4'],
+      ],
+    };
+
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => multiBandInfoData,
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockTileJsonData,
+      } as Response);
+
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
+
+    await act(async () => {
+      await result.current.fetchMetadata(mockCogUrl);
+    });
+
+    await waitFor(() => {
+      expect(result.current.selectedBands).toEqual([1, 2, 3]);
+    });
+
+    const tileUrlFetchCall = vi.mocked(fetch).mock.calls[1][0] as string;
+    expect(tileUrlFetchCall).toContain('&bidx=1&bidx=2&bidx=3');
+    expect(tileUrlFetchCall).not.toContain('&bidx=4');
+  });
+
+  it('should default to single band when metadata has one band', async () => {
+    const singleBandInfoData = {
+      band_descriptions: [[1, 'Band 1']],
+    };
+
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => singleBandInfoData,
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockTileJsonData,
+      } as Response);
+
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
+
+    await act(async () => {
+      await result.current.fetchMetadata(mockCogUrl);
+    });
+
+    await waitFor(() => {
+      expect(result.current.selectedBands).toEqual([1]);
+    });
+  });
+
+  it('should default to single band when metadata has no band descriptions', async () => {
+    const noBandInfoData = {};
+
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => noBandInfoData,
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockTileJsonData,
+      } as Response);
+
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
+
+    await act(async () => {
+      await result.current.fetchMetadata(mockCogUrl);
+    });
+
+    await waitFor(() => {
+      expect(result.current.selectedBands).toEqual([1]);
+    });
   });
 
   it('should handle errors when fetching metadata fails', async () => {

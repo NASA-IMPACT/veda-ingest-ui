@@ -24,6 +24,16 @@ type TileJsonResponse = {
   bounds?: [number, number, number, number];
 };
 
+const getDefaultBands = (metadata: COGMetadata): number[] => {
+  const totalBands = metadata.band_descriptions?.length ?? 0;
+
+  if (totalBands <= 1) {
+    return [1];
+  }
+
+  return Array.from({ length: Math.min(totalBands, 3) }, (_, i) => i + 1);
+};
+
 export const useCOGViewer = () => {
   const { message } = App.useApp();
   const [cogUrl, setCogUrl] = useState<string | null>(null);
@@ -154,8 +164,11 @@ export const useCOGViewer = () => {
 
         setMetadata(mergedMetadata);
 
-        // Keep default behavior to a single selected band unless renders specifies bidx.
-        setSelectedBands(parsedRenders.bidx?.slice(0, 3) || [1]);
+        const defaultBands = getDefaultBands(COGdata);
+        const initialBands = parsedRenders.bidx?.slice(0, 3) || defaultBands;
+
+        // Default to metadata-derived bands unless renders specifies bidx.
+        setSelectedBands(initialBands);
         setRescale(parsedRenders.rescale || [[null, null]]);
         setSelectedColormap(parsedRenders.colormap_name || 'Internal');
         setColorFormula(parsedRenders.color_formula || null);
@@ -164,7 +177,7 @@ export const useCOGViewer = () => {
 
         fetchTileUrl(
           url,
-          parsedRenders.bidx || [1],
+          initialBands,
           parsedRenders.rescale || [[null, null]],
           parsedRenders.colormap_name || 'Internal',
           parsedRenders.color_formula || null,
