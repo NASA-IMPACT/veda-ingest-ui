@@ -79,7 +79,6 @@ const ensureLogTapeConfigured = (): void => {
   }
 
   configureSync({
-    reset: true,
     sinks: {
       console: getConsoleSink({
         formatter: getJsonLinesFormatter({
