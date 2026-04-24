@@ -24,6 +24,8 @@ const REQUEST_ID_HEADERS = [
 ];
 
 const MAX_REQUEST_ID_LENGTH = 128;
+const DEFAULT_PRODUCTION_LOG_LEVEL: LogLevel = 'warn';
+const DEFAULT_DEBUG_LOG_LEVEL: LogLevel = 'debug';
 
 export interface RequestLogContext {
   requestId: string;
@@ -47,6 +49,29 @@ interface RequestLike {
 }
 
 let isLogTapeConfigured = false;
+const isDebugLoggingEnabled = process.env.ENABLE_DEBUG_LOGGING === 'true';
+
+const parseLogLevelFromEnv = (): LogLevel | null => {
+  const raw = process.env.LOG_LEVEL?.trim().toLowerCase();
+
+  if (!raw) {
+    return null;
+  }
+
+  if (raw === 'debug' || raw === 'info' || raw === 'warn' || raw === 'error') {
+    return raw;
+  }
+
+  if (raw === 'warning') {
+    return 'warn';
+  }
+
+  return null;
+};
+
+const configuredLogLevel: LogLevel = isDebugLoggingEnabled
+  ? (parseLogLevelFromEnv() ?? DEFAULT_DEBUG_LOG_LEVEL)
+  : DEFAULT_PRODUCTION_LOG_LEVEL;
 
 const ensureLogTapeConfigured = (): void => {
   if (isLogTapeConfigured) {
@@ -67,7 +92,7 @@ const ensureLogTapeConfigured = (): void => {
       // application logging policy
       {
         category: 'veda-ingest-ui',
-        lowestLevel: 'info',
+        lowestLevel: toLogTapeLevel(configuredLogLevel),
         sinks: ['console'],
       },
       // logtape library self-logging policy, with stricter filtering
@@ -178,6 +203,8 @@ const toLogTapeLevel = (level: LogLevel): LogTapeLevel => {
   return level;
 };
 
+const shouldLogSuccessfulRequest = (): boolean => isDebugLoggingEnabled;
+
 export const logStructured = (
   level: LogLevel,
   event: string,
@@ -255,6 +282,10 @@ export const logRequestStart = (
   context: RequestLogContext,
   details: Record<string, JsonValue> = {}
 ): void => {
+  if (!shouldLogSuccessfulRequest()) {
+    return;
+  }
+
   logStructured('info', 'api.request.start', {
     requestId: context.requestId,
     route: context.route,
@@ -269,6 +300,10 @@ export const logRequestEnd = (
   status: number,
   details: Record<string, JsonValue> = {}
 ): void => {
+  if (status < 400 && !shouldLogSuccessfulRequest()) {
+    return;
+  }
+
   const level: LogLevel =
     status >= 500 ? 'error' : status >= 400 ? 'warn' : 'info';
   logStructured(level, 'api.request.end', {
