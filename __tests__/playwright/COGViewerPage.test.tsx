@@ -80,7 +80,7 @@ test.describe('COG Viewer Page', () => {
     ).toHaveText(
       JSON.stringify(
         {
-          bidx: [1],
+          bidx: [1, 2, 3],
           rescale: [],
           assets: ['cog_default'],
         },
