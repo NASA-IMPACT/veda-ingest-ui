@@ -289,11 +289,14 @@
         "dashboard": {
           "type": ["string", "object"],
           "title": "Dashboard"
-        },
-        "ColorIR": {
-          "type": ["string", "object"],
-          "title": "ColorIR"
         }
+      },
+      "default": {
+        "dashboard": {}
+      },
+      "additionalProperties": {
+        "type": ["string", "object"],
+        "title": "Render"
       }
     },
     "providers": {

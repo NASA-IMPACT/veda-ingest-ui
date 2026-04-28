@@ -183,6 +183,12 @@
         "rows": 12
       }
     },
+    "additionalProperties": {
+      "ui:widget": "renders.dashboard",
+      "ui:options": {
+        "rows": 12
+      }
+    },
     "ui:classNames": "renders"
   },
   "temporal_extent": {

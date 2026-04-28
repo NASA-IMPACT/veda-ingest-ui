@@ -185,7 +185,13 @@
         "rows": 12
       }
     },
-    "ColorIR": {
+    "additionalProperties": {
+      "ui:widget": "renders.dashboard",
+      "ui:options": {
+        "rows": 12
+      }
+    },
+    "ui:additionalProperties": {
       "ui:widget": "renders.dashboard",
       "ui:options": {
         "rows": 12
