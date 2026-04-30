@@ -48,7 +48,6 @@ interface RequestLike {
   url?: string;
 }
 
-let isLogTapeConfigured = false;
 const isDebugLoggingEnabled = process.env.ENABLE_DEBUG_LOGGING === 'true';
 
 const parseLogLevelFromEnv = (): LogLevel | null => {
@@ -73,43 +72,40 @@ const configuredLogLevel: LogLevel = isDebugLoggingEnabled
   ? (parseLogLevelFromEnv() ?? DEFAULT_DEBUG_LOG_LEVEL)
   : DEFAULT_PRODUCTION_LOG_LEVEL;
 
-const ensureLogTapeConfigured = (): void => {
-  if (isLogTapeConfigured) {
-    return;
+const toLogTapeLevel = (level: LogLevel): LogTapeLevel => {
+  if (level === 'warn') {
+    return 'warning';
   }
 
-  configureSync({
-    sinks: {
-      console: getConsoleSink({
-        formatter: getJsonLinesFormatter({
-          categorySeparator: '.',
-          properties: 'flatten',
-        }),
+  return level;
+};
+
+configureSync({
+  sinks: {
+    console: getConsoleSink({
+      formatter: getJsonLinesFormatter({
+        categorySeparator: '.',
+        properties: 'flatten',
       }),
+    }),
+  },
+  loggers: [
+    // application logging policy
+    {
+      category: 'veda-ingest-ui',
+      lowestLevel: toLogTapeLevel(configuredLogLevel),
+      sinks: ['console'],
     },
-    loggers: [
-      // application logging policy
-      {
-        category: 'veda-ingest-ui',
-        lowestLevel: toLogTapeLevel(configuredLogLevel),
-        sinks: ['console'],
-      },
-      // logtape library self-logging policy, with stricter filtering
-      {
-        category: ['logtape', 'meta'],
-        lowestLevel: 'warning',
-        sinks: ['console'],
-      },
-    ],
-  });
+    // logtape library self-logging policy, with stricter filtering
+    {
+      category: ['logtape', 'meta'],
+      lowestLevel: 'warning',
+      sinks: ['console'],
+    },
+  ],
+});
 
-  isLogTapeConfigured = true;
-};
-
-const getBaseLogger = (): Logger => {
-  ensureLogTapeConfigured();
-  return getLogger(['veda-ingest-ui', 'app']);
-};
+const getBaseLogger = (): Logger => getLogger(['veda-ingest-ui', 'app']);
 
 const getPathFromRequest = (request: RequestLike, fallback: string): string => {
   if (request.nextUrl?.pathname) {
@@ -192,14 +188,6 @@ const toSerializableError = (
             }
           })(),
   };
-};
-
-const toLogTapeLevel = (level: LogLevel): LogTapeLevel => {
-  if (level === 'warn') {
-    return 'warning';
-  }
-
-  return level;
 };
 
 const shouldLogSuccessfulRequest = (): boolean => isDebugLoggingEnabled;
