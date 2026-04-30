@@ -40,7 +40,18 @@ Add a profile in [config/env.ts](../../config/env.ts) and include:
 
 Then set `NEXT_PUBLIC_APP_ENV` in Amplify to match your new profile key.
 
-## 4. Configure Amplify Environment Variables
+If this deployment needs custom branding, also complete the logo steps in Section 4.
+
+## 4. Add a Deployment-Specific Sidebar Logo (Optional)
+
+If the new instance needs a branded logo in the sidebar:
+
+1. Set `ADDITIONAL_LOGO` in your profile in [config/env.ts](../../config/env.ts).
+2. Add the new logo asset file in [public](../../public).
+3. Update [components/layout/SidebarLogo.tsx](../../components/layout/SidebarLogo.tsx) to render the new image when `cfg.ADDITIONAL_LOGO` matches your new value.
+4. Add or update tests in [**tests**/components/SidebarLogo.test.tsx](../../__tests__/components/SidebarLogo.test.tsx) to assert your logo renders for that profile value.
+
+## 5. Configure Amplify Environment Variables
 
 In Amplify Console, set non-secret environment variables:
 
@@ -53,7 +64,7 @@ In Amplify Console, set non-secret environment variables:
 - `NEXT_PUBLIC_KEYCLOAK_ISSUER`
 - `NEXT_PUBLIC_APP_ENV`
 
-## 5. Configure Secrets Manager Runtime Secret
+## 6. Configure Secrets Manager Runtime Secret
 
 Create a Secrets Manager secret (same account/region as Amplify compute) with this JSON shape:
 
@@ -72,7 +83,7 @@ Notes:
 - Use escaped newlines (`\\n`) for `GITHUB_PRIVATE_KEY`.
 - Set `APP_RUNTIME_SECRET_ID` to this secret ARN or name.
 
-## 6. Ensure Amplify Runtime IAM Permissions
+## 7. Ensure Amplify Runtime IAM Permissions
 
 The Amplify SSR runtime role must allow:
 
@@ -82,6 +93,13 @@ The Amplify SSR runtime role must allow:
 
 Scope resources to the role and secret ARNs used by your environment.
 
-## 7. Connect Branch Deployment Behavior
+## 8. Connect Branch Deployment Behavior
 
 Ensure your Amplify app is connected to the intended branch (typically `main`) for automatic deployment on merge.
+
+## 9. Validate After Deployment
+
+1. Confirm app loads and auth redirect works.
+2. Confirm create-ingest flow can open or update a PR in the configured destination repo.
+3. Confirm tenant-restricted paths return expected `401`/`403` outcomes for unauthorized users.
+4. If a custom logo is configured, confirm the new sidebar wordmark/logo renders for the instance profile.
