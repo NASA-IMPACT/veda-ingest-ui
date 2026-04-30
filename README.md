@@ -168,6 +168,45 @@ graph TD
 
 ```
 
+## Edit Existing Collection Flow Architecture
+
+```mermaid
+graph TD
+  subgraph "Edit Existing Collection"
+    PAGE[edit-existing-collection page]
+    PAGE --> CLIENT[EditExistingCollectionClient]
+
+    CLIENT --> LIST[ExistingCollectionsList]
+    LIST -->|Select collection| EDIT[EditCollectionView]
+    EDIT -->|Cancel or complete| LIST
+
+    LIST -->|GET /api/existing-collection| API_LIST[API list route]
+    API_LIST -->|Reads from| STAC_LIST["STAC collections endpoint"]
+
+    EDIT -->|GET /api/existing-collection/:collectionId| API_GET[API collection route]
+    EDIT -->|PUT /api/existing-collection/:collectionId| API_PUT[API collection route]
+
+    API_GET --> AUTH{Auth + stac:collection:update scope}
+    API_PUT --> AUTH
+    AUTH --> TENANT{Tenant access validation}
+    TENANT -->|Allowed| STAC_ITEM["STAC collection endpoint"]
+    TENANT -->|Denied| FORBIDDEN[403]
+
+    API_PUT -->|On success| STAC_ITEM
+  end
+
+  style PAGE fill:#0B3D91,stroke:#fff,stroke-width:2px,color:#fff
+  style CLIENT fill:#A4D3EE,stroke:#333,stroke-width:2px,color:#000
+  style LIST fill:#A4D3EE,stroke:#333,stroke-width:2px,color:#000
+  style EDIT fill:#A4D3EE,stroke:#333,stroke-width:2px,color:#000
+  style API_LIST fill:#FC3D21,stroke:#333,stroke-width:2px,color:#fff
+  style API_GET fill:#FC3D21,stroke:#333,stroke-width:2px,color:#fff
+  style API_PUT fill:#FC3D21,stroke:#333,stroke-width:2px,color:#fff
+  style AUTH fill:#BCC6CC,stroke:#333,stroke-width:2px,color:#000
+  style TENANT fill:#BCC6CC,stroke:#333,stroke-width:2px,color:#000
+  style FORBIDDEN fill:#f7c6c7,stroke:#333,stroke-width:2px,color:#000
+```
+
 # Requirements
 
 To set up the development environment for this website, you'll need to install the following on your system:
