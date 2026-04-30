@@ -27,6 +27,29 @@ const MAX_REQUEST_ID_LENGTH = 128;
 const DEFAULT_PRODUCTION_LOG_LEVEL: LogLevel = 'warn';
 const DEFAULT_DEBUG_LOG_LEVEL: LogLevel = 'debug';
 
+interface RequestLogBasePayload {
+  requestId: string;
+  route: string;
+  method: string;
+  path: string;
+}
+
+interface RequestStartPayload extends RequestLogBasePayload {
+  [key: string]: JsonValue;
+}
+
+interface RequestEndPayload extends RequestLogBasePayload {
+  status: number;
+  durationMs: number;
+  [key: string]: JsonValue;
+}
+
+interface RequestErrorPayload extends RequestLogBasePayload {
+  durationMs: number;
+  error: { name: string; message: string; stack?: string };
+  [key: string]: JsonValue;
+}
+
 export interface RequestLogContext {
   requestId: string;
   route: string;
@@ -273,13 +296,14 @@ export const logRequestStart = (
     return;
   }
 
-  logStructured('info', 'api.request.start', {
+  const payload: RequestStartPayload = {
     requestId: context.requestId,
     route: context.route,
     method: context.method,
     path: context.path,
     ...details,
-  });
+  };
+  logStructured('info', 'api.request.start', payload);
 };
 
 export const logRequestEnd = (
@@ -293,7 +317,7 @@ export const logRequestEnd = (
 
   const level: LogLevel =
     status >= 500 ? 'error' : status >= 400 ? 'warn' : 'info';
-  logStructured(level, 'api.request.end', {
+  const payload: RequestEndPayload = {
     requestId: context.requestId,
     route: context.route,
     method: context.method,
@@ -301,7 +325,8 @@ export const logRequestEnd = (
     status,
     durationMs: Date.now() - context.startTime,
     ...details,
-  });
+  };
+  logStructured(level, 'api.request.end', payload);
 };
 
 export const logRequestError = (
@@ -309,7 +334,7 @@ export const logRequestError = (
   error: unknown,
   details: Record<string, JsonValue> = {}
 ): void => {
-  logStructured('error', 'api.request.error', {
+  const payload: RequestErrorPayload = {
     requestId: context.requestId,
     route: context.route,
     method: context.method,
@@ -317,5 +342,6 @@ export const logRequestError = (
     durationMs: Date.now() - context.startTime,
     error: toSerializableError(error),
     ...details,
-  });
+  };
+  logStructured('error', 'api.request.error', payload);
 };
