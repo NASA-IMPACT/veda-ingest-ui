@@ -50,11 +50,7 @@ interface RequestErrorPayload extends RequestLogBasePayload {
   [key: string]: JsonValue;
 }
 
-export interface RequestLogContext {
-  requestId: string;
-  route: string;
-  method: string;
-  path: string;
+export interface RequestLogContext extends RequestLogBasePayload {
   startTime: number;
 }
 
@@ -73,6 +69,14 @@ interface RequestLike {
 
 const isDebugLoggingEnabled = process.env.ENABLE_DEBUG_LOGGING === 'true';
 
+const LOG_LEVEL_ALIASES: Record<string, LogLevel> = {
+  debug: 'debug',
+  info: 'info',
+  warn: 'warn',
+  warning: 'warn',
+  error: 'error',
+};
+
 const parseLogLevelFromEnv = (): LogLevel | null => {
   const raw = process.env.LOG_LEVEL?.trim().toLowerCase();
 
@@ -80,15 +84,7 @@ const parseLogLevelFromEnv = (): LogLevel | null => {
     return null;
   }
 
-  const aliases: Record<string, LogLevel> = {
-    debug: 'debug',
-    info: 'info',
-    warn: 'warn',
-    warning: 'warn',
-    error: 'error',
-  };
-
-  return aliases[raw] ?? null;
+  return LOG_LEVEL_ALIASES[raw] ?? null;
 };
 
 const configuredLogLevel: LogLevel = isDebugLoggingEnabled
@@ -128,7 +124,7 @@ configureSync({
   ],
 });
 
-const getBaseLogger = (): Logger => getLogger(['veda-ingest-ui', 'app']);
+const baseLogger: Logger = getLogger(['veda-ingest-ui', 'app']);
 
 const getPathFromRequest = (request: RequestLike, fallback: string): string => {
   if (request.nextUrl?.pathname) {
@@ -213,14 +209,11 @@ const toSerializableError = (
   };
 };
 
-const shouldLogSuccessfulRequest = (): boolean => isDebugLoggingEnabled;
-
 export const logStructured = (
   level: LogLevel,
   event: string,
   details: Record<string, JsonValue> = {}
 ): void => {
-  const logger = getBaseLogger();
   const payload = {
     event,
     ...details,
@@ -230,19 +223,19 @@ export const logStructured = (
 
   switch (logTapeLevel) {
     case 'debug':
-      logger.debug('{event}', payload);
+      baseLogger.debug('{event}', payload);
       break;
     case 'info':
-      logger.info('{event}', payload);
+      baseLogger.info('{event}', payload);
       break;
     case 'warning':
-      logger.warn('{event}', payload);
+      baseLogger.warn('{event}', payload);
       break;
     case 'error':
-      logger.error('{event}', payload);
+      baseLogger.error('{event}', payload);
       break;
     default:
-      logger.info('{event}', payload);
+      baseLogger.info('{event}', payload);
       break;
   }
 };
@@ -288,19 +281,25 @@ export const summarizeSession = (
   };
 };
 
+const contextToBasePayload = (
+  context: RequestLogContext
+): RequestLogBasePayload => ({
+  requestId: context.requestId,
+  route: context.route,
+  method: context.method,
+  path: context.path,
+});
+
 export const logRequestStart = (
   context: RequestLogContext,
   details: Record<string, JsonValue> = {}
 ): void => {
-  if (!shouldLogSuccessfulRequest()) {
+  if (!isDebugLoggingEnabled) {
     return;
   }
 
   const payload: RequestStartPayload = {
-    requestId: context.requestId,
-    route: context.route,
-    method: context.method,
-    path: context.path,
+    ...contextToBasePayload(context),
     ...details,
   };
   logStructured('info', 'api.request.start', payload);
@@ -311,17 +310,14 @@ export const logRequestEnd = (
   status: number,
   details: Record<string, JsonValue> = {}
 ): void => {
-  if (status < 400 && !shouldLogSuccessfulRequest()) {
+  if (status < 400 && !isDebugLoggingEnabled) {
     return;
   }
 
   const level: LogLevel =
     status >= 500 ? 'error' : status >= 400 ? 'warn' : 'info';
   const payload: RequestEndPayload = {
-    requestId: context.requestId,
-    route: context.route,
-    method: context.method,
-    path: context.path,
+    ...contextToBasePayload(context),
     status,
     durationMs: Date.now() - context.startTime,
     ...details,
@@ -335,10 +331,7 @@ export const logRequestError = (
   details: Record<string, JsonValue> = {}
 ): void => {
   const payload: RequestErrorPayload = {
-    requestId: context.requestId,
-    route: context.route,
-    method: context.method,
-    path: context.path,
+    ...contextToBasePayload(context),
     durationMs: Date.now() - context.startTime,
     error: toSerializableError(error),
     ...details,
