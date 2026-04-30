@@ -58,15 +58,15 @@ const parseLogLevelFromEnv = (): LogLevel | null => {
     return null;
   }
 
-  if (raw === 'debug' || raw === 'info' || raw === 'warn' || raw === 'error') {
-    return raw;
-  }
+  const aliases: Record<string, LogLevel> = {
+    debug: 'debug',
+    info: 'info',
+    warn: 'warn',
+    warning: 'warn',
+    error: 'error',
+  };
 
-  if (raw === 'warning') {
-    return 'warn';
-  }
-
-  return null;
+  return aliases[raw] ?? null;
 };
 
 const configuredLogLevel: LogLevel = isDebugLoggingEnabled
