@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { withPermission } from '@/lib/authorization/withPermission';
 import { validateTenantAccess } from '@/lib/serverTenantValidation';
 import { getTenantFieldKey } from '@/utils/tenantField';
 
@@ -8,168 +8,148 @@ import UpdatePR from '@/utils/githubUtils/UpdatePR';
 
 type AllowedIngestionType = 'dataset' | 'collection';
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
+export const POST = withPermission(
+  (capabilities) => capabilities.canCreateIngest,
+  async (request: NextRequest) => {
+    try {
+      const body = await request.json();
 
-    // Input validation
-    if (!body || typeof body !== 'object') {
-      return NextResponse.json(
-        { error: 'Invalid request body' },
-        { status: 400 }
-      );
-    }
-
-    const { data, ingestionType, userComment } = body;
-
-    // Validate required fields
-    if (!data || typeof data !== 'object') {
-      return NextResponse.json(
-        { error: 'Missing or invalid "data" field in the request body.' },
-        { status: 400 }
-      );
-    }
-
-    if (!ingestionType || !['dataset', 'collection'].includes(ingestionType)) {
-      return NextResponse.json(
-        {
-          error:
-            'Missing or invalid "ingestionType". Must be "dataset" or "collection".',
-        },
-        { status: 400 }
-      );
-    }
-
-    // Validate userComment if provided
-    if (userComment !== undefined && typeof userComment !== 'string') {
-      return NextResponse.json(
-        { error: 'Invalid "userComment" field. Must be a string.' },
-        { status: 400 }
-      );
-    }
-
-    const validatedIngestionType: AllowedIngestionType = ingestionType;
-
-    const tenantFieldKey = getTenantFieldKey();
-    const tenantValue = data[tenantFieldKey];
-    const tenant = typeof tenantValue === 'string' ? tenantValue : undefined;
-
-    if (tenant && tenant !== '' && tenant.toLowerCase() !== 'public') {
-      const session = await auth();
-      if (!session) {
+      // Input validation
+      if (!body || typeof body !== 'object') {
         return NextResponse.json(
-          { error: 'Authentication required for tenant-specific requests' },
-          { status: 401 }
+          { error: 'Invalid request body' },
+          { status: 400 }
         );
       }
 
-      const tenantValidation = await validateTenantAccess(tenant, request);
-      if (!tenantValidation.isValid) {
+      const { data, ingestionType, userComment } = body;
+
+      // Validate required fields
+      if (!data || typeof data !== 'object') {
+        return NextResponse.json(
+          { error: 'Missing or invalid "data" field in the request body.' },
+          { status: 400 }
+        );
+      }
+
+      if (
+        !ingestionType ||
+        !['dataset', 'collection'].includes(ingestionType)
+      ) {
         return NextResponse.json(
           {
             error:
-              'Access denied: You do not have permission to create ingests for this tenant',
-            details: tenantValidation.error,
+              'Missing or invalid "ingestionType". Must be "dataset" or "collection".',
           },
-          { status: 403 }
+          { status: 400 }
         );
       }
-    }
 
-    const githubResponse = await CreatePR(
-      data,
-      validatedIngestionType,
-      userComment
-    );
-
-    return NextResponse.json({ githubURL: githubResponse });
-  } catch (error) {
-    if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    } else {
-      console.log(error);
-      return NextResponse.json(
-        { error: 'Internal Server Error' },
-        { status: 500 }
-      );
-    }
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  try {
-    const session = await auth();
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Authentication required for updates' },
-        { status: 401 }
-      );
-    }
-
-    if (!session.scopes?.includes('dataset:update')) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions: dataset:update scope required' },
-        { status: 403 }
-      );
-    }
-
-    const body = await request.json();
-
-    const requiredFields = ['gitRef', 'fileSha', 'filePath', 'formData'];
-
-    // Check for missing fields
-    const missingFields = requiredFields.filter((field) => !(field in body));
-
-    if (missingFields.length > 0) {
-      return NextResponse.json(
-        { error: `Missing required fields: ${missingFields.join(', ')}` },
-        { status: 400 }
-      );
-    }
-
-    const { gitRef, fileSha, filePath, formData } = body;
-
-    const tenantFieldKey = getTenantFieldKey();
-    const tenantValue = formData?.[tenantFieldKey];
-    const tenant = typeof tenantValue === 'string' ? tenantValue : undefined;
-
-    if (tenant && tenant !== '' && tenant.toLowerCase() !== 'public') {
-      const session = await auth();
-      if (!session) {
+      // Validate userComment if provided
+      if (userComment !== undefined && typeof userComment !== 'string') {
         return NextResponse.json(
-          { error: 'Authentication required for tenant-specific updates' },
-          { status: 401 }
+          { error: 'Invalid "userComment" field. Must be a string.' },
+          { status: 400 }
         );
       }
 
-      const tenantValidation = await validateTenantAccess(tenant, request);
-      if (!tenantValidation.isValid) {
-        return NextResponse.json(
-          {
-            error:
-              'Access denied: You do not have permission to update ingests for this tenant',
-            details: tenantValidation.error,
-          },
-          { status: 403 }
-        );
+      const validatedIngestionType: AllowedIngestionType = ingestionType;
+
+      const tenantFieldKey = getTenantFieldKey();
+      const tenantValue = data[tenantFieldKey];
+      const tenant = typeof tenantValue === 'string' ? tenantValue : undefined;
+
+      if (tenant && tenant !== '' && tenant.toLowerCase() !== 'public') {
+        const tenantValidation = await validateTenantAccess(tenant, request);
+        if (!tenantValidation.isValid) {
+          return NextResponse.json(
+            {
+              error:
+                'Access denied: You do not have permission to create ingests for this tenant',
+              details: tenantValidation.error,
+            },
+            { status: 403 }
+          );
+        }
       }
-    }
 
-    await UpdatePR(gitRef, fileSha, filePath, formData);
-
-    return NextResponse.json(
-      { message: 'Data updated successfully' },
-      { status: 200 }
-    );
-  } catch (error) {
-    if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    } else {
-      console.log(error);
-      return NextResponse.json(
-        { error: 'Internal Server Error' },
-        { status: 500 }
+      const githubResponse = await CreatePR(
+        data,
+        validatedIngestionType,
+        userComment
       );
+
+      return NextResponse.json({ githubURL: githubResponse });
+    } catch (error) {
+      if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      } else {
+        console.log(error);
+        return NextResponse.json(
+          { error: 'Internal Server Error' },
+          { status: 500 }
+        );
+      }
     }
-  }
-}
+  },
+  { unauthenticatedMessage: 'Authentication required for create requests' }
+);
+
+export const PUT = withPermission(
+  (capabilities) => capabilities.canEditIngest,
+  async (request: NextRequest) => {
+    try {
+      const body = await request.json();
+
+      const requiredFields = ['gitRef', 'fileSha', 'filePath', 'formData'];
+
+      // Check for missing fields
+      const missingFields = requiredFields.filter((field) => !(field in body));
+
+      if (missingFields.length > 0) {
+        return NextResponse.json(
+          { error: `Missing required fields: ${missingFields.join(', ')}` },
+          { status: 400 }
+        );
+      }
+
+      const { gitRef, fileSha, filePath, formData } = body;
+
+      const tenantFieldKey = getTenantFieldKey();
+      const tenantValue = formData?.[tenantFieldKey];
+      const tenant = typeof tenantValue === 'string' ? tenantValue : undefined;
+
+      if (tenant && tenant !== '' && tenant.toLowerCase() !== 'public') {
+        const tenantValidation = await validateTenantAccess(tenant, request);
+        if (!tenantValidation.isValid) {
+          return NextResponse.json(
+            {
+              error:
+                'Access denied: You do not have permission to update ingests for this tenant',
+              details: tenantValidation.error,
+            },
+            { status: 403 }
+          );
+        }
+      }
+
+      await UpdatePR(gitRef, fileSha, filePath, formData);
+
+      return NextResponse.json(
+        { message: 'Data updated successfully' },
+        { status: 200 }
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        return NextResponse.json({ error: error.message }, { status: 400 });
+      } else {
+        console.log(error);
+        return NextResponse.json(
+          { error: 'Internal Server Error' },
+          { status: 500 }
+        );
+      }
+    }
+  },
+  { unauthenticatedMessage: 'Authentication required for updates' }
+);

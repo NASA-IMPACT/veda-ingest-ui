@@ -30,6 +30,14 @@ afterAll(() => {
 });
 
 describe('POST /api/create-ingest', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    authMock.mockResolvedValue({
+      user: { name: 'Test User' },
+      scopes: ['dataset:create'],
+    });
+  });
+
   it('returns GitHub URL on successful PR creation for a collection', async () => {
     const mockBody = {
       data: { collection: 'Test Collection' },
@@ -42,7 +50,7 @@ describe('POST /api/create-ingest', () => {
 
     vi.mocked(CreatePR).mockResolvedValue('https://github.com/test/pr');
 
-    const response = await POST(mockRequest);
+    const response = await POST(mockRequest, {});
     const jsonResponse = await response.json();
 
     expect(CreatePR).toHaveBeenCalledWith(
@@ -59,7 +67,7 @@ describe('POST /api/create-ingest', () => {
       json: vi.fn().mockResolvedValue({ ingestionType: 'collection' }), // 'data' is missing
     } as unknown as NextRequest;
 
-    const response = await POST(mockRequest);
+    const response = await POST(mockRequest, {});
     const jsonResponse = await response.json();
 
     expect(jsonResponse.error).toBe(
@@ -73,7 +81,7 @@ describe('POST /api/create-ingest', () => {
       json: vi.fn().mockResolvedValue({ data: { collection: 'Test' } }), // 'ingestionType' is missing
     } as unknown as NextRequest;
 
-    const response = await POST(mockRequest);
+    const response = await POST(mockRequest, {});
     const jsonResponse = await response.json();
 
     expect(jsonResponse.error).toBe(
@@ -93,7 +101,7 @@ describe('POST /api/create-ingest', () => {
 
     vi.mocked(CreatePR).mockRejectedValue(new Error('Failed to create PR'));
 
-    const response = await POST(mockRequest);
+    const response = await POST(mockRequest, {});
     const jsonResponse = await response.json();
 
     expect(jsonResponse).toEqual({ error: 'Failed to create PR' });
@@ -113,11 +121,52 @@ describe('POST /api/create-ingest', () => {
       throw 'A non-error was thrown';
     });
 
-    const response = await POST(mockRequest);
+    const response = await POST(mockRequest, {});
     const jsonResponse = await response.json();
 
     expect(jsonResponse).toEqual({ error: 'Internal Server Error' });
     expect(response.status).toBe(500);
+  });
+
+  it('returns 401 when user is unauthenticated', async () => {
+    authMock.mockResolvedValue(null);
+
+    const mockRequest = {
+      json: vi.fn().mockResolvedValue({
+        data: { collection: 'Test Collection' },
+        ingestionType: 'collection',
+      }),
+    } as unknown as NextRequest;
+
+    const response = await POST(mockRequest, {});
+    const jsonResponse = await response.json();
+
+    expect(jsonResponse).toEqual({
+      error: 'Authentication required for create requests',
+    });
+    expect(response.status).toBe(401);
+  });
+
+  it('returns 403 when user lacks create permission', async () => {
+    authMock.mockResolvedValue({
+      user: { name: 'Test User' },
+      scopes: ['openid'],
+    });
+
+    const mockRequest = {
+      json: vi.fn().mockResolvedValue({
+        data: { collection: 'Test Collection' },
+        ingestionType: 'collection',
+      }),
+    } as unknown as NextRequest;
+
+    const response = await POST(mockRequest, {});
+    const jsonResponse = await response.json();
+
+    expect(jsonResponse).toEqual({
+      error: 'You do not have permission to perform this action.',
+    });
+    expect(response.status).toBe(403);
   });
 });
 
@@ -143,7 +192,7 @@ describe('PUT /api/create-ingest', () => {
 
     vi.mocked(UpdatePR).mockResolvedValue(undefined);
 
-    const response = await PUT(mockRequest);
+    const response = await PUT(mockRequest, {});
     const jsonResponse = await response.json();
 
     expect(UpdatePR).toHaveBeenCalledWith('test-ref', 'test-sha', 'test-path', {
@@ -165,7 +214,7 @@ describe('PUT /api/create-ingest', () => {
 
     vi.mocked(UpdatePR).mockRejectedValue(new Error('Failed to update PR'));
 
-    const response = await PUT(mockRequest);
+    const response = await PUT(mockRequest, {});
     const jsonResponse = await response.json();
 
     expect(jsonResponse).toEqual({ error: 'Failed to update PR' });
@@ -186,7 +235,7 @@ describe('PUT /api/create-ingest', () => {
       throw 'A non-error was thrown';
     });
 
-    const response = await PUT(mockRequest);
+    const response = await PUT(mockRequest, {});
     const jsonResponse = await response.json();
 
     expect(jsonResponse).toEqual({ error: 'Internal Server Error' });
@@ -202,7 +251,7 @@ describe('PUT /api/create-ingest', () => {
       }), // filePath is missing
     } as unknown as NextRequest;
 
-    const response = await PUT(mockRequest);
+    const response = await PUT(mockRequest, {});
     const jsonResponse = await response.json();
 
     expect(jsonResponse).toEqual({

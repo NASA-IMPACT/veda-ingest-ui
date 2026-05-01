@@ -134,6 +134,7 @@ describe('Middleware', () => {
         '/edit-collection',
         '/edit-dataset',
         '/upload',
+        '/upload-url',
       ];
 
       for (const pathname of blockedRoutes) {
@@ -166,6 +167,7 @@ describe('Middleware', () => {
         '/create-collection',
         '/create-dataset',
         '/upload',
+        '/upload-url',
       ];
 
       for (const pathname of allowedRoutes) {

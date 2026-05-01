@@ -85,6 +85,80 @@ All API calls require users to be authenticated via Keycloak.
 - **STAC Operations**: Uses access token for STAC API calls with tenant-based permissions
 - **Tenant Filtering**: Support for multi-tenant environments with proper access controls
 
+### Scope Model
+
+The app currently uses four application scopes:
+
+- `dataset:limited-access`
+- `dataset:create`
+- `dataset:update`
+- `stac:collection:update`
+
+Behavior is derived from scopes:
+
+- `dataset:limited-access` takes precedence and restricts create/edit features.
+- `dataset:create` enables create flows (including thumbnail upload) but not ingest edit flows.
+- `dataset:update` enables ingest edit flows.
+- `stac:collection:update` enables editing existing STAC collections.
+
+### Authorization Implementation
+
+Authorization logic is centralized and shared across proxy, UI, and API routes:
+
+- `lib/authorization/policy.ts`: scope constants and capability derivation from session scopes.
+- `lib/authorization/withPermission.ts`: shared route-handler wrapper for auth + permission checks.
+
+### Access Matrix
+
+Current intended access behavior:
+
+| Scope state                                 | Collections / Datasets landing pages | Create Ingest (`/create-*`, `/upload`, `/api/create-ingest`, `/api/upload-url`) | Edit Ingest (`/edit-*`, `/api/list-ingests`, `/api/retrieve-ingest`, `/api/create-ingest` PUT) | Edit Existing Collection (`/edit-existing-collection`, `/api/existing-collection/*`) |
+| ------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Unauthenticated                             | Redirect `/login`                    | Deny                                                                            | Deny                                                                                           | Deny                                                                                 |
+| Authenticated with no app scopes            | Redirect `/unauthorized`             | Deny                                                                            | Deny                                                                                           | Deny                                                                                 |
+| `dataset:limited-access`                    | Allow                                | Deny                                                                            | Deny                                                                                           | Deny                                                                                 |
+| `dataset:create`                            | Allow                                | Allow                                                                           | Deny                                                                                           | Deny                                                                                 |
+| `dataset:update`                            | Allow                                | Allow                                                                           | Allow                                                                                          | Deny                                                                                 |
+| `stac:collection:update`                    | Allow                                | Allow                                                                           | Deny                                                                                           | Allow                                                                                |
+| `dataset:update` + `stac:collection:update` | Allow                                | Allow                                                                           | Allow                                                                                          | Allow                                                                                |
+
+### Where Authorization Is Enforced
+
+Authorization is enforced in multiple layers:
+
+- **Proxy route guard**: `proxy.ts` checks route access and redirects/returns 401/403 for matched routes.
+- **API route checks**: API handlers validate session/scopes using the shared `withPermission` wrapper and capability policy.
+- **Page access model**: pages rely on `proxy.ts` for route-level auth/authorization (no page-specific capability checks).
+- **Client UI gating**: navigation/cards are disabled using shared capabilities for better UX.
+
+### API Authorization Summary
+
+Current API authorization requirements:
+
+- `POST /api/create-ingest`: authenticated + create capability
+- `PUT /api/create-ingest`: authenticated + edit-ingest capability
+- `GET /api/list-ingests`: authenticated + edit-ingest capability
+- `GET /api/retrieve-ingest`: authenticated + edit-ingest capability
+- `GET /api/existing-collection`: authenticated + stac edit capability
+- `GET/PUT /api/existing-collection/[collectionId]`: authenticated + stac edit capability
+- `POST /api/upload-url`: authenticated + create capability
+
+### Mocking Auth Locally
+
+For local/test development:
+
+- Set `NEXT_PUBLIC_DISABLE_AUTH=true` to bypass Keycloak login.
+- Set `NEXT_PUBLIC_MOCK_SCOPES` to simulate permissions.
+- Set `NEXT_PUBLIC_MOCK_TENANTS` to simulate tenant access.
+
+Examples:
+
+```bash
+NEXT_PUBLIC_DISABLE_AUTH=true
+NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create"
+# NEXT_PUBLIC_MOCK_TENANTS=tenant1,tenant2
+```
+
 ## Creation Component Architecture
 
 ```mermaid

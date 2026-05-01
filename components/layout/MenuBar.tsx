@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { deriveCapabilities } from '@/lib/authorization/policy';
 
 import { Menu, MenuProps, Tooltip } from 'antd';
 import Link from 'next/link';
@@ -17,11 +18,11 @@ import {
 
 const MenuBar = () => {
   const { data: session } = useSession();
-  const hasEditIngestPermission = session?.scopes?.includes('dataset:update');
-  const hasLimitedAccess = session?.scopes?.includes('dataset:limited-access');
-  const hasEditStacCollectionPermission = session?.scopes?.includes(
-    'stac:collection:update'
-  );
+  const capabilities = deriveCapabilities(session ?? null);
+  const hasEditIngestPermission = capabilities.canEditIngest;
+  const hasLimitedAccess = capabilities.isLimited;
+  const hasEditStacCollectionPermission =
+    capabilities.canEditExistingCollection;
 
   const pathname = usePathname();
   const [activeLink, setActiveLink] = useState(pathname);

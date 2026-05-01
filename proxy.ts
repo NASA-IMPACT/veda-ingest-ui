@@ -1,4 +1,8 @@
 import { auth } from '@/auth';
+import {
+  deriveCapabilities,
+  UserCapabilities,
+} from '@/lib/authorization/policy';
 import { NextResponse, NextRequest } from 'next/server';
 
 const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
@@ -6,7 +10,7 @@ const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 // Define route permissions in a declarative way
 const routeConfig = {
   // Routes that require authentication but no special permissions
-  limited: ['/collections', '/datasets', '/cog-viewer', '/upload-url'],
+  authenticated: ['/', '/collections', '/datasets', '/cog-viewer'],
 
   // Routes that require create permissions (blocked for limited access)
   createAccess: [
@@ -14,6 +18,7 @@ const routeConfig = {
     '/create-dataset',
     '/upload',
     '/create-ingest',
+    '/upload-url',
   ],
 
   // Routes that require edit permissions (blocked for limited access + need dataset:update)
@@ -31,80 +36,43 @@ const routeConfig = {
   ],
 };
 
-type SessionLike = {
-  scopes?: string[];
-} | null;
-
-function getUserPermissionLevel(session: SessionLike) {
-  if (!session) return 'unauthenticated';
-  if (session.scopes?.includes('dataset:limited-access')) return 'limited';
-
-  const hasDatasetUpdate = session.scopes?.includes('dataset:update');
-  const hasStacCollectionUpdate = session.scopes?.includes(
-    'stac:collection:update'
-  );
-  const hasDatasetCreate = session.scopes?.includes('dataset:create');
-
-  if (hasDatasetUpdate && hasStacCollectionUpdate) return 'full-edit';
-  if (hasDatasetUpdate) return 'edit';
-  if (hasStacCollectionUpdate) return 'edit-existing';
-  if (hasDatasetCreate) return 'create';
-
-  // Authenticated user but no application-specific permissions
-  return 'authenticated-guest';
-}
-
-function isRouteAllowed(pathname: string, permissionLevel: string) {
+function isRouteAllowed(pathname: string, capabilities: UserCapabilities) {
   // Check if route starts with any of the configured paths
   const matchesRoute = (routes: string[]) =>
     routes.some((route) =>
       route === '/' ? pathname === '/' : pathname.startsWith(route)
     );
 
-  switch (permissionLevel) {
-    case 'unauthenticated':
-      // Unauthenticated users have no access - should be redirected to login
-      return false;
+  const hasAppAccess =
+    capabilities.isLimited ||
+    capabilities.canCreateIngest ||
+    capabilities.canEditIngest ||
+    capabilities.canEditExistingCollection;
 
-    case 'authenticated-guest':
-      // Authenticated users without app permissions - should be redirected to unauthorized
-      return false;
-
-    case 'limited':
-      // Limited users can access authenticated routes and upload-url, but not create/edit
-      return matchesRoute([...routeConfig.limited]);
-
-    case 'create':
-      return matchesRoute([
-        ...routeConfig.limited,
-        ...routeConfig.createAccess,
-      ]);
-
-    case 'edit':
-      return matchesRoute([
-        ...routeConfig.limited,
-        ...routeConfig.createAccess,
-        ...routeConfig.editAccess,
-      ]);
-
-    case 'edit-existing':
-      return matchesRoute([
-        ...routeConfig.limited,
-        ...routeConfig.createAccess,
-        ...routeConfig.editStacCollectionAccess,
-      ]);
-
-    case 'full-edit':
-      return matchesRoute([
-        ...routeConfig.limited,
-        ...routeConfig.createAccess,
-        ...routeConfig.editAccess,
-        ...routeConfig.editStacCollectionAccess,
-      ]);
-
-    default:
-      return false;
+  if (!capabilities.isAuthenticated) {
+    return false;
   }
+
+  if (matchesRoute(routeConfig.authenticated)) {
+    return hasAppAccess;
+  }
+
+  if (capabilities.canCreateIngest && matchesRoute(routeConfig.createAccess)) {
+    return true;
+  }
+
+  if (capabilities.canEditIngest && matchesRoute(routeConfig.editAccess)) {
+    return true;
+  }
+
+  if (
+    capabilities.canEditExistingCollection &&
+    matchesRoute(routeConfig.editStacCollectionAccess)
+  ) {
+    return true;
+  }
+
+  return false;
 }
 
 export async function proxy(request: NextRequest) {
@@ -126,19 +94,20 @@ export async function proxy(request: NextRequest) {
   const session = await auth();
   const pathname = request.nextUrl.pathname;
 
-  const permissionLevel = getUserPermissionLevel(session);
+  const capabilities = deriveCapabilities(session);
 
   // Check if the route is allowed for this permission level
-  if (!isRouteAllowed(pathname, permissionLevel)) {
+  if (!isRouteAllowed(pathname, capabilities)) {
     if (pathname.startsWith('/api/')) {
-      const status = permissionLevel === 'unauthenticated' ? 401 : 403;
+      const status = capabilities.isAuthenticated ? 403 : 401;
       return new NextResponse(
-        permissionLevel === 'unauthenticated' ? 'Unauthorized' : 'Forbidden',
+        capabilities.isAuthenticated ? 'Forbidden' : 'Unauthorized',
         { status }
       );
     } else {
-      const redirectUrl =
-        permissionLevel === 'unauthenticated' ? '/login' : '/unauthorized';
+      const redirectUrl = capabilities.isAuthenticated
+        ? '/unauthorized'
+        : '/login';
       return NextResponse.redirect(new URL(redirectUrl, request.url));
     }
   }

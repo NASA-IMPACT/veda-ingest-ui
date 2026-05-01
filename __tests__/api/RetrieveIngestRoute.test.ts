@@ -48,7 +48,7 @@ describe('GET /api/retrieve-ingest', () => {
         ref: 'mockRef',
         ingestionType: 'dataset',
       });
-      const response = await GET(mockRequest);
+      const response = await GET(mockRequest, {});
       const jsonResponse = await response.json();
 
       expect(RetrieveJSONMock).toHaveBeenCalledWith('mockRef', 'dataset');
@@ -68,7 +68,7 @@ describe('GET /api/retrieve-ingest', () => {
         ref: 'mockRef',
         ingestionType: 'dataset',
       });
-      const response = await GET(mockRequest);
+      const response = await GET(mockRequest, {});
       const jsonResponse = await response.json();
 
       expect(RetrieveJSONMock).toHaveBeenCalledWith('mockRef', 'dataset');
@@ -92,7 +92,7 @@ describe('GET /api/retrieve-ingest', () => {
         ref: 'mockRef',
         ingestionType: 'collection',
       });
-      const response = await GET(mockRequest);
+      const response = await GET(mockRequest, {});
       const jsonResponse = await response.json();
 
       expect(RetrieveJSONMock).toHaveBeenCalledWith('mockRef', 'collection');
@@ -112,7 +112,7 @@ describe('GET /api/retrieve-ingest', () => {
         ref: 'mockRef',
         ingestionType: 'collection',
       });
-      const response = await GET(mockRequest);
+      const response = await GET(mockRequest, {});
       const jsonResponse = await response.json();
 
       expect(RetrieveJSONMock).toHaveBeenCalledWith('mockRef', 'collection');
@@ -126,7 +126,7 @@ describe('GET /api/retrieve-ingest', () => {
   describe('Parameter and General Error Handling', () => {
     it('returns a 400 error if "ref" query parameter is missing', async () => {
       const mockRequest = createMockRequest({ ingestionType: 'dataset' }); // 'ref' is missing
-      const response = await GET(mockRequest);
+      const response = await GET(mockRequest, {});
       const jsonResponse = await response.json();
 
       expect(RetrieveJSONMock).not.toHaveBeenCalled();
@@ -138,7 +138,7 @@ describe('GET /api/retrieve-ingest', () => {
 
     it('returns a 400 error if "ingestionType" query parameter is missing', async () => {
       const mockRequest = createMockRequest({ ref: 'mockRef' });
-      const response = await GET(mockRequest);
+      const response = await GET(mockRequest, {});
       const jsonResponse = await response.json();
 
       expect(RetrieveJSONMock).not.toHaveBeenCalled();
@@ -153,7 +153,7 @@ describe('GET /api/retrieve-ingest', () => {
         ref: 'mockRef',
         ingestionType: 'invalid_type',
       });
-      const response = await GET(mockRequest);
+      const response = await GET(mockRequest, {});
       const jsonResponse = await response.json();
 
       expect(RetrieveJSONMock).not.toHaveBeenCalled();
@@ -172,7 +172,7 @@ describe('GET /api/retrieve-ingest', () => {
         ref: 'mockRef',
         ingestionType: 'dataset',
       });
-      const response = await GET(mockRequest);
+      const response = await GET(mockRequest, {});
       const jsonResponse = await response.json();
 
       expect(jsonResponse.error).toBe('Mocked error from utility');
@@ -189,7 +189,7 @@ describe('GET /api/retrieve-ingest', () => {
         ref: 'mockRef',
         ingestionType: 'dataset',
       });
-      const response = await GET(mockRequest);
+      const response = await GET(mockRequest, {});
       const jsonResponse = await response.json();
 
       expect(jsonResponse.error).toBe(

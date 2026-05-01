@@ -4,6 +4,7 @@ import AppLayout from '@/components/layout/Layout';
 import { Row, Col, Card, Tooltip, theme } from 'antd';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import { deriveCapabilities } from '@/lib/authorization/policy';
 import Title from 'antd/lib/typography/Title';
 import { FileAddOutlined, FormOutlined } from '@ant-design/icons';
 
@@ -11,8 +12,9 @@ const DatasetsClient = function DatasetsClient() {
   const { useToken } = theme;
   const { token } = useToken();
   const { data: session } = useSession();
-  const hasLimitedAccess = session?.scopes?.includes('dataset:limited-access');
-  const hasEditPermission = session?.scopes?.includes('dataset:update');
+  const capabilities = deriveCapabilities(session ?? null);
+  const hasLimitedAccess = capabilities.isLimited;
+  const hasEditPermission = capabilities.canEditIngest;
 
   return (
     <AppLayout>
