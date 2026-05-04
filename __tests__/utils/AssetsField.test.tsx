@@ -86,6 +86,31 @@ describe('AssetsField', () => {
     expect(MockSchemaField).toHaveBeenCalledTimes(2);
   });
 
+  it('uses ui:additionalProperties config for dynamic asset keys', () => {
+    const dynamicUiSchema = {
+      'ui:additionalProperties': {
+        'ui:grid': [{ title: 12, type: 12 }],
+        description: {
+          'ui:widget': 'textarea',
+        },
+      },
+    };
+
+    render(<AssetsField {...baseProps} uiSchema={dynamicUiSchema} />);
+
+    const firstSchemaFieldProps = MockSchemaField.mock.calls[0][0];
+    const schemaFieldUiSchema =
+      (firstSchemaFieldProps.uiSchema as Record<string, unknown>) || {};
+
+    expect(schemaFieldUiSchema['ui:grid']).toEqual([{ title: 12, type: 12 }]);
+    expect(schemaFieldUiSchema.description).toEqual({
+      'ui:widget': 'textarea',
+    });
+    expect(schemaFieldUiSchema['ui:options']).toEqual({
+      label: false,
+    });
+  });
+
   it('should add a new asset when the add button is clicked', () => {
     render(<AssetsField {...baseProps} />);
 
@@ -97,7 +122,7 @@ describe('AssetsField', () => {
     const updatedFormData = mockOnChange.mock.calls[0][0];
 
     expect(Object.keys(updatedFormData).length).toBe(3);
-    expect(updatedFormData).toHaveProperty('new_asset');
+    expect(updatedFormData).toHaveProperty('asset_1');
   });
 
   it('should remove an asset', () => {
@@ -178,7 +203,7 @@ describe('AssetsField', () => {
     expect(mockOnChange).toHaveBeenCalledTimes(1);
     const firstUpdate = mockOnChange.mock.calls[0][0];
     expect(Object.keys(firstUpdate).length).toBe(3);
-    expect(firstUpdate).toHaveProperty('new_asset');
+    expect(firstUpdate).toHaveProperty('asset_1');
 
     // --- Second Add ---
     // Rerender the component with the updated form data
@@ -191,7 +216,7 @@ describe('AssetsField', () => {
     expect(mockOnChange).toHaveBeenCalledTimes(2);
     const secondUpdate = mockOnChange.mock.calls[1][0];
     expect(Object.keys(secondUpdate).length).toBe(4);
-    // Check for the next unique key, which should be 'new_asset_1'
-    expect(secondUpdate).toHaveProperty('new_asset_1');
+    // Check for the next unique key, which should be 'asset_2'
+    expect(secondUpdate).toHaveProperty('asset_2');
   });
 });

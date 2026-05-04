@@ -137,24 +137,7 @@
     }
   },
   "item_assets": {
-    "ColorIR": {
-      "ui:grid": [
-        {
-          "title": 12,
-          "type": 12
-        },
-        {
-          "description": 12,
-          "roles": 12
-        }
-      ],
-      "description": {
-        "ui:widget": "textarea",
-        "ui:options": {
-          "rows": 4
-        }
-      }
-    },
+    "ui:field": "asset",
     "ui:additionalProperties": {
       "ui:grid": [
         {
@@ -202,7 +185,13 @@
         "rows": 12
       }
     },
-    "ColorIR": {
+    "additionalProperties": {
+      "ui:widget": "renders.dashboard",
+      "ui:options": {
+        "rows": 12
+      }
+    },
+    "ui:additionalProperties": {
       "ui:widget": "renders.dashboard",
       "ui:options": {
         "rows": 12

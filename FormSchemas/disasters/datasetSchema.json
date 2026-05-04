@@ -257,41 +257,6 @@
     "item_assets": {
       "type": "object",
       "title": "Item Assets",
-      "properties": {
-        "ColorIR": {
-          "type": "object",
-          "title": "ColorIR",
-          "properties": {
-            "type": {
-              "type": "string",
-              "title": "Type"
-            },
-            "roles": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "title": "Roles"
-            },
-            "title": {
-              "type": "string",
-              "title": "Title"
-            },
-            "description": {
-              "type": "string",
-              "title": "Description"
-            }
-          }
-        }
-      },
-      "default": {
-        "ColorIR": {
-          "description": "False color infrared composite combining near-infrared, red, and green bands for vegetation and land cover analysis.",
-          "roles": ["data", "layer"],
-          "title": "Color Infrared",
-          "type": "image/tiff; application=geotiff; profile=cloud-optimized"
-        }
-      },
       "additionalProperties": {
         "type": "object",
         "properties": {
@@ -324,11 +289,14 @@
         "dashboard": {
           "type": ["string", "object"],
           "title": "Dashboard"
-        },
-        "ColorIR": {
-          "type": ["string", "object"],
-          "title": "ColorIR"
         }
+      },
+      "default": {
+        "dashboard": {}
+      },
+      "additionalProperties": {
+        "type": ["string", "object"],
+        "title": "Render"
       }
     },
     "providers": {

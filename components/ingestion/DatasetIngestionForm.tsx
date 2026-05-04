@@ -21,6 +21,7 @@ import { customValidate } from '@/utils/CustomValidation';
 import { JSONEditorValue } from '@/components/ui/JSONEditor';
 import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
+import AssetField from '@/components/rjsf-components/AssetsField';
 
 import datasetSchema from '@/FormSchemas/datasets/datasetSchema.json';
 import datasetUiSchema from '@/FormSchemas/datasets/uischema.json';
@@ -108,6 +109,10 @@ const lockedFormFields = {
   collection: {
     'ui:readonly': true,
   },
+};
+
+const customFields = {
+  asset: AssetField,
 };
 
 interface FormProps {
@@ -311,6 +316,7 @@ function DatasetIngestionForm({
                 templates={{
                   ObjectFieldTemplate: ObjectFieldTemplate,
                 }}
+                fields={customFields}
                 formData={formScopedData}
                 onChange={onFormDataChanged}
                 onSubmit={handleFormSubmit}

@@ -45,7 +45,18 @@ function IconButton<
   S extends RJSFSchema = RJSFSchema,
   F extends GenericObjectType = GenericObjectType,
 >(props: IconButtonProps<T, S, F>) {
-  const { iconType = 'default', icon, onClick, ...otherProps } = props;
+  const {
+    iconType = 'default',
+    icon,
+    onClick,
+    uiSchema,
+    registry,
+    // Keep RJSF-only props from leaking into DOM via AntD Button internals.
+    ...otherProps
+  } = props;
+
+  void uiSchema;
+  void registry;
 
   return (
     <Button

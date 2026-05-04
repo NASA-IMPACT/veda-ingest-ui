@@ -31,11 +31,11 @@ const AssetsField: React.FC<FieldProps> = (props) => {
   }, [formData]);
 
   const generateUniqueKey = useCallback(() => {
-    const newKeyBase = 'new_asset';
     let counter = 1;
-    let newKey = newKeyBase;
+    let newKey = `asset_${counter}`;
     while (formData && formData.hasOwnProperty(newKey)) {
-      newKey = `${newKeyBase}_${counter++}`;
+      counter += 1;
+      newKey = `asset_${counter}`;
     }
     return newKey;
   }, [formData]);
@@ -129,6 +129,21 @@ const AssetsField: React.FC<FieldProps> = (props) => {
           path: [...fieldPathId.path, key],
         };
         const assetFormData = formData?.[key] ?? {};
+        const rawAssetUiSchema = (uiSchema?.[key] ||
+          uiSchema?.['ui:additionalProperties'] ||
+          {}) as Record<string, unknown>;
+        const nestedUiOptions =
+          typeof rawAssetUiSchema['ui:options'] === 'object'
+            ? (rawAssetUiSchema['ui:options'] as Record<string, unknown>)
+            : {};
+        const assetUiSchema = {
+          ...rawAssetUiSchema,
+          'ui:title': '',
+          'ui:options': {
+            ...nestedUiOptions,
+            label: false,
+          },
+        };
 
         return (
           <Card key={key} size="small" style={{ marginBottom: '16px' }}>
@@ -144,7 +159,7 @@ const AssetsField: React.FC<FieldProps> = (props) => {
               <SchemaField
                 {...props}
                 schema={assetDetailsSchema}
-                uiSchema={uiSchema?.[key] || {}}
+                uiSchema={assetUiSchema}
                 fieldPathId={assetIdSchema}
                 formData={assetFormData}
                 onChange={(newAssetValue, childPath) => {

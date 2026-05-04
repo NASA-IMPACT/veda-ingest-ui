@@ -131,6 +131,16 @@ label[title='cog_default'],
   margin-bottom: 24px !important;
 }
 
+#root_renders .form-additional:first-of-type {
+  flex: 0 0 180px !important;
+  max-width: 280px;
+}
+
+#root_renders .form-additional:nth-of-type(2) {
+  flex: 1 1 auto !important;
+  min-width: 0;
+}
+
 .tenants-field .ant-form-item-label > label {
   font-weight: 600;
   font-size: 1.1em;

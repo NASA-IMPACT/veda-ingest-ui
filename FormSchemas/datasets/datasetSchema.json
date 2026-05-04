@@ -236,9 +236,16 @@
       "type": "object",
       "properties": {
         "dashboard": {
-          "type": "string",
+          "type": ["string", "object"],
           "title": "Dashboard"
         }
+      },
+      "default": {
+        "dashboard": {}
+      },
+      "additionalProperties": {
+        "type": ["string", "object"],
+        "title": "Render"
       }
     },
     "providers": {
