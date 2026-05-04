@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withPermission } from '@/lib/authorization/withPermission';
 import { getUserTenants } from '@/lib/serverTenantValidation';
+import {
+  createRequestLogContext,
+  logRequestEnd,
+  logRequestError,
+  logRequestStart,
+} from '@/lib/structuredLogger';
 import { getTenantFieldKey } from '@/utils/tenantField';
 
 import ListPRs from '@/utils/githubUtils/ListPRs';
@@ -10,12 +16,16 @@ type IngestionType = 'collection' | 'dataset';
 export const GET = withPermission(
   (capabilities) => capabilities.canEditIngest,
   async (request: NextRequest, _context, session) => {
+    const logContext = createRequestLogContext(request, '/api/list-ingests');
+    logRequestStart(logContext);
+
     try {
       const userTenants = await getUserTenants(session);
 
       const searchParams = request.nextUrl.searchParams;
       const ingestionType = searchParams.get('ingestionType') as IngestionType;
       if (!ingestionType) {
+        logRequestEnd(logContext, 400, { reason: 'missing_ingestion_type' });
         return NextResponse.json(
           { error: 'ingestionType parameter is required' },
           { status: 400 }
@@ -29,12 +39,10 @@ export const GET = withPermission(
       const filteredIngests = allIngests.filter((ingest) => {
         const fileTenant = ingest.tenant;
 
-        // Condition 1: If the ingest has no tenant, it's public and should be shown.
         if (!fileTenant || fileTenant === '') {
           return true;
         }
 
-        // Condition 2: If the ingest has a tenant, show it only if the user has access to that tenant.
         return userTenants.includes(fileTenant);
       });
 
@@ -54,12 +62,18 @@ export const GET = withPermission(
         };
       });
 
+      logRequestEnd(logContext, 200, {
+        ingestionType,
+        resultCount: tenantKeyedIngests.length,
+      });
       return NextResponse.json({ githubResponse: tenantKeyedIngests });
     } catch (error) {
-      console.error('Error in /api/list-ingest:', error);
       if (error instanceof Error) {
+        logRequestError(logContext, error, { status: 400 });
         return NextResponse.json({ error: error.message }, { status: 400 });
       }
+
+      logRequestError(logContext, error, { status: 500 });
       return NextResponse.json(
         { error: 'An unexpected error occurred on the server.' },
         { status: 500 }

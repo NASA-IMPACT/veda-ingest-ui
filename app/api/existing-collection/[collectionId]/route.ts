@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withPermission } from '@/lib/authorization/withPermission';
 import { validateTenantAccess } from '@/lib/serverTenantValidation';
+import {
+  createRequestLogContext,
+  logRequestEnd,
+  logRequestError,
+  logRequestStart,
+  summarizeSession,
+} from '@/lib/structuredLogger';
 import { VEDA_PROD_BACKEND_URL } from '@/config/env';
 import { getTenantFieldKey } from '@/utils/tenantField';
 
@@ -13,10 +20,26 @@ interface RouteParams {
 export const GET = withPermission<RouteParams>(
   (capabilities) => capabilities.canEditExistingCollection,
   async (request: NextRequest, { params }, session) => {
+    const logContext = createRequestLogContext(
+      request,
+      '/api/existing-collection/[collectionId]'
+    );
+    logRequestStart(logContext);
+
     try {
       const tenantFieldKey = getTenantFieldKey();
-
       const accessToken = (session as { accessToken?: string }).accessToken;
+
+      if (!accessToken) {
+        logRequestEnd(logContext, 401, {
+          reason: 'missing_access_token',
+          ...summarizeSession(session),
+        });
+        return NextResponse.json(
+          { error: 'Authentication required' },
+          { status: 401 }
+        );
+      }
 
       const { collectionId } = await params;
 
@@ -29,6 +52,10 @@ export const GET = withPermission<RouteParams>(
 
       if (!stacResponse.ok) {
         const errorText = await stacResponse.text();
+        logRequestEnd(logContext, stacResponse.status, {
+          reason: 'downstream_collection_fetch_failed',
+          collectionId,
+        });
         return NextResponse.json(
           { error: `Collection not found: ${errorText}` },
           { status: stacResponse.status }
@@ -42,7 +69,6 @@ export const GET = withPermission<RouteParams>(
           ? collectionTenantValue
           : undefined;
 
-      // Validate tenant access if collection has a tenant
       if (
         collectionTenant &&
         collectionTenant !== '' &&
@@ -54,6 +80,11 @@ export const GET = withPermission<RouteParams>(
         );
 
         if (!tenantValidation.isValid) {
+          logRequestEnd(logContext, 403, {
+            reason: 'tenant_access_denied',
+            tenant: collectionTenant,
+            collectionId,
+          });
           return NextResponse.json(
             {
               error: `Access denied for collection from tenant: ${collectionTenant}`,
@@ -63,9 +94,10 @@ export const GET = withPermission<RouteParams>(
         }
       }
 
+      logRequestEnd(logContext, 200, { collectionId });
       return NextResponse.json(collectionData);
     } catch (error) {
-      console.error('Error fetching collection:', error);
+      logRequestError(logContext, error, { status: 500 });
       return NextResponse.json(
         { error: 'Failed to fetch collection' },
         { status: 500 }
@@ -77,15 +109,30 @@ export const GET = withPermission<RouteParams>(
 export const PUT = withPermission<RouteParams>(
   (capabilities) => capabilities.canEditExistingCollection,
   async (request: NextRequest, { params }, session) => {
+    const logContext = createRequestLogContext(
+      request,
+      '/api/existing-collection/[collectionId]'
+    );
+    logRequestStart(logContext);
+
     try {
       const tenantFieldKey = getTenantFieldKey();
-
       const accessToken = (session as { accessToken?: string }).accessToken;
+
+      if (!accessToken) {
+        logRequestEnd(logContext, 401, {
+          reason: 'missing_access_token',
+          ...summarizeSession(session),
+        });
+        return NextResponse.json(
+          { error: 'Authentication required' },
+          { status: 401 }
+        );
+      }
 
       const { collectionId } = await params;
       const formData = await request.json();
 
-      // First, get the existing collection to check tenant access
       const stacUrl = `${VEDA_PROD_BACKEND_URL}/stac/collections/${encodeURIComponent(collectionId)}`;
       const existingResponse = await fetch(stacUrl, {
         headers: {
@@ -94,6 +141,10 @@ export const PUT = withPermission<RouteParams>(
       });
 
       if (!existingResponse.ok) {
+        logRequestEnd(logContext, 404, {
+          reason: 'existing_collection_not_found',
+          collectionId,
+        });
         return NextResponse.json(
           { error: 'Collection not found' },
           { status: 404 }
@@ -107,7 +158,6 @@ export const PUT = withPermission<RouteParams>(
           ? existingTenantValue
           : undefined;
 
-      // Validate tenant access if collection has a tenant
       if (
         existingTenant &&
         existingTenant !== '' &&
@@ -119,6 +169,11 @@ export const PUT = withPermission<RouteParams>(
         );
 
         if (!tenantValidation.isValid) {
+          logRequestEnd(logContext, 403, {
+            reason: 'tenant_access_denied',
+            tenant: existingTenant,
+            collectionId,
+          });
           return NextResponse.json(
             {
               error: `Access denied for collection from tenant: ${existingTenant}`,
@@ -139,12 +194,10 @@ export const PUT = withPermission<RouteParams>(
 
       if (!updateResponse.ok) {
         const errorText = await updateResponse.text();
-        console.error('Existing collection PUT failed', {
+        logRequestEnd(logContext, updateResponse.status, {
+          reason: 'downstream_collection_put_failed',
           collectionId,
-          stacUrl,
-          status: updateResponse.status,
-          statusText: updateResponse.statusText,
-          responseBody: errorText,
+          downstreamStatus: updateResponse.status,
         });
         return NextResponse.json(
           {
@@ -162,14 +215,10 @@ export const PUT = withPermission<RouteParams>(
       }
 
       const updatedCollection = await updateResponse.json();
-      console.info('Existing collection PUT succeeded', {
-        collectionId,
-        stacUrl,
-        status: updateResponse.status,
-      });
+      logRequestEnd(logContext, 200, { collectionId });
       return NextResponse.json(updatedCollection);
     } catch (error) {
-      console.error('Error updating collection:', error);
+      logRequestError(logContext, error, { status: 500 });
       return NextResponse.json(
         {
           error: 'Failed to update collection',

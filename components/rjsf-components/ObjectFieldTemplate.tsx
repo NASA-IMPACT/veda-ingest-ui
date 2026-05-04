@@ -28,7 +28,7 @@ import { CloudUploadOutlined, ImportOutlined } from '@ant-design/icons';
 
 import COGDrawerViewer from '@/components/COGViewer/COGDrawerViewer';
 import ThumbnailUploaderDrawer from '@/components/thumbnails/ThumbnailUploaderDrawer';
-import { Alert } from 'antd';
+import { Alert, Divider, Typography } from 'antd';
 import DiscoveryItemObjectFieldTemplate from './DiscoveryItemObjectFieldTemplate'; // Import the specific template
 
 const DESCRIPTION_COL_STYLE = {
@@ -296,33 +296,49 @@ export default function ObjectFieldTemplate<
                         return (
                           <Col key={element.name} span={24}>
                             {isDashboardField(element) ? (
-                              <div
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'stretch',
-                                  flexDirection: 'column',
-                                }}
-                              >
-                                {element.content}
-                                {errorMessage && (
-                                  <div key={errorMessage}>
-                                    {' '}
-                                    <Alert
-                                      message={errorMessage}
-                                      type="error"
-                                      showIcon
-                                      style={{ marginBottom: '10px' }}
-                                    />
-                                  </div>
-                                )}
-                                <Button
-                                  type="primary"
-                                  onClick={handleOpenCOGDrawer}
-                                  icon={<ImportOutlined />}
+                              <>
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'stretch',
+                                    flexDirection: 'column',
+                                  }}
                                 >
-                                  Generate Renders Object From Sample File
-                                </Button>
-                              </div>
+                                  {element.content}
+                                  {errorMessage && (
+                                    <div key={errorMessage}>
+                                      {' '}
+                                      <Alert
+                                        message={errorMessage}
+                                        type="error"
+                                        showIcon
+                                        style={{ marginBottom: '10px' }}
+                                      />
+                                    </div>
+                                  )}
+                                  <Button
+                                    type="primary"
+                                    onClick={handleOpenCOGDrawer}
+                                    icon={<ImportOutlined />}
+                                    style={{
+                                      alignSelf: 'flex-end',
+                                      marginBottom: '16px',
+                                    }}
+                                  >
+                                    Generate Renders Object From Sample File
+                                  </Button>
+                                  <Divider style={{ margin: '0 0 16px 0' }} />
+                                </div>
+                                <Typography.Text
+                                  type="secondary"
+                                  style={{
+                                    display: 'block',
+                                    marginBottom: '8px',
+                                  }}
+                                >
+                                  Optional Additional Renders Objects
+                                </Typography.Text>
+                              </>
                             ) : (
                               element.content
                             )}

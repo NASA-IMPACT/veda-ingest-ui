@@ -4,6 +4,12 @@ import {
   UserCapabilities,
 } from '@/lib/authorization/policy';
 import { NextResponse, NextRequest } from 'next/server';
+import {
+  createRequestLogContext,
+  logRequestEnd,
+  logRequestStart,
+  summarizeSession,
+} from '@/lib/structuredLogger';
 
 const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
@@ -75,19 +81,46 @@ function isRouteAllowed(pathname: string, capabilities: UserCapabilities) {
   return false;
 }
 
+function getPermissionLevel(capabilities: UserCapabilities): string {
+  if (!capabilities.isAuthenticated) {
+    return 'unauthenticated';
+  }
+
+  if (capabilities.canEditIngest) {
+    return 'edit';
+  }
+
+  if (capabilities.canEditExistingCollection) {
+    return 'edit_stac_collection';
+  }
+
+  if (capabilities.canCreateIngest) {
+    return 'create';
+  }
+
+  if (capabilities.isLimited) {
+    return 'limited';
+  }
+
+  return 'authenticated';
+}
+
 export async function proxy(request: NextRequest) {
+  const logContext = createRequestLogContext(request, 'proxy');
+  logRequestStart(logContext, { target: 'authz-gate' });
+
   // Security: Ensure auth is never disabled in production
   if (DISABLE_AUTH && process.env.NODE_ENV === 'production') {
-    console.error(
-      'SECURITY WARNING: Authentication cannot be disabled in production'
-    );
+    logRequestEnd(logContext, 500, {
+      reason: 'auth_disabled_in_production',
+    });
     throw new Error('Authentication cannot be disabled in production');
   }
 
   if (DISABLE_AUTH) {
-    console.warn(
-      'WARNING: Authentication is disabled for development - middleware skipping auth checks'
-    );
+    logRequestEnd(logContext, 200, {
+      reason: 'auth_disabled_in_non_production',
+    });
     return NextResponse.next();
   }
 
@@ -95,11 +128,17 @@ export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   const capabilities = deriveCapabilities(session);
+  const permissionLevel = getPermissionLevel(capabilities);
 
   // Check if the route is allowed for this permission level
   if (!isRouteAllowed(pathname, capabilities)) {
     if (pathname.startsWith('/api/')) {
       const status = capabilities.isAuthenticated ? 403 : 401;
+      logRequestEnd(logContext, status, {
+        reason: 'route_not_allowed',
+        permissionLevel,
+        ...summarizeSession(session),
+      });
       return new NextResponse(
         capabilities.isAuthenticated ? 'Forbidden' : 'Unauthorized',
         { status }
@@ -108,10 +147,21 @@ export async function proxy(request: NextRequest) {
       const redirectUrl = capabilities.isAuthenticated
         ? '/unauthorized'
         : '/login';
+      logRequestEnd(logContext, 302, {
+        reason: 'route_not_allowed_redirect',
+        permissionLevel,
+        redirectUrl,
+        ...summarizeSession(session),
+      });
       return NextResponse.redirect(new URL(redirectUrl, request.url));
     }
   }
 
+  logRequestEnd(logContext, 200, {
+    reason: 'route_allowed',
+    permissionLevel,
+    ...summarizeSession(session),
+  });
   return NextResponse.next();
 }
 

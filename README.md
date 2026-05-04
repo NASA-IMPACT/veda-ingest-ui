@@ -16,6 +16,14 @@ cp .env.local.example .env.local
 yarn dev
 ```
 
+## Deployment Docs
+
+Deployment guidance is split into focused docs:
+
+- [Deployment Guides Index](docs/deployment/README.md)
+- [Amplify New Instance Runbook](docs/deployment/amplify-new-instance-runbook.md)
+- [GitHub App Setup for Destination Repos](docs/deployment/github-app-setup.md)
+
 ## Feature Tour
 
 The latest Playwright test report is published after each merge to `main`. This provides screenshots and descriptions of features in the veda-ingest-ui.
@@ -234,6 +242,45 @@ graph TD
 
 ```
 
+## Edit Existing Collection Flow Architecture
+
+```mermaid
+graph TD
+  subgraph "Edit Existing Collection"
+    PAGE[edit-existing-collection page]
+    PAGE --> CLIENT[EditExistingCollectionClient]
+
+    CLIENT --> LIST[ExistingCollectionsList]
+    LIST -->|Select collection| EDIT[EditCollectionView]
+    EDIT -->|Cancel or complete| LIST
+
+    LIST -->|GET /api/existing-collection| API_LIST[API list route]
+    API_LIST -->|Reads from| STAC_LIST["STAC collections endpoint"]
+
+    EDIT -->|GET /api/existing-collection/:collectionId| API_GET[API collection route]
+    EDIT -->|PUT /api/existing-collection/:collectionId| API_PUT[API collection route]
+
+    API_GET --> AUTH{Auth + stac:collection:update scope}
+    API_PUT --> AUTH
+    AUTH --> TENANT{Tenant access validation}
+    TENANT -->|Allowed| STAC_ITEM["STAC collection endpoint"]
+    TENANT -->|Denied| FORBIDDEN[403]
+
+    API_PUT -->|On success| STAC_ITEM
+  end
+
+  style PAGE fill:#0B3D91,stroke:#fff,stroke-width:2px,color:#fff
+  style CLIENT fill:#A4D3EE,stroke:#333,stroke-width:2px,color:#000
+  style LIST fill:#A4D3EE,stroke:#333,stroke-width:2px,color:#000
+  style EDIT fill:#A4D3EE,stroke:#333,stroke-width:2px,color:#000
+  style API_LIST fill:#FC3D21,stroke:#333,stroke-width:2px,color:#fff
+  style API_GET fill:#FC3D21,stroke:#333,stroke-width:2px,color:#fff
+  style API_PUT fill:#FC3D21,stroke:#333,stroke-width:2px,color:#fff
+  style AUTH fill:#BCC6CC,stroke:#333,stroke-width:2px,color:#000
+  style TENANT fill:#BCC6CC,stroke:#333,stroke-width:2px,color:#000
+  style FORBIDDEN fill:#f7c6c7,stroke:#333,stroke-width:2px,color:#000
+```
+
 # Requirements
 
 To set up the development environment for this website, you'll need to install the following on your system:
@@ -317,62 +364,22 @@ Configuration uses environment files that are **never committed** to version con
 
 ### AWS Amplify Deployment
 
-For production deployments, this app loads runtime secrets from AWS Secrets Manager.
+For production deployments, use the runbook:
 
-1. **Navigate to:** AWS Amplify Console -> Your App -> App settings -> Environment variables
+- [Amplify New Instance Runbook](docs/deployment/amplify-new-instance-runbook.md)
 
-2. **Add required Amplify environment variables** (plain env vars):
+It includes:
 
-- `APP_RUNTIME_SECRET_ID` - ARN of the Secrets Manager secret containing runtime JSON
-- `APP_ID` - GitHub App ID
-- `INSTALLATION_ID` - GitHub App installation ID
-- `ASSUME_ROLE_ARN` - AWS IAM role ARN used for STS AssumeRole for uploading Thumbnails
-- `KEYCLOAK_CLIENT_ID` - Keycloak client ID
-- `NEXTAUTH_URL` - Base URL for NextAuth
-- `NEXT_PUBLIC_KEYCLOAK_ISSUER` - Keycloak issuer URL
-- `NEXT_PUBLIC_APP_ENV` - Environment profile (`local`, `veda`, `eic`, `disasters`)
-
-3. **Create a Secrets Manager secret** (in the same account/region as your Amplify compute) with a JSON object in this shape:
-
-```json
-{
-  "GITHUB_PRIVATE_KEY": "-----BEGIN RSA PRIVATE KEY-----\\n...\\n-----END RSA PRIVATE KEY-----\\n",
-  "KEYCLOAK_CLIENT_SECRET": "your-keycloak-client-secret",
-  "NEXTAUTH_SECRET": "your-nextauth-secret",
-  "INGEST_UI_EXTERNAL_ID": "your-external-id"
-}
-```
-
-Notes:
-
-- Keep these keys at the top level (no wrapper object).
-- Use escaped newlines (`\\n`) for the private key value.
-- Set `APP_RUNTIME_SECRET_ID` environment variable to this secret ARN or name.
-
-4. **Add IAM permission to the Amplify server runtime role** (the SSR Lambda execution role, not only the build role). Ensure the ARN matches your actual roles.
-
-```json
-  {
-    "Effect": "Allow",
-    "Action": "sts:AssumeRole",
-    "Resource": "arn:aws:iam::12345:role/thumbnail-uploader"
-},
-{
-  "Sid": "ReadVedaIngestUiSecrets",
-  "Effect": "Allow",
-  "Action": [
-   "secretsmanager:GetSecretValue",
-   "secretsmanager:DescribeSecret"
-  ],
-  "Resource": "arn:aws:secretsmanager:us-west-2:12345:secret:veda-ingest-ui/*"
-}
-```
-
-5. **Runtime fallback behavior:** If Secrets Manager is unavailable, the app falls back to matching environment variables (`GITHUB_PRIVATE_KEY`, `KEYCLOAK_CLIENT_SECRET`, `NEXTAUTH_SECRET`, `INGEST_UI_EXTERNAL_ID`).
+- Branch deployment behavior for merge-to-main workflows
+- Required Amplify environment variables
+- Secrets Manager JSON shape and runtime secret wiring
+- Runtime IAM permissions and post-deploy validation checklist
 
 ### Github Access
 
-GitHub access is handled via a GitHub App installed on the target repository. See **Github Destination Repo Configuration** section below for setup.
+GitHub access is handled via a GitHub App installed on the target repository. Use:
+
+- [GitHub App Setup for Destination Repos](docs/deployment/github-app-setup.md)
 
 ## Running the app
 
@@ -449,10 +456,6 @@ the new first row has 4 fields with a combined width of 24. Nested objects in th
 
 ## Github Destination Repo Configuration
 
-To allow the veda-ingest-ui to open PRs in a repo, a Github app must be installed on the destination repo and several environment variables are needed from that Github app installation. Follow the [Installing your own GitHub App](https://docs.github.com/en/apps/using-github-apps/installing-your-own-github-app) guide from github to get started:
+Use the dedicated guide for app setup, field mapping, and org-specific decision points:
 
-1. Uncheck the "Active" checkbox under webhook. `No webhook is required.`
-2. Ensure the app has `Read and Write` permissions to `Contents` and `Pull Requests`.
-3. Create and save a Private Key to place in your env variables.
-4. Copy the `App ID` and `Client ID` from the new github app's overview.
-5. Copy the Installation ID from the repo's list of Installed GitHub Apps. The Installation ID is found in the URL for that application. For example, `https://github.com/settings/installations/[Installation ID]` or `https://github.com/organizations/[ORGANIZATION]/settings/installations/[Installation ID]`
+- [GitHub App Setup for Destination Repos](docs/deployment/github-app-setup.md)

@@ -108,6 +108,7 @@
     }
   },
   "item_assets": {
+    "ui:field": "asset",
     "cog_default": {
       "ui:grid": [
         {
@@ -177,6 +178,12 @@
   },
   "renders": {
     "dashboard": {
+      "ui:widget": "renders.dashboard",
+      "ui:options": {
+        "rows": 12
+      }
+    },
+    "additionalProperties": {
       "ui:widget": "renders.dashboard",
       "ui:options": {
         "rows": 12
