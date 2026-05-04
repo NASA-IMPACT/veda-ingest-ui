@@ -36,7 +36,7 @@ describe('GET /api/list-ingests', () => {
     const mockRequest = new NextRequest(
       'http://localhost/api/list-ingests?ingestionType=dataset'
     );
-    const response = await GET(mockRequest);
+    const response = await GET(mockRequest, {});
     const jsonResponse = await response.json();
 
     expect(authMock).toHaveBeenCalledOnce();
@@ -52,7 +52,7 @@ describe('GET /api/list-ingests', () => {
     const mockRequest = new NextRequest(
       'http://localhost/api/list-ingests?ingestionType=dataset'
     );
-    const response = await GET(mockRequest);
+    const response = await GET(mockRequest, {});
     const jsonResponse = await response.json();
 
     expect(response.status).toBe(401);
@@ -70,7 +70,7 @@ describe('GET /api/list-ingests', () => {
     const mockRequest = new NextRequest(
       'http://localhost/api/list-ingests?ingestionType=dataset'
     );
-    const response = await GET(mockRequest);
+    const response = await GET(mockRequest, {});
     const jsonResponse = await response.json();
 
     expect(response.status).toBe(400);
@@ -81,7 +81,7 @@ describe('GET /api/list-ingests', () => {
 
   it('returns a 400 error if ingestionType parameter is missing', async () => {
     const mockRequest = new NextRequest('http://localhost/api/list-ingests');
-    const response = await GET(mockRequest);
+    const response = await GET(mockRequest, {});
     const jsonResponse = await response.json();
 
     expect(response.status).toBe(400);

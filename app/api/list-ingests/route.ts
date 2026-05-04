@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
+import { withPermission } from '@/lib/authorization/withPermission';
 import { getUserTenants } from '@/lib/serverTenantValidation';
 import {
   createRequestLogContext,
   logRequestEnd,
   logRequestError,
   logRequestStart,
-  summarizeSession,
 } from '@/lib/structuredLogger';
 import { getTenantFieldKey } from '@/utils/tenantField';
 
@@ -14,88 +13,72 @@ import ListPRs from '@/utils/githubUtils/ListPRs';
 
 type IngestionType = 'collection' | 'dataset';
 
-export async function GET(request: NextRequest) {
-  const logContext = createRequestLogContext(request, '/api/list-ingests');
-  logRequestStart(logContext);
+export const GET = withPermission(
+  (capabilities) => capabilities.canEditIngest,
+  async (request: NextRequest, _context, session) => {
+    const logContext = createRequestLogContext(request, '/api/list-ingests');
+    logRequestStart(logContext);
 
-  try {
-    const session = await auth();
+    try {
+      const userTenants = await getUserTenants(session);
 
-    if (!session) {
-      logRequestEnd(logContext, 401, { reason: 'missing_session' });
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+      const searchParams = request.nextUrl.searchParams;
+      const ingestionType = searchParams.get('ingestionType') as IngestionType;
+      if (!ingestionType) {
+        logRequestEnd(logContext, 400, { reason: 'missing_ingestion_type' });
+        return NextResponse.json(
+          { error: 'ingestionType parameter is required' },
+          { status: 400 }
+        );
+      }
 
-    if (!session.scopes?.includes('dataset:update')) {
-      logRequestEnd(logContext, 403, {
-        reason: 'missing_scope_dataset_update',
-        ...summarizeSession(session),
+      const allIngests = await ListPRs(ingestionType);
+
+      const tenantFieldKey = getTenantFieldKey();
+
+      const filteredIngests = allIngests.filter((ingest) => {
+        const fileTenant = ingest.tenant;
+
+        if (!fileTenant || fileTenant === '') {
+          return true;
+        }
+
+        return userTenants.includes(fileTenant);
       });
-      return NextResponse.json(
-        { error: 'Insufficient permissions: dataset:update scope required' },
-        { status: 403 }
-      );
-    }
 
-    const userTenants = await getUserTenants(session);
+      const tenantKeyedIngests = filteredIngests.map((ingest) => {
+        const ingestRecord = ingest as unknown as Record<string, unknown>;
+        const tenant = ingestRecord.tenant;
 
-    const searchParams = request.nextUrl.searchParams;
-    const ingestionType = searchParams.get('ingestionType') as IngestionType;
-    if (!ingestionType) {
-      logRequestEnd(logContext, 400, { reason: 'missing_ingestion_type' });
-      return NextResponse.json(
-        { error: 'ingestionType parameter is required' },
-        { status: 400 }
-      );
-    }
+        if (typeof tenant !== 'string') {
+          return ingestRecord;
+        }
 
-    const allIngests = await ListPRs(ingestionType);
+        const { tenant: _tenant, ...rest } = ingestRecord;
+        void _tenant;
+        return {
+          ...rest,
+          [tenantFieldKey]: tenant,
+        };
+      });
 
-    const tenantFieldKey = getTenantFieldKey();
-
-    const filteredIngests = allIngests.filter((ingest) => {
-      const fileTenant = ingest.tenant;
-
-      // Condition 1: If the ingest has no tenant, it's public and should be shown.
-      if (!fileTenant || fileTenant === '') {
-        return true;
+      logRequestEnd(logContext, 200, {
+        ingestionType,
+        resultCount: tenantKeyedIngests.length,
+      });
+      return NextResponse.json({ githubResponse: tenantKeyedIngests });
+    } catch (error) {
+      if (error instanceof Error) {
+        logRequestError(logContext, error, { status: 400 });
+        return NextResponse.json({ error: error.message }, { status: 400 });
       }
 
-      // Condition 2: If the ingest has a tenant, show it only if the user has access to that tenant.
-      return userTenants.includes(fileTenant);
-    });
-
-    const tenantKeyedIngests = filteredIngests.map((ingest) => {
-      const ingestRecord = ingest as unknown as Record<string, unknown>;
-      const tenant = ingestRecord.tenant;
-
-      if (typeof tenant !== 'string') {
-        return ingestRecord;
-      }
-
-      const { tenant: _tenant, ...rest } = ingestRecord;
-      void _tenant;
-      return {
-        ...rest,
-        [tenantFieldKey]: tenant,
-      };
-    });
-
-    logRequestEnd(logContext, 200, {
-      ingestionType,
-      resultCount: tenantKeyedIngests.length,
-    });
-    return NextResponse.json({ githubResponse: tenantKeyedIngests });
-  } catch (error) {
-    if (error instanceof Error) {
-      logRequestError(logContext, error, { status: 400 });
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      logRequestError(logContext, error, { status: 500 });
+      return NextResponse.json(
+        { error: 'An unexpected error occurred on the server.' },
+        { status: 500 }
+      );
     }
-
-    logRequestError(logContext, error, { status: 500 });
-    return NextResponse.json(
-      { error: 'An unexpected error occurred on the server.' },
-      { status: 500 }
-    );
-  }
-}
+  },
+  { unauthenticatedMessage: 'Unauthorized' }
+);

@@ -70,7 +70,7 @@ describe('GET /api/existing-collection', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/existing-collection'
     );
-    const response = await GET(request);
+    const response = await GET(request, {});
 
     expect(response.status).toBe(401);
     const data = await response.json();
@@ -87,14 +87,14 @@ describe('GET /api/existing-collection', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/existing-collection'
     );
-    const response = await GET(request);
+    const response = await GET(request, {});
 
     expect(response.status).toBe(403);
     expect(mockFetch).not.toHaveBeenCalled();
 
     const data = await response.json();
     expect(data.error).toBe(
-      'Insufficient permissions: stac:collection:update scope required'
+      'You do not have permission to perform this action.'
     );
   });
 
@@ -109,7 +109,7 @@ describe('GET /api/existing-collection', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/existing-collection'
     );
-    const response = await GET(request);
+    const response = await GET(request, {});
 
     expect(response.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledWith(
@@ -139,7 +139,7 @@ describe('GET /api/existing-collection', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/existing-collection?tenant=tenant1'
     );
-    const response = await GET(request);
+    const response = await GET(request, {});
 
     expect(response.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledWith(
@@ -156,7 +156,7 @@ describe('GET /api/existing-collection', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/existing-collection?tenant=unauthorized-tenant'
     );
-    const response = await GET(request);
+    const response = await GET(request, {});
 
     expect(response.status).toBe(403);
     const data = await response.json();
@@ -194,7 +194,7 @@ describe('GET /api/existing-collection', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/existing-collection?tenant=Public'
     );
-    const response = await GET(request);
+    const response = await GET(request, {});
 
     expect(response.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledWith(
@@ -243,7 +243,7 @@ describe('GET /api/existing-collection', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/existing-collection?tenant=public'
     );
-    const response = await GET(request);
+    const response = await GET(request, {});
 
     expect(response.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledWith(
@@ -274,7 +274,7 @@ describe('GET /api/existing-collection', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/existing-collection'
     );
-    const response = await GET(request);
+    const response = await GET(request, {});
 
     expect(response.status).toBe(500);
     const data = await response.json();
@@ -292,7 +292,7 @@ describe('GET /api/existing-collection', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/existing-collection'
     );
-    const response = await GET(request);
+    const response = await GET(request, {});
 
     expect(response.status).toBe(200);
     const data = await response.json();
@@ -336,7 +336,7 @@ describe('GET /api/existing-collection', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/existing-collection'
     );
-    const response = await GET(request);
+    const response = await GET(request, {});
 
     expect(response.status).toBe(200);
 
@@ -362,7 +362,7 @@ describe('GET /api/existing-collection', () => {
     const request = new NextRequest(
       'http://localhost:3000/api/existing-collection'
     );
-    const response = await GET(request);
+    const response = await GET(request, {});
 
     expect(response.status).toBe(500);
     const data = await response.json();

@@ -6,10 +6,12 @@ import {
   beforeEach,
   afterAll,
   beforeAll,
+  Mock,
 } from 'vitest';
 import { POST } from '@/app/api/upload-url/route';
 import { NextRequest } from 'next/server';
 import * as s3Utils from '@/utils/s3';
+import { auth } from '@/auth';
 
 // Mock environment variables
 vi.stubEnv('AWS_REGION', 'us-east-1');
@@ -19,6 +21,12 @@ vi.mock('@/utils/s3', () => ({
   checkFileExists: vi.fn(),
   generateSignedUrl: vi.fn(),
 }));
+
+vi.mock('@/auth', () => ({
+  auth: vi.fn(),
+}));
+
+const authMock = auth as Mock;
 
 beforeAll(() => {
   vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -30,6 +38,10 @@ afterAll(() => {
 describe('POST /api/upload-url', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    authMock.mockResolvedValue({
+      user: { name: 'Test User' },
+      scopes: ['dataset:create'],
+    });
   });
 
   const createRequest = (body: object) =>
@@ -49,7 +61,7 @@ describe('POST /api/upload-url', () => {
       filename: 'newfile.png',
       filetype: 'image/png',
     });
-    const res = await POST(req);
+    const res = await POST(req, {});
     const json = await res.json();
 
     expect(res.status).toBe(200);
@@ -70,7 +82,7 @@ describe('POST /api/upload-url', () => {
       filename: 'existingfile.png',
       filetype: 'image/png',
     });
-    const res = await POST(req);
+    const res = await POST(req, {});
     const json = await res.json();
 
     expect(res.status).toBe(200);
@@ -84,19 +96,19 @@ describe('POST /api/upload-url', () => {
 
   it('returns a 400 error if filename is missing from POST body', async () => {
     const req = createRequest({ filetype: 'image/png' });
-    const res = await POST(req);
+    const res = await POST(req, {});
     expect(res.status).toBe(400);
   });
 
   it('returns a 400 error if filetype is missing from POST body', async () => {
     const req = createRequest({ filename: 'test.png' });
-    const res = await POST(req);
+    const res = await POST(req, {});
     expect(res.status).toBe(400);
   });
 
   it('returns a 400 error if filetype is not jpg or png', async () => {
     const req = createRequest({ filename: 'test.txt', filetype: 'text/plain' });
-    const res = await POST(req);
+    const res = await POST(req, {});
     expect(res.status).toBe(400);
   });
 
@@ -106,7 +118,7 @@ describe('POST /api/upload-url', () => {
     );
 
     const req = createRequest({ filename: 'test.png', filetype: 'image/png' });
-    const res = await POST(req);
+    const res = await POST(req, {});
     expect(res.status).toBe(500);
   });
 
@@ -117,7 +129,34 @@ describe('POST /api/upload-url', () => {
     );
 
     const req = createRequest({ filename: 'test.png', filetype: 'image/png' });
-    const res = await POST(req);
+    const res = await POST(req, {});
     expect(res.status).toBe(500);
+  });
+
+  it('returns 401 when unauthenticated', async () => {
+    authMock.mockResolvedValue(null);
+
+    const req = createRequest({ filename: 'test.png', filetype: 'image/png' });
+    const res = await POST(req, {});
+    const json = await res.json();
+
+    expect(res.status).toBe(401);
+    expect(json).toEqual({ error: 'Authentication required' });
+  });
+
+  it('returns 403 when user lacks create permissions', async () => {
+    authMock.mockResolvedValue({
+      user: { name: 'Test User' },
+      scopes: ['openid'],
+    });
+
+    const req = createRequest({ filename: 'test.png', filetype: 'image/png' });
+    const res = await POST(req, {});
+    const json = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(json).toEqual({
+      error: 'You do not have permission to perform this action.',
+    });
   });
 });

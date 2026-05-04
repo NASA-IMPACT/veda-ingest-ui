@@ -93,7 +93,7 @@ describe('GET /api/existing-collection/[collectionId]', () => {
 
     const data = await response.json();
     expect(data.error).toBe(
-      'Insufficient permissions: stac:collection:update scope required'
+      'You do not have permission to perform this action.'
     );
   });
 
@@ -455,7 +455,7 @@ describe('PUT /api/existing-collection/[collectionId]', () => {
 
     const data = await response.json();
     expect(data.error).toBe(
-      'Insufficient permissions: stac:collection:update scope required'
+      'You do not have permission to perform this action.'
     );
   });
 

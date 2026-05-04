@@ -3,6 +3,7 @@ import AppLayout from '@/components/layout/Layout';
 import { Card, Col, Row, Tooltip, theme } from 'antd';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import { deriveCapabilities } from '@/lib/authorization/policy';
 import Title from 'antd/lib/typography/Title';
 import {
   FileAddOutlined,
@@ -14,11 +15,11 @@ const CollectionsClient = function CollectionsClient() {
   const { useToken } = theme;
   const { token } = useToken();
   const { data: session } = useSession();
-  const hasLimitedAccess = session?.scopes?.includes('dataset:limited-access');
-  const hasEditIngestPermission = session?.scopes?.includes('dataset:update');
-  const hasEditStacCollectionPermission = session?.scopes?.includes(
-    'stac:collection:update'
-  );
+  const capabilities = deriveCapabilities(session ?? null);
+  const hasLimitedAccess = capabilities.isLimited;
+  const hasEditIngestPermission = capabilities.canEditIngest;
+  const hasEditStacCollectionPermission =
+    capabilities.canEditExistingCollection;
 
   if (hasLimitedAccess) {
     return (

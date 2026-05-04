@@ -1,15 +1,9 @@
 import '@ant-design/v5-patch-for-react-19';
 import AppLayout from '@/components/layout/Layout';
-import { redirect } from 'next/navigation';
-import { auth } from '@/auth';
+// Force static generation - authentication is handled by middleware
+export const dynamic = 'force-static';
 
-async function Home() {
-  const session = await auth();
-
-  if (!session) {
-    redirect('/login');
-  }
-
+function Home() {
   return (
     <AppLayout>
       <section
