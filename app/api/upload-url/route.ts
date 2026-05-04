@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { checkFileExists, generateSignedUrl } from '@/utils/s3';
+import {
+  createRequestLogContext,
+  logRequestEnd,
+  logRequestError,
+  logRequestStart,
+} from '@/lib/structuredLogger';
 
 const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png'];
 
 export async function POST(req: NextRequest) {
+  const logContext = createRequestLogContext(req, '/api/upload-url');
+  logRequestStart(logContext);
+
   try {
     const { NEXT_PUBLIC_AWS_S3_BUCKET_NAME: bucketName, AWS_REGION } =
       await import('@/config/env').then((m) => m.cfg);
@@ -12,6 +21,9 @@ export async function POST(req: NextRequest) {
     const { filename, filetype } = await req.json();
 
     if (!filename || !filetype) {
+      logRequestEnd(logContext, 400, {
+        reason: 'missing_filename_or_filetype',
+      });
       return NextResponse.json(
         { error: 'Missing filename or filetype' },
         { status: 400 }
@@ -19,6 +31,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!ALLOWED_FILE_TYPES.includes(filetype)) {
+      logRequestEnd(logContext, 400, { reason: 'invalid_file_type', filetype });
       return NextResponse.json(
         { error: 'Invalid file type. Only JPG and PNG are allowed.' },
         { status: 400 }
@@ -29,7 +42,10 @@ export async function POST(req: NextRequest) {
     try {
       fileExists = await checkFileExists(filename);
     } catch (error) {
-      console.error('Error checking file existence:', error);
+      logRequestError(logContext, error, {
+        status: 500,
+        reason: 'check_file_exists_failed',
+      });
       return NextResponse.json(
         { error: 'Failed to check file existence' },
         { status: 500 }
@@ -40,12 +56,19 @@ export async function POST(req: NextRequest) {
     try {
       signedUrl = await generateSignedUrl(filename, filetype);
     } catch (error) {
-      console.error('Error generating signed URL:', error);
+      logRequestError(logContext, error, {
+        status: 500,
+        reason: 'generate_signed_url_failed',
+      });
       return NextResponse.json(
         { error: 'Failed to generate upload URL' },
         { status: 500 }
       );
     }
+
+    logRequestEnd(logContext, 200, {
+      fileExists,
+    });
 
     return NextResponse.json({
       uploadUrl: signedUrl,
@@ -53,7 +76,7 @@ export async function POST(req: NextRequest) {
       fileExists,
     });
   } catch (error) {
-    console.error('Unexpected error:', error);
+    logRequestError(logContext, error, { status: 500 });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

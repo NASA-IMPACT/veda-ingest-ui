@@ -1,14 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
+import {
+  createRequestLogContext,
+  logRequestEnd,
+  logRequestError,
+  logRequestStart,
+  summarizeSession,
+} from '@/lib/structuredLogger';
 
 import RetrieveJSON from '@/utils/githubUtils/RetrieveJSON';
 
 type IngestionType = 'collection' | 'dataset';
 
 export async function GET(request: NextRequest) {
+  const logContext = createRequestLogContext(request, '/api/retrieve-ingest');
+  logRequestStart(logContext);
+
   try {
     const session = await auth();
     if (!session) {
+      logRequestEnd(logContext, 401, { reason: 'missing_session' });
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
@@ -16,6 +27,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (!session.scopes?.includes('dataset:update')) {
+      logRequestEnd(logContext, 403, {
+        reason: 'missing_scope_dataset_update',
+        ...summarizeSession(session),
+      });
       return NextResponse.json(
         { error: 'Insufficient permissions: dataset:update scope required' },
         { status: 403 }
@@ -27,6 +42,7 @@ export async function GET(request: NextRequest) {
     const ingestionType = searchParams.get('ingestionType') as IngestionType;
 
     if (!ref) {
+      logRequestEnd(logContext, 400, { reason: 'missing_ref' });
       return NextResponse.json(
         { error: 'Missing required query parameter: "ref".' },
         { status: 400 }
@@ -34,6 +50,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (!ingestionType || !['dataset', 'collection'].includes(ingestionType)) {
+      logRequestEnd(logContext, 400, { reason: 'invalid_ingestion_type' });
       return NextResponse.json(
         {
           error:
@@ -47,6 +64,7 @@ export async function GET(request: NextRequest) {
     const content = response?.content;
 
     if (!content || typeof content !== 'object') {
+      logRequestEnd(logContext, 400, { reason: 'invalid_file_content' });
       return NextResponse.json(
         { error: 'Invalid file format. Expected a JSON object.' },
         { status: 400 }
@@ -59,6 +77,7 @@ export async function GET(request: NextRequest) {
         typeof datasetContent.collection !== 'string' ||
         datasetContent.collection.trim() === ''
       ) {
+        logRequestEnd(logContext, 400, { reason: 'invalid_dataset_content' });
         return NextResponse.json(
           {
             error:
@@ -73,6 +92,9 @@ export async function GET(request: NextRequest) {
         typeof collectionContent.id !== 'string' ||
         collectionContent.id.trim() === ''
       ) {
+        logRequestEnd(logContext, 400, {
+          reason: 'invalid_collection_content',
+        });
         return NextResponse.json(
           {
             error:
@@ -83,12 +105,14 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    logRequestEnd(logContext, 200, { ingestionType, ref });
     return NextResponse.json(response);
   } catch (error) {
     if (error instanceof Error) {
+      logRequestError(logContext, error, { status: 400 });
       return NextResponse.json({ error: error.message }, { status: 400 });
     } else {
-      console.error('An unexpected error occurred:', error);
+      logRequestError(logContext, error, { status: 500 });
       return NextResponse.json(
         { error: 'An unexpected error occurred on the server.' },
         { status: 500 }
