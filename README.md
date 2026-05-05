@@ -24,6 +24,13 @@ Deployment guidance is split into focused docs:
 - [Amplify New Instance Runbook](docs/deployment/amplify-new-instance-runbook.md)
 - [GitHub App Setup for Destination Repos](docs/deployment/github-app-setup.md)
 
+## Architecture & Security Docs
+
+- [App Environment Profiles](docs/app-environment-profiles.md)
+- [Middleware Architecture](docs/middleware-architecture.md)
+- [Security Architecture](docs/security.md)
+- [GitHub Integration](docs/github-integration.md)
+
 ## Feature Tour
 
 The latest Playwright test report is published after each merge to `main`. This provides screenshots and descriptions of features in the veda-ingest-ui.
