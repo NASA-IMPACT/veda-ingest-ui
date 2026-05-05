@@ -102,6 +102,16 @@ vi.mock('@/utils/ObjectFieldTemplate', () => ({
 vi.mock('@/FormSchemas/datasets/datasetSchema.json', () => ({
   default: {
     type: 'object',
+    default: {
+      item_assets: {
+        cog_default: {
+          type: 'image/tiff; application=geotiff; profile=cloud-optimized',
+          roles: ['data', 'layer'],
+          title: 'Default COG Layer',
+          description: 'Cloud optimized default layer to display on map',
+        },
+      },
+    },
     properties: {
       collection: { type: 'string' },
       tenants: {
@@ -119,6 +129,16 @@ vi.mock('@/FormSchemas/datasets/uischema.json', () => ({
 vi.mock('@/FormSchemas/disasters/datasetSchema.json', () => ({
   default: {
     type: 'object',
+    default: {
+      item_assets: {
+        cog_default: {
+          type: 'image/tiff; application=geotiff; profile=cloud-optimized',
+          roles: ['data', 'layer'],
+          title: 'Default COG Layer',
+          description: 'Cloud optimized default layer to display on map',
+        },
+      },
+    },
     properties: {
       disaster_only: { type: 'boolean' },
     },
@@ -381,7 +401,7 @@ describe('DatasetIngestionForm', () => {
     expect(uiSchema.collection['ui:readonly']).toBe(true);
   });
 
-  it('does not inject default item_assets for default profile on new forms', async () => {
+  it('initializes default profile item_assets from schema defaults on new forms', async () => {
     mockedEnv.DATASET_FORM_SCHEMA_PROFILE = 'default';
     const mockSetFormData = vi.fn();
 
@@ -400,10 +420,17 @@ describe('DatasetIngestionForm', () => {
     const updaterFn = mockSetFormData.mock.calls[0][0];
     const newState = updaterFn({});
 
-    expect(newState.item_assets).toBeUndefined();
+    expect(newState.item_assets).toEqual({
+      cog_default: {
+        type: 'image/tiff; application=geotiff; profile=cloud-optimized',
+        roles: ['data', 'layer'],
+        title: 'Default COG Layer',
+        description: 'Cloud optimized default layer to display on map',
+      },
+    });
   });
 
-  it('does not inject default item_assets for disasters profile on new forms', async () => {
+  it('initializes disasters profile item_assets from schema defaults on new forms', async () => {
     mockedEnv.DATASET_FORM_SCHEMA_PROFILE = 'disasters';
     const mockSetFormData = vi.fn();
 
@@ -422,7 +449,14 @@ describe('DatasetIngestionForm', () => {
     const updaterFn = mockSetFormData.mock.calls[0][0];
     const newState = updaterFn({});
 
-    expect(newState.item_assets).toBeUndefined();
+    expect(newState.item_assets).toEqual({
+      cog_default: {
+        type: 'image/tiff; application=geotiff; profile=cloud-optimized',
+        roles: ['data', 'layer'],
+        title: 'Default COG Layer',
+        description: 'Cloud optimized default layer to display on map',
+      },
+    });
   });
 
   it('correctly handles nested dashboard objects in form rendering', () => {
@@ -503,12 +537,12 @@ describe('DatasetIngestionForm', () => {
     );
 
     expect(useTenants).toHaveBeenCalledWith(
-      {
+      expect.objectContaining({
         type: 'object',
         properties: {
           disaster_only: { type: 'boolean' },
         },
-      },
+      }),
       {
         disaster_only: { 'ui:widget': 'checkbox' },
       }

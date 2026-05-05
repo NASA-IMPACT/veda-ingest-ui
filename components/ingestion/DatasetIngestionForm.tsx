@@ -5,7 +5,6 @@ import '@ant-design/v5-patch-for-react-19';
 import React, {
   useEffect,
   useState,
-  FC,
   memo,
   useCallback,
   lazy,
@@ -14,14 +13,13 @@ import React, {
 import { Button, Tabs, Spin } from 'antd';
 import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
-import { WidgetProps } from '@rjsf/utils';
 
 import ObjectFieldTemplate from '@/components/rjsf-components/ObjectFieldTemplate';
 import { customValidate } from '@/utils/CustomValidation';
 import { JSONEditorValue } from '@/components/ui/JSONEditor';
 import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
-import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
 import AssetField from '@/components/rjsf-components/AssetsField';
+import { RendersDashboardWidget } from '@/components/rjsf-components/RendersDashboardWidget';
 
 import datasetSchema from '@/FormSchemas/datasets/datasetSchema.json';
 import datasetUiSchema from '@/FormSchemas/datasets/uischema.json';
@@ -36,40 +34,6 @@ import { Form } from './rjsfTheme';
 
 // Lazy load JSONEditor - only needed when JSON tab is active
 const JSONEditor = lazy(() => import('@/components/ui/JSONEditor'));
-
-// --- Adapter Component ---
-// This component accepts RJSF's props and translates them to what CodeEditorWidget expects.
-const RjsfCodeEditorWidget: FC<WidgetProps> = ({
-  value,
-  onChange,
-  readonly,
-}) => {
-  // Convert object to JSON string for display in editor
-  const stringValue = React.useMemo(() => {
-    if (value === null || value === undefined) {
-      return '';
-    }
-    if (typeof value === 'string') {
-      return value;
-    }
-    // If it's an object, stringify it with proper formatting
-    return JSON.stringify(value, null, 2);
-  }, [value]);
-
-  const handleOnChange = (newValue: string) => {
-    // Always pass the raw string value to the form state.
-    // RJSF will handle validation against the schema.
-    onChange(newValue);
-  };
-
-  return (
-    <CodeEditorWidget
-      value={stringValue}
-      onChange={handleOnChange}
-      readOnly={readonly}
-    />
-  );
-};
 
 interface TemporalExtent {
   startdate?: string;
@@ -151,6 +115,8 @@ function DatasetIngestionForm({
     schemaSources[cfg.DATASET_FORM_SCHEMA_PROFILE] || schemaSources.default;
   const selectedSchema = selectedSource.schema;
   const selectedUiSchema = selectedSource.uiSchema;
+  const schemaDefaults =
+    (selectedSchema.default as Record<string, unknown> | undefined) || {};
 
   const {
     schema: dynamicSchema,
@@ -174,34 +140,18 @@ function DatasetIngestionForm({
 
   const formScopedData = formData;
 
-  // --- Set initial "default" data for new forms ---
   useEffect(() => {
-    if (!isEditMode && (!formData || Object.keys(formData).length === 0)) {
+    if (
+      !isEditMode &&
+      (!formData || Object.keys(formData).length === 0) &&
+      Object.keys(schemaDefaults).length > 0
+    ) {
       setFormData((prevFormData) => ({
+        ...schemaDefaults,
         ...prevFormData,
-        // Manually set "default" values here
-        license: 'CC0-1.0',
-        stac_version: '1.0.0',
-        spatial_extent: {
-          xmin: -180,
-          ymin: -90,
-          xmax: 180,
-          ymax: 90,
-        },
-        stac_extensions: [
-          'https://stac-extensions.github.io/render/v1.0.0/schema.json',
-          'https://stac-extensions.github.io/item-assets/v1.0.0/schema.json',
-        ],
-        providers: [
-          {
-            name: 'NASA VEDA',
-            roles: ['host'],
-            url: 'https://www.earthdata.nasa.gov/dashboard/',
-          },
-        ],
       }));
     }
-  }, [isEditMode, formData, setFormData]);
+  }, [isEditMode, formData, schemaDefaults, setFormData]);
 
   useEffect(() => {
     if (defaultTemporalExtent) {
@@ -276,7 +226,7 @@ function DatasetIngestionForm({
   );
 
   const widgets = {
-    'renders.dashboard': RjsfCodeEditorWidget,
+    'renders.dashboard': RendersDashboardWidget,
     testableUrl: TestableUrlWidget,
     regexString: RegexStringWidget,
   };

@@ -8,7 +8,6 @@ import {
   FormContextType,
   GenericObjectType,
   ObjectFieldTemplateProps,
-  ObjectFieldTemplatePropertyType,
   RJSFSchema,
   StrictRJSFSchema,
   canExpand,
@@ -24,11 +23,9 @@ import {
   ConfigConsumerProps,
 } from 'antd/lib/config-provider/context';
 import Button from 'antd/lib/button';
-import { CloudUploadOutlined, ImportOutlined } from '@ant-design/icons';
+import { CloudUploadOutlined } from '@ant-design/icons';
 
-import COGDrawerViewer from '@/components/COGViewer/COGDrawerViewer';
 import ThumbnailUploaderDrawer from '@/components/thumbnails/ThumbnailUploaderDrawer';
-import { Alert, Divider, Typography } from 'antd';
 import DiscoveryItemObjectFieldTemplate from './DiscoveryItemObjectFieldTemplate'; // Import the specific template
 
 const DESCRIPTION_COL_STYLE = {
@@ -56,11 +53,6 @@ export default function ObjectFieldTemplate<
   } = props;
   const formContext = registry.formContext;
 
-  const [errorMessage, setErrorMessage] = useState('');
-  const [cogDrawerOpen, setCOGDrawerOpen] = useState(false);
-  const [drawerUrl, setDrawerUrl] = useState<string | null>(null);
-  const [renders, setRenders] = useState<string | null>(null);
-  const [, forceUpdate] = useState(0);
   const [thumbnailDrawerOpen, setThumbnailDrawerOpen] = useState(false);
 
   const uiOptions = getUiOptions<T, S, F>(uiSchema);
@@ -84,10 +76,6 @@ export default function ObjectFieldTemplate<
     formContext as GenericObjectType;
 
   type FormDataLike = {
-    sample_files?: string[];
-    renders?: {
-      dashboard?: string;
-    };
     assets?: {
       thumbnail?: Record<string, unknown>;
     };
@@ -105,43 +93,8 @@ export default function ObjectFieldTemplate<
     | FormContextWithUpdate
     | undefined;
 
-  const handleOpenCOGDrawer = () => {
-    if (
-      !formContextWithUpdate ||
-      typeof formContextWithUpdate.updateFormData !== 'function'
-    ) {
-      console.error('formContext or updateFormData is not available.');
-      return;
-    }
-    // Use full form data from formContext
-    const fullFormData = formContextWithUpdate.formData || {};
-    const sampleUrl: string | undefined = fullFormData?.sample_files?.[0]; // Use full form data
-    const rendersDashboardEntry: string | undefined =
-      fullFormData?.renders?.dashboard;
-
-    if (!sampleUrl) {
-      setErrorMessage('Sample File URL is required');
-      forceUpdate((prev) => prev + 1);
-      return;
-    }
-
-    setErrorMessage('');
-    setDrawerUrl(sampleUrl);
-    setCOGDrawerOpen(true);
-
-    if (rendersDashboardEntry) {
-      setRenders(rendersDashboardEntry);
-    }
-    forceUpdate((prev) => prev + 1);
-  };
-
   const handleOpenUploadDrawer = () => {
     setThumbnailDrawerOpen(true);
-    forceUpdate((prev) => prev + 1);
-  };
-
-  const handleCloseCOGDrawer = () => {
-    setCOGDrawerOpen(false);
   };
 
   const handleUploadSuccess = (s3Uri: string) => {
@@ -169,35 +122,6 @@ export default function ObjectFieldTemplate<
     });
     setThumbnailDrawerOpen(false);
   };
-
-  const handleAcceptRenderOptions = (renderOptions: string) => {
-    if (
-      !formContextWithUpdate ||
-      typeof formContextWithUpdate.updateFormData !== 'function'
-    ) {
-      console.error('formContext or updateFormData is not available.');
-      return;
-    }
-
-    formContextWithUpdate.updateFormData((prevData: FormDataLike) => {
-      const updatedFormData = {
-        ...prevData,
-        renders: {
-          ...prevData.renders,
-          dashboard: renderOptions, // only update renderOptions without overwriting other fields
-        },
-      };
-
-      return updatedFormData;
-    });
-  };
-
-  const isDashboardField = (element: ObjectFieldTemplatePropertyType) =>
-    element.name === 'dashboard' &&
-    (
-      (element.content?.props as { fieldPathId?: { $id?: string } })
-        ?.fieldPathId?.$id || ''
-    ).includes('renders');
   // Apply discovery item template only to the array item object itself,
   // not nested objects like discovery_items[].assets.
   const isDiscoveryItem =
@@ -292,56 +216,10 @@ export default function ObjectFieldTemplate<
                     )
                   : properties
                       .filter((e) => !e.hidden)
-                      .map((element: ObjectFieldTemplatePropertyType) => {
+                      .map((element) => {
                         return (
                           <Col key={element.name} span={24}>
-                            {isDashboardField(element) ? (
-                              <>
-                                <div
-                                  style={{
-                                    display: 'flex',
-                                    alignItems: 'stretch',
-                                    flexDirection: 'column',
-                                  }}
-                                >
-                                  {element.content}
-                                  {errorMessage && (
-                                    <div key={errorMessage}>
-                                      {' '}
-                                      <Alert
-                                        message={errorMessage}
-                                        type="error"
-                                        showIcon
-                                        style={{ marginBottom: '10px' }}
-                                      />
-                                    </div>
-                                  )}
-                                  <Button
-                                    type="primary"
-                                    onClick={handleOpenCOGDrawer}
-                                    icon={<ImportOutlined />}
-                                    style={{
-                                      alignSelf: 'flex-end',
-                                      marginBottom: '16px',
-                                    }}
-                                  >
-                                    Generate Renders Object From Sample File
-                                  </Button>
-                                  <Divider style={{ margin: '0 0 16px 0' }} />
-                                </div>
-                                <Typography.Text
-                                  type="secondary"
-                                  style={{
-                                    display: 'block',
-                                    marginBottom: '8px',
-                                  }}
-                                >
-                                  Optional Additional Renders Objects
-                                </Typography.Text>
-                              </>
-                            ) : (
-                              element.content
-                            )}
+                            {element.content}
                           </Col>
                         );
                       })}
@@ -363,13 +241,6 @@ export default function ObjectFieldTemplate<
                 </Col>
               )}
             </fieldset>
-            <COGDrawerViewer
-              drawerOpen={cogDrawerOpen}
-              url={drawerUrl || ''}
-              renders={renders}
-              onClose={handleCloseCOGDrawer}
-              onAcceptRenderOptions={handleAcceptRenderOptions}
-            />
             <ThumbnailUploaderDrawer
               open={thumbnailDrawerOpen}
               onClose={() => setThumbnailDrawerOpen(false)}

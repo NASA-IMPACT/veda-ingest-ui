@@ -109,7 +109,7 @@
   },
   "item_assets": {
     "ui:field": "asset",
-    "cog_default": {
+    "ui:additionalProperties": {
       "ui:grid": [
         {
           "title": 12,
@@ -123,7 +123,7 @@
       "description": {
         "ui:widget": "textarea",
         "ui:options": {
-          "rows": 8
+          "rows": 4
         }
       }
     }
