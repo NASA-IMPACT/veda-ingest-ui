@@ -123,8 +123,3 @@ For tenant-specific behavior, see `docs/tenants.md`.
   - Confirm app installation and private key validity.
 - 422 errors during PR creation
   - Common causes: branch already exists, invalid path/name, or duplicate PR constraints.
-
-## Related Docs
-
-- `docs/deployment/github-app-setup.md`
-- `docs/tenants.md`
