@@ -62,6 +62,23 @@ https://nasa-impact.github.io/veda-ingest-ui/
 └── __tests__/            # Test suites (unit, integration, e2e)
 ```
 
+## Form System & RJSF Customization
+
+This application uses [react-jsonschema-form (RJSF)](https://rjsf-team.github.io/react-jsonschema-form/) to generate forms from JSON Schema definitions. This approach provides several key advantages:
+
+- **Schema-driven**: Form structure, validation rules, and defaults are defined once in JSON Schema and reused across create/edit flows, reducing code duplication
+- **Multi-profile support**: Different data ingestion profiles (e.g., `default` vs. `disasters`) can have distinct forms with different field requirements, without duplicating form logic
+- **Dual interface**: Users can edit via visual form **or** direct JSON editor, with bidirectional sync and validation
+- **Composability**: Forms initialize from defaults, validate against schema, and serialize back to schema-compliant JSON
+
+**Why customization is necessary?**
+
+- **Layout control**: RJSF out-of-the-box doesn't support complex responsive grid layouts; we customize ObjectFieldTemplate with Ant Design's grid system for professional multi-column layouts
+- **Domain-specific widgets**: Standard input widgets don't handle some VEDA-specific fields and complex objects (COG file validation, renders dashboard, asset management, regex fields). Custom widgets encapsulate this domain logic
+- **Theme integration**: Ant Design theming requires custom overrides to work reliably with RJSF v6
+
+See [RJSF Customization Guide](docs/rjsf-customization.md) for detailed patterns and component architecture.
+
 # Architecture
 
 The application supports two primary workflows:
@@ -422,6 +439,8 @@ const cleanedData = sanitizeFormData(formData);
 ## Configuring the Validation Form
 
 The fields in the Validation Form are configured by a combination of the json schema in the [jsonschema.json file](FormSchemas/**/jsonschema.json) and the UI Schema in the [uischema.json file](FormSchemas/**/uischema.json). To modify fields in the form, a developer must update the json schema to include the proper JSON schema data fields and then modify the ui Schema to have any new or renamed fields in the desired location.
+
+For customization details (templates, widgets, fields, and theme overrides), see [RJSF Customization Guide](docs/rjsf-customization.md).
 
 The Form uses a 24 column grid format and the layout of each row is dictated by the "ui:grid" array in that json. Each row is defined as an object with each field allowed up to 24 columns wide. For example:
 

@@ -1,5 +1,34 @@
 {
   "type": "object",
+  "default": {
+    "license": "CC0-1.0",
+    "stac_version": "1.0.0",
+    "spatial_extent": {
+      "xmin": -180,
+      "ymin": -90,
+      "xmax": 180,
+      "ymax": 90
+    },
+    "stac_extensions": [
+      "https://stac-extensions.github.io/render/v1.0.0/schema.json",
+      "https://stac-extensions.github.io/item-assets/v1.0.0/schema.json"
+    ],
+    "providers": [
+      {
+        "name": "NASA VEDA",
+        "roles": ["host"],
+        "url": "https://www.earthdata.nasa.gov/dashboard/"
+      }
+    ],
+    "item_assets": {
+      "cog_default": {
+        "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+        "roles": ["data", "layer"],
+        "title": "Default COG Layer",
+        "description": "Cloud optimized default layer to display on map"
+      }
+    }
+  },
   "required": [
     "collection",
     "title",
@@ -208,25 +237,27 @@
     "item_assets": {
       "type": "object",
       "title": "Item Assets",
-      "properties": {
-        "cog_default": {
-          "type": "object",
-          "properties": {
-            "type": {
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
               "type": "string"
             },
-            "roles": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "title": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            }
+            "title": "Roles"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
           }
         }
       }
