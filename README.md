@@ -23,6 +23,7 @@ Deployment guidance is split into focused docs:
 - [Deployment Guides Index](docs/deployment/README.md)
 - [Amplify New Instance Runbook](docs/deployment/amplify-new-instance-runbook.md)
 - [GitHub App Setup for Destination Repos](docs/deployment/github-app-setup.md)
+- [CloudWatch Log Guide](docs/deployment/cloudwatch-logs.md)
 
 ## Feature Tour
 
