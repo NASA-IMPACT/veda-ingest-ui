@@ -23,6 +23,7 @@ Deployment guidance is split into focused docs:
 - [Deployment Guides Index](docs/deployment/README.md)
 - [Amplify New Instance Runbook](docs/deployment/amplify-new-instance-runbook.md)
 - [GitHub App Setup for Destination Repos](docs/deployment/github-app-setup.md)
+- [GitHub Integration Architecture](docs/github-integration.md)
 - [Tenant System](docs/tenants.md)
 
 ## Feature Tour
