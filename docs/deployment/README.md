@@ -13,3 +13,7 @@ For existing instances, deployments are connected to AWS Amplify and update from
 
 1. Start with the Amplify runbook for end-to-end setup.
 2. Use the GitHub App guide for selecting or creating the app and filling `APP_ID`, `INSTALLATION_ID`, and `GITHUB_PRIVATE_KEY`.
+
+## Related Documentation
+
+For thumbnail upload role, IAM permissions, and upload/preview flow details, see [Thumbnail Upload](../thumbnail-upload.md).
