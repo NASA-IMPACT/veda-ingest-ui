@@ -67,6 +67,8 @@ The matcher list in middleware defines exactly which routes are protected there.
 
 This protects routes even if middleware config is changed or a path is accessed in unexpected ways.
 
+For thumbnail upload specifics (assumed role, IAM permissions, and end-to-end upload sequence), see [Thumbnail Upload](thumbnail-upload.md).
+
 ## Tenant Isolation
 
 Tenant checks are server-side and do not rely only on UI filtering. Validation helpers are in [lib/serverTenantValidation.ts](lib/serverTenantValidation.ts)

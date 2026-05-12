@@ -28,10 +28,11 @@ Deployment guidance is split into focused docs:
 ## Architecture & Security Docs
 
 - [App Environment Profiles](docs/app-environment-profiles.md)
+- [GitHub Integration Architecture](docs/github-integration.md)
 - [Middleware Architecture](docs/middleware-architecture.md)
 - [Security Architecture](docs/security.md)
-- [GitHub Integration Architecture](docs/github-integration.md)
 - [Tenant System](docs/tenants.md)
+- [Thumbnail Upload](docs/thumbnail-upload.md)
 
 ## Feature Tour
 
