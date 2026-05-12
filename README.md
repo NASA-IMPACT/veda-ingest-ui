@@ -28,6 +28,7 @@ Deployment guidance is split into focused docs:
 ## Architecture & Security Docs
 
 - [App Environment Profiles](docs/app-environment-profiles.md)
+- [COG Viewer](docs/cog-viewer.md)
 - [GitHub Integration Architecture](docs/github-integration.md)
 - [Middleware Architecture](docs/middleware-architecture.md)
 - [Security Architecture](docs/security.md)
