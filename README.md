@@ -23,15 +23,15 @@ Deployment guidance is split into focused docs:
 - [Deployment Guides Index](docs/deployment/README.md)
 - [Amplify New Instance Runbook](docs/deployment/amplify-new-instance-runbook.md)
 - [GitHub App Setup for Destination Repos](docs/deployment/github-app-setup.md)
-- [GitHub Integration Architecture](docs/github-integration.md)
-- [Tenant System](docs/tenants.md)
+- [CloudWatch Log Guide](docs/deployment/cloudwatch-logs.md)
 
 ## Architecture & Security Docs
 
 - [App Environment Profiles](docs/app-environment-profiles.md)
 - [Middleware Architecture](docs/middleware-architecture.md)
 - [Security Architecture](docs/security.md)
-- [GitHub Integration](docs/github-integration.md)
+- [GitHub Integration Architecture](docs/github-integration.md)
+- [Tenant System](docs/tenants.md)
 
 ## Feature Tour
 
