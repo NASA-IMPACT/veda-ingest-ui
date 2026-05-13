@@ -32,6 +32,7 @@ Deployment guidance is split into focused docs:
 - [GitHub Integration Architecture](docs/github-integration.md)
 - [Middleware Architecture](docs/middleware-architecture.md)
 - [Security Architecture](docs/security.md)
+- [STAC Extension Loading](docs/stac-extension-loading.md)
 - [Tenant System](docs/tenants.md)
 - [Thumbnail Upload](docs/thumbnail-upload.md)
 

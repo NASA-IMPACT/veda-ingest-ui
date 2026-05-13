@@ -4,6 +4,8 @@ This project uses RJSF (react-jsonschema-form) with custom templates, fields, wi
 
 Use this document to understand where behavior lives and which customization hook to use when adding new form UX.
 
+For extension URL loading and extension-field lifecycle details, see [STAC Extension Loading](./stac-extension-loading.md).
+
 ## Architecture
 
 RJSF rendering is assembled in the ingestion form components:
