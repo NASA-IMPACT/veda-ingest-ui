@@ -34,6 +34,38 @@ const getDefaultBands = (metadata: COGMetadata): number[] => {
   return Array.from({ length: Math.min(totalBands, 3) }, (_, i) => i + 1);
 };
 
+const fetchTileJson = async (
+  url: string,
+  bands: number[],
+  rescale: [number | null, number | null][],
+  colormap: string,
+  colorFormula?: string | null,
+  resampling?: string | null,
+  noData?: string | null
+): Promise<TileJsonResponse> => {
+  if (!url) throw new Error('COG URL is required.');
+
+  const bidxParams = bands.map((band) => `&bidx=${band}`).join('');
+  const rescaleParams = rescale
+    .filter((range) => range[0] !== null && range[1] !== null)
+    .map((range) => `&rescale=${range[0]},${range[1]}`)
+    .join('');
+  const colormapParam =
+    colormap !== 'Internal' ? `&colormap_name=${colormap}` : '';
+  const colorFormulaParam = colorFormula
+    ? `&color_formula=${encodeURIComponent(colorFormula)}`
+    : '';
+  const resamplingParam = resampling ? `&resampling=${resampling}` : '';
+  const noDataParam = noData ? `&nodata=${encodeURIComponent(noData)}` : '';
+
+  const response = await fetch(
+    `${VEDA_BACKEND_URL}/raster/cog/WebMercatorQuad/tilejson.json?url=${encodeURIComponent(url)}${bidxParams}${rescaleParams}${colormapParam}${colorFormulaParam}${resamplingParam}${noDataParam}`
+  );
+
+  if (!response.ok) throw new Error('Failed to fetch tile URL');
+  return response.json() as Promise<TileJsonResponse>;
+}
+
 export const useCOGViewer = () => {
   const { message } = App.useApp();
   const [cogUrl, setCogUrl] = useState<string | null>(null);
@@ -65,41 +97,26 @@ export const useCOGViewer = () => {
     ) => {
       setLoading(true);
       try {
-        if (!url) throw new Error('COG URL is required.');
-
-        const bidxParams = bands.map((band) => `&bidx=${band}`).join('');
-        const rescaleParams = rescale
-          .filter((range) => range[0] !== null && range[1] !== null)
-          .map((range) => `&rescale=${range[0]},${range[1]}`)
-          .join('');
-        const colormapParam =
-          colormap !== 'Internal' ? `&colormap_name=${colormap}` : '';
-        const colorFormulaParam = colorFormula
-          ? `&color_formula=${encodeURIComponent(colorFormula)}`
-          : '';
-        const resamplingParam = resampling ? `&resampling=${resampling}` : '';
-        const noDataParam = noData
-          ? `&nodata=${encodeURIComponent(noData)}`
-          : '';
-
-        const response = await fetch(
-          `${VEDA_BACKEND_URL}/raster/cog/WebMercatorQuad/tilejson.json?url=${encodeURIComponent(
-            url
-          )}${bidxParams}${rescaleParams}${colormapParam}${colorFormulaParam}${resamplingParam}${noDataParam}`
+        const data = await fetchTileJson(
+          url,
+          bands,
+          rescale,
+          colormap,
+          colorFormula,
+          resampling,
+          noData
         );
-
-        if (!response.ok) throw new Error('Failed to fetch tile URL');
-        const data = (await response.json()) as TileJsonResponse;
         setTileUrl(data.tiles[0]);
 
         const bounds = data.bounds;
         if (mapRef.current && bounds) {
           import('leaflet').then((L) => {
-            const leafletBounds = L.latLngBounds([
-              [bounds[1], bounds[0]],
-              [bounds[3], bounds[2]],
-            ]);
-            mapRef.current?.fitBounds(leafletBounds);
+            mapRef.current?.fitBounds(
+              L.latLngBounds([
+                [bounds[1], bounds[0]],
+                [bounds[3], bounds[2]],
+              ])
+            );
           });
         }
 
