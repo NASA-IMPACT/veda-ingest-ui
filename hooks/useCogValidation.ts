@@ -50,11 +50,9 @@ export const useCogValidation = (): UseCogValidationReturn => {
     }
 
     setIsValidatingCog(true);
-    try {
-      return await validateCogUrl(sampleFileUrl);
-    } finally {
-      setIsValidatingCog(false);
-    }
+    const result = await validateCogUrl(sampleFileUrl);
+    setIsValidatingCog(false);
+    return result;
   }, []);
 
   const showCogValidationModal = useCallback(() => {
