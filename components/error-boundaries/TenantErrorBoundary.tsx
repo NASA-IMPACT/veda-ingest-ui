@@ -40,7 +40,7 @@ export class TenantErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     logFrontendError('error_boundary.tenant.caught', error, {
-      componentStack: errorInfo.componentStack,
+      componentStack: errorInfo.componentStack ?? null,
     });
 
     this.setState({

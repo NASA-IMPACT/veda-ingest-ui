@@ -45,7 +45,7 @@ export class APIErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     logFrontendError('error_boundary.api.caught', error, {
-      componentStack: errorInfo.componentStack,
+      componentStack: errorInfo.componentStack ?? null,
     });
 
     if (this.props.onError) {
