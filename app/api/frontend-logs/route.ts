@@ -48,27 +48,16 @@ const isValidFrontendLogEntry = (value: unknown): value is FrontendLogEntry => {
 
   const { level, event, details, clientTimestamp } = value;
 
-  if (typeof level !== 'string' || !ALLOWED_LOG_LEVELS.has(level)) {
-    return false;
-  }
+  let valid = true;
 
-  if (typeof event !== 'string' || event.trim() === '') {
-    return false;
-  }
+  if (
+    typeof level !== 'string' || !ALLOWED_LOG_LEVELS.has(level) ||
+    typeof event !== 'string' || event.trim() === '' ||
+    !isRecord(details) || !Object.values(details).every(isJsonValue) ||
+    typeof clientTimestamp !== 'string' || clientTimestamp.trim() === ''
+  ) valid = false;
 
-  if (!isRecord(details)) {
-    return false;
-  }
-
-  if (!Object.values(details).every((item) => isJsonValue(item))) {
-    return false;
-  }
-
-  if (typeof clientTimestamp !== 'string' || clientTimestamp.trim() === '') {
-    return false;
-  }
-
-  return true;
+  return valid;
 };
 
 export async function POST(request: NextRequest) {
