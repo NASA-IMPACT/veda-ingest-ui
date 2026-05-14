@@ -15,6 +15,7 @@ interface RenderingOptionsModalProps {
     bidx: number[];
     rescale?: [number | null, number | null][] | null;
     colormap_name?: string;
+    colormap?: Record<string, number[]>;
     color_formula?: string;
     resampling?: string | null;
     nodata?: string | null;
@@ -29,8 +30,15 @@ const RenderingOptionsModal: React.FC<RenderingOptionsModalProps> = ({
   const { message } = App.useApp();
   const [copied, setCopied] = useState(false);
 
-  const { bidx, rescale, colormap_name, color_formula, resampling, nodata } =
-    options;
+  const {
+    bidx,
+    rescale,
+    colormap_name,
+    colormap,
+    color_formula,
+    resampling,
+    nodata,
+  } = options;
 
   // Build the rendering options object dynamically
   const renderingOptions: Record<string, unknown> = {
@@ -47,6 +55,7 @@ const RenderingOptionsModal: React.FC<RenderingOptionsModalProps> = ({
     ...(colormap_name && colormap_name.toLowerCase() !== 'internal'
       ? { colormap_name }
       : {}),
+    ...(colormap ? { colormap } : {}),
     ...(color_formula ? { color_formula } : {}),
     ...(resampling ? { resampling } : {}),
     ...(nodata ? { nodata } : {}),
