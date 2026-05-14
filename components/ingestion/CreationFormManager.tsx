@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, Typography, Alert, Modal, Input, Spin } from 'antd';
 import { Status } from '@/types/global';
 import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm';
@@ -42,7 +42,7 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
     validateFormDataCog,
   } = useCogValidation();
 
-  const handleFormSubmit = async (data?: Record<string, unknown>) => {
+  const handleFormSubmit = useCallback(async (data?: Record<string, unknown>) => {
     if (!data) {
       console.error('No form data provided.');
       return;
@@ -67,7 +67,7 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
     }
 
     setIsModalVisible(true);
-  };
+  }, [formType, validateFormDataCog, showCogValidationModal]);
 
   const handleCogValidationContinue = () => {
     hideCogValidationModal();
