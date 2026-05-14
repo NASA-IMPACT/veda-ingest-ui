@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button, Modal, App } from 'antd';
 import dynamic from 'next/dynamic';
 import '@uiw/react-textarea-code-editor/dist.css';
+import { logFrontendError } from '@/lib/structuredLogger';
 
 const CodeEditor = dynamic(
   () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
@@ -61,7 +62,7 @@ const RenderingOptionsModal: React.FC<RenderingOptionsModalProps> = ({
       setCopied(true);
       message.success('Rendering options copied to clipboard!');
     } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
+      logFrontendError('cog.rendering_options.copy_failed', error);
       message.error('Failed to copy rendering options.');
     }
   };

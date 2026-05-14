@@ -17,6 +17,7 @@ import {
   ExclamationCircleOutlined,
   CopyOutlined,
 } from '@ant-design/icons';
+import { logFrontendError } from '@/lib/structuredLogger';
 
 const { Title, Paragraph, Link } = Typography;
 
@@ -168,7 +169,9 @@ function ThumbnailUploader({
       await proceedWithUpload(file, uploadUrl, fileUrl, progressHandler);
     } catch (error) {
       loadingMessage();
-      console.error('Upload failed:', error);
+      logFrontendError('thumbnail.upload.request_failed', error, {
+        endpoint: '/api/upload-url',
+      });
       message.error('Upload failed, please try again.');
       setUploadingFile(null);
       clearErrorsWithAnimation();
@@ -195,7 +198,9 @@ function ThumbnailUploader({
       setUploadedFile({ name: file.name, url: fileUrl });
     } catch (error) {
       closeUploadingMessage();
-      console.error('Upload failed:', error);
+      logFrontendError('thumbnail.upload.s3_put_failed', error, {
+        destination: 's3',
+      });
       message.error('Upload failed, please try again.');
       setUploadingFile(null);
     }
@@ -249,7 +254,7 @@ function ThumbnailUploader({
       await navigator.clipboard.writeText(uploadedFile.url);
       setCopied(true);
     } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
+      logFrontendError('thumbnail.upload.copy_url_failed', error);
     }
   };
 

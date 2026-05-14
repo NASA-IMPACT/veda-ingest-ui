@@ -3,6 +3,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Alert, Button, Space, Spin } from 'antd';
 import { ReloadOutlined, BugOutlined } from '@ant-design/icons';
+import { logFrontendError } from '@/lib/structuredLogger';
 
 interface Props {
   children: ReactNode;
@@ -43,7 +44,9 @@ export class APIErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('APIErrorBoundary caught an error:', error, errorInfo);
+    logFrontendError('error_boundary.api.caught', error, {
+      componentStack: errorInfo.componentStack,
+    });
 
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
@@ -66,7 +69,7 @@ export class APIErrorBoundary extends Component<Props, State> {
         });
       }, 500);
     } catch (retryError) {
-      console.error('Retry failed:', retryError);
+      logFrontendError('error_boundary.api.retry_failed', retryError);
       this.setState({ isRetrying: false });
     }
   };

@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Drawer, Button } from 'antd';
 import { useCOGViewer } from '@/hooks/useCOGViewer';
 import dynamic from 'next/dynamic';
+import { logFrontendError } from '@/lib/structuredLogger';
 
 // Dynamically load the COGViewerContent component to prevent SSR issues
 const COGViewerContent = dynamic(
@@ -48,8 +49,9 @@ const COGDrawerViewer: React.FC<COGDrawerViewerProps> = ({
 
   const handleAccept = () => {
     if (!onAcceptRenderOptions) {
-      console.error(
-        '❌ onAcceptRenderOptions function is missing in COGDrawerViewer.'
+      logFrontendError(
+        'cog.drawer.accept_missing_callback',
+        'onAcceptRenderOptions function is missing in COGDrawerViewer.'
       );
       return;
     }

@@ -7,6 +7,7 @@ import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm';
 import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
 import { useCogValidation } from '@/hooks/useCogValidation';
 import { getTenantFieldKey } from '@/utils/tenantField';
+import { logFrontendError } from '@/lib/structuredLogger';
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -42,32 +43,38 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
     validateFormDataCog,
   } = useCogValidation();
 
-  const handleFormSubmit = useCallback(async (data?: Record<string, unknown>) => {
-    if (!data) {
-      console.error('No form data provided.');
-      return;
-    }
+  const handleFormSubmit = useCallback(
+    async (data?: Record<string, unknown>) => {
+      if (!data) {
+        logFrontendError(
+          'ingestion.creation.submit_missing_form_data',
+          'No form data provided.'
+        );
+        return;
+      }
 
-    // Clean up the form data
-    const cleanedData = { ...data };
-    const tenantFieldKey = getTenantFieldKey();
-    if (
-      Array.isArray(cleanedData[tenantFieldKey]) &&
-      cleanedData[tenantFieldKey].length === 0
-    ) {
-      delete cleanedData[tenantFieldKey];
-    }
+      // Clean up the form data
+      const cleanedData = { ...data };
+      const tenantFieldKey = getTenantFieldKey();
+      if (
+        Array.isArray(cleanedData[tenantFieldKey]) &&
+        cleanedData[tenantFieldKey].length === 0
+      ) {
+        delete cleanedData[tenantFieldKey];
+      }
 
-    setStagedFormData(cleanedData);
+      setStagedFormData(cleanedData);
 
-    const isValid = await validateFormDataCog(cleanedData, formType);
-    if (!isValid) {
-      showCogValidationModal();
-      return;
-    }
+      const isValid = await validateFormDataCog(cleanedData, formType);
+      if (!isValid) {
+        showCogValidationModal();
+        return;
+      }
 
-    setIsModalVisible(true);
-  }, [formType, validateFormDataCog, showCogValidationModal]);
+      setIsModalVisible(true);
+    },
+    [formType, validateFormDataCog, showCogValidationModal]
+  );
 
   const handleCogValidationContinue = () => {
     hideCogValidationModal();
@@ -76,7 +83,10 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
 
   const handleFinalSubmit = () => {
     if (!stagedFormData) {
-      console.error('No staged form data available for submission.');
+      logFrontendError(
+        'ingestion.creation.final_submit_missing_staged_data',
+        'No staged form data available for submission.'
+      );
       setIsModalVisible(false);
       return;
     }
@@ -112,7 +122,9 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
         setStatus('success');
       })
       .catch((error) => {
-        console.error(error);
+        logFrontendError('ingestion.creation.submit_request_failed', error, {
+          endpoint: 'api/create-ingest',
+        });
         setStatus('error');
       })
       .finally(() => {

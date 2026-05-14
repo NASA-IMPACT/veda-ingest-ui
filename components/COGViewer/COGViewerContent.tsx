@@ -4,6 +4,7 @@ import { Map as LeafletMap } from 'leaflet';
 
 import COGControlsForm from './COGControlsForm';
 import RenderingOptionsModal from './RenderingOptionsModal';
+import { logFrontendError } from '@/lib/structuredLogger';
 
 // Dynamically import react-leaflet components to avoid SSR issues
 import dynamic from 'next/dynamic';
@@ -153,7 +154,10 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
                 noDataValue
               );
             } else {
-              console.error('Cannot update tile layer: COG URL is null.');
+              logFrontendError(
+                'cog.viewer.update_tile_layer_missing_cog_url',
+                'Cannot update tile layer: COG URL is null.'
+              );
             }
           }}
           onViewRenderingOptions={() => setIsModalVisible(true)}

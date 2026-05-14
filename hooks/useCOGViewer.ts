@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { App } from 'antd';
 import { VEDA_BACKEND_URL } from '@/config/env';
+import { logFrontendError } from '@/lib/structuredLogger';
 import { Map as LeafletMap } from 'leaflet';
 
 type RendersType = {
@@ -64,7 +65,7 @@ const fetchTileJson = async (
 
   if (!response.ok) throw new Error('Failed to fetch tile URL');
   return response.json() as Promise<TileJsonResponse>;
-}
+};
 
 export const useCOGViewer = () => {
   const { message } = App.useApp();
@@ -122,7 +123,9 @@ export const useCOGViewer = () => {
 
         message.success('COG tile layer loaded successfully!');
       } catch (error) {
-        console.error('Error fetching tile URL:', error);
+        logFrontendError('cog.viewer.fetch_tile_url_failed', error, {
+          endpoint: 'raster/cog/WebMercatorQuad/tilejson.json',
+        });
         message.error('Failed to load tile layer.');
       } finally {
         setLoading(false);
@@ -175,7 +178,7 @@ export const useCOGViewer = () => {
                 : renders;
             mergedMetadata = { ...COGdata, ...parsedRenders };
           } catch (error) {
-            console.error('Error parsing renders:', error);
+            logFrontendError('cog.viewer.parse_renders_failed', error);
           }
         }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { App } from 'antd';
 import { JSONSchema7 } from 'json-schema';
+import { logFrontendError } from '@/lib/structuredLogger';
 
 export interface ExtensionField {
   name: string;
@@ -70,7 +71,7 @@ export function useStacExtensions({ setFormData }: UseStacExtensionsProps) {
 
         message.success(`Extension "${title}" loaded successfully.`);
       } catch (error) {
-        console.error(error);
+        logFrontendError('stac.extensions.load_failed', error, { url });
         message.error(`Could not load or parse extension from ${url}`);
       } finally {
         setUrlsToProcess((prev) => prev.filter((u) => u !== url));

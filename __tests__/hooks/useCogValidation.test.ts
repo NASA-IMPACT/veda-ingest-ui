@@ -154,8 +154,9 @@ describe('useCogValidation', () => {
 
       expect(isValid!).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith(
-        'COG validation API request failed',
-        expect.any(Error)
+        expect.stringContaining(
+          '"event":"frontend.cog.validation.request_failed"'
+        )
       );
 
       consoleSpy.mockRestore();

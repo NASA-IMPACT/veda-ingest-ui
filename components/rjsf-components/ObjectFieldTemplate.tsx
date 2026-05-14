@@ -24,6 +24,7 @@ import {
 } from 'antd/lib/config-provider/context';
 import Button from 'antd/lib/button';
 import { CloudUploadOutlined } from '@ant-design/icons';
+import { logFrontendError } from '@/lib/structuredLogger';
 
 import ThumbnailUploaderDrawer from '@/components/thumbnails/ThumbnailUploaderDrawer';
 import DiscoveryItemObjectFieldTemplate from './DiscoveryItemObjectFieldTemplate'; // Import the specific template
@@ -102,7 +103,10 @@ export default function ObjectFieldTemplate<
       !formContextWithUpdate ||
       typeof formContextWithUpdate.updateFormData !== 'function'
     ) {
-      console.error('formContext or updateFormData is not available.');
+      logFrontendError(
+        'rjsf.object_template.form_context_missing_update',
+        'formContext or updateFormData is not available.'
+      );
       return;
     }
 

@@ -5,6 +5,7 @@ import Button from 'antd/lib/button';
 import Typography from 'antd/lib/typography';
 import { useState, useEffect, useRef } from 'react';
 import { CheckOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { logFrontendError } from '@/lib/structuredLogger';
 
 type ValidationState = 'idle' | 'loading' | 'validated' | 'error';
 
@@ -51,7 +52,9 @@ export const TestableUrlWidget = ({
         setValidationState('error');
       }
     } catch (err) {
-      console.error('Validation API request failed', err);
+      logFrontendError('rjsf.testable_url.validation_request_failed', err, {
+        endpoint: 'raster/cog/validate',
+      });
       setValidationState('error');
     }
   };
