@@ -146,7 +146,77 @@ describe('useCOGViewer', () => {
     expect(tileUrlFetchCall).not.toContain('&colormap_name=');
   });
 
-  it('should treat string renders.colormap as a named colormap', async () => {
+  it('should prefer custom colormap when both colormap and colormap_name are provided', async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockInfoData,
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockTileJsonData,
+      } as Response);
+
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
+
+    const customColormap = {
+      '0': [0, 0, 0, 128],
+      '100': [0, 130, 0, 255],
+    };
+
+    await act(async () => {
+      await result.current.fetchMetadata(mockCogUrl, {
+        bidx: [1],
+        colormap: customColormap,
+        colormap_name: 'greens',
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current.colormapType).toBe('custom');
+      expect(JSON.parse(result.current.customColormapJson)).toEqual(
+        customColormap
+      );
+      expect(result.current.selectedColormap).toBe('Internal');
+    });
+
+    const tileUrlFetchCall = vi.mocked(fetch).mock.calls[1][0] as string;
+    expect(tileUrlFetchCall).toContain('&colormap=');
+    expect(tileUrlFetchCall).not.toContain('&colormap_name=greens');
+  });
+
+  it('should load named colormap from renders.colormap_name', async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockInfoData,
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockTileJsonData,
+      } as Response);
+
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
+
+    await act(async () => {
+      await result.current.fetchMetadata(mockCogUrl, {
+        bidx: [1],
+        colormap_name: 'cfastie',
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current.colormapType).toBe('named');
+      expect(result.current.selectedColormap).toBe('cfastie');
+      expect(result.current.customColormapJson).toBe('');
+    });
+
+    const tileUrlFetchCall = vi.mocked(fetch).mock.calls[1][0] as string;
+    expect(tileUrlFetchCall).toContain('&colormap_name=cfastie');
+    expect(tileUrlFetchCall).not.toContain('&colormap=');
+  });
+
+  it('should ignore non-object renders.colormap and default to Internal named flow', async () => {
     vi.mocked(fetch)
       .mockResolvedValueOnce({
         ok: true,
@@ -168,12 +238,12 @@ describe('useCOGViewer', () => {
 
     await waitFor(() => {
       expect(result.current.colormapType).toBe('named');
-      expect(result.current.selectedColormap).toBe('cfastie');
+      expect(result.current.selectedColormap).toBe('Internal');
       expect(result.current.customColormapJson).toBe('');
     });
 
     const tileUrlFetchCall = vi.mocked(fetch).mock.calls[1][0] as string;
-    expect(tileUrlFetchCall).toContain('&colormap_name=cfastie');
+    expect(tileUrlFetchCall).not.toContain('&colormap_name=');
     expect(tileUrlFetchCall).not.toContain('&colormap=');
   });
 

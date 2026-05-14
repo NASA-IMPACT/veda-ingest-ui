@@ -7,7 +7,7 @@ type RendersType = {
   bidx?: number[];
   rescale?: [number, number][];
   colormap_name?: string;
-  colormap?: string | Record<string, number[]>;
+  colormap?: unknown;
   color_formula?: string;
   resampling?: string;
   nodata?: string;
@@ -225,9 +225,7 @@ export const useCOGViewer = () => {
         let initialCustomColormapJson = '';
         let initialSelectedColormap = 'Internal';
 
-        if (typeof parsedRenders.colormap === 'string') {
-          initialSelectedColormap = parsedRenders.colormap || 'Internal';
-        } else if (
+        if (
           parsedRenders.colormap &&
           typeof parsedRenders.colormap === 'object' &&
           !Array.isArray(parsedRenders.colormap) &&
@@ -239,8 +237,9 @@ export const useCOGViewer = () => {
             null,
             2
           );
-        } else if (parsedRenders.colormap_name) {
-          // Backward compatibility for older stored render options.
+        } else if (parsedRenders.colormap_name?.trim()) {
+          // Named colormaps come from `colormap_name`.
+          // `colormap` is only treated as valid when it is a custom object.
           initialSelectedColormap = parsedRenders.colormap_name;
         }
 
