@@ -144,23 +144,6 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
     (valueToValidate: JSONEditorValue) => {
       const processedValue = structuredClone(valueToValidate);
 
-      if (
-        processedValue.renders?.dashboard &&
-        typeof processedValue.renders.dashboard === 'object'
-      ) {
-        try {
-          processedValue.renders.dashboard = JSON.stringify(
-            processedValue.renders.dashboard,
-            null,
-            2
-          );
-        } catch (e) {
-          console.error('Error stringifying renders.dashboard:', e);
-          setSchemaErrors(['Invalid JSON object in renders.dashboard.']);
-          return;
-        }
-      }
-
       // Create a deep copy of the JSON schema
       const modifiedSchema = structuredClone(jsonSchema) as MutableSchema;
 
