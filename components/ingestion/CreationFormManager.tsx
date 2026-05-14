@@ -100,7 +100,7 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
     };
 
     try {
-      const { data, error } = await fetcher(url, requestOptions);
+      const { data, error } = await fetcher<{ githubURL: string }>(url, requestOptions);
       if (error) {
         setApiErrorMessage(data as string);
         setStatus('error');
