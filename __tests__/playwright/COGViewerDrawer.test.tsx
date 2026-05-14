@@ -23,7 +23,10 @@ async function openCOGDrawer(page: Page) {
   // Wait for the drawer to open and content to load
   await expect(page.locator('.ant-drawer')).toBeVisible({ timeout: 10000 });
 
-  await expect(page.getByTestId('colormap')).toBeVisible({ timeout: 10000 });
+  // Wait for the colormap controls to be visible by finding the "Named" label
+  await expect(page.locator('label').filter({ hasText: /Named/i })).toBeVisible(
+    { timeout: 10000 }
+  );
 }
 
 async function fillRenders(page: Page, rendersData: Record<string, unknown>) {
@@ -461,7 +464,9 @@ test.describe('COG Viewer Drawer', () => {
     });
 
     await test.step('validate that colormap mode toggle is set to custom', async () => {
-      const customModeButton = page.getByRole('radio', { name: 'Custom' });
+      const customModeButton = page
+        .locator('label')
+        .filter({ hasText: /Custom/i });
       await expect(customModeButton).toBeVisible({ timeout: 10000 });
       await expect(customModeButton).toBeChecked();
     });
