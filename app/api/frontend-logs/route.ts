@@ -20,7 +20,11 @@ const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 };
 
-  if (value === null || ['string', 'number', 'boolean'].includes(typeof value)) {
+const isJsonValue = (value: unknown): value is JsonValue => {
+  if (
+    value === null ||
+    ['string', 'number', 'boolean'].includes(typeof value)
+  ) {
     return true;
   }
 
@@ -45,11 +49,16 @@ const isValidFrontendLogEntry = (value: unknown): value is FrontendLogEntry => {
   let valid = true;
 
   if (
-    typeof level !== 'string' || !ALLOWED_LOG_LEVELS.has(level) ||
-    typeof event !== 'string' || event.trim() === '' ||
-    !isRecord(details) || !Object.values(details).every(isJsonValue) ||
-    typeof clientTimestamp !== 'string' || clientTimestamp.trim() === ''
-  ) valid = false;
+    typeof level !== 'string' ||
+    !ALLOWED_LOG_LEVELS.has(level) ||
+    typeof event !== 'string' ||
+    event.trim() === '' ||
+    !isRecord(details) ||
+    !Object.values(details).every(isJsonValue) ||
+    typeof clientTimestamp !== 'string' ||
+    clientTimestamp.trim() === ''
+  )
+    valid = false;
 
   return valid;
 };
