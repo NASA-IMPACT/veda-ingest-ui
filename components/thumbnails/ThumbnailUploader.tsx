@@ -110,6 +110,10 @@ function ThumbnailUploader({
 
   const handleUpload = async ({ file, onProgress }: UploadHandlerOptions) => {
     if (!(file instanceof File)) {
+      logFrontendError(
+        'thumbnail.upload.invalid_selected_file',
+        'No valid file selected for thumbnail upload.'
+      );
       message.error('No valid file selected. Please try again.');
       return;
     }
@@ -117,6 +121,9 @@ function ThumbnailUploader({
     const progressHandler = onProgress || (() => {});
 
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+      logFrontendError('thumbnail.upload.invalid_file_format', {
+        fileType: file.type || 'unknown',
+      });
       message.error('Invalid file format. Please upload a JPG or PNG image.');
       return;
     }

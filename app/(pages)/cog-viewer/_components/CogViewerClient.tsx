@@ -3,6 +3,7 @@
 import AppLayout from '@/components/layout/Layout';
 import { Input, App } from 'antd';
 import { useCOGViewer } from '@/hooks/useCOGViewer';
+import { logFrontend } from '@/lib/structuredLogger';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 
@@ -36,6 +37,7 @@ const CogViewerClient = function CogViewerClient() {
             onSearch={(url) => {
               const trimmedUrl = url.trim();
               if (!trimmedUrl) {
+                logFrontend('warn', 'cog.viewer.search_missing_url');
                 message.error('Please enter a valid URL.');
                 return;
               }

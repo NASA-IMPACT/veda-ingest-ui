@@ -8,7 +8,7 @@ import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPrope
 import dynamic from 'next/dynamic';
 import '@uiw/react-textarea-code-editor/dist.css';
 import { JSONSchema7 } from 'json-schema';
-import { logFrontendError } from '@/lib/structuredLogger';
+import { logFrontend, logFrontendError } from '@/lib/structuredLogger';
 
 const CodeEditor = dynamic(
   () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
@@ -373,9 +373,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
           dashboard: JSON.parse(value.renders.dashboard),
         };
       } catch {
-        console.warn(
-          "Could not parse 'renders.dashboard' as JSON, leaving it as-is."
-        );
+        logFrontend('warn', 'json_editor.parse_dashboard_as_json_failed');
       }
     }
     setEditorValue(JSON.stringify(updatedValue, null, 2));

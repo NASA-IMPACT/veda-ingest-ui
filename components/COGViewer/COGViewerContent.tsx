@@ -5,7 +5,7 @@ import { Map as LeafletMap } from 'leaflet';
 
 import COGControlsForm from './COGControlsForm';
 import RenderingOptionsModal from './RenderingOptionsModal';
-import { logFrontendError } from '@/lib/structuredLogger';
+import { logFrontend, logFrontendError } from '@/lib/structuredLogger';
 
 // Dynamically import react-leaflet components to avoid SSR issues
 import dynamic from 'next/dynamic';
@@ -100,7 +100,7 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
   // Automatically adjust map size when container resizes
   useEffect(() => {
     if (!containerRef.current) {
-      console.warn('Map container ref not available for ResizeObserver');
+      logFrontend('warn', 'cog.viewer.resize_observer_missing_container_ref');
       return;
     }
 

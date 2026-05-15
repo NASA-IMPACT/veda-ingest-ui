@@ -1,7 +1,7 @@
 import { useState, useReducer, useRef, useCallback } from 'react';
 import { App } from 'antd';
 import { VEDA_BACKEND_URL } from '@/config/env';
-import { logFrontendError } from '@/lib/structuredLogger';
+import { logFrontend, logFrontendError } from '@/lib/structuredLogger';
 import { Map as LeafletMap } from 'leaflet';
 import {
   type ColormapType,
@@ -175,6 +175,9 @@ export const useCOGViewer = () => {
   const fetchMetadata = useCallback(
     async (url: string, renders?: string | RendersType | null) => {
       if (!url) {
+        logFrontend('warn', 'cog.viewer.metadata_missing_url', {
+          endpoint: 'raster/cog/info',
+        });
         message.error('COG URL is required');
         return;
       }
@@ -278,6 +281,10 @@ export const useCOGViewer = () => {
 
         message.success('COG metadata loaded successfully!');
       } catch (error) {
+        logFrontendError('cog.viewer.fetch_metadata_failed', error, {
+          endpoint: 'raster/cog/info',
+          hasRenders: Boolean(renders),
+        });
         if (error instanceof Error) {
           message.error(error.message);
         } else {
