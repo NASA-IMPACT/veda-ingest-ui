@@ -3,6 +3,7 @@ import KeycloakProvider from 'next-auth/providers/keycloak';
 import { JWT } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 import { VEDA_BACKEND_URL } from '@/config/env';
+import fetcher from '@/lib/fetcher';
 import { getRequiredRuntimeSecret } from '@/lib/runtimeSecrets';
 import {
   createRequestLogContext,
@@ -101,37 +102,28 @@ const parseScopesFromAccessToken = (accessToken: string): string[] => {
 
 const fetchWritableTenants = async (accessToken: string): Promise<string[]> => {
   try {
-    const tenantsResponse = await fetch(
-      `${VEDA_BACKEND_URL}/ingest/auth/tenants/writable`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: 'application/json',
-        },
-      }
+    const url = `${VEDA_BACKEND_URL}/ingest/auth/tenants/writable`;
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json',
+      },
+    };
+
+    const { data, error } = await fetcher<string[] | { tenants: string[] }>(
+      url,
+      requestOptions
     );
 
-    if (!tenantsResponse.ok) {
-      logStructured('warn', 'auth.tenants.fetch_failed', {
-        status: tenantsResponse.status,
-      });
-      return [];
+    if (error) {
+      throw new Error(data);
     }
 
-    const contentType = tenantsResponse.headers.get('content-type') || '';
-    if (!contentType.toLowerCase().includes('application/json')) {
-      logStructured('warn', 'auth.tenants.invalid_content_type', {
-        contentType,
-      });
-      return [];
-    }
-
-    const tenantsData = await tenantsResponse.json();
-    const rawTenants = Array.isArray(tenantsData)
-      ? tenantsData
-      : Array.isArray(tenantsData?.tenants)
-        ? tenantsData.tenants
+    const rawTenants = Array.isArray(data)
+      ? data
+      : Array.isArray(data.tenants)
+        ? data.tenants
         : [];
 
     return normalizeTenants(
