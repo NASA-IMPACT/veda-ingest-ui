@@ -6,6 +6,8 @@ Use this document to understand where behavior lives and which customization hoo
 
 For extension URL loading and extension-field lifecycle details, see [STAC Extension Loading](./stac-extension-loading.md).
 
+For `renders.dashboard` string/object conversion behavior across RJSF, JSON tab editing, and submit serialization, see [`renders.dashboard` Lifecycle](./renders-dashboard-lifecycle.md).
+
 ## Architecture
 
 RJSF rendering is assembled in the ingestion form components:

@@ -85,6 +85,8 @@ Implementation: `components/COGViewer/RenderingOptionsModal.tsx`
 
 This is the primary authoring path for many dataset `renders.dashboard` values.
 
+For full end-to-end handling across form widgets, JSON tab conversion, validation, and GitHub submission serialization, see [`renders.dashboard` Lifecycle](./renders-dashboard-lifecycle.md).
+
 ## COG Validation in Submit Flows
 
 In create/edit dataset flows, sample COG URL validation runs before submit:
