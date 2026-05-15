@@ -39,6 +39,7 @@ import BboxField from '@/utils/BboxField';
 import IntervalField from '@/utils/IntervalField';
 import AssetField from '@/components/rjsf-components/AssetsField';
 import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
+import { RendersDashboardWidget } from '@/components/rjsf-components/RendersDashboardWidget';
 import SummariesManager from '@/components/rjsf-components/SummariesManager';
 
 import staticBaseSchema from '@/FormSchemas/collections/collectionSchema.json';
@@ -104,6 +105,10 @@ function CollectionIngestionForm({
     : { ...uiSchema, ...lockedFormFields };
 
   const formScopedData = formData;
+
+  const widgets = {
+    'renders.dashboard': RendersDashboardWidget,
+  };
 
   const prevFormDataRef = useRef(formData);
   useEffect(() => {
@@ -292,6 +297,7 @@ function CollectionIngestionForm({
                   fields={customFields}
                   formData={rjsfFormData}
                   onChange={onRJSFDataChanged}
+                  widgets={widgets}
                   tagName="div"
                 >
                   <></>

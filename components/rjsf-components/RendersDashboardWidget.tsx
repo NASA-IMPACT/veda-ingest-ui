@@ -44,6 +44,8 @@ export const RendersDashboardWidget = ({
     | FormContextWithSampleFiles
     | undefined;
   const isDashboardField = id.endsWith('_dashboard');
+  const hasSampleFiles =
+    context?.formData?.sample_files && context.formData.sample_files.length > 0;
 
   const handleOpenCOGDrawer = () => {
     const sampleUrl = context?.formData?.sample_files?.[0];
@@ -75,7 +77,7 @@ export const RendersDashboardWidget = ({
         readOnly={!!(readonly || disabled)}
       />
 
-      {isDashboardField && (
+      {isDashboardField && hasSampleFiles && (
         <>
           {errorMessage && (
             <Alert

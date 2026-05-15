@@ -7,6 +7,7 @@ import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm';
 import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
 import { useCogValidation } from '@/hooks/useCogValidation';
 import { getTenantFieldKey } from '@/utils/tenantField';
+import fetcher from '@/lib/fetcher';
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -74,7 +75,7 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
     setIsModalVisible(true);
   };
 
-  const handleFinalSubmit = () => {
+  const handleFinalSubmit = async () => {
     if (!stagedFormData) {
       console.error('No staged form data available for submission.');
       setIsModalVisible(false);
@@ -98,27 +99,23 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
       headers: { 'Content-Type': 'application/json' },
     };
 
-    fetch(url, requestOptions)
-      .then(async (response) => {
-        if (!response.ok) {
-          const errorMessage = await response.text();
-          setApiErrorMessage(errorMessage);
-          setStatus('error');
-          return;
-        }
-        const responseJson = await response.json();
-        setPullRequestUrl(responseJson.githubURL);
+    try {
+      const { data, error } = await fetcher<{ githubURL: string }>(url, requestOptions);
+      if (error) {
+        setApiErrorMessage(data as string);
+        setStatus('error');
+      } else {
+        setPullRequestUrl(data.githubURL);
         setFormData({});
         setStatus('success');
-      })
-      .catch((error) => {
-        console.error(error);
-        setStatus('error');
-      })
-      .finally(() => {
-        setStagedFormData(null);
-        setUserComment('');
-      });
+      }
+    } catch (error) {
+      console.error(error);
+      setStatus('error');
+    } finally {
+      setStagedFormData(null);
+      setUserComment('');
+    }
   };
 
   const handleCancel = () => {
