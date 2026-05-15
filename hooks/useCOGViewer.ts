@@ -1,7 +1,12 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useReducer, useRef, useCallback } from 'react';
 import { App } from 'antd';
 import { VEDA_BACKEND_URL } from '@/config/env';
 import { Map as LeafletMap } from 'leaflet';
+import {
+  type ColormapType,
+  colormapReducer,
+  initialColormapState,
+} from '@/components/COGViewer/colormapReducer';
 
 type RendersType = {
   bidx?: number[];
@@ -14,8 +19,6 @@ type RendersType = {
   assets?: string[];
   title?: string;
 };
-
-type ColormapType = 'named' | 'custom';
 
 type COGMetadata = {
   band_descriptions?: Array<[string | number, string]>;
@@ -97,9 +100,7 @@ export const useCOGViewer = () => {
   const [metadata, setMetadata] = useState<COGMetadata | null>(null);
   const [selectedBands, setSelectedBands] = useState<number[]>([]);
   const [rescale, setRescale] = useState<[number | null, number | null][]>([]);
-  const [selectedColormap, setSelectedColormap] = useState<string>('Internal');
-  const [colormapType, setColormapType] = useState<ColormapType>('named');
-  const [customColormapJson, setCustomColormapJson] = useState<string>('');
+  const [colormap, dispatchColormap] = useReducer(colormapReducer, initialColormapState);
   const [colorFormula, setColorFormula] = useState<string | null>(null);
   const [selectedResampling, setSelectedResampling] = useState<string | null>(
     null
@@ -243,9 +244,11 @@ export const useCOGViewer = () => {
           initialSelectedColormap = parsedRenders.colormap_name;
         }
 
-        setColormapType(initialColormapType);
-        setCustomColormapJson(initialCustomColormapJson);
-        setSelectedColormap(initialSelectedColormap);
+        dispatchColormap({ type: 'INIT', state: {
+          type: initialColormapType,
+          selected: initialSelectedColormap,
+          customJson: initialCustomColormapJson,
+        }});
         setColorFormula(parsedRenders.color_formula || null);
         setSelectedResampling(parsedRenders.resampling || null);
         setNoDataValue(parsedRenders.nodata || null);
@@ -287,12 +290,7 @@ export const useCOGViewer = () => {
     setSelectedBands,
     rescale,
     setRescale,
-    selectedColormap,
-    setSelectedColormap,
-    colormapType,
-    setColormapType,
-    customColormapJson,
-    setCustomColormapJson,
+    colormap: { ...colormap, dispatch: dispatchColormap },
     colorFormula,
     setColorFormula,
     selectedResampling,

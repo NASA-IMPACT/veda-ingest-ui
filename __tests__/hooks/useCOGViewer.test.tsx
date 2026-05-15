@@ -101,7 +101,7 @@ describe('useCOGViewer', () => {
 
     await waitFor(() => {
       expect(result.current.selectedBands).toEqual([3, 2, 1]);
-      expect(result.current.selectedColormap).toBe('pretty_color');
+      expect(result.current.colormap.selected).toBe('pretty_color');
     });
 
     const tileUrlFetchCall = vi.mocked(fetch).mock.calls[1][0];
@@ -135,8 +135,8 @@ describe('useCOGViewer', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.colormapType).toBe('custom');
-      expect(JSON.parse(result.current.customColormapJson)).toEqual(
+      expect(result.current.colormap.type).toBe('custom');
+      expect(JSON.parse(result.current.colormap.customJson)).toEqual(
         customColormap
       );
     });
@@ -173,11 +173,11 @@ describe('useCOGViewer', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.colormapType).toBe('custom');
-      expect(JSON.parse(result.current.customColormapJson)).toEqual(
+      expect(result.current.colormap.type).toBe('custom');
+      expect(JSON.parse(result.current.colormap.customJson)).toEqual(
         customColormap
       );
-      expect(result.current.selectedColormap).toBe('Internal');
+      expect(result.current.colormap.selected).toBe('Internal');
     });
 
     const tileUrlFetchCall = vi.mocked(fetch).mock.calls[1][0] as string;
@@ -206,9 +206,9 @@ describe('useCOGViewer', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.colormapType).toBe('named');
-      expect(result.current.selectedColormap).toBe('cfastie');
-      expect(result.current.customColormapJson).toBe('');
+      expect(result.current.colormap.type).toBe('named');
+      expect(result.current.colormap.selected).toBe('cfastie');
+      expect(result.current.colormap.customJson).toBe('');
     });
 
     const tileUrlFetchCall = vi.mocked(fetch).mock.calls[1][0] as string;
@@ -237,9 +237,9 @@ describe('useCOGViewer', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.colormapType).toBe('named');
-      expect(result.current.selectedColormap).toBe('Internal');
-      expect(result.current.customColormapJson).toBe('');
+      expect(result.current.colormap.type).toBe('named');
+      expect(result.current.colormap.selected).toBe('Internal');
+      expect(result.current.colormap.customJson).toBe('');
     });
 
     const tileUrlFetchCall = vi.mocked(fetch).mock.calls[1][0] as string;
@@ -491,7 +491,7 @@ describe('useCOGViewer', () => {
     await waitFor(() => {
       expect(result.current.selectedBands).toEqual([2, 1]);
       expect(result.current.rescale).toEqual([[0, 100]]);
-      expect(result.current.selectedColormap).toBe('viridis');
+      expect(result.current.colormap.selected).toBe('viridis');
       expect(result.current.colorFormula).toBe(
         'Gamma RGB 3.5 Saturation 1.7 Sigmoidal RGB 15 0.35'
       );
