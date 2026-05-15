@@ -20,7 +20,8 @@
       "extent": 24
     },
     {
-      "links": 24
+      "renders": 12,
+      "links": 12
     },
     {
       "summaries": 24
@@ -74,5 +75,20 @@
       "description": "This describes the STAC collection.",
       "rows": 8
     }
+  },
+  "renders": {
+    "dashboard": {
+      "ui:widget": "renders.dashboard",
+      "ui:options": {
+        "rows": 12
+      }
+    },
+    "additionalProperties": {
+      "ui:widget": "renders.dashboard",
+      "ui:options": {
+        "rows": 12
+      }
+    },
+    "ui:classNames": "renders"
   }
 }

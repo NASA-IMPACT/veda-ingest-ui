@@ -8,6 +8,7 @@ import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionF
 import { useCogValidation } from '@/hooks/useCogValidation';
 import { getTenantFieldKey } from '@/utils/tenantField';
 import { logFrontendError } from '@/lib/structuredLogger';
+import fetcher from '@/lib/fetcher';
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -81,7 +82,7 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
     setIsModalVisible(true);
   };
 
-  const handleFinalSubmit = () => {
+  const handleFinalSubmit = async () => {
     if (!stagedFormData) {
       logFrontendError(
         'ingestion.creation.final_submit_missing_staged_data',
@@ -108,29 +109,28 @@ const CreationFormManager: React.FC<CreationFormManagerProps> = ({
       headers: { 'Content-Type': 'application/json' },
     };
 
-    fetch(url, requestOptions)
-      .then(async (response) => {
-        if (!response.ok) {
-          const errorMessage = await response.text();
-          setApiErrorMessage(errorMessage);
-          setStatus('error');
-          return;
-        }
-        const responseJson = await response.json();
-        setPullRequestUrl(responseJson.githubURL);
+    try {
+      const { data, error } = await fetcher<{ githubURL: string }>(
+        url,
+        requestOptions
+      );
+      if (error) {
+        setApiErrorMessage(data as string);
+        setStatus('error');
+      } else {
+        setPullRequestUrl(data.githubURL);
         setFormData({});
         setStatus('success');
-      })
-      .catch((error) => {
-        logFrontendError('ingestion.creation.submit_request_failed', error, {
-          endpoint: 'api/create-ingest',
-        });
-        setStatus('error');
-      })
-      .finally(() => {
-        setStagedFormData(null);
-        setUserComment('');
+      }
+    } catch (error) {
+      logFrontendError('ingestion.creation.submit_request_failed', error, {
+        endpoint: 'api/create-ingest',
       });
+      setStatus('error');
+    } finally {
+      setStagedFormData(null);
+      setUserComment('');
+    }
   };
 
   const handleCancel = () => {

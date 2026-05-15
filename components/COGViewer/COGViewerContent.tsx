@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { type ColormapContext } from './colormapReducer';
 import { Spin } from 'antd';
 import { Map as LeafletMap } from 'leaflet';
 
@@ -25,8 +26,7 @@ interface COGViewerContentProps {
   setSelectedBands: (bands: number[]) => void;
   rescale: [number | null, number | null][];
   setRescale: (rescale: [number | null, number | null][]) => void;
-  selectedColormap: string;
-  setSelectedColormap: (colormap: string) => void;
+  colormap: ColormapContext;
   colorFormula: string | null;
   setColorFormula: (formula: string | null) => void;
   selectedResampling: string | null;
@@ -42,7 +42,9 @@ interface COGViewerContentProps {
     colormap: string,
     colorFormula?: string | null,
     resampling?: string | null,
-    noData?: string | null
+    noData?: string | null,
+    colormapType?: 'named' | 'custom',
+    customColormapJson?: string | null
   ) => void;
   cogUrl: string | null;
   mapRef: React.MutableRefObject<LeafletMap | null>;
@@ -58,8 +60,7 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
   setSelectedBands,
   rescale,
   setRescale,
-  selectedColormap,
-  setSelectedColormap,
+  colormap,
   colorFormula,
   setColorFormula,
   selectedResampling,
@@ -73,6 +74,28 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
   mapRef,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const parsedCustomColormap = useMemo<
+    Record<string, number[]> | undefined
+  >(() => {
+    if (!colormap.customJson.trim()) {
+      return undefined;
+    }
+
+    try {
+      const parsed = JSON.parse(colormap.customJson) as unknown;
+      if (
+        typeof parsed !== 'object' ||
+        parsed === null ||
+        Array.isArray(parsed)
+      ) {
+        return undefined;
+      }
+
+      return parsed as Record<string, number[]>;
+    } catch {
+      return undefined;
+    }
+  }, [colormap.customJson]);
 
   // Automatically adjust map size when container resizes
   useEffect(() => {
@@ -108,7 +131,9 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
           metadata={metadata}
           selectedBands={selectedBands}
           rescale={rescale}
-          selectedColormap={selectedColormap}
+          selectedColormap={colormap.selected}
+          colormapType={colormap.type}
+          customColormapJson={colormap.customJson}
           colorFormula={colorFormula}
           selectedResampling={selectedResampling}
           noDataValue={noDataValue}
@@ -126,8 +151,16 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
             setRescale(updatedRescale);
             setHasChanges(true);
           }}
+          onColormapTypeChange={(value) => {
+            colormap.dispatch({ type: 'SET_TYPE', value });
+            setHasChanges(true);
+          }}
           onColormapChange={(value) => {
-            setSelectedColormap(value);
+            colormap.dispatch({ type: 'SET_COLORMAP', value });
+            setHasChanges(true);
+          }}
+          onCustomColormapChange={(value) => {
+            colormap.dispatch({ type: 'SET_CUSTOM_JSON', value });
             setHasChanges(true);
           }}
           onColorFormulaChange={(value) => {
@@ -148,10 +181,12 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
                 cogUrl,
                 selectedBands,
                 rescale,
-                selectedColormap,
+                colormap.selected,
                 colorFormula,
                 selectedResampling,
-                noDataValue
+                noDataValue,
+                colormap.type,
+                colormap.customJson
               );
             } else {
               logFrontendError(
@@ -200,7 +235,12 @@ const COGViewerContent: React.FC<COGViewerContentProps> = ({
         options={{
           bidx: selectedBands.length > 1 ? selectedBands : [selectedBands[0]],
           rescale,
-          colormap_name: selectedColormap.toLowerCase(),
+          colormap_name:
+            colormap.type === 'named'
+              ? colormap.selected.toLowerCase()
+              : undefined,
+          colormap:
+            colormap.type === 'custom' ? parsedCustomColormap : undefined,
           color_formula: colorFormula || undefined,
           resampling: selectedResampling || undefined,
           nodata: noDataValue || undefined,

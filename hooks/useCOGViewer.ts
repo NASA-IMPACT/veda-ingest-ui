@@ -1,13 +1,19 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useReducer, useRef, useCallback } from 'react';
 import { App } from 'antd';
 import { VEDA_BACKEND_URL } from '@/config/env';
 import { logFrontendError } from '@/lib/structuredLogger';
 import { Map as LeafletMap } from 'leaflet';
+import {
+  type ColormapType,
+  colormapReducer,
+  initialColormapState,
+} from '@/components/COGViewer/colormapReducer';
 
 type RendersType = {
   bidx?: number[];
   rescale?: [number, number][];
   colormap_name?: string;
+  colormap?: unknown;
   color_formula?: string;
   resampling?: string;
   nodata?: string;
@@ -42,7 +48,9 @@ const fetchTileJson = async (
   colormap: string,
   colorFormula?: string | null,
   resampling?: string | null,
-  noData?: string | null
+  noData?: string | null,
+  colormapType: ColormapType = 'named',
+  customColormapJson?: string | null
 ): Promise<TileJsonResponse> => {
   if (!url) throw new Error('COG URL is required.');
 
@@ -51,8 +59,27 @@ const fetchTileJson = async (
     .filter((range) => range[0] !== null && range[1] !== null)
     .map((range) => `&rescale=${range[0]},${range[1]}`)
     .join('');
-  const colormapParam =
-    colormap !== 'Internal' ? `&colormap_name=${colormap}` : '';
+  let colormapParam = '';
+  if (colormapType === 'custom') {
+    if (!customColormapJson?.trim()) {
+      throw new Error('Custom colormap JSON is required when mode is custom.');
+    }
+
+    let parsedColormap: unknown;
+    try {
+      parsedColormap = JSON.parse(customColormapJson);
+    } catch {
+      throw new Error('Custom colormap must be valid JSON.');
+    }
+
+    if (typeof parsedColormap !== 'object' || parsedColormap === null) {
+      throw new Error('Custom colormap must be a JSON object.');
+    }
+
+    colormapParam = `&colormap=${encodeURIComponent(JSON.stringify(parsedColormap))}`;
+  } else if (colormap !== 'Internal') {
+    colormapParam = `&colormap_name=${encodeURIComponent(colormap)}`;
+  }
   const colorFormulaParam = colorFormula
     ? `&color_formula=${encodeURIComponent(colorFormula)}`
     : '';
@@ -74,7 +101,10 @@ export const useCOGViewer = () => {
   const [metadata, setMetadata] = useState<COGMetadata | null>(null);
   const [selectedBands, setSelectedBands] = useState<number[]>([]);
   const [rescale, setRescale] = useState<[number | null, number | null][]>([]);
-  const [selectedColormap, setSelectedColormap] = useState<string>('Internal');
+  const [colormap, dispatchColormap] = useReducer(
+    colormapReducer,
+    initialColormapState
+  );
   const [colorFormula, setColorFormula] = useState<string | null>(null);
   const [selectedResampling, setSelectedResampling] = useState<string | null>(
     null
@@ -94,7 +124,9 @@ export const useCOGViewer = () => {
       colormap: string,
       colorFormula?: string | null,
       resampling?: string | null,
-      noData?: string | null
+      noData?: string | null,
+      colormapType: ColormapType = 'named',
+      customColormapJson?: string | null
     ) => {
       setLoading(true);
       try {
@@ -105,7 +137,9 @@ export const useCOGViewer = () => {
           colormap,
           colorFormula,
           resampling,
-          noData
+          noData,
+          colormapType,
+          customColormapJson
         );
         setTileUrl(data.tiles[0]);
 
@@ -126,7 +160,11 @@ export const useCOGViewer = () => {
         logFrontendError('cog.viewer.fetch_tile_url_failed', error, {
           endpoint: 'raster/cog/WebMercatorQuad/tilejson.json',
         });
-        message.error('Failed to load tile layer.');
+        if (error instanceof Error) {
+          message.error(error.message);
+        } else {
+          message.error('Failed to load tile layer.');
+        }
       } finally {
         setLoading(false);
       }
@@ -190,7 +228,36 @@ export const useCOGViewer = () => {
         // Default to metadata-derived bands unless renders specifies bidx.
         setSelectedBands(initialBands);
         setRescale(parsedRenders.rescale || [[null, null]]);
-        setSelectedColormap(parsedRenders.colormap_name || 'Internal');
+        let initialColormapType: ColormapType = 'named';
+        let initialCustomColormapJson = '';
+        let initialSelectedColormap = 'Internal';
+
+        if (
+          parsedRenders.colormap &&
+          typeof parsedRenders.colormap === 'object' &&
+          !Array.isArray(parsedRenders.colormap) &&
+          Object.keys(parsedRenders.colormap).length > 0
+        ) {
+          initialColormapType = 'custom';
+          initialCustomColormapJson = JSON.stringify(
+            parsedRenders.colormap,
+            null,
+            2
+          );
+        } else if (parsedRenders.colormap_name?.trim()) {
+          // Named colormaps come from `colormap_name`.
+          // `colormap` is only treated as valid when it is a custom object.
+          initialSelectedColormap = parsedRenders.colormap_name;
+        }
+
+        dispatchColormap({
+          type: 'INIT',
+          state: {
+            type: initialColormapType,
+            selected: initialSelectedColormap,
+            customJson: initialCustomColormapJson,
+          },
+        });
         setColorFormula(parsedRenders.color_formula || null);
         setSelectedResampling(parsedRenders.resampling || null);
         setNoDataValue(parsedRenders.nodata || null);
@@ -199,10 +266,14 @@ export const useCOGViewer = () => {
           url,
           initialBands,
           parsedRenders.rescale || [[null, null]],
-          parsedRenders.colormap_name || 'Internal',
+          initialSelectedColormap,
           parsedRenders.color_formula || null,
           parsedRenders.resampling || null,
-          parsedRenders.nodata || null
+          parsedRenders.nodata || null,
+          initialColormapType,
+          initialColormapType === 'custom'
+            ? initialCustomColormapJson
+            : undefined
         );
 
         message.success('COG metadata loaded successfully!');
@@ -228,8 +299,7 @@ export const useCOGViewer = () => {
     setSelectedBands,
     rescale,
     setRescale,
-    selectedColormap,
-    setSelectedColormap,
+    colormap: { ...colormap, dispatch: dispatchColormap },
     colorFormula,
     setColorFormula,
     selectedResampling,

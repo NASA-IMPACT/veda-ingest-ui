@@ -4,6 +4,8 @@ import {
   Form,
   InputNumber,
   Select,
+  Radio,
+  Space,
   Button,
   Row,
   Col,
@@ -13,6 +15,7 @@ import {
   Divider,
 } from 'antd';
 import { logFrontendError } from '@/lib/structuredLogger';
+import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
 
 const { Option } = Select;
 const { Title } = Typography;
@@ -26,6 +29,8 @@ interface COGControlsFormProps {
   selectedBands: number[];
   rescale: [number | null, number | null][];
   selectedColormap: string;
+  colormapType: 'named' | 'custom';
+  customColormapJson: string;
   colorFormula: string | null;
   selectedResampling: string | null;
   noDataValue: string | null;
@@ -35,7 +40,9 @@ interface COGControlsFormProps {
     index: number,
     values: [number | null, number | null]
   ) => void;
+  onColormapTypeChange: (value: 'named' | 'custom') => void;
   onColormapChange: (value: string) => void;
+  onCustomColormapChange: (value: string) => void;
   onColorFormulaChange: (value: string | null) => void;
   onResamplingChange: (value: string | null) => void;
   onNoDataValueChange: (value: string | null) => void;
@@ -49,13 +56,17 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
   selectedBands,
   rescale,
   selectedColormap,
+  colormapType,
+  customColormapJson,
   colorFormula,
   selectedResampling,
   noDataValue,
   hasChanges,
   onBandChange,
   onRescaleChange,
+  onColormapTypeChange,
   onColormapChange,
+  onCustomColormapChange,
   onColorFormulaChange,
   onResamplingChange,
   onNoDataValueChange,
@@ -71,6 +82,8 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
       selectedBands,
       rescale,
       selectedColormap,
+      colormapType,
+      customColormapJson,
       colorFormula,
       selectedResampling,
       noDataValue,
@@ -80,6 +93,8 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
     selectedBands,
     rescale,
     selectedColormap,
+    colormapType,
+    customColormapJson,
     colorFormula,
     selectedResampling,
     noDataValue,
@@ -187,18 +202,63 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
       </Form.Item>
       <Row gutter={16}>
         <Col span={12}>
-          <Form.Item label="Colormap" name="selectedColormap">
-            <Select
-              showSearch
-              onChange={onColormapChange}
-              data-testid="colormap"
+          <Form.Item label="Colormap">
+            <Card
+              size="small"
+              style={{ background: 'var(--ant-color-bg-container)' }}
             >
-              {colorMapsList.map((colorMap) => (
-                <Option key={colorMap} value={colorMap}>
-                  {colorMap}
-                </Option>
-              ))}
-            </Select>
+              <Space
+                direction="vertical"
+                size="small"
+                style={{ width: '100%' }}
+              >
+                <Form.Item name="colormapType" style={{ marginBottom: 0 }}>
+                  <Radio.Group
+                    onChange={(e) =>
+                      onColormapTypeChange(e.target.value as 'named' | 'custom')
+                    }
+                    data-testid="colormap-type"
+                    optionType="button"
+                    buttonStyle="solid"
+                  >
+                    <Radio.Button value="named">Named</Radio.Button>
+                    <Radio.Button value="custom">Custom</Radio.Button>
+                  </Radio.Group>
+                </Form.Item>
+
+                {colormapType === 'named' ? (
+                  <Form.Item
+                    name="selectedColormap"
+                    style={{ marginBottom: 0 }}
+                  >
+                    <Select
+                      showSearch
+                      onChange={onColormapChange}
+                      data-testid="colormap"
+                    >
+                      {colorMapsList.map((colorMap) => (
+                        <Option key={colorMap} value={colorMap}>
+                          {colorMap}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                ) : (
+                  <Form.Item
+                    name="customColormapJson"
+                    style={{ marginBottom: 0 }}
+                  >
+                    <div data-testid="custom-colormap-json">
+                      <CodeEditorWidget
+                        id="custom-colormap-json-editor"
+                        value={customColormapJson}
+                        onChange={onCustomColormapChange}
+                      />
+                    </div>
+                  </Form.Item>
+                )}
+              </Space>
+            </Card>
           </Form.Item>
         </Col>
         <Col span={12}>

@@ -56,15 +56,30 @@ const COGDrawerViewer: React.FC<COGDrawerViewerProps> = ({
       return;
     }
 
+    let parsedCustomColormap: Record<string, number[]> | undefined;
+    if (cogViewer.colormap.type === 'custom' && cogViewer.colormap.customJson) {
+      try {
+        const parsed = JSON.parse(cogViewer.colormap.customJson) as unknown;
+        if (typeof parsed === 'object' && parsed !== null) {
+          parsedCustomColormap = parsed as Record<string, number[]>;
+        }
+      } catch {
+        parsedCustomColormap = undefined;
+      }
+    }
+
     const renderOptions = {
       bidx: cogViewer.selectedBands,
       rescale: cogViewer.rescale.filter(
         (pair) => pair[0] !== null && pair[1] !== null
       ),
       colormap_name:
-        cogViewer.selectedColormap !== 'Internal'
-          ? cogViewer.selectedColormap
+        cogViewer.colormap.type === 'named' &&
+        cogViewer.colormap.selected !== 'Internal'
+          ? cogViewer.colormap.selected
           : undefined,
+      colormap:
+        cogViewer.colormap.type === 'custom' ? parsedCustomColormap : undefined,
       color_formula: cogViewer.colorFormula || undefined,
       ...(cogViewer.selectedResampling != null && {
         resampling: cogViewer.selectedResampling,

@@ -23,7 +23,10 @@ async function openCOGDrawer(page: Page) {
   // Wait for the drawer to open and content to load
   await expect(page.locator('.ant-drawer')).toBeVisible({ timeout: 10000 });
 
-  await expect(page.getByTestId('colormap')).toBeVisible({ timeout: 10000 });
+  // Wait for the colormap controls to be visible by finding the "Named" label
+  await expect(page.locator('label').filter({ hasText: /Named/i })).toBeVisible(
+    { timeout: 10000 }
+  );
 }
 
 async function fillRenders(page: Page, rendersData: Record<string, unknown>) {
@@ -420,6 +423,127 @@ test.describe('COG Viewer Drawer', () => {
     const errorScreenshot = await page.screenshot();
     testInfo.attach('error message if no sample file url present', {
       body: errorScreenshot,
+      contentType: 'image/png',
+    });
+  });
+
+  test('COG Viewer loads with custom colormap JSON in renders object', async ({
+    page,
+  }, testInfo) => {
+    const customColormapJson = {
+      '0': [0, 0, 0, 128],
+      '100': [0, 130, 0, 255],
+      '200': [17, 131, 226, 255],
+      '300': [199, 43, 32, 255],
+      '400': [98, 234, 37, 255],
+    };
+
+    await test.step('navigate to Create Dataset page', async () => {
+      await page.goto('/create-dataset');
+    });
+
+    await test.step('enter URL of Sample File and custom colormap in renders object', async () => {
+      await fillSampleFile(page);
+
+      await fillRenders(page, {
+        bidx: [1],
+        colormap: customColormapJson,
+        assets: ['cog_default'],
+        title: 'Custom Colormap Render Parameters',
+      });
+    });
+
+    const initialRendersScreenshot = await page.screenshot({ fullPage: true });
+    testInfo.attach('Initial Renders Object with Custom Colormap', {
+      body: initialRendersScreenshot,
+      contentType: 'image/png',
+    });
+
+    await test.step('click button to open COG Viewer Drawer', async () => {
+      await openCOGDrawer(page);
+    });
+
+    await test.step('validate that colormap mode toggle is set to custom', async () => {
+      const customModeButton = page
+        .locator('label')
+        .filter({ hasText: /Custom/i });
+      await expect(customModeButton).toBeVisible({ timeout: 10000 });
+      await expect(customModeButton).toBeChecked();
+    });
+
+    await test.step('validate that custom colormap JSON editor is visible and populated', async () => {
+      const jsonEditor = page.locator('[data-testid="custom-colormap-json"]');
+      await expect(jsonEditor).toBeVisible();
+      const editorContent = jsonEditor.locator('textarea');
+      const textContent = await editorContent.inputValue();
+      expect(textContent).toContain('"0"');
+      expect(textContent).toContain('"100"');
+    });
+
+    const prepopulatedControlsScreenshot = await page.screenshot();
+    testInfo.attach('Pre-populated COG Viewer with Custom Colormap', {
+      body: prepopulatedControlsScreenshot,
+      contentType: 'image/png',
+    });
+
+    await test.step('validate API call to tilejson includes encoded colormap parameter', async () => {
+      // Make a trivial change to enable the "Update Tile Layer" button
+      const rescaleInput = page.locator('[data-testid="nodata"]');
+      await rescaleInput.click();
+      await rescaleInput.fill('0');
+      await rescaleInput.blur();
+
+      const requestPromise = page.waitForRequest((req) => {
+        const url = req.url();
+        return url.includes('tilejson.json') && url.includes('&colormap=');
+      });
+
+      await page.getByRole('button', { name: /update tile layer/i }).click();
+
+      const request = await requestPromise;
+      const urlString = request.url();
+
+      // Verify colormap parameter is present and correctly encoded
+      expect(urlString).toContain('&colormap=');
+      expect(urlString).not.toContain('&colormap_name=');
+
+      // Verify the colormap object is properly encoded in the URL
+      const decodedUrl = decodeURIComponent(urlString);
+      expect(decodedUrl).toContain('"0":');
+      expect(decodedUrl).toContain('"100":');
+      expect(decodedUrl).toContain('[0,0,0,128]');
+    });
+
+    const tilejsonRequestScreenshot = await page.screenshot();
+    testInfo.attach('Custom Colormap API Request Verified', {
+      body: tilejsonRequestScreenshot,
+      contentType: 'image/png',
+    });
+
+    await test.step('validate that Rendering Options Modal displays custom colormap in json', async () => {
+      await page
+        .getByRole('button', { name: 'View Rendering Options' })
+        .click();
+      await expect(
+        page
+          .getByRole('dialog')
+          .locator('.ant-drawer-title')
+          .getByText(/COG Rendering Options/i)
+      ).toBeVisible();
+
+      // Use toContainText for flexible assertion
+      const textbox = page
+        .getByText('COG Rendering Options{ "bidx')
+        .getByRole('textbox');
+      await expect(textbox).toContainText('"colormap": {');
+      await expect(textbox).toContainText('"0": [');
+      await expect(textbox).toContainText('"100": [');
+      await expect(textbox).toContainText('"200": [');
+    });
+
+    const renderingOptionsModalScreenshot = await page.screenshot();
+    testInfo.attach('Rendering Options Modal with Custom Colormap', {
+      body: renderingOptionsModalScreenshot,
       contentType: 'image/png',
     });
   });

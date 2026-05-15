@@ -101,12 +101,150 @@ describe('useCOGViewer', () => {
 
     await waitFor(() => {
       expect(result.current.selectedBands).toEqual([3, 2, 1]);
-      expect(result.current.selectedColormap).toBe('pretty_color');
+      expect(result.current.colormap.selected).toBe('pretty_color');
     });
 
     const tileUrlFetchCall = vi.mocked(fetch).mock.calls[1][0];
     expect(tileUrlFetchCall).toContain('&bidx=3&bidx=2&bidx=1');
     expect(tileUrlFetchCall).toContain('&colormap_name=pretty_color');
+  });
+
+  it('should use custom colormap from renders when provided', async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockInfoData,
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockTileJsonData,
+      } as Response);
+
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
+
+    const customColormap = {
+      '0': [0, 0, 0, 128],
+      '100': [0, 130, 0, 255],
+    };
+
+    await act(async () => {
+      await result.current.fetchMetadata(mockCogUrl, {
+        bidx: [1],
+        colormap: customColormap,
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current.colormap.type).toBe('custom');
+      expect(JSON.parse(result.current.colormap.customJson)).toEqual(
+        customColormap
+      );
+    });
+
+    const tileUrlFetchCall = vi.mocked(fetch).mock.calls[1][0] as string;
+    expect(tileUrlFetchCall).toContain('&colormap=');
+    expect(tileUrlFetchCall).not.toContain('&colormap_name=');
+  });
+
+  it('should prefer custom colormap when both colormap and colormap_name are provided', async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockInfoData,
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockTileJsonData,
+      } as Response);
+
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
+
+    const customColormap = {
+      '0': [0, 0, 0, 128],
+      '100': [0, 130, 0, 255],
+    };
+
+    await act(async () => {
+      await result.current.fetchMetadata(mockCogUrl, {
+        bidx: [1],
+        colormap: customColormap,
+        colormap_name: 'greens',
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current.colormap.type).toBe('custom');
+      expect(JSON.parse(result.current.colormap.customJson)).toEqual(
+        customColormap
+      );
+      expect(result.current.colormap.selected).toBe('Internal');
+    });
+
+    const tileUrlFetchCall = vi.mocked(fetch).mock.calls[1][0] as string;
+    expect(tileUrlFetchCall).toContain('&colormap=');
+    expect(tileUrlFetchCall).not.toContain('&colormap_name=greens');
+  });
+
+  it('should load named colormap from renders.colormap_name', async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockInfoData,
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockTileJsonData,
+      } as Response);
+
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
+
+    await act(async () => {
+      await result.current.fetchMetadata(mockCogUrl, {
+        bidx: [1],
+        colormap_name: 'cfastie',
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current.colormap.type).toBe('named');
+      expect(result.current.colormap.selected).toBe('cfastie');
+      expect(result.current.colormap.customJson).toBe('');
+    });
+
+    const tileUrlFetchCall = vi.mocked(fetch).mock.calls[1][0] as string;
+    expect(tileUrlFetchCall).toContain('&colormap_name=cfastie');
+    expect(tileUrlFetchCall).not.toContain('&colormap=');
+  });
+
+  it('should ignore non-object renders.colormap and default to Internal named flow', async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockInfoData,
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockTileJsonData,
+      } as Response);
+
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
+
+    await act(async () => {
+      await result.current.fetchMetadata(mockCogUrl, {
+        bidx: [1],
+        colormap: 'cfastie',
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current.colormap.type).toBe('named');
+      expect(result.current.colormap.selected).toBe('Internal');
+      expect(result.current.colormap.customJson).toBe('');
+    });
+
+    const tileUrlFetchCall = vi.mocked(fetch).mock.calls[1][0] as string;
+    expect(tileUrlFetchCall).not.toContain('&colormap_name=');
+    expect(tileUrlFetchCall).not.toContain('&colormap=');
   });
 
   it('should default to the first 3 bands when metadata has more than 3 bands', async () => {
@@ -354,7 +492,7 @@ describe('useCOGViewer', () => {
     await waitFor(() => {
       expect(result.current.selectedBands).toEqual([2, 1]);
       expect(result.current.rescale).toEqual([[0, 100]]);
-      expect(result.current.selectedColormap).toBe('viridis');
+      expect(result.current.colormap.selected).toBe('viridis');
       expect(result.current.colorFormula).toBe(
         'Gamma RGB 3.5 Saturation 1.7 Sigmoidal RGB 15 0.35'
       );
@@ -429,6 +567,41 @@ describe('useCOGViewer', () => {
     expect(fetchCall).not.toContain('&color_formula');
     expect(fetchCall).not.toContain('&resampling');
     expect(fetchCall).not.toContain('&nodata');
+  });
+
+  it('should handle fetchTileUrl with custom colormap JSON', async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => mockTileJsonData,
+    } as Response);
+
+    const { result } = renderHook(() => useCOGViewer(), { wrapper });
+    const customColormapJson = JSON.stringify({
+      '0': [0, 0, 0, 128],
+      '100': [0, 130, 0, 255],
+    });
+
+    await act(async () => {
+      await result.current.fetchTileUrl(
+        mockCogUrl,
+        [1],
+        [[null, null]],
+        'Internal',
+        null,
+        null,
+        null,
+        'custom',
+        customColormapJson
+      );
+    });
+
+    await waitFor(() => {
+      expect(result.current.tileUrl).toBe(mockTileJsonData.tiles[0]);
+    });
+
+    const fetchCall = vi.mocked(fetch).mock.calls[0][0] as string;
+    expect(fetchCall).toContain('&colormap=');
+    expect(fetchCall).not.toContain('&colormap_name');
   });
 
   it('should handle fetchTileUrl error when URL is missing', async () => {
