@@ -57,7 +57,12 @@ describe('ListPRs fallback tenant behavior', () => {
   });
 
   it('falls back to eic:tenant when VEDA_TENANT_FILTER_FIELD is unset and ignores other tenant-like keys', async () => {
-    const pr = { number: 1, head: { sha: 'abc123' } };
+    const pr = {
+      number: 1,
+      title: 'collection Ingest Request for test',
+      user: { login: 'ingest-bot[bot]', type: 'Bot' },
+      head: { sha: 'abc123', ref: 'feat/test' },
+    };
     mockList.mockResolvedValue({ data: [pr] });
     mockListFiles.mockResolvedValue({
       data: [{ filename: 'ingestion-data/staging/collections/test.json' }],
