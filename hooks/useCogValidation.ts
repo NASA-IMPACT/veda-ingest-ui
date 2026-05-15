@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { VEDA_BACKEND_URL } from '@/config/env';
+import { logFrontendError } from '@/lib/structuredLogger';
 
 interface UseCogValidationReturn {
   isCogValidationModalVisible: boolean;
@@ -22,38 +23,43 @@ const validateCogUrl = async (url: string): Promise<boolean> => {
     const response = await fetch(validationApiUrl);
     return response.ok;
   } catch (err) {
-    console.error('COG validation API request failed', err);
+    logFrontendError('cog.validation.request_failed', err, {
+      endpoint: 'raster/cog/validate',
+    });
     return false;
   }
-}
+};
 
 export const useCogValidation = (): UseCogValidationReturn => {
   const [isCogValidationModalVisible, setIsCogValidationModalVisible] =
     useState(false);
   const [isValidatingCog, setIsValidatingCog] = useState(false);
 
-  const validateFormDataCog = useCallback(async (
-    formData: Record<string, unknown>,
-    formType: 'dataset' | 'collection' | 'existingCollection'
-  ): Promise<boolean> => {
-    if (formType !== 'dataset' || !formData.sample_files) {
-      return true;
-    }
+  const validateFormDataCog = useCallback(
+    async (
+      formData: Record<string, unknown>,
+      formType: 'dataset' | 'collection' | 'existingCollection'
+    ): Promise<boolean> => {
+      if (formType !== 'dataset' || !formData.sample_files) {
+        return true;
+      }
 
-    const sampleFiles = formData.sample_files as string | string[];
-    const sampleFileUrl = Array.isArray(sampleFiles)
-      ? sampleFiles[0]
-      : sampleFiles;
+      const sampleFiles = formData.sample_files as string | string[];
+      const sampleFileUrl = Array.isArray(sampleFiles)
+        ? sampleFiles[0]
+        : sampleFiles;
 
-    if (!sampleFileUrl) {
-      return true;
-    }
+      if (!sampleFileUrl) {
+        return true;
+      }
 
-    setIsValidatingCog(true);
-    const result = await validateCogUrl(sampleFileUrl);
-    setIsValidatingCog(false);
-    return result;
-  }, []);
+      setIsValidatingCog(true);
+      const result = await validateCogUrl(sampleFileUrl);
+      setIsValidatingCog(false);
+      return result;
+    },
+    []
+  );
 
   const showCogValidationModal = useCallback(() => {
     setIsCogValidationModalVisible(true);

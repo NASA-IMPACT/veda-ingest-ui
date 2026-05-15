@@ -1,6 +1,7 @@
 import { useState, useReducer, useRef, useCallback } from 'react';
 import { App } from 'antd';
 import { VEDA_BACKEND_URL } from '@/config/env';
+import { logFrontend, logFrontendError } from '@/lib/structuredLogger';
 import { Map as LeafletMap } from 'leaflet';
 import {
   type ColormapType,
@@ -100,7 +101,10 @@ export const useCOGViewer = () => {
   const [metadata, setMetadata] = useState<COGMetadata | null>(null);
   const [selectedBands, setSelectedBands] = useState<number[]>([]);
   const [rescale, setRescale] = useState<[number | null, number | null][]>([]);
-  const [colormap, dispatchColormap] = useReducer(colormapReducer, initialColormapState);
+  const [colormap, dispatchColormap] = useReducer(
+    colormapReducer,
+    initialColormapState
+  );
   const [colorFormula, setColorFormula] = useState<string | null>(null);
   const [selectedResampling, setSelectedResampling] = useState<string | null>(
     null
@@ -153,7 +157,9 @@ export const useCOGViewer = () => {
 
         message.success('COG tile layer loaded successfully!');
       } catch (error) {
-        console.error('Error fetching tile URL:', error);
+        logFrontendError('cog.viewer.fetch_tile_url_failed', error, {
+          endpoint: 'raster/cog/WebMercatorQuad/tilejson.json',
+        });
         if (error instanceof Error) {
           message.error(error.message);
         } else {
@@ -169,6 +175,9 @@ export const useCOGViewer = () => {
   const fetchMetadata = useCallback(
     async (url: string, renders?: string | RendersType | null) => {
       if (!url) {
+        logFrontend('warn', 'cog.viewer.metadata_missing_url', {
+          endpoint: 'raster/cog/info',
+        });
         message.error('COG URL is required');
         return;
       }
@@ -210,7 +219,7 @@ export const useCOGViewer = () => {
                 : renders;
             mergedMetadata = { ...COGdata, ...parsedRenders };
           } catch (error) {
-            console.error('Error parsing renders:', error);
+            logFrontendError('cog.viewer.parse_renders_failed', error);
           }
         }
 
@@ -244,11 +253,14 @@ export const useCOGViewer = () => {
           initialSelectedColormap = parsedRenders.colormap_name;
         }
 
-        dispatchColormap({ type: 'INIT', state: {
-          type: initialColormapType,
-          selected: initialSelectedColormap,
-          customJson: initialCustomColormapJson,
-        }});
+        dispatchColormap({
+          type: 'INIT',
+          state: {
+            type: initialColormapType,
+            selected: initialSelectedColormap,
+            customJson: initialCustomColormapJson,
+          },
+        });
         setColorFormula(parsedRenders.color_formula || null);
         setSelectedResampling(parsedRenders.resampling || null);
         setNoDataValue(parsedRenders.nodata || null);
@@ -269,6 +281,10 @@ export const useCOGViewer = () => {
 
         message.success('COG metadata loaded successfully!');
       } catch (error) {
+        logFrontendError('cog.viewer.fetch_metadata_failed', error, {
+          endpoint: 'raster/cog/info',
+          hasRenders: Boolean(renders),
+        });
         if (error instanceof Error) {
           message.error(error.message);
         } else {

@@ -21,6 +21,14 @@ if (missingEnvVars.length > 0 && process.env.NODE_ENV !== 'test') {
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: false,
+  env: {
+    // Expose a browser-readable debug flag while allowing a single operational
+    // backend env var to control both server and frontend logger behavior.
+    NEXT_PUBLIC_ENABLE_DEBUG_LOGGING:
+      process.env.NEXT_PUBLIC_ENABLE_DEBUG_LOGGING ??
+      process.env.ENABLE_DEBUG_LOGGING ??
+      'false',
+  },
   turbopack: {
     resolveAlias: {
       '@': './src',

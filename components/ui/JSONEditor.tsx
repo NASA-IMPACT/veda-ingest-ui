@@ -8,6 +8,7 @@ import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPrope
 import dynamic from 'next/dynamic';
 import '@uiw/react-textarea-code-editor/dist.css';
 import { JSONSchema7 } from 'json-schema';
+import { logFrontend, logFrontendError } from '@/lib/structuredLogger';
 
 const CodeEditor = dynamic(
   () => import('@uiw/react-textarea-code-editor').then((mod) => mod.default),
@@ -155,7 +156,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
             2
           );
         } catch (e) {
-          console.error('Error stringifying renders.dashboard:', e);
+          logFrontendError('json_editor.stringify_renders_dashboard_failed', e);
           setSchemaErrors(['Invalid JSON object in renders.dashboard.']);
           return;
         }
@@ -342,7 +343,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
 
       validateAndApply(parsedValue);
     } catch (err) {
-      console.error('error', err);
+      logFrontendError('json_editor.apply_changes_invalid_json', err);
       setJsonError('Invalid JSON format.');
       setSchemaErrors([]);
     }
@@ -372,9 +373,7 @@ const JSONEditor: React.FC<JSONEditorProps> = ({
           dashboard: JSON.parse(value.renders.dashboard),
         };
       } catch {
-        console.warn(
-          "Could not parse 'renders.dashboard' as JSON, leaving it as-is."
-        );
+        logFrontend('warn', 'json_editor.parse_dashboard_as_json_failed');
       }
     }
     setEditorValue(JSON.stringify(updatedValue, null, 2));

@@ -8,6 +8,7 @@ import { Button, Card, Space, Alert, Modal, Spin } from 'antd';
 import { useCogValidation } from '@/hooks/useCogValidation';
 import { VirtualDiffViewer } from 'virtual-react-json-diff';
 import { sanitizeFormData } from '@/utils/stacSanitization';
+import { logFrontendError } from '@/lib/structuredLogger';
 
 interface EditFormManagerProps {
   formType: 'dataset' | 'collection' | 'existingCollection';
@@ -101,7 +102,10 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
 
   const onFormDataSubmit = async (formData?: Record<string, unknown>) => {
     if (!formData) {
-      console.error('No form data provided.');
+      logFrontendError(
+        'ingestion.edit.submit_missing_form_data',
+        'No form data provided.'
+      );
       return;
     }
 
@@ -113,7 +117,10 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
     setIsDiffModalVisible(false);
 
     if (!pendingFormData) {
-      console.error('No pending form data.');
+      logFrontendError(
+        'ingestion.edit.confirm_missing_pending_form_data',
+        'No pending form data.'
+      );
       return;
     }
 
@@ -149,7 +156,8 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
     if (formType === 'existingCollection') {
       const collectionId = formData.id as string;
       if (!collectionId) {
-        console.error(
+        logFrontendError(
+          'ingestion.edit.missing_collection_id',
           'Collection ID is required for existing collection updates'
         );
         setApiErrorMessage('Collection ID is missing');
@@ -187,7 +195,9 @@ const EditFormManager: React.FC<EditFormManagerProps> = ({
         setStatus('success');
       })
       .catch((error) => {
-        console.error(error);
+        logFrontendError('ingestion.edit.submit_request_failed', error, {
+          endpoint: url,
+        });
         setApiErrorMessage('A network error occurred. Please try again.');
         setStatus('error');
       });

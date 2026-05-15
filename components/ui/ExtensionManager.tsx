@@ -9,6 +9,7 @@ import {
   App,
   Button,
 } from 'antd';
+import { logFrontend } from '@/lib/structuredLogger';
 
 interface ExtensionManagerProps {
   extensionFields: Record<string, { title: string }>;
@@ -31,6 +32,7 @@ const ExtensionManager: React.FC<ExtensionManagerProps> = ({
       onAddExtension(value);
       setSearchUrl('');
     } else {
+      logFrontend('warn', 'stac.extensions.search_missing_url');
       message.error('Please enter a URL.');
     }
   };

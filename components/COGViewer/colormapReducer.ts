@@ -14,12 +14,19 @@ export type ColormapAction =
   | { type: 'SET_CUSTOM_JSON'; value: string }
   | { type: 'INIT'; state: ColormapState };
 
-export function colormapReducer(state: ColormapState, action: ColormapAction): ColormapState {
+export function colormapReducer(
+  state: ColormapState,
+  action: ColormapAction
+): ColormapState {
   switch (action.type) {
-    case 'SET_TYPE':        return { ...state, type: action.value };
-    case 'SET_COLORMAP':    return { ...state, selected: action.value };
-    case 'SET_CUSTOM_JSON': return { ...state, customJson: action.value };
-    case 'INIT':            return action.state;
+    case 'SET_TYPE':
+      return { ...state, type: action.value };
+    case 'SET_COLORMAP':
+      return { ...state, selected: action.value };
+    case 'SET_CUSTOM_JSON':
+      return { ...state, customJson: action.value };
+    case 'INIT':
+      return action.state;
   }
 }
 
@@ -29,4 +36,6 @@ export const initialColormapState: ColormapState = {
   customJson: '',
 };
 
-export type ColormapContext = ColormapState & { dispatch: Dispatch<ColormapAction> };
+export type ColormapContext = ColormapState & {
+  dispatch: Dispatch<ColormapAction>;
+};

@@ -180,6 +180,31 @@ Current API authorization requirements:
 - `GET/PUT /api/existing-collection/[collectionId]`: authenticated + stac edit capability
 - `POST /api/upload-url`: authenticated + create capability
 
+### API and Frontend Logging
+
+Structured logging is shared across server and browser code via [lib/structuredLogger.ts](lib/structuredLogger.ts).
+
+- Server/API route logging:
+  - Use `logStructured` for service/domain events.
+  - Use `createRequestLogContext`, `logRequestStart`, `logRequestEnd`, and `logRequestError` for request lifecycle logs.
+- Frontend logging:
+  - Use `logFrontend` for non-error client events.
+  - Use `logFrontendError` for client-side exceptions and recoverable failures in hooks/components.
+  - Frontend event names are prefixed as `frontend.<event>` to keep API and browser logs cohesive and easy to filter.
+  - Browser logs are forwarded to `POST /api/frontend-logs` by default, where they are re-emitted by the server logger for CloudWatch ingestion.
+  - In production, `POST /api/frontend-logs` applies an origin guard that validates `origin` against `x-forwarded-host`/`host` to support Amplify and branch-preview domains without a static allowlist.
+
+Frontend log forwarding toggle:
+
+- `NEXT_PUBLIC_FORWARD_FRONTEND_LOGS=true|false` (defaults to `true`; automatically disabled in test runtime)
+
+Example frontend event categories in this app include:
+
+- `frontend.error_boundary.*`
+- `frontend.cog.*`
+- `frontend.thumbnail.*`
+- `frontend.ingestion.*`
+
 ### Mocking Auth Locally
 
 For local/test development:

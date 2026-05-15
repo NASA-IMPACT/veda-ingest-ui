@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { App } from 'antd';
 import { JSONSchema7 } from 'json-schema';
+import { logFrontend, logFrontendError } from '@/lib/structuredLogger';
 
 export interface ExtensionField {
   name: string;
@@ -54,6 +55,10 @@ export function useStacExtensions({ setFormData }: UseStacExtensionsProps) {
         }));
 
         if (fields.length === 0) {
+          logFrontend('warn', 'stac.extensions.no_fields_found', {
+            url,
+            title,
+          });
           message.warning(`No specific extension fields found in: ${title}.`);
           return;
         }
@@ -70,7 +75,7 @@ export function useStacExtensions({ setFormData }: UseStacExtensionsProps) {
 
         message.success(`Extension "${title}" loaded successfully.`);
       } catch (error) {
-        console.error(error);
+        logFrontendError('stac.extensions.load_failed', error, { url });
         message.error(`Could not load or parse extension from ${url}`);
       } finally {
         setUrlsToProcess((prev) => prev.filter((u) => u !== url));
@@ -90,6 +95,10 @@ export function useStacExtensions({ setFormData }: UseStacExtensionsProps) {
 
   const addExtension = (url: string) => {
     if (!url || extensionFields[url]) {
+      logFrontend('warn', 'stac.extensions.add_invalid_or_duplicate', {
+        url,
+        isDuplicate: Boolean(url && extensionFields[url]),
+      });
       message.warning('Extension already added or URL is empty.');
       return;
     }
@@ -103,6 +112,7 @@ export function useStacExtensions({ setFormData }: UseStacExtensionsProps) {
       delete newFields[urlToRemove];
       return newFields;
     });
+    logFrontend('info', 'stac.extensions.removed', { url: urlToRemove, title });
     message.info(`"${title}" extension removed.`);
   };
 

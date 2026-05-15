@@ -3,6 +3,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Alert, Button, Space, Typography } from 'antd';
 import { ReloadOutlined, HomeOutlined } from '@ant-design/icons';
+import { logFrontendError } from '@/lib/structuredLogger';
 
 const { Paragraph } = Typography;
 
@@ -38,7 +39,9 @@ export class TenantErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('TenantErrorBoundary caught an error:', error, errorInfo);
+    logFrontendError('error_boundary.tenant.caught', error, {
+      componentStack: errorInfo.componentStack ?? null,
+    });
 
     this.setState({
       error,

@@ -14,6 +14,7 @@ import {
   Input,
   Divider,
 } from 'antd';
+import { logFrontendError } from '@/lib/structuredLogger';
 import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
 
 const { Option } = Select;
@@ -121,7 +122,9 @@ const COGControlsForm: React.FC<COGControlsFormProps> = ({
       const data = await response.json();
       setColorMapsList(['Internal', ...data.colorMaps]);
     } catch (error) {
-      console.error('Failed to fetch color maps:', error);
+      logFrontendError('cog.controls.fetch_colormaps_failed', error, {
+        endpoint: 'raster/colorMaps',
+      });
       setColorMapsList(['Internal']);
     }
   };

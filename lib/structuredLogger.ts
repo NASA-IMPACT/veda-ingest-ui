@@ -7,9 +7,9 @@ import {
   type Logger,
 } from '@logtape/logtape';
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-type JsonValue =
+export type JsonValue =
   | string
   | number
   | boolean
@@ -22,6 +22,9 @@ const REQUEST_ID_HEADERS = [
   'x-correlation-id',
   'x-amzn-trace-id',
 ];
+
+const FRONTEND_LOG_INGEST_PATH = '/api/frontend-logs';
+const DEFAULT_ENABLE_FRONTEND_LOG_FORWARDING = true;
 
 const MAX_REQUEST_ID_LENGTH = 128;
 const DEFAULT_PRODUCTION_LOG_LEVEL: LogLevel = 'warn';
@@ -46,8 +49,22 @@ interface RequestEndPayload extends RequestLogBasePayload {
 
 interface RequestErrorPayload extends RequestLogBasePayload {
   durationMs: number;
-  error: { name: string; message: string; stack?: string };
+  error: SerializableError;
   [key: string]: JsonValue;
+}
+
+export interface SerializableError {
+  [key: string]: JsonValue;
+  name: string;
+  message: string;
+  stack: string | null;
+}
+
+export interface FrontendLogEntry {
+  level: LogLevel;
+  event: string;
+  details: Record<string, JsonValue>;
+  clientTimestamp: string;
 }
 
 export interface RequestLogContext extends RequestLogBasePayload {
@@ -67,7 +84,10 @@ interface RequestLike {
   url?: string;
 }
 
-const isDebugLoggingEnabled = process.env.ENABLE_DEBUG_LOGGING === 'true';
+const isBrowserRuntime = typeof window !== 'undefined';
+const isServerDebugLoggingEnabled = process.env.ENABLE_DEBUG_LOGGING === 'true';
+const isFrontendDebugLoggingEnabled =
+  process.env.NEXT_PUBLIC_ENABLE_DEBUG_LOGGING === 'true';
 
 const LOG_LEVEL_ALIASES: Record<string, LogLevel> = {
   debug: 'debug',
@@ -87,9 +107,13 @@ const parseLogLevelFromEnv = (): LogLevel | null => {
   return LOG_LEVEL_ALIASES[raw] ?? null;
 };
 
-const configuredLogLevel: LogLevel = isDebugLoggingEnabled
-  ? (parseLogLevelFromEnv() ?? DEFAULT_DEBUG_LOG_LEVEL)
-  : DEFAULT_PRODUCTION_LOG_LEVEL;
+const configuredLogLevel: LogLevel = isBrowserRuntime
+  ? isFrontendDebugLoggingEnabled
+    ? DEFAULT_DEBUG_LOG_LEVEL
+    : DEFAULT_PRODUCTION_LOG_LEVEL
+  : isServerDebugLoggingEnabled
+    ? (parseLogLevelFromEnv() ?? DEFAULT_DEBUG_LOG_LEVEL)
+    : DEFAULT_PRODUCTION_LOG_LEVEL;
 
 const toLogTapeLevel = (level: LogLevel): LogTapeLevel => {
   if (level === 'warn') {
@@ -183,14 +207,12 @@ const pickRequestId = (headers?: HeaderLike): string => {
   return createFallbackRequestId();
 };
 
-const toSerializableError = (
-  error: unknown
-): { name: string; message: string; stack?: string } => {
+export const toSerializableError = (error: unknown): SerializableError => {
   if (error instanceof Error) {
     return {
       name: error.name,
       message: error.message,
-      stack: error.stack,
+      stack: error.stack ?? null,
     };
   }
 
@@ -206,7 +228,54 @@ const toSerializableError = (
               return '[unserializable-error]';
             }
           })(),
+    stack: null,
   };
+};
+
+const getBrowserContext = (): Record<string, JsonValue> => {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  return {
+    pathname: window.location.pathname,
+    href: window.location.href,
+  };
+};
+
+const shouldForwardFrontendLogs = (): boolean => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  if (process.env.NODE_ENV === 'test') {
+    return false;
+  }
+
+  const configuredValue = process.env.NEXT_PUBLIC_FORWARD_FRONTEND_LOGS;
+  if (!configuredValue || configuredValue.trim() === '') {
+    return DEFAULT_ENABLE_FRONTEND_LOG_FORWARDING;
+  }
+
+  return configuredValue.trim().toLowerCase() === 'true';
+};
+
+const forwardFrontendLog = (entry: FrontendLogEntry): void => {
+  if (!shouldForwardFrontendLogs()) {
+    return;
+  }
+
+  void fetch(FRONTEND_LOG_INGEST_PATH, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'same-origin',
+    keepalive: true,
+    body: JSON.stringify({ logs: [entry] }),
+  }).catch(() => {
+    // Avoid recursive logging loops if log forwarding itself fails.
+  });
 };
 
 export const logStructured = (
@@ -238,6 +307,38 @@ export const logStructured = (
       baseLogger.info('{event}', payload);
       break;
   }
+};
+
+export const logFrontend = (
+  level: LogLevel,
+  event: string,
+  details: Record<string, JsonValue> = {}
+): void => {
+  const frontendEventName = `frontend.${event}`;
+  const payload = {
+    runtime: 'browser',
+    ...getBrowserContext(),
+    ...details,
+  };
+
+  logStructured(level, frontendEventName, payload);
+  forwardFrontendLog({
+    level,
+    event: frontendEventName,
+    details: payload,
+    clientTimestamp: new Date().toISOString(),
+  });
+};
+
+export const logFrontendError = (
+  event: string,
+  error: unknown,
+  details: Record<string, JsonValue> = {}
+): void => {
+  logFrontend('error', event, {
+    ...details,
+    error: toSerializableError(error),
+  });
 };
 
 export const createRequestLogContext = (
@@ -294,7 +395,7 @@ export const logRequestStart = (
   context: RequestLogContext,
   details: Record<string, JsonValue> = {}
 ): void => {
-  if (!isDebugLoggingEnabled) {
+  if (!isServerDebugLoggingEnabled) {
     return;
   }
 
@@ -310,7 +411,7 @@ export const logRequestEnd = (
   status: number,
   details: Record<string, JsonValue> = {}
 ): void => {
-  if (status < 400 && !isDebugLoggingEnabled) {
+  if (status < 400 && !isServerDebugLoggingEnabled) {
     return;
   }
 

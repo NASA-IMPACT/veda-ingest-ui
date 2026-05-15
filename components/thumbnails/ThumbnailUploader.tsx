@@ -17,6 +17,7 @@ import {
   ExclamationCircleOutlined,
   CopyOutlined,
 } from '@ant-design/icons';
+import { logFrontendError } from '@/lib/structuredLogger';
 
 const { Title, Paragraph, Link } = Typography;
 
@@ -109,6 +110,10 @@ function ThumbnailUploader({
 
   const handleUpload = async ({ file, onProgress }: UploadHandlerOptions) => {
     if (!(file instanceof File)) {
+      logFrontendError(
+        'thumbnail.upload.invalid_selected_file',
+        'No valid file selected for thumbnail upload.'
+      );
       message.error('No valid file selected. Please try again.');
       return;
     }
@@ -116,6 +121,9 @@ function ThumbnailUploader({
     const progressHandler = onProgress || (() => {});
 
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+      logFrontendError('thumbnail.upload.invalid_file_format', {
+        fileType: file.type || 'unknown',
+      });
       message.error('Invalid file format. Please upload a JPG or PNG image.');
       return;
     }
@@ -168,7 +176,9 @@ function ThumbnailUploader({
       await proceedWithUpload(file, uploadUrl, fileUrl, progressHandler);
     } catch (error) {
       loadingMessage();
-      console.error('Upload failed:', error);
+      logFrontendError('thumbnail.upload.request_failed', error, {
+        endpoint: '/api/upload-url',
+      });
       message.error('Upload failed, please try again.');
       setUploadingFile(null);
       clearErrorsWithAnimation();
@@ -195,7 +205,9 @@ function ThumbnailUploader({
       setUploadedFile({ name: file.name, url: fileUrl });
     } catch (error) {
       closeUploadingMessage();
-      console.error('Upload failed:', error);
+      logFrontendError('thumbnail.upload.s3_put_failed', error, {
+        destination: 's3',
+      });
       message.error('Upload failed, please try again.');
       setUploadingFile(null);
     }
@@ -249,7 +261,7 @@ function ThumbnailUploader({
       await navigator.clipboard.writeText(uploadedFile.url);
       setCopied(true);
     } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
+      logFrontendError('thumbnail.upload.copy_url_failed', error);
     }
   };
 

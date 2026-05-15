@@ -36,6 +36,19 @@ Common auth/proxy events you may also see:
 - `auth.token.refresh_failed`
 - `auth.tenants.fetch_failed`
 
+Frontend structured error events are also emitted with the same logger helpers, prefixed as `frontend.*` (for example `frontend.error_boundary.api.caught` and `frontend.thumbnail.upload.request_failed`).
+
+Global browser listeners in [components/error-boundaries/FrontendErrorListeners.tsx](../../components/error-boundaries/FrontendErrorListeners.tsx) also capture:
+
+- `frontend.window.error`
+- `frontend.window.unhandled_rejection`
+
+When frontend forwarding is enabled, browser logs are posted to [app/api/frontend-logs/route.ts](../../app/api/frontend-logs/route.ts), then written by the server logger so they are included in CloudWatch streams with the same JSON format.
+
+- These frontend events appear in browser devtools logs.
+- They are shipped to CloudWatch through the server-side ingest route.
+- In production, the ingest route enforces an origin guard by comparing `origin` against `x-forwarded-host`/`host` (Amplify-safe), and rejects cross-site submissions.
+
 ## Log-Level Behavior (Very Important)
 
 The logger is intentionally quieter in non-debug mode.
@@ -51,10 +64,12 @@ The logger is intentionally quieter in non-debug mode.
   - `api.request.start` is emitted.
   - Successful request-end logs are emitted.
   - Default lowest level becomes `debug` unless overridden with `LOG_LEVEL`.
+  - Frontend logger debug verbosity is also enabled via the public mapping `NEXT_PUBLIC_ENABLE_DEBUG_LOGGING`.
 
 Environment variables:
 
 - `ENABLE_DEBUG_LOGGING=true|false`
+- `NEXT_PUBLIC_ENABLE_DEBUG_LOGGING=true|false` (browser-facing flag; auto-populated from `ENABLE_DEBUG_LOGGING` in `next.config.ts` unless explicitly set)
 - `LOG_LEVEL=debug|info|warn|warning|error` (used only when debug logging is enabled)
 
 ## Finding Logs From Amplify

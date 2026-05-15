@@ -454,8 +454,9 @@ describe('useCOGViewer', () => {
 
     await waitFor(() => {
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error parsing renders:',
-        expect.any(Error)
+        expect.stringContaining(
+          '"event":"frontend.cog.viewer.parse_renders_failed"'
+        )
       );
     });
 
