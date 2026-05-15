@@ -15,6 +15,49 @@ const TARGET_PATHS = {
 
 type IngestionType = 'collection' | 'dataset';
 
+const isGitHubAppAuthored = (
+  login: string | undefined,
+  type: string | undefined
+): boolean => {
+  if (!login || !type) {
+    return false;
+  }
+
+  return type === 'Bot' || login.endsWith('[bot]');
+};
+
+const matchesUiIngestNamingConvention = (
+  title: string | undefined,
+  headRef: string | undefined,
+  ingestionType: IngestionType
+): boolean => {
+  if (!title || !headRef) {
+    return false;
+  }
+
+  const expectedTitlePrefix = `${ingestionType} Ingest Request for `;
+  return title.startsWith(expectedTitlePrefix) && headRef.startsWith('feat/');
+};
+
+const shouldIncludePullRequest = (
+  pr: {
+    title?: string;
+    user?: { login?: string; type?: string } | null;
+    head?: { ref?: string };
+  },
+  ingestionType: IngestionType
+): boolean => {
+  const login = pr.user?.login;
+  const userType = pr.user?.type;
+  const headRef = pr.head?.ref;
+
+  if (isGitHubAppAuthored(login, userType)) {
+    return true;
+  }
+
+  return matchesUiIngestNamingConvention(pr.title, headRef, ingestionType);
+};
+
 const extractTenantFromContent = (
   parsedContent: Record<string, unknown>,
   tenantFieldKey: string
@@ -46,8 +89,12 @@ const ListPRs = async (
       state: 'open',
     });
 
+    const filteredPullRequests = pullRequests.filter((pr) =>
+      shouldIncludePullRequest(pr, ingestionType)
+    );
+
     // 2. Create an array of promises to check the files for each pull request.
-    const checkFilePromises = pullRequests.map(async (pr) => {
+    const checkFilePromises = filteredPullRequests.map(async (pr) => {
       const { data: files } = await octokit.rest.pulls.listFiles({
         owner,
         repo,

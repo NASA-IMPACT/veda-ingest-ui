@@ -125,6 +125,60 @@ describe('RetrieveJSON', () => {
         content: { id: 'test-collection' },
       });
     });
+
+    it('derives collection filename from collection/* ref', async () => {
+      const mockRef = 'collection/GEDI';
+      const mockFilePath = 'ingestion-data/staging/collections/GEDI.json';
+      const mockContentBase64 = Buffer.from(
+        JSON.stringify({ id: 'GEDI' })
+      ).toString('base64');
+
+      mockGetContent.mockResolvedValue({
+        data: {
+          sha: 'mockShaCollectionRef',
+          content: mockContentBase64,
+          path: mockFilePath,
+        },
+      });
+
+      const result = await RetrieveJSON(mockRef, 'collection');
+
+      expect(mockGetContent).toHaveBeenCalledWith(
+        expect.objectContaining({ path: mockFilePath, ref: mockRef })
+      );
+      expect(result).toEqual({
+        fileSha: 'mockShaCollectionRef',
+        filePath: mockFilePath,
+        content: { id: 'GEDI' },
+      });
+    });
+
+    it('derives collection filename from refs/heads/collection/* ref', async () => {
+      const mockRef = 'refs/heads/collection/GEDI';
+      const mockFilePath = 'ingestion-data/staging/collections/GEDI.json';
+      const mockContentBase64 = Buffer.from(
+        JSON.stringify({ id: 'GEDI' })
+      ).toString('base64');
+
+      mockGetContent.mockResolvedValue({
+        data: {
+          sha: 'mockShaRefsHeadsCollectionRef',
+          content: mockContentBase64,
+          path: mockFilePath,
+        },
+      });
+
+      const result = await RetrieveJSON(mockRef, 'collection');
+
+      expect(mockGetContent).toHaveBeenCalledWith(
+        expect.objectContaining({ path: mockFilePath, ref: mockRef })
+      );
+      expect(result).toEqual({
+        fileSha: 'mockShaRefsHeadsCollectionRef',
+        filePath: mockFilePath,
+        content: { id: 'GEDI' },
+      });
+    });
   });
 
   describe('Error Handling', () => {

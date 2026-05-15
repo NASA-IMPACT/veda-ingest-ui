@@ -3,6 +3,36 @@ import GetGithubToken from '@/utils/githubUtils/GetGithubToken';
 
 type IngestionType = 'collection' | 'dataset';
 
+const normalizeRefToFileStem = (
+  ref: string,
+  ingestionType: IngestionType
+): string => {
+  let stem = ref.replace(/^refs\/heads\//, '');
+
+  if (stem.startsWith('feat/')) {
+    stem = stem.slice('feat/'.length);
+  }
+
+  if (ingestionType === 'collection' && stem.startsWith('collection/')) {
+    stem = stem.slice('collection/'.length);
+  }
+
+  if (ingestionType === 'dataset' && stem.startsWith('dataset/')) {
+    stem = stem.slice('dataset/'.length);
+  }
+
+  // Branch names can include path separators; the ingest filename is the final slug.
+  if (stem.includes('/')) {
+    const parts = stem.split('/').filter(Boolean);
+    const lastPart = parts[parts.length - 1];
+    if (lastPart) {
+      stem = lastPart;
+    }
+  }
+
+  return stem;
+};
+
 const RetrieveJSON = async (ref: string, ingestionType: IngestionType) => {
   const { OWNER: owner, REPO: repo } = await import('@/config/env').then(
     (m) => m.cfg
@@ -21,8 +51,8 @@ const RetrieveJSON = async (ref: string, ingestionType: IngestionType) => {
     throw new Error(`Invalid ingestionType provided: ${ingestionType}`);
   }
 
-  // The filename is derived from the branch name ('ref').
-  const fileName = ref.replace('feat/', '');
+  // The filename is derived from the branch ref slug.
+  const fileName = normalizeRefToFileStem(ref, ingestionType);
   const fullPath = `${targetPath}/${fileName}.json`;
 
   try {

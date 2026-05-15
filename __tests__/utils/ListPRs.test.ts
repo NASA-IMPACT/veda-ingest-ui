@@ -67,7 +67,12 @@ describe('ListPRs Utility', () => {
   });
 
   it('returns PRs with valid matching file and tenant', async () => {
-    const pr = { number: 1, head: { sha: 'abc123' } };
+    const pr = {
+      number: 1,
+      title: 'collection Ingest Request for test',
+      user: { login: 'ingest-bot[bot]', type: 'Bot' },
+      head: { sha: 'abc123', ref: 'feat/test' },
+    };
     mockList.mockResolvedValue({ data: [pr] });
     mockListFiles.mockResolvedValue({
       data: [
@@ -89,7 +94,12 @@ describe('ListPRs Utility', () => {
   });
 
   it('returns PRs with tenant undefined if JSON parse fails', async () => {
-    const pr = { number: 2, head: { sha: 'def456' } };
+    const pr = {
+      number: 2,
+      title: 'collection Ingest Request for bad',
+      user: { login: 'ingest-bot[bot]', type: 'Bot' },
+      head: { sha: 'def456', ref: 'feat/bad' },
+    };
     mockList.mockResolvedValue({ data: [pr] });
     mockListFiles.mockResolvedValue({
       data: [{ filename: 'ingestion-data/staging/collections/bad.json' }],
@@ -106,7 +116,12 @@ describe('ListPRs Utility', () => {
   });
 
   it('filters out PRs without matching files', async () => {
-    const pr = { number: 3, head: { sha: 'ghi789' } };
+    const pr = {
+      number: 3,
+      title: 'collection Ingest Request for nope',
+      user: { login: 'ingest-bot[bot]', type: 'Bot' },
+      head: { sha: 'ghi789', ref: 'feat/nope' },
+    };
     mockList.mockResolvedValue({ data: [pr] });
     mockListFiles.mockResolvedValue({
       data: [{ filename: 'not-a-match.txt' }],
@@ -114,6 +129,45 @@ describe('ListPRs Utility', () => {
 
     const result = await ListPRs('collection');
     expect(result).toEqual([]);
+  });
+
+  it('filters out manual PRs that do not match app naming conventions', async () => {
+    const manualPr = {
+      number: 4,
+      title: 'Update GEDI WMTS collection',
+      user: { login: 'human-user', type: 'User' },
+      head: { sha: 'jkl012', ref: 'collection/GEDI' },
+    };
+
+    mockList.mockResolvedValue({ data: [manualPr] });
+
+    const result = await ListPRs('collection');
+    expect(result).toEqual([]);
+    expect(mockListFiles).not.toHaveBeenCalled();
+  });
+
+  it('includes user-authored PRs when branch/title follow UI naming conventions', async () => {
+    const userPrWithConventions = {
+      number: 5,
+      title: 'collection Ingest Request for GEDI',
+      user: { login: 'human-user', type: 'User' },
+      head: { sha: 'mno345', ref: 'feat/GEDI' },
+    };
+
+    mockList.mockResolvedValue({ data: [userPrWithConventions] });
+    mockListFiles.mockResolvedValue({
+      data: [{ filename: 'ingestion-data/staging/collections/GEDI.json' }],
+    });
+    const fileContent = Buffer.from(
+      JSON.stringify({ 'local:tenant': 'tenant2' })
+    ).toString('base64');
+    mockGetContent.mockResolvedValue({
+      data: { content: fileContent },
+    });
+
+    const result = await ListPRs('collection');
+    expect(result).toHaveLength(1);
+    expect(result[0].pr).toEqual(userPrWithConventions);
   });
 
   it('throws and logs error if octokit fails', async () => {
