@@ -63,65 +63,105 @@ const isValidFrontendLogEntry = (value: unknown): value is FrontendLogEntry => {
   return valid;
 };
 
+const validateOriginOrRespond = (
+  request: NextRequest,
+  logContext: ReturnType<typeof createRequestLogContext>
+): NextResponse | null => {
+  const originGuard = validateFrontendLogOrigin(
+    request.headers,
+    process.env.NODE_ENV === 'production'
+  );
+
+  if (!originGuard.allowed) {
+    logRequestEnd(logContext, originGuard.status, {
+      reason: originGuard.reason,
+    });
+    return NextResponse.json(
+      { error: 'Origin validation failed' },
+      { status: originGuard.status }
+    );
+  }
+
+  return null;
+};
+
+const validateContentLengthOrRespond = (
+  request: NextRequest,
+  logContext: ReturnType<typeof createRequestLogContext>
+): NextResponse | null => {
+  const contentLengthRaw = request.headers.get('content-length');
+  const contentLength = contentLengthRaw ? Number(contentLengthRaw) : 0;
+
+  if (
+    Number.isFinite(contentLength) &&
+    contentLength > MAX_CONTENT_LENGTH_BYTES
+  ) {
+    logRequestEnd(logContext, 413, {
+      reason: 'payload_too_large',
+      contentLength,
+    });
+    return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+  }
+
+  return null;
+};
+
+const parseAndValidateLogsOrRespond = (
+  body: unknown,
+  logContext: ReturnType<typeof createRequestLogContext>
+): { logs: unknown[] } | NextResponse => {
+  if (!isRecord(body) || !Array.isArray(body.logs)) {
+    logRequestEnd(logContext, 400, {
+      reason: 'invalid_request_body',
+    });
+    return NextResponse.json(
+      { error: 'Request body must include a logs array' },
+      { status: 400 }
+    );
+  }
+
+  if (body.logs.length === 0 || body.logs.length > MAX_LOGS_PER_REQUEST) {
+    logRequestEnd(logContext, 400, {
+      reason: 'invalid_log_count',
+      logCount: body.logs.length,
+    });
+    return NextResponse.json(
+      {
+        error: `Logs array must contain between 1 and ${MAX_LOGS_PER_REQUEST} entries`,
+      },
+      { status: 400 }
+    );
+  }
+
+  return { logs: body.logs };
+};
+
 export async function POST(request: NextRequest) {
   const logContext = createRequestLogContext(request, '/api/frontend-logs');
   logRequestStart(logContext, { target: 'frontend-log-ingest' });
 
   try {
-    const originGuard = validateFrontendLogOrigin(
-      request.headers,
-      process.env.NODE_ENV === 'production'
-    );
-    if (!originGuard.allowed) {
-      logRequestEnd(logContext, originGuard.status, {
-        reason: originGuard.reason,
-      });
-      return NextResponse.json(
-        { error: 'Origin validation failed' },
-        { status: originGuard.status }
-      );
+    const originValidationError = validateOriginOrRespond(request, logContext);
+    if (originValidationError) {
+      return originValidationError;
     }
 
-    const contentLengthRaw = request.headers.get('content-length');
-    const contentLength = contentLengthRaw ? Number(contentLengthRaw) : 0;
-
-    if (
-      Number.isFinite(contentLength) &&
-      contentLength > MAX_CONTENT_LENGTH_BYTES
-    ) {
-      logRequestEnd(logContext, 413, {
-        reason: 'payload_too_large',
-        contentLength,
-      });
-      return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+    const contentLengthValidationError = validateContentLengthOrRespond(
+      request,
+      logContext
+    );
+    if (contentLengthValidationError) {
+      return contentLengthValidationError;
     }
 
     const body = await request.json();
-    if (!isRecord(body) || !Array.isArray(body.logs)) {
-      logRequestEnd(logContext, 400, {
-        reason: 'invalid_request_body',
-      });
-      return NextResponse.json(
-        { error: 'Request body must include a logs array' },
-        { status: 400 }
-      );
+    const parsedLogs = parseAndValidateLogsOrRespond(body, logContext);
+    if (parsedLogs instanceof NextResponse) {
+      return parsedLogs;
     }
 
-    if (body.logs.length === 0 || body.logs.length > MAX_LOGS_PER_REQUEST) {
-      logRequestEnd(logContext, 400, {
-        reason: 'invalid_log_count',
-        logCount: body.logs.length,
-      });
-      return NextResponse.json(
-        {
-          error: `Logs array must contain between 1 and ${MAX_LOGS_PER_REQUEST} entries`,
-        },
-        { status: 400 }
-      );
-    }
-
-    const validLogs = body.logs.filter((entry): entry is FrontendLogEntry =>
-      isValidFrontendLogEntry(entry)
+    const validLogs = parsedLogs.logs.filter(
+      (entry): entry is FrontendLogEntry => isValidFrontendLogEntry(entry)
     );
 
     if (validLogs.length === 0) {
@@ -135,7 +175,7 @@ export async function POST(request: NextRequest) {
     }
 
     const session = await auth();
-    const droppedCount = body.logs.length - validLogs.length;
+    const droppedCount = parsedLogs.logs.length - validLogs.length;
 
     for (const frontendLog of validLogs) {
       logStructured(frontendLog.level, frontendLog.event, {
