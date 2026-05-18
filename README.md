@@ -447,6 +447,20 @@ This will start the app and make it available at <http://localhost:3000/>.
 
 To bypass the keycloak login, set the `NEXT_PUBLIC_DISABLE_AUTH` environment variable to true. This variable is also leveraged for Playwright testing.
 
+## Pull request titles
+
+New pull requests should use [Conventional Commits](https://www.conventionalcommits.org/) for the **PR title**.
+
+For example,
+
+```
+type: short description
+```
+
+where the common types are `feat`, `fix`, `docs`, `chore`, `test`, `ci`. Scopes are optional (for example, `feat(ui): add tenant`).
+
+CI enforces this on open PRs via the **Lint PR title** workflow.
+
 ## 🛠️ STAC Data Sanitization
 
 To fix incorrect, previously ingested data, the application includes a data sanitization system to ensure STAC schema compliance:
