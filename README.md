@@ -51,6 +51,22 @@ https://nasa-impact.github.io/veda-ingest-ui/
 - **Testing**: Vitest + Playwright for comprehensive testing
 - **Deployment**: AWS Amplify with serverless architecture
 
+## Contributing
+
+### Pull request titles
+
+New pull requests should use [Conventional Commits](https://www.conventionalcommits.org/) for the **PR title**.
+
+For example,
+
+```
+type: short description
+```
+
+where the common types are `feat`, `fix`, `docs`, `chore`, `test`, `ci`. Scopes are optional (for example, `feat(ui): add tenant`).
+
+CI enforces this on open PRs via the **Lint PR title** workflow.
+
 ## 📁 Project Structure
 
 ```
@@ -447,19 +463,6 @@ This will start the app and make it available at <http://localhost:3000/>.
 
 To bypass the keycloak login, set the `NEXT_PUBLIC_DISABLE_AUTH` environment variable to true. This variable is also leveraged for Playwright testing.
 
-## Pull request titles
-
-New pull requests should use [Conventional Commits](https://www.conventionalcommits.org/) for the **PR title**.
-
-For example,
-
-```
-type: short description
-```
-
-where the common types are `feat`, `fix`, `docs`, `chore`, `test`, `ci`. Scopes are optional (for example, `feat(ui): add tenant`).
-
-CI enforces this on open PRs via the **Lint PR title** workflow.
 
 ## 🛠️ STAC Data Sanitization
 
