@@ -17,7 +17,12 @@ export const IngestColumn: React.FC<IngestColumnProps> = ({
   columnSize,
 }) => {
   return (
-    <Col {...(columnSize == 'full' ? {xs: 24, sm: 24, md: 24, lg: 24} : {xs: 24, sm: 12, md: 8, lg: 6})} data-testid={testId}>
+    <Col
+      {...(columnSize == 'full'
+        ? { xs: 24, sm: 24, md: 24, lg: 24 }
+        : { xs: 24, sm: 12, md: 8, lg: 6 })}
+      data-testid={testId}
+    >
       <Card
         title={title}
         style={{
