@@ -101,7 +101,8 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
       getIngestTenant(ingest)?.toLowerCase() === 'public'
   );
 
-  const columnSize = tenants.length > 1 ? 'default' : 'full'; // if more then one tenant, default is set to 1/4 width on desktop
+  const columnSize = visibleTenants.length > 0 ? 'default' : 'full'; // if more then one tenant, default is set to 1/4 width on desktop
+
   return (
     <>
       <Title level={3} style={{ marginBottom: 24 }}>
@@ -109,23 +110,34 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
       </Title>
 
       <Row gutter={[16, 16]}>
-        {tenants.length > 0 &&
-          tenants.map((tenant: string) => {
+        {visibleTenants.length > 0 &&
+          visibleTenants.map((tenant: string) => {
             const tenantIngests: IngestPullRequest[] = allIngests.filter(
               (ingest: IngestPullRequest) => getIngestTenant(ingest) === tenant
             );
-            const publicTenant: boolean = tenant.toLowerCase() == 'public';
+
             return (
               <IngestColumn
-                key={publicTenant ? 'public' : tenant}
-                title={publicTenant ? 'Public' : `Tenant: ${tenant}`}
-                ingests={publicTenant ? publicIngests : tenantIngests}
+                key={tenant}
+                title={`Tenant: ${tenant}`}
+                ingests={tenantIngests}
                 onIngestSelect={onIngestSelect}
-                testId={publicTenant ? "tenant-column-public" : `tenant-column-${tenant}`}
+                testId={`tenant-column-${tenant}`}
                 columnSize={columnSize}
               />
             );
           })}
+
+        {publicIngests.length > 0 && (
+          <IngestColumn
+            key="public"
+            title="Public"
+            ingests={publicIngests}
+            onIngestSelect={onIngestSelect}
+            testId="tenant-column-public"
+            columnSize={columnSize}
+          />
+        )}
       </Row>
 
       {apiError && (
