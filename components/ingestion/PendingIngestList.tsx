@@ -121,7 +121,7 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
                 title={publicTenant ? 'Public' : `Tenant: ${tenant}`}
                 ingests={publicTenant ? publicIngests : tenantIngests}
                 onIngestSelect={onIngestSelect}
-                testId={`tenant-column-${tenant}`}
+                testId={publicTenant ? "tenant-column-public" : `tenant-column-${tenant}`}
                 columnSize={columnSize}
               />
             );
