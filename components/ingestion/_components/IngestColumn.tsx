@@ -6,6 +6,7 @@ interface IngestColumnProps {
   ingests: IngestPullRequest[];
   onIngestSelect: (ref: string, title: string) => void;
   testId?: string;
+  columnSize?: 'default' | 'full';
 }
 
 export const IngestColumn: React.FC<IngestColumnProps> = ({
@@ -13,9 +14,10 @@ export const IngestColumn: React.FC<IngestColumnProps> = ({
   ingests,
   onIngestSelect,
   testId,
+  columnSize,
 }) => {
   return (
-    <Col xs={24} sm={12} md={8} lg={6} data-testid={testId}>
+    <Col {...(columnSize == 'full' ? {xs: 24, sm: 24, md: 24, lg: 24} : {xs: 24, sm: 12, md: 8, lg: 6})} data-testid={testId}>
       <Card
         title={title}
         style={{
@@ -23,6 +25,7 @@ export const IngestColumn: React.FC<IngestColumnProps> = ({
           borderRadius: 8,
           boxShadow: '0 2px 8px #f0f1f2',
         }}
+        styles={{ body: { maxHeight: '600px', overflowY: 'auto' } }}
       >
         <List
           dataSource={ingests}
