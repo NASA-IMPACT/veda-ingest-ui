@@ -101,6 +101,8 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
       getIngestTenant(ingest)?.toLowerCase() === 'public'
   );
 
+  const columnSize = visibleTenants.length > 0 ? 'default' : 'full'; // if more then one tenant, default is set to 1/4 width on desktop
+
   return (
     <>
       <Title level={3} style={{ marginBottom: 24 }}>
@@ -121,6 +123,7 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
                 ingests={tenantIngests}
                 onIngestSelect={onIngestSelect}
                 testId={`tenant-column-${tenant}`}
+                columnSize={columnSize}
               />
             );
           })}
@@ -132,6 +135,7 @@ const PendingIngestList: React.FC<PendingIngestListProps> = ({
             ingests={publicIngests}
             onIngestSelect={onIngestSelect}
             testId="tenant-column-public"
+            columnSize={columnSize}
           />
         )}
       </Row>
