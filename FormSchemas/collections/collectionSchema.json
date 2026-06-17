@@ -150,9 +150,7 @@
             "title": "Set of values",
             "type": "array",
             "minItems": 1,
-            "items": {
-              "type": "string"
-            }
+            "items": {}
           }
         ]
       }
