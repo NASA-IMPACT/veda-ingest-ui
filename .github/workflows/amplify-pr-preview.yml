@@ -35,7 +35,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: "$AMPLIFY_PREVIEW_ROLE"
+          role-to-assume: ${{ vars.AMPLIFY_PREVIEW_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
       # Handle PR Open or Sync: Deploy Preview
