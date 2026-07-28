@@ -70,6 +70,14 @@ div[id='root_assets'] {
   box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.2);
 }
 
+
+/* Remove nesting of the visual CSS boxes for nested object input fields */
+fieldset[id^='root_'].object-field-template-nested {
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
 label[title='Discovery Items'],
 label[title='Links'],
 label[title='Item Assets'],
