@@ -19,4 +19,4 @@ The workflow relies on these values, sourced from the `veda` GitHub environment 
 
 The workflow authenticates to AWS using `aws-actions/configure-aws-credentials`, assuming the role at `vars.AMPLIFY_PREVIEW_ROLE` via GitHub's OIDC identity provider.
 
-`GitHubActionsAmplifyPreviewRole` IAM Role was created in the **UAH** AWS account from an existing `token.actions.githubusercontent.com` OIDC provider. Its trust policy allows GitHub Actions runs from this repository to assume it, and its permissions policy is scoped to the Amplify actions the workflow needs (`get-branch`, `create-branch`, `start-job`, `get-job`, `delete-branch`) against the `veda-ingest-ui` Amplify app.
+`GitHubActionsAmplifyPreviewRole` IAM Role was created in the **UAH** AWS account from an existing `token.actions.githubusercontent.com` OIDC provider. Its trust policy allows GitHub Actions runs from this repository to assume it, and its permissions policy is scoped to the Amplify actions the workflow needs (`get-branch`, `create-branch`, `start-job`, `get-job`, `list-jobs`, `stop-job`, `delete-branch`) against the `veda-ingest-ui` Amplify app.
