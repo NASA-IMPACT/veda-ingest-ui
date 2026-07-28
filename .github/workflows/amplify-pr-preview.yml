@@ -12,7 +12,6 @@ permissions:
   pull-requests: write # Required to post/update comments
 
 env:
-  AMPLIFY_APP_ID: dzi1klnpemkf3
   AWS_REGION: us-west-2
   # Amplify branch subdomains lowercase the branch name and replace '/' with '-'.
   BRANCH_NAME: ${{ github.head_ref }}
@@ -24,6 +23,11 @@ jobs:
     # contributor's PR could trigger an AWS build on this public repo.
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    environment: veda
+    env:
+      AMPLIFY_APP_ID: ${{ vars.AMPLIFY_APP_ID }}
+      # The IAM role to assume to deploy the preview.
+      AMPLIFY_PREVIEW_ROLE: ${{ vars.AMPLIFY_PREVIEW_ROLE }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -31,7 +35,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::853558080719:role/GitHubActionsAmplifyPreviewRole
+          role-to-assume: "$AMPLIFY_PREVIEW_ROLE"
           aws-region: ${{ env.AWS_REGION }}
 
       # Handle PR Open or Sync: Deploy Preview
