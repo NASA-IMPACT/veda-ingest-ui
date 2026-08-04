@@ -105,8 +105,8 @@ function getPermissionLevel(capabilities: UserCapabilities): string {
   return 'authenticated';
 }
 
-export async function proxy(request: NextRequest) {
-  const logContext = createRequestLogContext(request, 'proxy');
+export async function middleware(request: NextRequest) {
+  const logContext = createRequestLogContext(request, 'middleware');
   logRequestStart(logContext, { target: 'authz-gate' });
 
   // Security: Ensure auth is never disabled in production
