@@ -53,7 +53,8 @@ jobs:
 
           # Check if the preview branch already exists in Amplify, if not, create it
           aws amplify get-branch --app-id "$APP_ID" --branch-name "$BRANCH_NAME" || \
-          aws amplify create-branch --app-id "$APP_ID" --branch-name "$BRANCH_NAME" --stage PULL_REQUEST
+          aws amplify create-branch --app-id "$APP_ID" --branch-name "$BRANCH_NAME" --stage PULL_REQUEST \
+            --environment-variables NEXT_PUBLIC_DISABLE_AUTH=true
 
           # Amplify rejects StartJob if the branch already has a pending/running job
           # (e.g. a rapid follow-up push). Stop it first so the new job can start.
