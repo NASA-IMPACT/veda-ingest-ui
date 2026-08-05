@@ -109,8 +109,10 @@ export async function middleware(request: NextRequest) {
   const logContext = createRequestLogContext(request, 'middleware');
   logRequestStart(logContext, { target: 'authz-gate' });
 
-  // Security: Ensure auth is never disabled in production
-  if (DISABLE_AUTH && process.env.NODE_ENV === 'production') {
+  // Security: Ensure auth is never disabled in a production deployment
+  const appEnv = process.env.NEXT_PUBLIC_APP_ENV?.toLowerCase();
+  const isProdDeployment = appEnv === 'veda' || appEnv === 'disasters' || appEnv === 'eic';
+  if (DISABLE_AUTH && isProdDeployment) {
     logRequestEnd(logContext, 500, {
       reason: 'auth_disabled_in_production',
     });
