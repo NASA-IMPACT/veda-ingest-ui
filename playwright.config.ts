@@ -4,13 +4,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const authDisabledCommand = process.env.CI
-  ? 'NEXT_PUBLIC_DISABLE_AUTH=true NEXT_PUBLIC_APP_ENV=local NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" yarn start'
-  : 'NEXT_PUBLIC_DISABLE_AUTH=true NEXT_PUBLIC_APP_ENV=local NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" yarn dev';
+  ? 'DISABLE_AUTH=true NEXT_PUBLIC_APP_ENV=local NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" yarn start'
+  : 'DISABLE_AUTH=true NEXT_PUBLIC_APP_ENV=local NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" yarn dev';
 
 const authEnabledEnv = [
   'PORT=3001',
   'NEXTAUTH_URL=http://localhost:3001',
-  'NEXT_PUBLIC_DISABLE_AUTH=false',
+  'DISABLE_AUTH=false',
   'NEXT_PUBLIC_APP_ENV=local',
   'NEXTAUTH_SECRET=test-secret-for-playwright',
   'KEYCLOAK_CLIENT_ID=ingest-ui',

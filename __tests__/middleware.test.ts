@@ -30,7 +30,7 @@ import { NextResponse } from 'next/server';
 describe('Middleware', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.stubEnv('NEXT_PUBLIC_DISABLE_AUTH', 'false');
+    vi.stubEnv('DISABLE_AUTH', 'false');
     vi.stubEnv('NODE_ENV', 'development');
   });
 

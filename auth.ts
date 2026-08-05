@@ -13,7 +13,7 @@ import {
   logStructured,
 } from '@/lib/structuredLogger';
 
-const authDisabled = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
+const authDisabled = process.env.DISABLE_AUTH === 'true';
 
 // Normalize tenant values by deduping case-insensitively and enforcing one Public Tenant.
 const normalizeTenants = (tenants: string[]): string[] => {
@@ -274,7 +274,7 @@ const initializeAuth = async (): Promise<void> => {
           customToken.scopes = parseScopesFromAccessToken(account.access_token);
 
           try {
-            if (process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true') {
+            if (process.env.DISABLE_AUTH === 'true') {
               const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
               if (mockTenants && mockTenants.trim() !== '') {
                 customToken.tenants = normalizeTenants(mockTenants.split(','));

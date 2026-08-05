@@ -24,6 +24,10 @@ const nextConfig: NextConfig = {
   env: {
     // Expose a browser-readable debug flag while allowing a single operational
     // backend env var to control both server and frontend logger behavior.
+    NEXT_PUBLIC_DISABLE_AUTH:
+      process.env.NEXT_PUBLIC_DISABLE_AUTH ??
+      process.env.DISABLE_AUTH ??
+      'false',
     NEXT_PUBLIC_ENABLE_DEBUG_LOGGING:
       process.env.NEXT_PUBLIC_ENABLE_DEBUG_LOGGING ??
       process.env.ENABLE_DEBUG_LOGGING ??
