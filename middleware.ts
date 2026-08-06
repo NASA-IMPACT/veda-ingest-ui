@@ -11,7 +11,12 @@ import {
   summarizeSession,
 } from '@/lib/structuredLogger';
 
-const DISABLE_AUTH = process.env.DISABLE_AUTH === 'true';
+// We have to read NEXT_PUBLIC_DISABLE_AUTH, not DISABLE_AUTH because
+// the middleware runs in the Edge Runtime where only NEXT_PUBLIC_* vars are
+// inlined at build time and non-public vars are undefined at runtime.
+// so next.config.ts `env` field derives this from DISABLE_AUTH at build time.
+// source: https://nextjs.org/docs/app/guides/environment-variables#bundling-environment-variables-for-the-browser
+const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
 // Define route permissions in a declarative way
 const routeConfig = {
