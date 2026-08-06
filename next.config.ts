@@ -21,6 +21,7 @@ if (missingEnvVars.length > 0 && process.env.NODE_ENV !== 'test') {
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: false,
+  ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
   env: {
     // Derive NEXT_PUBLIC_DISABLE_AUTH from DISABLE_AUTH at build time so middleware
     // and auth.ts (which run in Edge Runtime) can read it since non-NEXT_PUBLIC_ vars are

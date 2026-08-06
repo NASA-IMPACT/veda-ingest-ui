@@ -9,6 +9,7 @@ const authDisabledCommand = process.env.CI
 
 const authEnabledEnv = [
   'PORT=3001',
+  'NEXT_DIST_DIR=.next-auth-enabled',
   'NEXTAUTH_URL=http://localhost:3001',
   'DISABLE_AUTH=false', // needed for server side code
   'NEXT_PUBLIC_DISABLE_AUTH=false', // needed for edge runtime middleware
@@ -19,8 +20,9 @@ const authEnabledEnv = [
   'NEXT_PUBLIC_KEYCLOAK_ISSUER=https://example.test/realms/veda',
 ].join(' ');
 
+// make a separate build with DISABLE_AUTH=false into a different dist dir for the auth-enabled server
 const authEnabledCommand = process.env.CI
-  ? `${authEnabledEnv} yarn start`
+  ? `${authEnabledEnv} yarn build && ${authEnabledEnv} yarn start`
   : `${authEnabledEnv} yarn dev`;
 
 export default defineConfig({
