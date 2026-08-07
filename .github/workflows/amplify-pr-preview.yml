@@ -62,7 +62,7 @@ jobs:
           # (e.g. a rapid follow-up push). Stop it first so the new job can start.
           ACTIVE_JOB_ID=$(aws amplify list-jobs --app-id "$APP_ID" --branch-name "$BRANCH_NAME" \
             --query "jobSummaries[?status=='PENDING' || status=='PROVISIONING' || status=='RUNNING'].jobId | [0]" \
-            --output text)
+            --output text | head -1)
           if [ -n "$ACTIVE_JOB_ID" ] && [ "$ACTIVE_JOB_ID" != "None" ]; then
             aws amplify stop-job --app-id "$APP_ID" --branch-name "$BRANCH_NAME" --job-id "$ACTIVE_JOB_ID"
           fi
