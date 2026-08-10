@@ -275,7 +275,7 @@ const initializeAuth = async (): Promise<void> => {
           customToken.scopes = parseScopesFromAccessToken(account.access_token);
 
           try {
-            if (process.env.DISABLE_AUTH === 'true') {
+            if (process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true') {
               const mockTenants = process.env.NEXT_PUBLIC_MOCK_TENANTS;
               if (mockTenants && mockTenants.trim() !== '') {
                 customToken.tenants = normalizeTenants(mockTenants.split(','));
