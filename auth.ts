@@ -13,6 +13,7 @@ import {
   logStructured,
 } from '@/lib/structuredLogger';
 
+// See middleware.ts for why this reads NEXT_PUBLIC_DISABLE_AUTH instead of DISABLE_AUTH
 const authDisabled = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
 // Normalize tenant values by deduping case-insensitively and enforcing one Public Tenant.

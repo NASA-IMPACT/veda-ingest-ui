@@ -3,20 +3,57 @@ import { defineConfig } from '@playwright/test';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const webServerCommand = process.env.CI
-  ? 'NEXT_PUBLIC_DISABLE_AUTH=true NEXT_PUBLIC_APP_ENV=local NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" yarn start'
-  : 'NEXT_PUBLIC_DISABLE_AUTH=true NEXT_PUBLIC_APP_ENV=local NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" yarn dev';
+const authDisabledCommand = process.env.CI
+  ? 'DISABLE_AUTH=true NEXT_PUBLIC_APP_ENV=local NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" yarn start'
+  : 'DISABLE_AUTH=true NEXT_PUBLIC_APP_ENV=local NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" yarn dev';
+
+const authEnabledEnv = [
+  'PORT=3001',
+  'NEXT_DIST_DIR=.next-auth-enabled',
+  'NEXTAUTH_URL=http://localhost:3001',
+  'DISABLE_AUTH=false', // needed for server side code
+  'NEXT_PUBLIC_DISABLE_AUTH=false', // needed for edge runtime middleware
+  'NEXT_PUBLIC_APP_ENV=local',
+  'NEXTAUTH_SECRET=test-secret-for-playwright',
+  'KEYCLOAK_CLIENT_ID=ingest-ui',
+  'KEYCLOAK_CLIENT_SECRET=test-secret-for-playwright',
+  'NEXT_PUBLIC_KEYCLOAK_ISSUER=https://example.test/realms/veda',
+].join(' ');
+
+// make a separate build with DISABLE_AUTH=false into a different dist dir for the auth-enabled server
+const authEnabledCommand = process.env.CI
+  ? `${authEnabledEnv} yarn build && ${authEnabledEnv} yarn start`
+  : `${authEnabledEnv} yarn dev`;
 
 export default defineConfig({
   testDir: './__tests__/playwright',
-  webServer: {
-    command: webServerCommand,
-    port: 3000,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-  },
+  webServer: [
+    {
+      command: authDisabledCommand,
+      port: 3000,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120000,
+    },
+    {
+      command: authEnabledCommand,
+      port: 3001,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120000,
+    },
+  ],
+  projects: [
+    {
+      name: 'default',
+      use: { baseURL: 'http://localhost:3000' },
+      testIgnore: ['**/MiddlewareAuth.test.tsx'],
+    },
+    {
+      name: 'middleware',
+      use: { baseURL: 'http://localhost:3001' },
+      testMatch: ['**/MiddlewareAuth.test.tsx'],
+    },
+  ],
   use: {
-    baseURL: 'http://localhost:3000',
     headless: true,
     trace: 'retain-on-failure',
   },
