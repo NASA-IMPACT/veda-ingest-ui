@@ -39,7 +39,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.AMPLIFY_PREVIEW_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
