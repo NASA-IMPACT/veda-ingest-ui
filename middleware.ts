@@ -11,11 +11,6 @@ import {
   summarizeSession,
 } from '@/lib/structuredLogger';
 
-// We have to read NEXT_PUBLIC_DISABLE_AUTH, not DISABLE_AUTH because
-// the middleware runs in the Edge Runtime where only NEXT_PUBLIC_* vars are
-// inlined at build time and non-public vars are undefined at runtime.
-// so next.config.ts `env` field derives this from DISABLE_AUTH at build time.
-// source: https://nextjs.org/docs/app/guides/environment-variables#bundling-environment-variables-for-the-browser
 const DISABLE_AUTH = process.env.NEXT_PUBLIC_DISABLE_AUTH === 'true';
 
 // Define route permissions in a declarative way
@@ -116,7 +111,8 @@ export async function middleware(request: NextRequest) {
 
   // Security: Ensure auth is never disabled in a production deployment
   const appEnv = process.env.NEXT_PUBLIC_APP_ENV?.toLowerCase();
-  const isProdDeployment = appEnv === 'veda' || appEnv === 'disasters' || appEnv === 'eic';
+  const isProdDeployment =
+    appEnv === 'veda' || appEnv === 'disasters' || appEnv === 'eic';
   if (DISABLE_AUTH && isProdDeployment) {
     logRequestEnd(logContext, 500, {
       reason: 'auth_disabled_in_production',

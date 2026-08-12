@@ -23,16 +23,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
   env: {
-    // Derive NEXT_PUBLIC_DISABLE_AUTH from DISABLE_AUTH at build time so middleware
-    // and auth.ts (which run in Edge Runtime) can read it since non-NEXT_PUBLIC_ vars are
-    // not available in Edge Runtime
-    // (source: https://nextjs.org/docs/app/api-reference/config/next-config-js/env)
-    // Also expose a browser-readable debug flag while allowing a single operational
+    // Expose a browser-readable debug flag while allowing a single operational
     // backend env var to control both server and frontend logger behavior.
-    NEXT_PUBLIC_DISABLE_AUTH:
-      process.env.NEXT_PUBLIC_DISABLE_AUTH ??
-      process.env.DISABLE_AUTH ??
-      'false',
     NEXT_PUBLIC_ENABLE_DEBUG_LOGGING:
       process.env.NEXT_PUBLIC_ENABLE_DEBUG_LOGGING ??
       process.env.ENABLE_DEBUG_LOGGING ??
