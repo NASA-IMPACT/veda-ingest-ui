@@ -463,14 +463,6 @@ This will start the app and make it available at <http://localhost:3000/>.
 
 To bypass the keycloak login, set the `NEXT_PUBLIC_DISABLE_AUTH` environment variable to true. This variable is also leveraged for Playwright testing.
 
-## Running integration tests locally
-
-If you want to run the Playwright e2e tests locally, use `yarn playwright test` instead of `yarn test:e2e`. The `test:e2e` script runs `yarn build` first, which is needed in CI (where servers use `yarn start`) but it causes conflicts locally (where servers use `yarn dev`)
-
-```bash
-# Run all integration tests
-yarn playwright test
-```
 
 ## 🛠️ STAC Data Sanitization
 

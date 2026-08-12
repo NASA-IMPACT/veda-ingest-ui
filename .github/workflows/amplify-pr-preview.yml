@@ -55,14 +55,11 @@ jobs:
           aws amplify get-branch --app-id "$APP_ID" --branch-name "$BRANCH_NAME" || \
           aws amplify create-branch --app-id "$APP_ID" --branch-name "$BRANCH_NAME" --stage PULL_REQUEST
 
-          aws amplify update-branch --app-id "$APP_ID" --branch-name "$BRANCH_NAME" \
-            --environment-variables DISABLE_AUTH=true,NEXT_PUBLIC_APP_ENV=preview
-
           # Amplify rejects StartJob if the branch already has a pending/running job
           # (e.g. a rapid follow-up push). Stop it first so the new job can start.
           ACTIVE_JOB_ID=$(aws amplify list-jobs --app-id "$APP_ID" --branch-name "$BRANCH_NAME" \
             --query "jobSummaries[?status=='PENDING' || status=='PROVISIONING' || status=='RUNNING'].jobId | [0]" \
-            --output text | head -1)
+            --output text)
           if [ -n "$ACTIVE_JOB_ID" ] && [ "$ACTIVE_JOB_ID" != "None" ]; then
             aws amplify stop-job --app-id "$APP_ID" --branch-name "$BRANCH_NAME" --job-id "$ACTIVE_JOB_ID"
           fi
