@@ -111,7 +111,8 @@ export async function middleware(request: NextRequest) {
 
   // Security: Ensure auth is never disabled in a production deployment
   const appEnv = process.env.NEXT_PUBLIC_APP_ENV?.toLowerCase();
-  const isProdDeployment = appEnv === 'veda' || appEnv === 'disasters' || appEnv === 'eic';
+  const isProdDeployment =
+    appEnv === 'veda' || appEnv === 'disasters' || appEnv === 'eic';
   if (DISABLE_AUTH && isProdDeployment) {
     logRequestEnd(logContext, 500, {
       reason: 'auth_disabled_in_production',

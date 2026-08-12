@@ -7,8 +7,8 @@ on:
     types: [opened, synchronize, reopened, closed]
 
 permissions:
-  id-token: write   # Required for AWS OIDC authentication
-  contents: read    # Required for checking out the repository
+  id-token: write # Required for AWS OIDC authentication
+  contents: read # Required for checking out the repository
   pull-requests: write # Required to post/update comments
 
 # Cancel a stale run for this PR when a new commit is pushed, so we don't
