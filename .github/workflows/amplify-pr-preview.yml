@@ -36,7 +36,7 @@ jobs:
       AMPLIFY_PREVIEW_ROLE: ${{ vars.AMPLIFY_PREVIEW_ROLE }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
