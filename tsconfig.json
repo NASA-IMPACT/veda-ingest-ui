@@ -1,8 +1,14 @@
 {
   "compilerOptions": {
-    "types": ["vitest"],
+    "types": [
+      "vitest"
+    ],
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -20,16 +26,21 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     }
   },
   "include": [
-    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    ".next/dev/types/**/*.ts",
     ".next/types/**/*.ts",
+    "next-env.d.ts",
     "types/**/*.d.ts",
-    ".next/dev/types/**/*.ts"
+    ".next-auth-enabled/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

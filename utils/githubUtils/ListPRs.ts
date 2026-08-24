@@ -145,8 +145,8 @@ const ListPRs = async (
 
     // Filter out any PRs that didn't have a matching or valid file
     return results.filter(
-      (ingest): ingest is IngestPullRequest => ingest !== null
-    );
+      (ingest) => ingest !== null
+    ) as IngestPullRequest[];
   } catch (error) {
     console.error('Failed to list pull requests:', error);
     throw error;

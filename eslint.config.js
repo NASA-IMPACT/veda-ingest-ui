@@ -1,23 +1,13 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
-import js from "@eslint/js";
-import playwright from "eslint-plugin-playwright";
+import tseslint from "@typescript-eslint/eslint-plugin";
+import nextConfig from "eslint-config-next";
 import eslintConfigPrettier from "eslint-config-prettier";
+import playwright from "eslint-plugin-playwright";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-});
+const playwrightRecommended = playwright.configs["flat/recommended"] ?? {};
 
 export default [
-  // 1. Global Ignores (Merged Legacy and Newly Requested Ignores)
   {
     ignores: [
-      // Folders
       ".next/**",
       "node_modules/**",
       "dist/**",
@@ -30,35 +20,32 @@ export default [
       "out/**",
       "playwright-report/**",
       "test-results/**",
-
-      // Individual Files
       "*.config.js",
       "**/*.css",
-      "next-env.d.ts"
+      "next-env.d.ts",
     ],
   },
-
-  // 2. Base Next.js & TypeScript configurations via FlatCompat
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
-
-  // 3. Custom global rules
+  ...nextConfig,
   {
+    plugins: {
+      "@typescript-eslint": tseslint,
+    },
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-require-imports": "warn",
       "@typescript-eslint/triple-slash-reference": "warn",
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/refs": "off",
     },
   },
-
-  // 4. Playwright override config block
   {
     files: ["__tests__/playwright/**"],
-    ...playwright.configs["flat/recommended"],
+    plugins: { playwright },
+    languageOptions: playwrightRecommended.languageOptions ?? {},
     rules: {
+      ...(playwrightRecommended.rules ?? {}),
       "playwright/no-nested-step": "off",
     },
   },
-
-  // 5. Prettier config to turn off conflicting rules (Must always be last)
   eslintConfigPrettier,
 ];
