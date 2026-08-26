@@ -61,6 +61,7 @@ type MutableSchema = {
 
 const codeEditorStyle = {
   backgroundColor: '#00152a',
+  color: '#FFFFFF',
   fontFamily:
     'ui-monospace,SFMono-Regular,Consolas,Liberation Mono,Menlo,monospace',
   boxShadow: '0px 3px 15px rgba(0, 0, 0, 0.2)',
