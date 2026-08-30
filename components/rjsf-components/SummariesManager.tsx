@@ -88,9 +88,13 @@ const SummariesManager: React.FC<SummariesManagerProps> = ({
       case SUMMARY_TYPES.SET:
         return (
           <div>
-            {(data as unknown[]).map((v, i) => (
-              <Tag key={i}>{String(v) || '(empty)'}</Tag>
-            ))}
+            {(data as unknown[]).map((v, i) => {
+              const label =
+                v !== null && typeof v === 'object'
+                  ? JSON.stringify(v)
+                  : String(v);
+              return <Tag key={i}>{label || '(empty)'}</Tag>;
+            })}
           </div>
         );
       case SUMMARY_TYPES.RANGE:
