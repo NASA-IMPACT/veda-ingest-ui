@@ -7,7 +7,7 @@ updates:
     schedule:
       interval: weekly
     groups:
-      maven:
+      npm-dependencies:
         patterns:
         - "*"
     commit-message:

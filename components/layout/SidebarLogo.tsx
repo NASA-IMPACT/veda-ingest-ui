@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { AlertFilled } from '@ant-design/icons/';
+import { AlertFilled } from '@ant-design/icons';
 import { cfg } from '@/config/env';
 
 interface SidebarLogoProps {
