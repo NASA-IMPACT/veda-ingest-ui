@@ -105,7 +105,7 @@ function getPermissionLevel(capabilities: UserCapabilities): string {
   return 'authenticated';
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const logContext = createRequestLogContext(request, 'middleware');
   logRequestStart(logContext, { target: 'authz-gate' });
 
