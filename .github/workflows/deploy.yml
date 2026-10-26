@@ -3,8 +3,8 @@ name: Deploy
 on:
   workflow_dispatch:
     inputs: 
-      tag:
-        description: "Release tag to deploy (defaults to latest release)"
+      TAG:
+        description: Release tag to deploy or defaults to latest release
         required: false
         default: ""
       DEPLOY_VEDA:
@@ -23,10 +23,6 @@ on:
         default: false
         description: Deploy to disasters instance
 
-permissions:
-  contents: write
-  id-token: write
-
 concurrency:
   group: amplify-deploy
   cancel-in-progress: false
@@ -37,13 +33,49 @@ env:
 jobs:
   resolve:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
       sha: ${{ steps.tag.outputs.sha }}
       apps: ${{ steps.instances.outputs.apps }}
     steps:
+      - name: Select Instances
+        id: instances
+        env:
+          ALL_INSTANCES: ${{ vars.AMPLIFY_INSTANCE_APP_IDS }}
+          DEPLOY_VEDA: ${{ inputs.DEPLOY_VEDA }}
+          DEPLOY_EIC: ${{ inputs.DEPLOY_EIC }}
+          DEPLOY_DISASTERS: ${{ inputs.DEPLOY_DISASTERS }}
+        run: |
+          WANT=()
+          [ "$DEPLOY_VEDA" = "true" ]      && WANT+=("veda")
+          [ "$DEPLOY_EIC" = "true" ]       && WANT+=("eic")
+          [ "$DEPLOY_DISASTERS" = "true" ] && WANT+=("disasters")
+
+          if [ ${#WANT[@]} -eq 0 ]; then
+            echo "::error::No instance selected. Select at least one."
+            exit 1
+          fi
+
+          WANT_JSON=$(printf '%s\n' "${WANT[@]}" | jq -R . | jq -sc .)
+          APPS=$(echo "$ALL_INSTANCES" | jq -c --argjson want "$WANT_JSON" \
+            'map(select(.name as $n | $want | index($n)))')
+
+          # Fail if a selected instance is missing from AMPLIFY_INSTANCE_APP_IDS
+          MISSING=$(echo "$ALL_INSTANCES" | jq -r --argjson want "$WANT_JSON" \
+            '[.[].name] as $have | $want - $have | join(", ")')
+          if [ -n "$MISSING" ]; then
+            echo "::error::Selected instance(s) not found in AMPLIFY_INSTANCE_APP_IDS: $MISSING"
+            exit 1
+          fi
+
+          echo "apps=$APPS" >> "$GITHUB_OUTPUT"
+          echo "Targets:" >> "$GITHUB_STEP_SUMMARY"
+          echo "$APPS" | jq -r '.[] | "- \(.name) (\(.id))"' >> "$GITHUB_STEP_SUMMARY"
+
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -52,7 +84,7 @@ jobs:
         id: tag
         env:
           GH_TOKEN: ${{ github.token }}
-          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_TAG: ${{ inputs.TAG }}
         run: |
           if [ -n "$INPUT_TAG" ]; then
             TAG="$INPUT_TAG"
@@ -78,55 +110,25 @@ jobs:
           git push origin "${SHA}:refs/heads/${AMPLIFY_DEPLOY_BRANCH}" --force
           echo "Pushed \`${SHA}\` to \`${AMPLIFY_DEPLOY_BRANCH}\`" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Select Instances
-        id: instances
-        env:
-          ALL_INSTANCES: ${{ vars.AMPLIFY_INSTANCE_APP_IDS }}
-          DEPLOY_VEDA: ${{ inputs.DEPLOY_VEDA }}
-          DEPLOY_EIC: ${{ inputs.DEPLOY_EIC }}
-          DEPLOY_DISASTERS: ${{ inputs.DEPLOY_DISASTERS }}
-        run: |
-          WANT=()
-          [ "$DEPLOY_VEDA" = "true" ]      && WANT+=("veda")
-          [ "$DEPLOY_EIC" = "true" ]       && WANT+=("eic")
-          [ "$DEPLOY_DISASTERS" = "true" ] && WANT+=("disasters")
-
-          if [ ${#WANT[@]} -eq 0 ]; then
-            # Nothing ticked: deploy every instance
-            echo "No instances selected, deploying to all."
-            WANT=($(echo "$ALL_INSTANCES" | jq -r '.[].name'))
-          fi
-
-          WANT_JSON=$(printf '%s\n' "${WANT[@]}" | jq -R . | jq -sc .)
-          APPS=$(echo "$ALL_INSTANCES" | jq -c --argjson want "$WANT_JSON" \
-            'map(select(.name as $n | $want | index($n)))')
-
-          # Fail if a selected instance is missing from AMPLIFY_INSTANCE_APP_IDS
-          MISSING=$(echo "$ALL_INSTANCES" | jq -r --argjson want "$WANT_JSON" \
-            '[.[].name] as $have | $want - $have | join(", ")')
-          if [ -n "$MISSING" ]; then
-            echo "::error::Selected instance(s) not found in AMPLIFY_INSTANCE_APP_IDS: $MISSING"
-            exit 1
-          fi
-
-          echo "apps=$APPS" >> "$GITHUB_OUTPUT"
-          echo "Targets:" >> "$GITHUB_STEP_SUMMARY"
-          echo "$APPS" | jq -r '.[] | "- \(.name) (\(.id))"' >> "$GITHUB_STEP_SUMMARY"
-
   deploy: 
     needs: resolve
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      id-token: write
     name: deploy (${{ matrix.app.name }})
+    env:
+      AWS_REGION: us-west-2
     strategy:
       fail-fast: false
       matrix:
         app: ${{ fromJSON(needs.resolve.outputs.apps) }}
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c
         with: 
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
       
       - name: Start Amplify build
         id: job
