@@ -6,7 +6,6 @@ on:
       TAG:
         description: Release tag to deploy or defaults to latest release
         required: false
-        default: ""
       DEPLOY_VEDA:
         type: boolean
         required: true
