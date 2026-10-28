@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@octokit/types": "^13.6.2",
-    "@playwright/test": "^1.57.0",
+    "@playwright/test": "^1.64.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
