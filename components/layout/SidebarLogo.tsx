@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { AlertFilled } from '@ant-design/icons/';
 import { cfg } from '@/config/env';
+import { Tooltip } from 'antd';
 
 interface SidebarLogoProps {
   collapsed: boolean;
@@ -25,12 +26,14 @@ const SidebarLogo = ({ collapsed }: SidebarLogoProps) => {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <Image
-          src="/icon.svg"
-          alt="VEDA Ingest UI Logo"
-          width={32}
-          height={32}
-        />
+        <Tooltip placement="right" title={collapsed ? 'VEDA Ingest UI' : ''}>
+          <Image
+            src="/icon.svg"
+            alt="VEDA Ingest UI Logo"
+            width={32}
+            height={32}
+          />
+        </Tooltip>
         {!collapsed && (
           <div
             style={{

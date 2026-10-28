@@ -21,6 +21,7 @@ if (missingEnvVars.length > 0 && process.env.NODE_ENV !== 'test') {
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: false,
+  ...(process.env.NEXT_DIST_DIR ? { distDir: process.env.NEXT_DIST_DIR } : {}),
   env: {
     // Expose a browser-readable debug flag while allowing a single operational
     // backend env var to control both server and frontend logger behavior.

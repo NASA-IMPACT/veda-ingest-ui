@@ -1,0 +1,159 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs: 
+      TAG:
+        description: Release tag to deploy or defaults to latest release
+        required: false
+      DEPLOY_VEDA:
+        type: boolean
+        required: true
+        default: false
+        description: Deploy to veda instance
+      DEPLOY_EIC:
+        type: boolean
+        required: true
+        default: false
+        description: Deploy to eic instance
+      DEPLOY_DISASTERS:
+        type: boolean
+        required: true
+        default: false
+        description: Deploy to disasters instance
+
+concurrency:
+  group: amplify-deploy
+  cancel-in-progress: false
+
+env:
+  AMPLIFY_DEPLOY_BRANCH: amplify-deploy
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      sha: ${{ steps.tag.outputs.sha }}
+      apps: ${{ steps.instances.outputs.apps }}
+    steps:
+      - name: Select Instances
+        id: instances
+        env:
+          ALL_INSTANCES: ${{ vars.AMPLIFY_INSTANCE_APP_IDS }}
+          DEPLOY_VEDA: ${{ inputs.DEPLOY_VEDA }}
+          DEPLOY_EIC: ${{ inputs.DEPLOY_EIC }}
+          DEPLOY_DISASTERS: ${{ inputs.DEPLOY_DISASTERS }}
+        run: |
+          WANT=()
+          [ "$DEPLOY_VEDA" = "true" ]      && WANT+=("veda")
+          [ "$DEPLOY_EIC" = "true" ]       && WANT+=("eic")
+          [ "$DEPLOY_DISASTERS" = "true" ] && WANT+=("disasters")
+
+          if [ ${#WANT[@]} -eq 0 ]; then
+            echo "::error::No instance selected. Select at least one."
+            exit 1
+          fi
+
+          WANT_JSON=$(printf '%s\n' "${WANT[@]}" | jq -R . | jq -sc .)
+          APPS=$(echo "$ALL_INSTANCES" | jq -c --argjson want "$WANT_JSON" \
+            'map(select(.name as $n | $want | index($n)))')
+
+          # Fail if a selected instance is missing from AMPLIFY_INSTANCE_APP_IDS
+          MISSING=$(echo "$ALL_INSTANCES" | jq -r --argjson want "$WANT_JSON" \
+            '[.[].name] as $have | $want - $have | join(", ")')
+          if [ -n "$MISSING" ]; then
+            echo "::error::Selected instance(s) not found in AMPLIFY_INSTANCE_APP_IDS: $MISSING"
+            exit 1
+          fi
+
+          echo "apps=$APPS" >> "$GITHUB_OUTPUT"
+          echo "Targets:" >> "$GITHUB_STEP_SUMMARY"
+          echo "$APPS" | jq -r '.[] | "- \(.name) (\(.id))"' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Checkout Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Get Release Tag
+        id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ inputs.TAG }}
+        run: |
+          if [ -n "$INPUT_TAG" ]; then
+            TAG="$INPUT_TAG"
+            echo "Using tag from input: $TAG"
+          else
+            TAG=$(gh release view --json tagName --jq .tagName)
+            echo "No tag given, using latest release: $TAG"
+          fi
+
+          if ! SHA=$(git rev-parse --verify --quiet "refs/tags/$TAG^{commit}"); then
+            echo "::error::Tag '$TAG' does not exist"
+            exit 1
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "### Deploying \`$TAG\` (\`$SHA\`)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Point deploy branch at release commit
+        env:
+          SHA: ${{ steps.tag.outputs.sha }}
+        run: |
+          git push origin "${SHA}:refs/heads/${AMPLIFY_DEPLOY_BRANCH}" --force
+          echo "Pushed \`${SHA}\` to \`${AMPLIFY_DEPLOY_BRANCH}\`" >> "$GITHUB_STEP_SUMMARY"
+
+  deploy: 
+    needs: resolve
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      id-token: write
+    name: deploy (${{ matrix.app.name }})
+    env:
+      AWS_REGION: us-west-2
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.resolve.outputs.apps) }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v.6.2.4
+        with: 
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Start Amplify build
+        id: job
+        run: |
+          JOB_ID=$(aws amplify start-job \
+            --app-id "${{ matrix.app.id }}" \
+            --branch-name "$AMPLIFY_DEPLOY_BRANCH" \
+            --job-type RELEASE \
+            --commit-id "${{ needs.resolve.outputs.sha }}" \
+            --commit-message "Release ${{ needs.resolve.outputs.tag }}" \
+            --query 'jobSummary.jobId' --output text)
+          echo "job_id=$JOB_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for Amplify build
+        run: |
+          while true; do
+            STATUS=$(aws amplify get-job \
+              --app-id "${{ matrix.app.id }}" \
+              --branch-name "$AMPLIFY_DEPLOY_BRANCH" \
+              --job-id "${{ steps.job.outputs.job_id }}" \
+              --query 'job.summary.status' --output text)
+            echo "${{ matrix.app.name }}: $STATUS"
+            case "$STATUS" in
+              SUCCEED) exit 0 ;;
+              FAILED|CANCELLED) exit 1 ;;
+            esac
+            sleep 20
+          done
+

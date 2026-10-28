@@ -136,6 +136,8 @@ export default function ObjectFieldTemplate<
     return <DiscoveryItemObjectFieldTemplate {...props} />;
   }
 
+  const isNestedInputObject = fieldPathId.path.length > 1;
+
   return (
     <ConfigConsumer>
       {(configProps: ConfigConsumerProps) => {
@@ -149,7 +151,12 @@ export default function ObjectFieldTemplate<
 
         return (
           <>
-            <fieldset id={fieldPathId.$id}>
+            <fieldset
+              id={fieldPathId.$id}
+              className={
+                isNestedInputObject ? 'object-field-template-nested' : undefined
+              }
+            >
               <Row gutter={rowGutter}>
                 {title && (
                   <Col className={labelColClassName} span={24}>
