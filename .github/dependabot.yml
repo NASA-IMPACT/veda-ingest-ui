@@ -5,9 +5,13 @@ updates:
     cooldown:
       default-days: 7
     schedule:
-      interval: weekly
+      interval: monthly
     groups:
-      maven:
+      npm-dependencies:
+        patterns:
+        - "*"
+      npm-security:
+        applies-to: security-updates
         patterns:
         - "*"
     commit-message:
@@ -18,7 +22,7 @@ updates:
     cooldown:
       default-days: 7
     schedule:
-      interval: weekly
+      interval: monthly
     groups:
       github-actions:
         patterns:
