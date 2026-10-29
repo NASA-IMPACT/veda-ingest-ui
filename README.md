@@ -433,17 +433,18 @@ Configuration uses environment files that are **never committed** to version con
    ```
 
 ### AWS Amplify Deployment
+For existing instance production deployments, reference:
+- [Deployment Guide Doc](/docs/deployment/README.md)
 
-For production deployments, use the runbook:
-
+For new instance production deployments, use the runbook:
 - [Amplify New Instance Runbook](docs/deployment/amplify-new-instance-runbook.md)
 
-It includes:
+  It includes:
 
-- Branch deployment behavior for merge-to-main workflows
-- Required Amplify environment variables
-- Secrets Manager JSON shape and runtime secret wiring
-- Runtime IAM permissions and post-deploy validation checklist
+  - Branch deployment behavior for the manual Deploy dispatch workflow
+  - Required Amplify environment variables
+  - Secrets Manager JSON shape and runtime secret wiring
+  - Runtime IAM permissions and post-deploy validation checklist
 
 ### Github Access
 
