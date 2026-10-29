@@ -6,8 +6,17 @@ updates:
       default-days: 7
     schedule:
       interval: monthly
+    open-pull-requests-limit: 10 # upped from default since prod majors would be their own 
     groups:
-      npm-dependencies:
+      production-dependencies: # group minor and patch updates and have major updates come through alone
+        dependency-type: "production"
+        update-types:
+        - "minor"
+        - "patch"
+        patterns:
+        - "*"
+      development-dependencies:
+        dependency-type: "development"
         patterns:
         - "*"
       npm-security:
