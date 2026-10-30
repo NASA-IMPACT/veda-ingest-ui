@@ -13,9 +13,10 @@ For existing instances, deployments are triggered manually by running the [Deplo
 ![deploy workflow diagram](images/deploy-workflow-diagram.png)
 
 ### Amplify App Instances Configuration
-* `amplify-deploy` is set as the production branch for each app instance
-* For our custom domains (i.e. url: `https://ingest.openveda.cloud`), branch is set to `amplify-deploy`
-* `Auto-build` is `disabled` for `amplify-deploy` branch
+* `amplify-deploy` is set as...
+   * The production branch for each app instance
+   * For our custom domains (i.e. url: `https://ingest.openveda.cloud`)
+   * `Auto-build` is `disabled`
 
 ### Instructions
 1. Navigate to github actions in the repository, and select the `Deploy` workflow
@@ -34,8 +35,10 @@ For the `Deploy` dispatch workflow to run successfuly, these are required:
       * `AWS_DEPLOY_ROLE_ARN`: Uses the `GitHubActionsAmplifyPreviewRole` arn as it has the appropriate permissions
       * `AMPLIFY_INSTANCE_APP_IDS`: Must include the instance name and app id in the variable value for the github actions matrix strategy
 * In AWS Amplify for each instance:
-   * Production branch set to `amplify-deploy` with `auto-build` set to `disabled`
-   * Custom domains pointing to `amplify-deploy` branch (only if production)
+   * See [Amplify App Instances Configuration](#amplify-app-instances-configuration)
+
+## Rollbacks
+For a Rollback, just specify a release tag you'd like to rollback to and dispatch the workflow.
 
 ## Which Guide Should I Start With?
 
