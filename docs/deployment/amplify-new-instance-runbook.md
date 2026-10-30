@@ -96,8 +96,9 @@ Scope resources to the role and secret ARNs used by your environment.
 In Github repository, under `Secrets and variables`, find the `AMPLIFY_INSTANCE_APP_IDS` variable and edit it to add the new instance.
 
 ## 9. Connect Branch Deployment Behavior
-Ensure your Amplify app is connected to the `amplify-deploy` branch and it is set as the production branch in amplify. The [Deploy workflow](../../.github/workflows/deploy.yml) force-pushes a chosen release commit to that branch before triggering a deploy off of it.
-> note: In Amplify console, make sure to point production custom domains to `amplify-deploy` branch. (i.e. url: `https://ingest.openveda.cloud`)
+Ensure your Amplify app has these configued, see [Amplify App Instances Configuration](./README.md/#amplify-app-instances-configuration)
+
+The [Deploy workflow](../../.github/workflows/deploy.yml) force-pushes a chosen release commit to that branch before triggering a deploy off of it.
 
 ## 10. Validate After Deployment
 
