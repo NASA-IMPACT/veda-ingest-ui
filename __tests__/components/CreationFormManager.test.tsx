@@ -217,21 +217,26 @@ describe('CreationFormManager', () => {
 
     const form = screen.getByTestId('dataset-ingestion-form');
     fireEvent.submit(form);
-    await screen.findByText('Add an Optional Note for Maintainers');
 
-    const cancelButton = screen.getByRole('button', { name: /Cancel/i });
-    fireEvent.click(cancelButton);
-
-    // Assert the modal is gone
     await waitFor(() => {
-      expect(
-        screen.queryByText('Add an Optional Note for Maintainers')
-      ).not.toBeInTheDocument();
+      expect(mockValidateFormDataCog).toHaveBeenCalledWith(
+        {
+          collection: 'Test Dataset',
+          sample_files: 'http://example.com/file.tif',
+        },
+        'dataset'
+      );
     });
 
-    // Assert that fetch was never called
-    expect(fetch).not.toHaveBeenCalled();
-    expect(mockSetStatus).not.toHaveBeenCalled();
+    const cancelButton = await screen.findByRole('button', {
+      name: /Cancel/i,
+    });
+    fireEvent.click(cancelButton);
+
+    await waitFor(() => {
+      expect(fetch).not.toHaveBeenCalled();
+      expect(mockSetStatus).not.toHaveBeenCalled();
+    });
   });
 
   it('handles failed form submission after modal confirmation', async () => {
