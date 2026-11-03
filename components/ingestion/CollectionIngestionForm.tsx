@@ -43,7 +43,9 @@ import { RendersDashboardWidget } from '@/components/rjsf-components/RendersDash
 import SummariesManager from '@/components/rjsf-components/SummariesManager';
 
 import staticBaseSchema from '@/FormSchemas/collections/collectionSchema.json';
+import staticDiscoverSchema from '@/FormSchemas/collections/discoverSchema.json';
 import uiSchema from '@/FormSchemas/collections/uischema.json';
+import discoverUiSchema from '@/FormSchemas/collections/discoverUiSchema.json';
 import { Form } from './rjsfTheme';
 
 // Lazy load JSONEditor - only needed when JSON tab is active
@@ -429,6 +431,48 @@ function CollectionIngestionForm({
                   additionalProperties={additionalProperties}
                 />
               </Suspense>
+            ),
+          },
+          {
+            key: 'discover',
+            label: 'Discover Items',
+            children: (
+              <AntdForm onFinish={handleFormSubmit}>
+                <Form
+                  key={forceRenderKey}
+                  // schema={schemaForRJSF as JSONSchema7}
+                  schema={staticDiscoverSchema as JSONSchema7}
+                  // uiSchema={
+                  //   isEditMode ? lockedUiSchema : dynamicUiSchema || uiSchema
+                  // }
+                  uiSchema={(discoverUiSchema as unknown) as JSONSchema7}
+                  validator={validator}
+                  customValidate={customValidate}
+                  templates={{ ObjectFieldTemplate }}
+                  // fields={customFields}
+                  formData={rjsfFormData}
+                  onChange={onRJSFDataChanged}
+                  widgets={widgets}
+                  tagName="div"
+                >
+                  <></>
+                </Form>
+
+                {children ?? (
+                  <Row justify="center" style={{ marginTop: '40px' }}>
+                    <Col span={24}>
+                      <Button
+                        type="primary"
+                        htmlType="submit"
+                        size="large"
+                        block
+                      >
+                        Submit
+                      </Button>
+                    </Col>
+                  </Row>
+                )}
+              </AntdForm>
             ),
           },
         ]}
