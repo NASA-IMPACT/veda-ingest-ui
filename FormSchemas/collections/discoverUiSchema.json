@@ -1,0 +1,11 @@
+{
+  "ui:grid": [
+    {
+      "id": 8
+    },
+    {
+      "type": 4,
+      "stac_version": 4
+    }
+  ]
+}

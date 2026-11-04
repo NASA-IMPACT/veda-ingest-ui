@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "required": [
+    "stac_version",
+    "type",
+    "id"
+  ],
+  "properties": {
+    "type": {
+      "title": "Type of STAC entity",
+      "type": "string",
+      "const": "Collection"
+    },
+    "id": {
+      "type": "string",
+      "title": "Identifier"
+    },
+    "stac_version": {
+      "title": "STAC version",
+      "type": "string",
+      "const": "1.0.0"
+    }
+  }
+}
