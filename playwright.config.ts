@@ -4,8 +4,22 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const authDisabledCommand = process.env.CI
-  ? 'NEXT_PUBLIC_DISABLE_AUTH=true NEXT_PUBLIC_APP_ENV=local NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" yarn start'
-  : 'NEXT_PUBLIC_DISABLE_AUTH=true NEXT_PUBLIC_APP_ENV=local NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create" yarn dev';
+  ? [
+      'NEXT_PUBLIC_DISABLE_AUTH=true',
+      'NEXT_PUBLIC_APP_ENV=local',
+      'NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create"',
+      'yarn build &&',
+      'NEXT_PUBLIC_DISABLE_AUTH=true',
+      'NEXT_PUBLIC_APP_ENV=local',
+      'NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create"',
+      'yarn start',
+    ].join(' ')
+  : [
+      'NEXT_PUBLIC_DISABLE_AUTH=true',
+      'NEXT_PUBLIC_APP_ENV=local',
+      'NEXT_PUBLIC_MOCK_SCOPES="dataset:update stac:collection:update dataset:create"',
+      'yarn dev',
+    ].join(' ');
 
 const authEnabledEnv = [
   'PORT=3001',
