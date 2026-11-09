@@ -250,35 +250,35 @@ function DatasetIngestionForm({
           label: 'Form',
           children: (
             <>
-            <AntdManualForm handleFormSubmit={handleFormSubmit}>
-              <ManualForm
-                key={forceRenderKey} // Forces re-render when data updates
-                schemaForRJSF={dynamicSchema as JSONSchema7}
-                uiSchema={resolvedUiSchema}
-                customFields={customFields}
-                rjsfFormData={formScopedData}
-                onRJSFDataChanged={onFormDataChanged}
-                formContext={{
-                  formData: formScopedData,
-                  updateFormData: setFormData,
-                }}
-                widgets={widgets}
-                tagName="div"
-            >
-              {children ? (
-                  children
-                ) : (
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    style={{ marginTop: '20px' }}
-                    block
-                  >
-                    Submit
-                  </Button>
-                )}
-              </ManualForm>
-            </AntdManualForm>
+              <AntdManualForm handleFormSubmit={handleFormSubmit}>
+                <ManualForm
+                  key={forceRenderKey} // Forces re-render when data updates
+                  schemaForRJSF={dynamicSchema as JSONSchema7}
+                  uiSchema={resolvedUiSchema}
+                  customFields={customFields}
+                  rjsfFormData={formScopedData}
+                  onRJSFDataChanged={onFormDataChanged}
+                  formContext={{
+                    formData: formScopedData,
+                    updateFormData: setFormData,
+                  }}
+                  widgets={widgets}
+                  tagName="div"
+                >
+                  {children ? (
+                    children
+                  ) : (
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      style={{ marginTop: '20px' }}
+                      block
+                    >
+                      Submit
+                    </Button>
+                  )}
+                </ManualForm>
+              </AntdManualForm>
               {additionalProperties &&
                 Object.keys(additionalProperties).length > 0 && (
                   <AdditionalPropertyCard

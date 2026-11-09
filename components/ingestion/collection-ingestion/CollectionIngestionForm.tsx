@@ -12,15 +12,7 @@ import {
   lazy,
   Suspense,
 } from 'react';
-import {
-  Button,
-  Col,
-  Row,
-  Tabs,
-  Divider,
-  Form as AntdForm,
-  Spin,
-} from 'antd';
+import { Button, Col, Row, Tabs, Divider, Form as AntdForm, Spin } from 'antd';
 import { JSONSchema7 } from 'json-schema';
 
 import { useStacExtensions } from '@/hooks/useStacExtensions';
@@ -35,7 +27,7 @@ import { RendersDashboardWidget } from '@/components/rjsf-components/RendersDash
 
 import staticBaseSchema from '@/FormSchemas/collections/collectionSchema.json';
 import uiSchema from '@/FormSchemas/collections/uischema.json';
-import {AntdManualForm, ManualForm} from './manual-form';
+import { AntdManualForm, ManualForm } from './manual-form';
 
 // Lazy load JSONEditor - only needed when JSON tab is active
 const JSONEditor = lazy(() => import('@/components/ui/JSONEditor'));
@@ -282,10 +274,9 @@ function CollectionIngestionForm({
                   widgets={widgets}
                   forceRenderKey={forceRenderKey}
                   schemaForRJSF={schemaForRJSF}
-                  // isEditMode={isEditM ode}
-                  // lockedUiSchema={lockedUiSchema}
-                  // dynamicUiSchema={dynamicUiSchema}
-                  uiSchema={isEditMode ? lockedUiSchema : dynamicUiSchema || uiSchema}
+                  uiSchema={
+                    isEditMode ? lockedUiSchema : dynamicUiSchema || uiSchema
+                  }
                   summariesData={summariesData}
                   handleSummariesChange={handleSummariesChange}
                   isExistingCollectionEditMode={isExistingCollectionEditMode}
@@ -294,7 +285,7 @@ function CollectionIngestionForm({
                   formData={formData}
                   additionalProperties={additionalProperties}
                   validationErrors={validationErrors}
-                  tagName='div'
+                  tagName="div"
                 >
                   {children ?? (
                     <Row justify="center" style={{ marginTop: '40px' }}>

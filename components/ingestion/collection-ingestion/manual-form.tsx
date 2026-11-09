@@ -2,19 +2,14 @@
 
 import '@ant-design/v5-patch-for-react-19';
 import { ElementType } from 'react';
-import {
-  Alert,
-  Card,
-  Form as AntdForm,
-  Space,
-} from 'antd';
+import { Alert, Card, Form as AntdForm, Space } from 'antd';
 import { Form } from '../rjsfTheme';
 import { JSONSchema7 } from 'json-schema';
 import type {
   UiSchema as RJSFUiSchema,
   RegistryWidgetsType,
   RegistryFieldsType,
-  UiSchema
+  UiSchema,
 } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
 import { customValidate } from '@/utils/CustomValidation';
@@ -26,9 +21,7 @@ import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPrope
 
 interface ManualFormProps {
   customFields: RegistryFieldsType;
-  onRJSFDataChanged: (formState: {
-    formData?: object | undefined;
-}) => void
+  onRJSFDataChanged: (formState: { formData?: object | undefined }) => void;
   rjsfFormData?: Record<string, unknown>;
   widgets: RegistryWidgetsType;
   forceRenderKey?: number;
@@ -38,7 +31,11 @@ interface ManualFormProps {
   handleSummariesChange?: (newSummaries: Record<string, unknown>) => void;
   isExistingCollectionEditMode?: boolean;
   extensionFields?: Record<string, Extension>;
-  handleExtensionValueChange?: (propKey: string, isRequired: boolean, newValue: string) => void;
+  handleExtensionValueChange?: (
+    propKey: string,
+    isRequired: boolean,
+    newValue: string
+  ) => void;
   formData?: Record<string, unknown> | undefined;
   additionalProperties?: Record<string, unknown>;
   validationErrors?: string[];
@@ -47,18 +44,14 @@ interface ManualFormProps {
   tagName?: ElementType;
 }
 
-export function AntdManualForm ({
+export function AntdManualForm({
   handleFormSubmit,
-  children
+  children,
 }: {
   handleFormSubmit: () => void;
   children: React.ReactNode;
 }) {
-  return (
-    <AntdForm onFinish={handleFormSubmit}>
-      {children}
-    </AntdForm>
-  )
+  return <AntdForm onFinish={handleFormSubmit}>{children}</AntdForm>;
 }
 
 export function ManualForm({
@@ -79,75 +72,70 @@ export function ManualForm({
   validationErrors,
   children,
   formContext,
-  tagName
+  tagName,
 }: ManualFormProps) {
-    return (
-      <>
-        <Form
-          key={forceRenderKey}
-          schema={schemaForRJSF as JSONSchema7}
-          uiSchema={uiSchema}
-          validator={validator}
-          customValidate={customValidate}
-          templates={{ ObjectFieldTemplate }}
-          fields={customFields}
-          formData={rjsfFormData}
-          onChange={onRJSFDataChanged}
-          widgets={widgets}
-          tagName={tagName}
-          formContext={formContext}
-        >
-          <></>
-        </Form>
-      {
-        handleSummariesChange && (
-          <SummariesManager
-            initialData={summariesData}
-            onChange={handleSummariesChange}
-            readonly={isExistingCollectionEditMode}
-          />
-        )
-      }
+  return (
+    <>
+      <Form
+        key={forceRenderKey}
+        schema={schemaForRJSF as JSONSchema7}
+        uiSchema={uiSchema}
+        validator={validator}
+        customValidate={customValidate}
+        templates={{ ObjectFieldTemplate }}
+        fields={customFields}
+        formData={rjsfFormData}
+        onChange={onRJSFDataChanged}
+        widgets={widgets}
+        tagName={tagName}
+        formContext={formContext}
+      >
+        <></>
+      </Form>
+      {handleSummariesChange && (
+        <SummariesManager
+          initialData={summariesData}
+          onChange={handleSummariesChange}
+          readonly={isExistingCollectionEditMode}
+        />
+      )}
 
+      {extensionFields &&
+        handleExtensionValueChange &&
+        Object.values(extensionFields).map(({ title, fields }) => (
+          <Card
+            key={title}
+            title={`${title} Fields`}
+            style={{ marginTop: '20px' }}
+          >
+            <Space direction="vertical" style={{ width: '100%' }}>
+              {fields.map(({ name, required }) => {
+                const fieldId = name;
 
-      {extensionFields && handleExtensionValueChange && Object.values(extensionFields).map(({ title, fields }) => (
-        <Card
-          key={title}
-          title={`${title} Fields`}
-          style={{ marginTop: '20px' }}
-        >
-          <Space direction="vertical" style={{ width: '100%' }}>
-            {fields.map(({ name, required }) => {
-              const fieldId = name;
-
-              return (
-                <AntdForm.Item
-                  key={name}
-                  label={name}
-                  required={required}
-                  htmlFor={fieldId}
-                >
-                  <CodeEditorWidget
-                    id={fieldId}
-                    value={JSON.stringify(
-                      formData?.[name] ?? undefined,
-                      null,
-                      2
-                    )}
-                    onChange={(newValue) =>
-                      handleExtensionValueChange(
-                        name,
-                        required,
-                        newValue
-                      )
-                    }
-                  />
-                </AntdForm.Item>
-              );
-            })}
-          </Space>
-        </Card>
-      ))}
+                return (
+                  <AntdForm.Item
+                    key={name}
+                    label={name}
+                    required={required}
+                    htmlFor={fieldId}
+                  >
+                    <CodeEditorWidget
+                      id={fieldId}
+                      value={JSON.stringify(
+                        formData?.[name] ?? undefined,
+                        null,
+                        2
+                      )}
+                      onChange={(newValue) =>
+                        handleExtensionValueChange(name, required, newValue)
+                      }
+                    />
+                  </AntdForm.Item>
+                );
+              })}
+            </Space>
+          </Card>
+        ))}
 
       {additionalProperties && Object.keys(additionalProperties).length > 0 && (
         <AdditionalPropertyCard
@@ -172,6 +160,6 @@ export function ManualForm({
         />
       )}
       {children}
-      </>
-  )
+    </>
+  );
 }
