@@ -1,9 +1,11 @@
 {
   "type": "object",
   "required": [
-    "stac_version",
     "type",
-    "id"
+    "id",
+    "file_names",
+    "hazard",
+    "event_name"
   ],
   "properties": {
     "type": {
@@ -13,12 +15,23 @@
     },
     "id": {
       "type": "string",
-      "title": "Identifier"
+      "title": "Collection Identifier"
     },
-    "stac_version": {
-      "title": "STAC version",
+    "event_name": {
       "type": "string",
-      "const": "1.0.0"
+      "title": "Event Name",
+      "description": "replace with event name description"
+    },
+    "file_names": {
+      "type": "string",
+      "title": "File Names",
+      "description": "replace with filename description, regex?"
+    },
+    "hazard": {
+      "title": "Hazard",
+      "type": "string",
+      "description": "replace with Hazard description",
+      "enum": ["hazard1", "hazard2", "hazard3"]
     }
   }
 }

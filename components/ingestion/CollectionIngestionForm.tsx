@@ -433,23 +433,18 @@ function CollectionIngestionForm({
               </Suspense>
             ),
           },
-          {
+          ...( formType === 'existingCollection' ? [{
             key: 'discover',
             label: 'Discover Items',
             children: (
               <AntdForm onFinish={handleFormSubmit}>
                 <Form
                   key={forceRenderKey}
-                  // schema={schemaForRJSF as JSONSchema7}
                   schema={staticDiscoverSchema as JSONSchema7}
-                  // uiSchema={
-                  //   isEditMode ? lockedUiSchema : dynamicUiSchema || uiSchema
-                  // }
                   uiSchema={(discoverUiSchema as unknown) as JSONSchema7}
                   validator={validator}
                   customValidate={customValidate}
                   templates={{ ObjectFieldTemplate }}
-                  // fields={customFields}
                   formData={rjsfFormData}
                   onChange={onRJSFDataChanged}
                   widgets={widgets}
@@ -474,7 +469,7 @@ function CollectionIngestionForm({
                 )}
               </AntdForm>
             ),
-          },
+          }] : [])
         ]}
       />
     </>

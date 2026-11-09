@@ -5,7 +5,9 @@
     },
     {
       "type": 4,
-      "stac_version": 4
+      "event_name": 4,
+      "file_names": 4,
+      "hazard": 4
     }
   ]
 }
