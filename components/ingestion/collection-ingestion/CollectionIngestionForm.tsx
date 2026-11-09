@@ -35,7 +35,7 @@ import { RendersDashboardWidget } from '@/components/rjsf-components/RendersDash
 
 import staticBaseSchema from '@/FormSchemas/collections/collectionSchema.json';
 import uiSchema from '@/FormSchemas/collections/uischema.json';
-import ManualForm from './manual-form';
+import {AntdManualForm, ManualForm} from './manual-form';
 
 // Lazy load JSONEditor - only needed when JSON tab is active
 const JSONEditor = lazy(() => import('@/components/ui/JSONEditor'));
@@ -274,41 +274,42 @@ function CollectionIngestionForm({
             key: 'form',
             label: 'Form',
             children: (
-              <ManualForm
-                handleFormSubmit={handleFormSubmit}
-                customFields={customFields}
-                onRJSFDataChanged={onRJSFDataChanged}
-                rjsfFormData={rjsfFormData}
-                widgets={widgets}
-                forceRenderKey={forceRenderKey}
-                schemaForRJSF={schemaForRJSF}
-                isEditMode={isEditMode}
-                lockedUiSchema={lockedUiSchema}
-                dynamicUiSchema={dynamicUiSchema}
-                summariesData={summariesData}
-                handleSummariesChange={handleSummariesChange}
-                isExistingCollectionEditMode={isExistingCollectionEditMode}
-                extensionFields={extensionFields}
-                handleExtensionValueChange={handleExtensionValueChange}
-                formData={formData}
-                additionalProperties={additionalProperties}
-                validationErrors={validationErrors}
-              >
-                {children ?? (
-                  <Row justify="center" style={{ marginTop: '40px' }}>
-                    <Col span={24}>
-                      <Button
-                        type="primary"
-                        htmlType="submit"
-                        size="large"
-                        block
-                      >
-                        Submit
-                      </Button>
-                    </Col>
-                  </Row>
-                )}
-              </ManualForm>
+              <AntdManualForm handleFormSubmit={handleFormSubmit}>
+                <ManualForm
+                  customFields={customFields}
+                  onRJSFDataChanged={onRJSFDataChanged}
+                  rjsfFormData={rjsfFormData}
+                  widgets={widgets}
+                  forceRenderKey={forceRenderKey}
+                  schemaForRJSF={schemaForRJSF}
+                  isEditMode={isEditMode}
+                  lockedUiSchema={lockedUiSchema}
+                  dynamicUiSchema={dynamicUiSchema}
+                  summariesData={summariesData}
+                  handleSummariesChange={handleSummariesChange}
+                  isExistingCollectionEditMode={isExistingCollectionEditMode}
+                  extensionFields={extensionFields}
+                  handleExtensionValueChange={handleExtensionValueChange}
+                  formData={formData}
+                  additionalProperties={additionalProperties}
+                  validationErrors={validationErrors}
+                >
+                  {children ?? (
+                    <Row justify="center" style={{ marginTop: '40px' }}>
+                      <Col span={24}>
+                        <Button
+                          type="primary"
+                          htmlType="submit"
+                          size="large"
+                          block
+                        >
+                          Submit
+                        </Button>
+                      </Col>
+                    </Row>
+                  )}
+                </ManualForm>
+              </AntdManualForm>
             ),
           },
           {

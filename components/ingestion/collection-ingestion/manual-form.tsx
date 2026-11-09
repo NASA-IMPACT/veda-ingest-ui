@@ -6,9 +6,6 @@ import {
   Card,
   Form as AntdForm,
   Space,
-  Row,
-  Col,
-  Button
 } from 'antd';
 import { Form } from '../rjsfTheme';
 import { JSONSchema7 } from 'json-schema';
@@ -27,7 +24,6 @@ import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
 import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 
 interface ManualFormProps {
-  handleFormSubmit: () => void;
   customFields: RegistryFieldsType;
   onRJSFDataChanged: (formState: {
     formData?: object | undefined;
@@ -50,8 +46,21 @@ interface ManualFormProps {
   children?: React.ReactNode;
 }
 
-export default function ManualForm({
+export function AntdManualForm ({
   handleFormSubmit,
+  children
+}: {
+  handleFormSubmit: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <AntdForm onFinish={handleFormSubmit}>
+      {children}
+    </AntdForm>
+  )
+}
+
+export function ManualForm({
   customFields,
   onRJSFDataChanged,
   rjsfFormData,
@@ -72,7 +81,7 @@ export default function ManualForm({
   children
 }: ManualFormProps) {
     return (
-      <AntdForm onFinish={handleFormSubmit}>
+      <>
         <Form
           key={forceRenderKey}
           schema={schemaForRJSF as JSONSchema7}
@@ -159,6 +168,6 @@ export default function ManualForm({
         />
       )}
       {children}
-    </AntdForm>
+      </>
   )
 }
