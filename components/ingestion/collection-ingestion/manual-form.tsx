@@ -1,6 +1,7 @@
 'use client';
 
 import '@ant-design/v5-patch-for-react-19';
+import { ElementType } from 'react';
 import {
   Alert,
   Card,
@@ -12,9 +13,9 @@ import { JSONSchema7 } from 'json-schema';
 import type {
   UiSchema as RJSFUiSchema,
   RegistryWidgetsType,
-  RegistryFieldsType
+  RegistryFieldsType,
+  UiSchema
 } from '@rjsf/utils';
-import uiSchema from '@/FormSchemas/collections/uischema.json';
 import validator from '@rjsf/validator-ajv8';
 import { customValidate } from '@/utils/CustomValidation';
 import ObjectFieldTemplate from '@/components/rjsf-components/ObjectFieldTemplate';
@@ -28,22 +29,22 @@ interface ManualFormProps {
   onRJSFDataChanged: (formState: {
     formData?: object | undefined;
 }) => void
-  rjsfFormData: Record<string, unknown>;
+  rjsfFormData?: Record<string, unknown>;
   widgets: RegistryWidgetsType;
-  forceRenderKey: number;
+  forceRenderKey?: number;
   schemaForRJSF: JSONSchema7;
-  isEditMode?: boolean;
-  lockedUiSchema: Record<string, unknown>;
-  dynamicUiSchema?: RJSFUiSchema;
-  summariesData: Record<string, unknown>;
-  handleSummariesChange: (newSummaries: Record<string, unknown>) => void;
+  uiSchema: RJSFUiSchema | UiSchema;
+  summariesData?: Record<string, unknown>;
+  handleSummariesChange?: (newSummaries: Record<string, unknown>) => void;
   isExistingCollectionEditMode?: boolean;
-  extensionFields: Record<string, Extension>;
-  handleExtensionValueChange: (propKey: string, isRequired: boolean, newValue: string) => void;
-  formData: Record<string, unknown> | undefined;
-  additionalProperties: Record<string, unknown>;
-  validationErrors: string[];
+  extensionFields?: Record<string, Extension>;
+  handleExtensionValueChange?: (propKey: string, isRequired: boolean, newValue: string) => void;
+  formData?: Record<string, unknown> | undefined;
+  additionalProperties?: Record<string, unknown>;
+  validationErrors?: string[];
   children?: React.ReactNode;
+  formContext?: Record<string, unknown>;
+  tagName?: ElementType;
 }
 
 export function AntdManualForm ({
@@ -67,9 +68,7 @@ export function ManualForm({
   widgets,
   forceRenderKey,
   schemaForRJSF,
-  isEditMode,
-  lockedUiSchema,
-  dynamicUiSchema,
+  uiSchema,
   summariesData,
   handleSummariesChange,
   isExistingCollectionEditMode,
@@ -78,16 +77,16 @@ export function ManualForm({
   formData,
   additionalProperties,
   validationErrors,
-  children
+  children,
+  formContext,
+  tagName
 }: ManualFormProps) {
     return (
       <>
         <Form
           key={forceRenderKey}
           schema={schemaForRJSF as JSONSchema7}
-          uiSchema={
-            isEditMode ? lockedUiSchema : dynamicUiSchema || uiSchema
-          }
+          uiSchema={uiSchema}
           validator={validator}
           customValidate={customValidate}
           templates={{ ObjectFieldTemplate }}
@@ -95,18 +94,23 @@ export function ManualForm({
           formData={rjsfFormData}
           onChange={onRJSFDataChanged}
           widgets={widgets}
-          tagName="div"
+          tagName={tagName}
+          formContext={formContext}
         >
           <></>
         </Form>
+      {
+        handleSummariesChange && (
+          <SummariesManager
+            initialData={summariesData}
+            onChange={handleSummariesChange}
+            readonly={isExistingCollectionEditMode}
+          />
+        )
+      }
 
-      <SummariesManager
-        initialData={summariesData}
-        onChange={handleSummariesChange}
-        readonly={isExistingCollectionEditMode}
-      />
 
-      {Object.values(extensionFields).map(({ title, fields }) => (
+      {extensionFields && handleExtensionValueChange && Object.values(extensionFields).map(({ title, fields }) => (
         <Card
           key={title}
           title={`${title} Fields`}
@@ -145,14 +149,14 @@ export function ManualForm({
         </Card>
       ))}
 
-      {Object.keys(additionalProperties).length > 0 && (
+      {additionalProperties && Object.keys(additionalProperties).length > 0 && (
         <AdditionalPropertyCard
           additionalProperties={additionalProperties}
           style="warning"
         />
       )}
 
-      {validationErrors.length > 0 && (
+      {validationErrors && validationErrors.length > 0 && (
         <Alert
           message="Validation Errors"
           description={

@@ -282,9 +282,10 @@ function CollectionIngestionForm({
                   widgets={widgets}
                   forceRenderKey={forceRenderKey}
                   schemaForRJSF={schemaForRJSF}
-                  isEditMode={isEditMode}
-                  lockedUiSchema={lockedUiSchema}
-                  dynamicUiSchema={dynamicUiSchema}
+                  // isEditMode={isEditM ode}
+                  // lockedUiSchema={lockedUiSchema}
+                  // dynamicUiSchema={dynamicUiSchema}
+                  uiSchema={isEditMode ? lockedUiSchema : dynamicUiSchema || uiSchema}
                   summariesData={summariesData}
                   handleSummariesChange={handleSummariesChange}
                   isExistingCollectionEditMode={isExistingCollectionEditMode}
@@ -293,6 +294,7 @@ function CollectionIngestionForm({
                   formData={formData}
                   additionalProperties={additionalProperties}
                   validationErrors={validationErrors}
+                  tagName='div'
                 >
                   {children ?? (
                     <Row justify="center" style={{ marginTop: '40px' }}>
