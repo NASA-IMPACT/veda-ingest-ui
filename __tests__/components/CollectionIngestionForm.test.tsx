@@ -9,7 +9,7 @@ import {
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
 
-import CollectionIngestionForm from '@/components/ingestion/collection-ingestion/CollectionIngestionForm';
+import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
 import { useStacExtensions } from '@/hooks/useStacExtensions';
 import { useTenants } from '@/hooks/useTenants';
 

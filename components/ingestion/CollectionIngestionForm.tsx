@@ -27,7 +27,7 @@ import { RendersDashboardWidget } from '@/components/rjsf-components/RendersDash
 
 import staticBaseSchema from '@/FormSchemas/collections/collectionSchema.json';
 import uiSchema from '@/FormSchemas/collections/uischema.json';
-import { AntdManualForm, ManualForm } from '../ManualForm';
+import { AntdManualForm, ManualForm } from './ManualForm';
 
 // Lazy load JSONEditor - only needed when JSON tab is active
 const JSONEditor = lazy(() => import('@/components/ui/JSONEditor'));
