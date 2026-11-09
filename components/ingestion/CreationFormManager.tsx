@@ -4,7 +4,7 @@ import React, { useState, useCallback } from 'react';
 import { Card, Typography, Alert, Modal, Input, Spin } from 'antd';
 import { Status } from '@/types/global';
 import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm';
-import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
+import CollectionIngestionForm from '@/components/ingestion/collection-ingestion/CollectionIngestionForm';
 import { useCogValidation } from '@/hooks/useCogValidation';
 import { getTenantFieldKey } from '@/utils/tenantField';
 import { logFrontendError } from '@/lib/structuredLogger';

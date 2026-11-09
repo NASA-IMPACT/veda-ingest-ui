@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Status } from '@/types/global';
 import DatasetIngestionForm from '@/components/ingestion/DatasetIngestionForm';
-import CollectionIngestionForm from '@/components/ingestion/CollectionIngestionForm';
+import CollectionIngestionForm from '@/components/ingestion/collection-ingestion/CollectionIngestionForm';
 import { Button, Card, Space, Alert, Modal, Spin } from 'antd';
 import { useCogValidation } from '@/hooks/useCogValidation';
 import { VirtualDiffViewer } from 'virtual-react-json-diff';
