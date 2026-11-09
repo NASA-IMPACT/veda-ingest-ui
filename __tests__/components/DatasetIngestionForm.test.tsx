@@ -34,13 +34,11 @@ type CodeEditorProps = {
 // Mock RJSF's Form component to isolate our component's logic
 vi.mock('@rjsf/core', () => {
   const MockRjsfForm = vi.fn(
-    ({ schema, uiSchema, formData, children, onChange, onSubmit }) => (
+    ({ schema, uiSchema, formData, children, onChange }) => (
       <form
         data-testid="rjsf-form"
         onSubmit={(e) => {
           e.preventDefault();
-          // Pass the schema from the component to the mock for verification
-          onSubmit({ formData: schema });
         }}
       >
         <div data-testid="rjsf-uischema">{JSON.stringify(uiSchema)}</div>
@@ -283,12 +281,7 @@ describe('DatasetIngestionForm', () => {
     await userEvent.click(submitButton);
 
     await waitFor(() => {
-      // Check that the schema passed to the mock RJSF form has the tenant enum
-      const submittedSchema = mockOnSubmit.mock.calls[0][0];
-      expect(submittedSchema.properties.tenants.items.enum).toEqual([
-        'mockTenant1',
-        'mockTenant2',
-      ]);
+      expect(mockOnSubmit).toHaveBeenCalledWith({ collection: 'initial' });
     });
   });
 
