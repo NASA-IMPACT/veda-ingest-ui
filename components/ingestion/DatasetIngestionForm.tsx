@@ -26,7 +26,7 @@ import { RegexStringWidget } from '@/components/rjsf-components/RegexStringWidge
 
 import { useTenants } from '@/hooks/useTenants';
 import { cfg } from '@/config/env';
-import { AntdManualForm, ManualForm } from './collection-ingestion/manual-form';
+import { AntdManualForm, ManualForm } from './ManualForm';
 
 // Lazy load JSONEditor - only needed when JSON tab is active
 const JSONEditor = lazy(() => import('@/components/ui/JSONEditor'));

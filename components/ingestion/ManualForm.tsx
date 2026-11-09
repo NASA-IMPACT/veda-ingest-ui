@@ -3,7 +3,7 @@
 import '@ant-design/v5-patch-for-react-19';
 import { ElementType } from 'react';
 import { Alert, Card, Form as AntdForm, Space } from 'antd';
-import { Form } from '../rjsfTheme';
+import { Form } from './rjsfTheme';
 import { JSONSchema7 } from 'json-schema';
 import type {
   UiSchema as RJSFUiSchema,
