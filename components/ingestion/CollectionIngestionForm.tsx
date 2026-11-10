@@ -86,6 +86,8 @@ function CollectionIngestionForm({
 
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
+  const [discoverFormData, setDiscoverFormData] = useState<Record<string, unknown>>( formData ? {id: formData.id} : {})
+
   const { extensionFields, addExtension, removeExtension, isLoading } =
     useStacExtensions({ setFormData });
 
@@ -199,7 +201,6 @@ function CollectionIngestionForm({
     }
     return { rjsfFormData: rjsfData, additionalProperties: additional };
   }, [dynamicSchema, extensionFields, formScopedData]);
-
   const [summariesData, setSummariesData] = useState(
     rjsfFormData.summaries || {}
   );
@@ -221,6 +222,15 @@ function CollectionIngestionForm({
     [setFormData]
   );
 
+  const onRJSFDiscoverDataChanged = useCallback(
+    (formState: { formData?: object }) => {
+      const updatedRjsfData =
+        (formState.formData as Record<string, unknown>) ?? {};
+        setDiscoverFormData((prev) => ({ ...prev, ...updatedRjsfData }));
+    },
+    [setDiscoverFormData]
+  );
+
   const handleSummariesChange = useCallback(
     (newSummaries: Record<string, unknown>) => {
       setSummariesData(newSummaries);
@@ -238,6 +248,12 @@ function CollectionIngestionForm({
       summaries: summariesData,
     });
   }, [validateExtensionFields, formData, summariesData, onSubmit]);
+
+  const handleDiscoverFormSubmit = () => {
+    // Submit form and proceed to acceptance testing (also this will create an artifact of the config in disasters-data)
+    console.log("handleDiscoverFormSubmit clicked \nForm Data: \n", discoverFormData);
+    return;
+  };
 
   const handleJsonEditorChange = useCallback(
     (updatedData: JSONEditorValue) => {
@@ -437,17 +453,14 @@ function CollectionIngestionForm({
             key: 'discover',
             label: 'Discover Items',
             children: (
-              <AntdForm onFinish={handleFormSubmit}>
+              <AntdForm onFinish={handleDiscoverFormSubmit}>
                 <Form
-                  key={forceRenderKey}
                   schema={staticDiscoverSchema as JSONSchema7}
                   uiSchema={(discoverUiSchema as unknown) as JSONSchema7}
                   validator={validator}
-                  customValidate={customValidate}
                   templates={{ ObjectFieldTemplate }}
-                  formData={rjsfFormData}
-                  onChange={onRJSFDataChanged}
-                  widgets={widgets}
+                  formData={discoverFormData}
+                  onChange={onRJSFDiscoverDataChanged}
                   tagName="div"
                 >
                   <></>
