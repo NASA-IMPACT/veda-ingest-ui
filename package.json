@@ -88,7 +88,7 @@
     "husky": "^9.1.7",
     "jsdom": "^30.0.1",
     "lint-staged": "^17.3.0",
-    "msw": "^3.0.3",
+    "msw": "^2.15.0",
     "pin-github-action": "3.5.2",
     "playwright-msw": "^3.0.1",
     "prettier": "^3.9.6",
