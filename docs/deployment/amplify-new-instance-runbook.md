@@ -3,8 +3,7 @@
 This runbook documents how to deploy a new ingest-ui instance with AWS Amplify and wire it to a destination data repository.
 
 ## 1. Understand the Existing Model
-
-- Existing ingest-ui deployments are connected to Amplify and update from merges to `main`.
+- For existing ingest-ui deployments, reference this [section](README.md#current-deployment-model) to understand current deployment model.
 - Amplify builds this app using [amplify.yml](../../amplify.yml), including writing required runtime variables to `.env.production` during build.
 
 ## 2. Choose Destination Repository Strategy
@@ -93,11 +92,15 @@ The Amplify SSR runtime role must allow:
 
 Scope resources to the role and secret ARNs used by your environment.
 
-## 8. Connect Branch Deployment Behavior
+## 8. Update Github Variables
+In Github repository, under `Secrets and variables`, find the `AMPLIFY_INSTANCE_APP_IDS` variable and edit it to add the new instance.
 
-Ensure your Amplify app is connected to the intended branch (typically `main`) for automatic deployment on merge.
+## 9. Connect Branch Deployment Behavior
+Ensure your Amplify app has these configued, see [Amplify App Instances Configuration](./README.md/#amplify-app-instances-configuration)
 
-## 9. Validate After Deployment
+The [Deploy workflow](../../.github/workflows/deploy.yml) force-pushes a chosen release commit to that branch before triggering a deploy off of it.
+
+## 10. Validate After Deployment
 
 1. Confirm app loads and auth redirect works.
 2. Confirm create-ingest flow can open or update a PR in the configured destination repo.
