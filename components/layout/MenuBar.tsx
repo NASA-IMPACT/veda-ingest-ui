@@ -153,7 +153,7 @@ const MenuBar = () => {
             //   <Link href="/discover-items">Discover Items</Link>
             // ),
           icon: <FormOutlined />, // @TODO-SANDRA: Update Icon
-          disabled: hasLimitedAccess || !hasEditIngestPermission,
+          // disabled: hasLimitedAccess || !hasEditIngestPermission,
         },
       ],
     },
