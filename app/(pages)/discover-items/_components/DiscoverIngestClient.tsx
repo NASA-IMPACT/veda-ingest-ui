@@ -53,7 +53,7 @@ const DiscoverItemsClient = () => {
     },
     [setDiscoverFormData]
   );
-  console.log(`selectedCollection: `, selectedCollection)
+
   return (
     <AppLayout>
       <TenantErrorBoundary>

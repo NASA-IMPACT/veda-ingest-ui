@@ -139,19 +139,19 @@ const MenuBar = () => {
         },
         {
           key: '/discover-items',
-          label:
-            hasLimitedAccess || !hasEditIngestPermission ? (
-              <Tooltip
-                title="Contact the VEDA Data Services team for access"
-                placement="right"
-              >
-                <span style={{ cursor: 'not-allowed' }}>
-                  <Link href="/discover-items">Discover Items</Link>
-                </span>
-              </Tooltip>
-            ) : (
-              <Link href="/discover-items">Discover Items</Link>
-            ),
+          label: (<Link href="/discover-items">Discover Items</Link>), // temporarily allow display since isn't hooked up
+            // hasLimitedAccess || !hasEditIngestPermission ? (
+            //   <Tooltip
+            //     title="Contact the VEDA Data Services team for access"
+            //     placement="right"
+            //   >
+            //     <span style={{ cursor: 'not-allowed' }}>
+            //       <Link href="/discover-items">Discover Items</Link>
+            //     </span>
+            //   </Tooltip>
+            // ) : (
+            //   <Link href="/discover-items">Discover Items</Link>
+            // ),
           icon: <FormOutlined />, // @TODO-SANDRA: Update Icon
           disabled: hasLimitedAccess || !hasEditIngestPermission,
         },
