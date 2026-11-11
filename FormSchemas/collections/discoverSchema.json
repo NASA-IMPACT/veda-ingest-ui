@@ -3,35 +3,79 @@
   "required": [
     "type",
     "id",
-    "file_names",
-    "hazard",
-    "event_name"
+    "discovery_items"
   ],
   "properties": {
+    "id": {
+      "type": "string",
+      "title": "Collection Identifier"
+    },
     "type": {
       "title": "Type of STAC entity",
       "type": "string",
       "const": "Collection"
     },
-    "id": {
-      "type": "string",
-      "title": "Collection Identifier"
-    },
-    "event_name": {
-      "type": "string",
-      "title": "Event Name",
-      "description": "replace with event name description"
-    },
-    "file_names": {
-      "type": "string",
-      "title": "File Names",
-      "description": "replace with filename description, regex?"
-    },
-    "hazard": {
-      "title": "Hazard",
-      "type": "string",
-      "description": "replace with Hazard description",
-      "enum": ["hazard1", "hazard2", "hazard3"]
+    "discovery_items": {
+      "type": "array",
+      "title": "Discovery Items",
+      "items": {
+        "type": "object",
+        "properties": {
+          "discovery": {
+            "type": "string",
+            "enum": ["s3"],
+            "title": "Discovery"
+          },
+          "prefix": {
+            "type": "string",
+            "title": "Prefix"
+          },
+          "bucket": {
+            "type": "string",
+            "title": "Bucket"
+          },
+          "filename_regex": {
+            "type": "string",
+            "title": "Filename Regex",
+            "default": "[\\s\\S]*"
+          },
+          "datetime_range": {
+            "type": "string",
+            "enum": ["day", "month", "year"],
+            "title": "Datetime Range"
+          },
+          "start_datetime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start Datetime"
+          },
+          "end_datetime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End Datetime"
+          },
+          "single_datetime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Single Datetime"
+          },
+          "id_regex": {
+            "type": "string",
+            "title": "Id Regex"
+          },
+          "id_template": {
+            "type": "string",
+            "title": "Id Template"
+          },
+          "use_multithreading": {
+            "type": "boolean",
+            "title": "Use Multithreading",
+            "default": false
+          }
+        },
+        "required": ["prefix", "bucket"]
+      },
+      "minItems": 1
     }
   }
 }

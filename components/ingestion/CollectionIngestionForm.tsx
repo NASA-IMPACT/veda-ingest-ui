@@ -46,6 +46,7 @@ import staticBaseSchema from '@/FormSchemas/collections/collectionSchema.json';
 import staticDiscoverSchema from '@/FormSchemas/collections/discoverSchema.json';
 import uiSchema from '@/FormSchemas/collections/uischema.json';
 import discoverUiSchema from '@/FormSchemas/collections/discoverUiSchema.json';
+import { RegexStringWidget } from '@/components/rjsf-components/RegexStringWidget';
 import { Form } from './rjsfTheme';
 
 // Lazy load JSONEditor - only needed when JSON tab is active
@@ -461,6 +462,9 @@ function CollectionIngestionForm({
                   templates={{ ObjectFieldTemplate }}
                   formData={discoverFormData}
                   onChange={onRJSFDiscoverDataChanged}
+                  widgets={{
+                    regexString: RegexStringWidget
+                  }}
                   tagName="div"
                 >
                   <></>
