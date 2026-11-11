@@ -43,10 +43,7 @@ import { RendersDashboardWidget } from '@/components/rjsf-components/RendersDash
 import SummariesManager from '@/components/rjsf-components/SummariesManager';
 
 import staticBaseSchema from '@/FormSchemas/collections/collectionSchema.json';
-import staticDiscoverSchema from '@/FormSchemas/collections/discoverSchema.json';
 import uiSchema from '@/FormSchemas/collections/uischema.json';
-import discoverUiSchema from '@/FormSchemas/collections/discoverUiSchema.json';
-import { RegexStringWidget } from '@/components/rjsf-components/RegexStringWidget';
 import { Form } from './rjsfTheme';
 
 // Lazy load JSONEditor - only needed when JSON tab is active
@@ -84,10 +81,7 @@ function CollectionIngestionForm({
   const [activeTab, setActiveTab] = useState<string>('form');
   const [forceRenderKey, setForceRenderKey] = useState<number>(0);
   const [hasJSONChanges, setHasJSONChanges] = useState<boolean>(false);
-
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-
-  const [discoverFormData, setDiscoverFormData] = useState<Record<string, unknown>>( formData ? {id: formData.id} : {})
 
   const { extensionFields, addExtension, removeExtension, isLoading } =
     useStacExtensions({ setFormData });
@@ -223,15 +217,6 @@ function CollectionIngestionForm({
     [setFormData]
   );
 
-  const onRJSFDiscoverDataChanged = useCallback(
-    (formState: { formData?: object }) => {
-      const updatedRjsfData =
-        (formState.formData as Record<string, unknown>) ?? {};
-        setDiscoverFormData((prev) => ({ ...prev, ...updatedRjsfData }));
-    },
-    [setDiscoverFormData]
-  );
-
   const handleSummariesChange = useCallback(
     (newSummaries: Record<string, unknown>) => {
       setSummariesData(newSummaries);
@@ -249,12 +234,6 @@ function CollectionIngestionForm({
       summaries: summariesData,
     });
   }, [validateExtensionFields, formData, summariesData, onSubmit]);
-
-  const handleDiscoverFormSubmit = () => {
-    // Submit form and proceed to acceptance testing (also this will create an artifact of the config in disasters-data)
-    console.log("handleDiscoverFormSubmit clicked \nForm Data: \n", discoverFormData);
-    return;
-  };
 
   const handleJsonEditorChange = useCallback(
     (updatedData: JSONEditorValue) => {
@@ -449,44 +428,7 @@ function CollectionIngestionForm({
                 />
               </Suspense>
             ),
-          },
-          ...( formType === 'existingCollection' ? [{
-            key: 'discover',
-            label: 'Discover Items',
-            children: (
-              <AntdForm onFinish={handleDiscoverFormSubmit}>
-                <Form
-                  schema={staticDiscoverSchema as JSONSchema7}
-                  uiSchema={(discoverUiSchema as unknown) as JSONSchema7}
-                  validator={validator}
-                  templates={{ ObjectFieldTemplate }}
-                  formData={discoverFormData}
-                  onChange={onRJSFDiscoverDataChanged}
-                  widgets={{
-                    regexString: RegexStringWidget
-                  }}
-                  tagName="div"
-                >
-                  <></>
-                </Form>
-
-                {children ?? (
-                  <Row justify="center" style={{ marginTop: '40px' }}>
-                    <Col span={24}>
-                      <Button
-                        type="primary"
-                        htmlType="submit"
-                        size="large"
-                        block
-                      >
-                        Submit
-                      </Button>
-                    </Col>
-                  </Row>
-                )}
-              </AntdForm>
-            ),
-          }] : [])
+          }
         ]}
       />
     </>
