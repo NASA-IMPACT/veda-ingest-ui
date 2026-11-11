@@ -12,39 +12,22 @@ import {
   lazy,
   Suspense,
 } from 'react';
-import {
-  Button,
-  Col,
-  Row,
-  Tabs,
-  Card,
-  Divider,
-  Form as AntdForm,
-  Alert,
-  Space,
-  Spin,
-} from 'antd';
-import validator from '@rjsf/validator-ajv8';
+import { Button, Col, Row, Tabs, Divider, Form as AntdForm, Spin } from 'antd';
 import { JSONSchema7 } from 'json-schema';
 
 import { useStacExtensions } from '@/hooks/useStacExtensions';
 import { useTenants } from '@/hooks/useTenants';
 
 import ExtensionManager from '@/components/ui/ExtensionManager';
-import ObjectFieldTemplate from '@/components/rjsf-components/ObjectFieldTemplate';
-import { customValidate } from '@/utils/CustomValidation';
 import { JSONEditorValue } from '@/components/ui/JSONEditor';
-import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 import BboxField from '@/utils/BboxField';
 import IntervalField from '@/utils/IntervalField';
 import AssetField from '@/components/rjsf-components/AssetsField';
-import CodeEditorWidget from '@/components/ui/CodeEditorWidget';
 import { RendersDashboardWidget } from '@/components/rjsf-components/RendersDashboardWidget';
-import SummariesManager from '@/components/rjsf-components/SummariesManager';
 
 import staticBaseSchema from '@/FormSchemas/collections/collectionSchema.json';
 import uiSchema from '@/FormSchemas/collections/uischema.json';
-import { Form } from './rjsfTheme';
+import { AntdManualForm, ManualForm } from './ManualForm';
 
 // Lazy load JSONEditor - only needed when JSON tab is active
 const JSONEditor = lazy(() => import('@/components/ui/JSONEditor'));
@@ -198,8 +181,8 @@ function CollectionIngestionForm({
     return { rjsfFormData: rjsfData, additionalProperties: additional };
   }, [dynamicSchema, extensionFields, formScopedData]);
 
-  const [summariesData, setSummariesData] = useState(
-    rjsfFormData.summaries || {}
+  const [summariesData, setSummariesData] = useState<Record<string, unknown>>(
+    (rjsfFormData.summaries as Record<string, unknown>) || {}
   );
 
   const schemaForRJSF = useMemo(() => {
@@ -265,7 +248,6 @@ function CollectionIngestionForm({
       </div>
     );
   }
-
   return (
     <>
       <ExtensionManager
@@ -284,108 +266,43 @@ function CollectionIngestionForm({
             key: 'form',
             label: 'Form',
             children: (
-              <AntdForm onFinish={handleFormSubmit}>
-                <Form
-                  key={forceRenderKey}
-                  schema={schemaForRJSF as JSONSchema7}
+              <AntdManualForm handleFormSubmit={handleFormSubmit}>
+                <ManualForm
+                  customFields={customFields}
+                  onRJSFDataChanged={onRJSFDataChanged}
+                  rjsfFormData={rjsfFormData}
+                  widgets={widgets}
+                  forceRenderKey={forceRenderKey}
+                  schemaForRJSF={schemaForRJSF}
                   uiSchema={
                     isEditMode ? lockedUiSchema : dynamicUiSchema || uiSchema
                   }
-                  validator={validator}
-                  customValidate={customValidate}
-                  templates={{ ObjectFieldTemplate }}
-                  fields={customFields}
-                  formData={rjsfFormData}
-                  onChange={onRJSFDataChanged}
-                  widgets={widgets}
+                  summariesData={summariesData}
+                  handleSummariesChange={handleSummariesChange}
+                  isExistingCollectionEditMode={isExistingCollectionEditMode}
+                  extensionFields={extensionFields}
+                  handleExtensionValueChange={handleExtensionValueChange}
+                  formData={formData}
+                  additionalProperties={additionalProperties}
+                  validationErrors={validationErrors}
                   tagName="div"
                 >
-                  <></>
-                </Form>
-
-                <SummariesManager
-                  initialData={summariesData as Record<string, unknown>}
-                  onChange={handleSummariesChange}
-                  readonly={isExistingCollectionEditMode}
-                />
-
-                {Object.values(extensionFields).map(({ title, fields }) => (
-                  <Card
-                    key={title}
-                    title={`${title} Fields`}
-                    style={{ marginTop: '20px' }}
-                  >
-                    <Space direction="vertical" style={{ width: '100%' }}>
-                      {fields.map(({ name, required }) => {
-                        const fieldId = name;
-
-                        return (
-                          <AntdForm.Item
-                            key={name}
-                            label={name}
-                            required={required}
-                            htmlFor={fieldId}
-                          >
-                            <CodeEditorWidget
-                              id={fieldId}
-                              value={JSON.stringify(
-                                formData?.[name] ?? undefined,
-                                null,
-                                2
-                              )}
-                              onChange={(newValue) =>
-                                handleExtensionValueChange(
-                                  name,
-                                  required,
-                                  newValue
-                                )
-                              }
-                            />
-                          </AntdForm.Item>
-                        );
-                      })}
-                    </Space>
-                  </Card>
-                ))}
-
-                {Object.keys(additionalProperties).length > 0 && (
-                  <AdditionalPropertyCard
-                    additionalProperties={additionalProperties}
-                    style="warning"
-                  />
-                )}
-
-                {validationErrors.length > 0 && (
-                  <Alert
-                    message="Validation Errors"
-                    description={
-                      <ul>
-                        {validationErrors.map((error, i) => (
-                          <li key={i}>{error}</li>
-                        ))}
-                      </ul>
-                    }
-                    type="error"
-                    showIcon
-                    style={{ marginTop: '20px' }}
-                  />
-                )}
-
-                {children ?? (
-                  <Row justify="center" style={{ marginTop: '40px' }}>
-                    <Col span={24}>
-                      <Button
-                        type="primary"
-                        htmlType="submit"
-                        size="large"
-                        block
-                      >
-                        Submit
-                      </Button>
-                    </Col>
-                  </Row>
-                )}
-              </AntdForm>
+                  {children ?? (
+                    <Row justify="center" style={{ marginTop: '40px' }}>
+                      <Col span={24}>
+                        <Button
+                          type="primary"
+                          htmlType="submit"
+                          size="large"
+                          block
+                        >
+                          Submit
+                        </Button>
+                      </Col>
+                    </Row>
+                  )}
+                </ManualForm>
+              </AntdManualForm>
             ),
           },
           {
