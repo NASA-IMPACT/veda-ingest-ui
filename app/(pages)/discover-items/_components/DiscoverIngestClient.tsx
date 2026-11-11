@@ -20,6 +20,7 @@ import { JSONSchema7 } from 'json-schema';
 import validator from '@rjsf/validator-ajv8';
 import ObjectFieldTemplate from '@/components/rjsf-components/ObjectFieldTemplate';
 import { RegexStringWidget } from '@/components/rjsf-components/RegexStringWidget';
+import { UiSchema } from '@rjsf/utils';
 
 type ExistingCollectionData = Record<string, unknown>;
 
@@ -95,7 +96,7 @@ const DiscoverItemsClient = () => {
               <AntdForm onFinish={handleDiscoverFormSubmit}>
                 <Form
                   schema={staticDiscoverSchema as JSONSchema7}
-                  uiSchema={(discoverUiSchema as unknown) as JSONSchema7}
+                  uiSchema={discoverUiSchema as UiSchema}
                   validator={validator}
                   templates={{ ObjectFieldTemplate }}
                   formData={discoverFormData}
