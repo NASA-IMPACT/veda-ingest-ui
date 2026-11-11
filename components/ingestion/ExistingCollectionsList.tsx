@@ -27,10 +27,12 @@ const PAGE_SIZE = 10;
 
 interface ExistingCollectionsListProps {
   onCollectionSelect: (data: Record<string, unknown>) => void;
+  title?: string
 }
 
 const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
   onCollectionSelect,
+  title
 }) => {
   const { status: sessionStatus } = useSession();
   const router = useRouter();
@@ -51,6 +53,7 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   const { tenants } = useUserTenants();
+  const pageTitle = title ? title : 'Edit Existing Collection';
 
   const tenantOptions = [
     { value: undefined, label: 'All Tenants' },
@@ -133,7 +136,7 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
     return (
       <>
         <Title level={3} style={{ marginBottom: 24 }}>
-          Edit Existing Collection
+          {pageTitle}
         </Title>
         <SkeletonLoading
           count={PAGE_SIZE}
@@ -162,7 +165,7 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
   return (
     <>
       <Title level={3} style={{ marginBottom: 24 }}>
-        Edit Existing Collection
+        {pageTitle}
       </Title>
       <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
         <div>
