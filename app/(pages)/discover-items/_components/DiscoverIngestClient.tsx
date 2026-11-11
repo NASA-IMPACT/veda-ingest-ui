@@ -121,6 +121,7 @@ const DiscoverItemsClient = () => {
             </>
           ) : (
             <ExistingCollectionsList
+              testing={true} // @TODO-SANDRA: exists for preview to bypass perms, to be deleted
               onCollectionSelect={handleCollectionSelect}
               title="Append Items to Existing Collections"
             />

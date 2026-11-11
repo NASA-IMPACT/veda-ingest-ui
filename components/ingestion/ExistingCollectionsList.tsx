@@ -28,11 +28,13 @@ const PAGE_SIZE = 10;
 interface ExistingCollectionsListProps {
   onCollectionSelect: (data: Record<string, unknown>) => void;
   title?: string
+  testing?: boolean // @NOTE-SANDRA: To be deleted, allows us to just display for preview for now, editing is not actually hooked up right now
 }
 
 const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
   onCollectionSelect,
-  title
+  title,
+  testing
 }) => {
   const { status: sessionStatus } = useSession();
   const router = useRouter();
@@ -64,11 +66,62 @@ const ExistingCollectionsList: React.FC<ExistingCollectionsListProps> = ({
   ];
 
   useEffect(() => {
-    if (sessionStatus === 'unauthenticated') {
+    if (sessionStatus === 'unauthenticated' && !testing) {
       router.push('/login');
     }
 
-    if (sessionStatus === 'authenticated') {
+    if (sessionStatus === 'authenticated' && !testing) {
+      const fetchCollections = async () => {
+        setIsLoading(true);
+        setApiError('');
+
+        try {
+          const params = new URLSearchParams({
+            limit: String(PAGE_SIZE),
+            offset: String(offset),
+          });
+
+          if (searchTerm) {
+            params.set('q', searchTerm);
+          }
+
+          if (selectedTenant) {
+            params.set('tenant', selectedTenant);
+          }
+
+          const url = `/api/existing-collection?${params.toString()}`;
+          const response = await fetch(url);
+
+          if (!response.ok) {
+            throw new Error(await response.text());
+          }
+
+          const data: StacCollectionsResponse = await response.json();
+          const fetchedCollections = data.collections || [];
+          setCollections(fetchedCollections);
+          const total = data.numberMatched;
+          setNumberMatched(total);
+          setHasNextPage(
+            total !== undefined
+              ? offset + fetchedCollections.length < total
+              : fetchedCollections.length === PAGE_SIZE
+          );
+        } catch (err) {
+          setApiError(
+            err instanceof Error ? err.message : 'An unknown error occurred.'
+          );
+          setCollections([]);
+          setHasNextPage(false);
+        } finally {
+          setIsLoading(false);
+          setHasLoadedOnce(true);
+        }
+      };
+
+      fetchCollections();
+    }
+
+    if (testing) { // @NOTE-SANDRA: To be deleted! just to bypass session/perms for preview, currently editing is not hookd up so is okay
       const fetchCollections = async () => {
         setIsLoading(true);
         setApiError('');
