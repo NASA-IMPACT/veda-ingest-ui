@@ -12,6 +12,7 @@ import {
   Button,
   Form as AntdForm,
 } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Form } from '@/components/ingestion/rjsfTheme';
 import staticDiscoverSchema from '@/FormSchemas/collections/discoverSchema.json';
 import discoverUiSchema from '@/FormSchemas/collections/discoverUiSchema.json';
@@ -37,6 +38,10 @@ const DiscoverItemsClient = () => {
     // Submit form and proceed to acceptance testing (also this will create an artifact of the config in disasters-data)
     console.log("handleDiscoverFormSubmit clicked \nForm Data: \n", discoverFormData);
     return;
+  };
+
+  const handleReturnToList = () => {
+    setSelectedCollection(null);
   };
 
   const onRJSFDiscoverDataChanged = useCallback(
@@ -77,31 +82,42 @@ const DiscoverItemsClient = () => {
             <div style={{ paddingBottom: 16 }} />
           </div>
           {selectedCollection ? (
-            <AntdForm onFinish={handleDiscoverFormSubmit}>
-              <Form
-                schema={staticDiscoverSchema as JSONSchema7}
-                uiSchema={(discoverUiSchema as unknown) as JSONSchema7}
-                validator={validator}
-                templates={{ ObjectFieldTemplate }}
-                formData={discoverFormData}
-                onChange={onRJSFDiscoverDataChanged}
-                widgets={{
-                  regexString: RegexStringWidget
-                }}
-                tagName="div"
+            <>
+              <Button
+                type="default"
+                icon={<ArrowLeftOutlined />}
+                onClick={handleReturnToList}
+                style={{ marginBottom: 16 }}
+                aria-label="Back to collection list"
               >
-                <></>
-              </Form>
+                Back
+              </Button>
+              <AntdForm onFinish={handleDiscoverFormSubmit}>
+                <Form
+                  schema={staticDiscoverSchema as JSONSchema7}
+                  uiSchema={(discoverUiSchema as unknown) as JSONSchema7}
+                  validator={validator}
+                  templates={{ ObjectFieldTemplate }}
+                  formData={discoverFormData}
+                  onChange={onRJSFDiscoverDataChanged}
+                  widgets={{
+                    regexString: RegexStringWidget
+                  }}
+                  tagName="div"
+                >
+                  <></>
+                </Form>
 
-            <Button
-              type="primary"
-              htmlType="submit"
-              style={{ marginTop: '20px' }}
-              block
-            >
-              Submit
-            </Button>
-          </AntdForm>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  style={{ marginTop: '20px' }}
+                  block
+                >
+                  Submit
+                </Button>
+              </AntdForm>
+            </>
           ) : (
             <ExistingCollectionsList
               onCollectionSelect={handleCollectionSelect}
