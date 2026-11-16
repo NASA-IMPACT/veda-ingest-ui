@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { middleware } from '@/middleware';
+import { proxy } from '@/proxy';
 import { createMockSession } from '@/__tests__/types/session';
 
 vi.mock('@/auth', () => ({
@@ -62,7 +62,7 @@ describe('Middleware', () => {
       for (const pathname of testRoutes) {
         vi.clearAllMocks();
         const request = createMockRequest(pathname);
-        await middleware(request);
+        await proxy(request);
 
         expect(vi.mocked(NextResponse.redirect)).toHaveBeenCalledWith(
           new URL('/login', request.url)
@@ -95,7 +95,7 @@ describe('Middleware', () => {
       for (const pathname of testRoutes) {
         vi.clearAllMocks();
         const request = createMockRequest(pathname);
-        await middleware(request);
+        await proxy(request);
 
         expect(vi.mocked(NextResponse.redirect)).toHaveBeenCalledWith(
           new URL('/unauthorized', request.url)
@@ -120,7 +120,7 @@ describe('Middleware', () => {
       for (const pathname of allowedRoutes) {
         vi.clearAllMocks();
         const request = createMockRequest(pathname);
-        await middleware(request);
+        await proxy(request);
 
         expect(vi.mocked(NextResponse.next)).toHaveBeenCalled();
         expect(vi.mocked(NextResponse.redirect)).not.toHaveBeenCalled();
@@ -140,7 +140,7 @@ describe('Middleware', () => {
       for (const pathname of blockedRoutes) {
         vi.clearAllMocks();
         const request = createMockRequest(pathname);
-        await middleware(request);
+        await proxy(request);
 
         expect(vi.mocked(NextResponse.redirect)).toHaveBeenCalledWith(
           new URL('/unauthorized', request.url)
@@ -173,7 +173,7 @@ describe('Middleware', () => {
       for (const pathname of allowedRoutes) {
         vi.clearAllMocks();
         const request = createMockRequest(pathname);
-        await middleware(request);
+        await proxy(request);
 
         expect(vi.mocked(NextResponse.next)).toHaveBeenCalled();
         expect(vi.mocked(NextResponse.redirect)).not.toHaveBeenCalled();
@@ -186,7 +186,7 @@ describe('Middleware', () => {
       for (const pathname of blockedRoutes) {
         vi.clearAllMocks();
         const request = createMockRequest(pathname);
-        await middleware(request);
+        await proxy(request);
 
         expect(vi.mocked(NextResponse.redirect)).toHaveBeenCalledWith(
           new URL('/unauthorized', request.url)
@@ -220,7 +220,7 @@ describe('Middleware', () => {
       for (const pathname of allowedRoutes) {
         vi.clearAllMocks();
         const request = createMockRequest(pathname);
-        await middleware(request);
+        await proxy(request);
 
         expect(vi.mocked(NextResponse.next)).toHaveBeenCalled();
         expect(vi.mocked(NextResponse.redirect)).not.toHaveBeenCalled();
@@ -237,7 +237,7 @@ describe('Middleware', () => {
       for (const pathname of blockedRoutes) {
         vi.clearAllMocks();
         const request = createMockRequest(pathname);
-        const result = await middleware(request);
+        const result = await proxy(request);
 
         if (pathname.startsWith('/api/')) {
           expect(result).toBeInstanceOf(Response);
@@ -274,7 +274,7 @@ describe('Middleware', () => {
       for (const pathname of allowedRoutes) {
         vi.clearAllMocks();
         const request = createMockRequest(pathname);
-        await middleware(request);
+        await proxy(request);
 
         expect(vi.mocked(NextResponse.next)).toHaveBeenCalled();
         expect(vi.mocked(NextResponse.redirect)).not.toHaveBeenCalled();
@@ -287,7 +287,7 @@ describe('Middleware', () => {
       vi.mocked(auth).mockResolvedValue(null);
 
       const request = createMockRequest('/api/create-ingest');
-      const result = await middleware(request);
+      const result = await proxy(request);
 
       expect(result).toBeInstanceOf(Response);
       expect(result.status).toBe(401);
@@ -302,7 +302,7 @@ describe('Middleware', () => {
       vi.mocked(auth).mockResolvedValue(limitedSession);
 
       const request = createMockRequest('/api/create-ingest');
-      const result = await middleware(request);
+      const result = await proxy(request);
 
       expect(result).toBeInstanceOf(Response);
       expect(result.status).toBe(403);
@@ -349,7 +349,7 @@ describe('Middleware', () => {
         vi.mocked(auth).mockResolvedValue(session);
 
         const request = createMockRequest(testCase.route || '/collections');
-        await middleware(request);
+        await proxy(request);
 
         if (testCase.shouldAllow) {
           expect(vi.mocked(NextResponse.next)).toHaveBeenCalled();

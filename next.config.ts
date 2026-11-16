@@ -50,5 +50,5 @@ const withRemoveImports = removeImports();
 
 export default withRemoveImports({
   ...nextConfig,
-  experimental: { esmExternals: true },
+  experimental: { esmExternals: true, agentUpgrade: 'latest' },
 });
