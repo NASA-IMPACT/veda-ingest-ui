@@ -4,7 +4,7 @@ This application is to allow users to create PRs in a data repo such as [veda-da
 
 ## Quick Start
 
-```bash
+```shell
 # Install dependencies
 yarn install
 
@@ -69,7 +69,7 @@ CI enforces this on open PRs via the **Lint PR title** workflow.
 
 ## 📁 Project Structure
 
-```
+```markdown
 ├── app/                    # Next.js App Router pages
 │   ├── api/               # API routes for GitHub operations and STAC API
 │   ├── collections/       # Collection management pages
@@ -115,7 +115,7 @@ The application supports two primary workflows:
 
 The application allows users to create and edit PRs in the data repository for data ingestion. New PRs are created with a prefix of `'[collection/dataset] Ingest Request for [collectionName]'`. The branch name and file name of the json for these new PRs is set by the Collection Name field in the form after any non-alphanumeric characters are removed from the collection name:
 
-```
+```typescript
 const fileName = 'ingestion-data/staging/dataset-config/${collectionName}.json';
 const branchName = `feat/${collectionName}`;
 ```
@@ -364,14 +364,15 @@ If you use [`nvm`](https://github.com/creationix/nvm), activate the desired Node
 
 Install Node + package manager this repo depends on.
 
-```
+```shell
 nvm install
-npm -g install yarn
+corepack enable
+corepack prepare yarn@stable --activate
 ```
 
 Then install project dependencies by running the yarn install.
 
-```
+```shell
 yarn install
 ```
 
@@ -433,17 +434,18 @@ Configuration uses environment files that are **never committed** to version con
    ```
 
 ### AWS Amplify Deployment
+For existing instance production deployments, reference:
+- [Deployment Guide Doc](/docs/deployment/README.md)
 
-For production deployments, use the runbook:
-
+For new instance production deployments, use the runbook:
 - [Amplify New Instance Runbook](docs/deployment/amplify-new-instance-runbook.md)
 
-It includes:
+  It includes:
 
-- Branch deployment behavior for merge-to-main workflows
-- Required Amplify environment variables
-- Secrets Manager JSON shape and runtime secret wiring
-- Runtime IAM permissions and post-deploy validation checklist
+  - Branch deployment behavior for the manual Deploy dispatch workflow
+  - Required Amplify environment variables
+  - Secrets Manager JSON shape and runtime secret wiring
+  - Runtime IAM permissions and post-deploy validation checklist
 
 ### Github Access
 
@@ -455,7 +457,7 @@ GitHub access is handled via a GitHub App installed on the target repository. Us
 
 To preview the app use:
 
-```
+```shell
 yarn dev
 ```
 
@@ -467,7 +469,7 @@ To bypass the keycloak login, set the `NEXT_PUBLIC_DISABLE_AUTH` environment var
 
 If you want to run the Playwright e2e tests locally, use `yarn playwright test` instead of `yarn test:e2e`. The `test:e2e` script runs `yarn build` first, which is needed in CI (where servers use `yarn start`) but it causes conflicts locally (where servers use `yarn dev`)
 
-```bash
+```shell
 # Run all integration tests
 yarn playwright test
 ```

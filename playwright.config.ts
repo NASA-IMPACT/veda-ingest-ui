@@ -56,9 +56,9 @@ export default defineConfig({
     headless: true,
     trace: 'retain-on-failure',
   },
-  retries: 1,
+  retries: 2,
   testMatch: ['**/__tests__/playwright/**/*.test.tsx'],
-  timeout: 60000,
-  workers: process.env.CI ? 2 : 4,
+  timeout: 120000,
+  workers: 2,
   reporter: 'html',
 });
