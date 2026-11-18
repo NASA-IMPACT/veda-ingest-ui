@@ -11,11 +11,7 @@ import React, {
   Suspense,
 } from 'react';
 import { Button, Tabs, Spin } from 'antd';
-import validator from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
-
-import ObjectFieldTemplate from '@/components/rjsf-components/ObjectFieldTemplate';
-import { customValidate } from '@/utils/CustomValidation';
 import { JSONEditorValue } from '@/components/ui/JSONEditor';
 import AdditionalPropertyCard from '@/components/rjsf-components/AdditionalPropertyCard';
 import AssetField from '@/components/rjsf-components/AssetsField';
@@ -30,7 +26,7 @@ import { RegexStringWidget } from '@/components/rjsf-components/RegexStringWidge
 
 import { useTenants } from '@/hooks/useTenants';
 import { cfg } from '@/config/env';
-import { Form } from './rjsfTheme';
+import { AntdManualForm, ManualForm } from './ManualForm';
 
 // Lazy load JSONEditor - only needed when JSON tab is active
 const JSONEditor = lazy(() => import('@/components/ui/JSONEditor'));
@@ -212,18 +208,15 @@ function DatasetIngestionForm({
     [setFormData, setDisabled]
   );
 
-  const handleFormSubmit = useCallback(
-    (rjsfData: { formData?: object }) => {
-      const mergedFormData = {
-        ...((rjsfData.formData as Record<string, unknown>) ?? {}),
-        ...additionalProperties,
-      };
+  const handleFormSubmit = useCallback(() => {
+    const mergedFormData = {
+      ...(formScopedData ?? {}),
+      ...additionalProperties,
+    };
 
-      const finalFormData = stripEmptyRenders(mergedFormData);
-      onSubmit(finalFormData);
-    },
-    [additionalProperties, onSubmit]
-  );
+    const finalFormData = stripEmptyRenders(mergedFormData);
+    onSubmit(finalFormData);
+  }, [formScopedData, additionalProperties, onSubmit]);
 
   const widgets = {
     'renders.dashboard': RendersDashboardWidget,
@@ -257,38 +250,35 @@ function DatasetIngestionForm({
           label: 'Form',
           children: (
             <>
-              <Form
-                key={forceRenderKey} // Forces re-render when data updates
-                schema={dynamicSchema as JSONSchema7}
-                uiSchema={resolvedUiSchema}
-                validator={validator}
-                customValidate={customValidate}
-                templates={{
-                  ObjectFieldTemplate: ObjectFieldTemplate,
-                }}
-                fields={customFields}
-                formData={formScopedData}
-                onChange={onFormDataChanged}
-                onSubmit={handleFormSubmit}
-                formContext={{
-                  formData: formScopedData,
-                  updateFormData: setFormData,
-                }}
-                widgets={widgets}
-              >
-                {children ? (
-                  children
-                ) : (
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    style={{ marginTop: '20px' }}
-                    block
-                  >
-                    Submit
-                  </Button>
-                )}
-              </Form>
+              <AntdManualForm handleFormSubmit={handleFormSubmit}>
+                <ManualForm
+                  key={forceRenderKey} // Forces re-render when data updates
+                  schemaForRJSF={dynamicSchema as JSONSchema7}
+                  uiSchema={resolvedUiSchema}
+                  customFields={customFields}
+                  rjsfFormData={formScopedData}
+                  onRJSFDataChanged={onFormDataChanged}
+                  formContext={{
+                    formData: formScopedData,
+                    updateFormData: setFormData,
+                  }}
+                  widgets={widgets}
+                  tagName="div"
+                >
+                  {children ? (
+                    children
+                  ) : (
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      style={{ marginTop: '20px' }}
+                      block
+                    >
+                      Submit
+                    </Button>
+                  )}
+                </ManualForm>
+              </AntdManualForm>
               {additionalProperties &&
                 Object.keys(additionalProperties).length > 0 && (
                   <AdditionalPropertyCard
