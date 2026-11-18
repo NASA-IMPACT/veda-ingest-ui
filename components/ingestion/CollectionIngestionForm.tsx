@@ -81,7 +81,6 @@ function CollectionIngestionForm({
   const [activeTab, setActiveTab] = useState<string>('form');
   const [forceRenderKey, setForceRenderKey] = useState<number>(0);
   const [hasJSONChanges, setHasJSONChanges] = useState<boolean>(false);
-
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const { extensionFields, addExtension, removeExtension, isLoading } =
@@ -197,7 +196,6 @@ function CollectionIngestionForm({
     }
     return { rjsfFormData: rjsfData, additionalProperties: additional };
   }, [dynamicSchema, extensionFields, formScopedData]);
-
   const [summariesData, setSummariesData] = useState(
     rjsfFormData.summaries || {}
   );
@@ -430,7 +428,7 @@ function CollectionIngestionForm({
                 />
               </Suspense>
             ),
-          },
+          }
         ]}
       />
     </>
