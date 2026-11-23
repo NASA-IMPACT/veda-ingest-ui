@@ -70,6 +70,49 @@ div[id='root_assets'] {
   box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.2);
 }
 
+fieldset[id='root_discovery_items'] {
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+fieldset[id='root_discovery_items'] > .ant-row > .array-item-list {
+  padding: 6px 6px;
+  border-radius: 6px;
+  box-shadow: 0px 3px 15px rgba(0, 0, 0, 0.2);
+}
+
+fieldset[id='root_discovery_items'] .rjsf-array-item-add{
+  margin-top: 16px;
+}
+
+
+/* shrink the fixed button column */ 
+fieldset[id^='root_discovery_items_'][id$='_properties_location'] .array-item-list > .ant-row > .ant-col:nth-child(2),
+fieldset[id^='root_discovery_items_'][id$='_properties_hazard'] .array-item-list > .ant-row > .ant-col:nth-child(2) {
+  flex: 0 0 30px !important;
+}
+
+fieldset[id^='root_discovery_items_'][id$='_properties_location'] .array-item-list .ant-btn,
+fieldset[id^='root_discovery_items_'][id$='_properties_hazard'] .array-item-list .ant-btn {
+  padding-inline: 4px !important;
+  min-width: 24px !important;
+}
+
+/* The "Add Item" button itself (shown even when the array is empty) */
+fieldset[id^='root_discovery_items_'][id$='_properties_location'] .ant-row-end > .ant-col,
+fieldset[id^='root_discovery_items_'][id$='_properties_hazard'] .ant-row-end > .ant-col {
+  flex: 0 0 48px !important;
+}
+
+fieldset[id^='root_discovery_items_'][id$='_properties_location'] .rjsf-array-item-add,
+fieldset[id^='root_discovery_items_'][id$='_properties_hazard'] .rjsf-array-item-add {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  padding: 0 !important;
+}
+
 /* Remove nesting of the visual CSS boxes for nested object input fields */
 fieldset[id^='root_'].object-field-template-nested {
   padding: 0;
@@ -91,8 +134,8 @@ label[title='Asset links'],
 label[title='Extents'],
 label[title='Spatial extent object'],
 label[title='Temporal extent object'] {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 16px !important;
+  font-weight: 600 !important;
 }
 
 label[title='Spatial Extent'],
@@ -104,6 +147,12 @@ label[title='cog_default'],
 [id^='root_providers_'] > .ant-row > .ant-col:first-child label {
   font-size: 14px;
   font-weight: 500;
+}
+
+label[title='Discovery Items'].ant-form-item-required::before {
+  order: 1;
+  margin-inline-end: 0;
+  margin-inline-start: 4px;
 }
 
 .lightJSONEditor .language-json.code-highlight .token.property {

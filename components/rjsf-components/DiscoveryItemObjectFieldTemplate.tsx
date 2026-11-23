@@ -22,6 +22,12 @@ export default function DiscoveryItemObjectFieldTemplate<
     (registry.formContext as { rowGutter?: number } | undefined)?.rowGutter ||
     12;
 
+  const s3SectionTitle = (
+    uiSchema?.['ui:options'] as { s3SectionTitle?: string } | undefined
+  )?.s3SectionTitle;
+
+  const propertiesElement = properties.find((p) => p.name === 'properties');
+
   // We want the "More Options" panel to be collapsed by default
   const defaultActiveKeys: string[] = [];
 
@@ -67,8 +73,18 @@ export default function DiscoveryItemObjectFieldTemplate<
   return (
     <>
       {/* Always Visible Sections */}
+      {s3SectionTitle && (
+        <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
+          {s3SectionTitle}
+        </div>
+      )}
       {renderGridRow(0)} {/* discovery, prefix, bucket */}
       {renderGridRow(1)} {/* filename_regex */}
+      {propertiesElement && (
+        <Row gutter={rowGutter}>
+          <Col span={24}>{propertiesElement.content}</Col>
+        </Row>
+      )}
       {/* Collapsible "More Options" Section */}
       {/* The Collapse component wraps only the "More Options" panel */}
       <Collapse defaultActiveKey={defaultActiveKeys}>
