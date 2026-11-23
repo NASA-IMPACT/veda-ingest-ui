@@ -22,6 +22,7 @@ import ObjectFieldTemplate from '@/components/rjsf-components/ObjectFieldTemplat
 import { RegexStringWidget } from '@/components/rjsf-components/RegexStringWidget';
 import { UiSchema } from '@rjsf/utils';
 import AssetsField from '@/components/rjsf-components/AssetsField';
+import LocationListField from '@/components/rjsf-components/LocationListField';
 
 type ExistingCollectionData = Record<string, unknown>;
 
@@ -33,6 +34,7 @@ const lockedFormFields = {
 
 const customFields = {
   asset: AssetsField,
+  locationList: LocationListField,
 };
 
 const DiscoverItemsClient = () => {

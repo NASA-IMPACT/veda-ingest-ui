@@ -15,6 +15,31 @@
   },
   "discovery_items": {
     "items": {
+      "ui:options": {
+        "s3SectionTitle": "S3 Location",
+        "propertiesSectionTitle": "Properties"
+      },
+      "properties": {
+        "ui:grid": [
+          {
+            "event:name": 8,
+            "hazard": 8,
+            "sensor": 8,
+            "product": 8
+          },
+          {
+            "location": 24
+          }
+        ],
+        "location": {
+          "ui:field": "locationList",
+          "items": {
+            "ui:options": {
+              "label": false
+            }
+          }
+        }
+      },
       "datetime_range": {
         "ui:help": "omit for sub-daily data"
       },

@@ -33,7 +33,7 @@
         "properties": {
           "discovery": {
             "type": "string",
-            "enum": ["s3"],
+            "default": "s3",
             "title": "Discovery"
           },
           "prefix": {
@@ -48,6 +48,36 @@
             "type": "string",
             "title": "Filename Regex",
             "default": "[\\s\\S]*"
+          },
+          "properties": {
+            "type": "object",
+            "title": "Properties",
+            "properties": {
+              "event:name": {
+                "type": "string",
+                "title": "Event Name"
+              },
+              "hazard": {
+                "type": "string",
+                "title": "Hazards",
+                "enum": ["fire", "flood", "earthquake", "tropical cyclone", "heat"]
+              },
+              "sensor": {
+                "type": "string",
+                "title": "Sensors"
+              },
+              "product": {
+                "type": "string",
+                "title": "Products"
+              },
+              "location": {
+                "type": "string",
+                "title": "Locations",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "datetime_range": {
             "type": "string",
