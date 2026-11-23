@@ -1,5 +1,15 @@
 {
   "type": "object",
+  "default": {
+    "item_assets": {
+      "cog_default": {
+        "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+        "roles": ["data", "layer"],
+        "title": "Default COG Layer",
+        "description": "Cloud optimized default layer to display on map"
+      }
+    }
+  },
   "required": [
     "type",
     "id",
@@ -76,6 +86,34 @@
         "required": ["prefix", "bucket"]
       },
       "minItems": 1
+    },
+    "item_assets": {
+      "type": "object",
+      "title": "Item Assets",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "Roles"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        }
+      }
     }
   }
 }

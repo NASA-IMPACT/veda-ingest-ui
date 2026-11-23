@@ -5,8 +5,14 @@
     },
     {
       "discovery_items": 24
+    },
+    {
+      "item_assets": 24
     }
   ],
+  "id": {
+    "ui:disabled": true
+  },
   "discovery_items": {
     "items": {
       "datetime_range": {
@@ -43,6 +49,27 @@
           "use_multithreading": 8
         }
       ]
+    }
+  },
+  "item_assets": {
+    "ui:field": "asset",
+    "ui:additionalProperties": {
+      "ui:grid": [
+        {
+          "title": 12,
+          "type": 12
+        },
+        {
+          "description": 12,
+          "roles": 12
+        }
+      ],
+      "description": {
+        "ui:widget": "textarea",
+        "ui:options": {
+          "rows": 4
+        }
+      }
     }
   }
 }

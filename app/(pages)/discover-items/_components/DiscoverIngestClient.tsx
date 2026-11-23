@@ -21,9 +21,19 @@ import validator from '@rjsf/validator-ajv8';
 import ObjectFieldTemplate from '@/components/rjsf-components/ObjectFieldTemplate';
 import { RegexStringWidget } from '@/components/rjsf-components/RegexStringWidget';
 import { UiSchema } from '@rjsf/utils';
+import AssetsField from '@/components/rjsf-components/AssetsField';
 
 type ExistingCollectionData = Record<string, unknown>;
 
+const lockedFormFields = {
+  collection: {
+    'ui:readonly': true,
+  },
+};
+
+const customFields = {
+  asset: AssetsField,
+};
 
 const DiscoverItemsClient = () => {
   const [selectedCollection, setSelectedCollection] =
@@ -100,6 +110,7 @@ const DiscoverItemsClient = () => {
                   validator={validator}
                   templates={{ ObjectFieldTemplate }}
                   formData={discoverFormData}
+                  fields={customFields}
                   onChange={onRJSFDiscoverDataChanged}
                   widgets={{
                     regexString: RegexStringWidget
