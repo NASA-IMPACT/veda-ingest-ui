@@ -58,9 +58,12 @@
                 "title": "Event Name"
               },
               "hazard": {
-                "type": "string",
+                "type": "array",
                 "title": "Hazards",
-                "enum": ["fire", "flood", "earthquake", "tropical cyclone", "heat"]
+                "items": {
+                  "type": "string",
+                  "enum": ["fire", "flood", "earthquake", "tropical cyclone", "heat"]
+                }
               },
               "sensor": {
                 "type": "string",
@@ -71,7 +74,7 @@
                 "title": "Products"
               },
               "location": {
-                "type": "string",
+                "type": "array",
                 "title": "Locations",
                 "items": {
                   "type": "string"

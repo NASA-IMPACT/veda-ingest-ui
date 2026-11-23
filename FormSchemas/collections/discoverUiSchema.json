@@ -23,16 +23,26 @@
         "ui:grid": [
           {
             "event:name": 8,
-            "hazard": 8,
             "sensor": 8,
             "product": 8
+          },
+          {
+            "hazard": 24
           },
           {
             "location": 24
           }
         ],
+        "hazard": {
+          "ui:field": "listPreview",
+          "items": {
+            "ui:options": {
+              "label": false
+            }
+          }
+        },
         "location": {
-          "ui:field": "locationList",
+          "ui:field": "listPreview",
           "items": {
             "ui:options": {
               "label": false

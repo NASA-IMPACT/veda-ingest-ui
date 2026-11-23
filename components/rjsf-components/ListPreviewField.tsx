@@ -6,7 +6,7 @@ import { Typography } from 'antd';
 
 const { Text } = Typography;
 
-const LocationListField: React.FC<FieldProps> = (props) => {
+const ListPreviewField: React.FC<FieldProps> = (props) => {
   const { formData, registry } = props;
   const { ArrayField } = registry.fields;
 
@@ -26,4 +26,4 @@ const LocationListField: React.FC<FieldProps> = (props) => {
   );
 };
 
-export default LocationListField;
+export default ListPreviewField;
